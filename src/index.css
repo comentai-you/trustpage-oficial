@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -15,46 +15,46 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 258 90% 58%;
+    --primary: 211 100% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 20% 96%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 20% 96%;
+    --muted: 210 14% 95%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 217 91% 60%;
+    --accent: 211 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 258 90% 58%;
+    --border: 0 0% 93%;
+    --input: 0 0% 93%;
+    --ring: 211 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --success: 142 76% 36%;
     --warning: 38 92% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(258 90% 58%) 0%, hsl(217 91% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 99%) 100%);
-    --gradient-subtle: linear-gradient(135deg, hsl(258 90% 58% / 0.05) 0%, hsl(217 91% 60% / 0.05) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(211 100% 50%) 0%, hsl(211 100% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 99%) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(211 100% 50% / 0.05) 0%, hsl(211 100% 60% / 0.05) 100%);
 
-    --shadow-soft: 0 1px 3px hsl(220 13% 91% / 0.5), 0 4px 12px hsl(220 13% 91% / 0.3);
-    --shadow-card: 0 2px 8px hsl(220 13% 91% / 0.4), 0 8px 24px hsl(220 13% 91% / 0.2);
-    --shadow-elevated: 0 4px 12px hsl(220 13% 91% / 0.5), 0 16px 48px hsl(220 13% 91% / 0.3);
+    --shadow-soft: 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.06), 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-elevated: 0 4px 6px hsl(0 0% 0% / 0.07), 0 2px 4px hsl(0 0% 0% / 0.05);
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 258 90% 58%;
+    --sidebar-primary: 211 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 20% 96%;
     --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 258 90% 58%;
+    --sidebar-border: 0 0% 93%;
+    --sidebar-ring: 211 100% 50%;
   }
 }
 
@@ -76,7 +76,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card border border-border rounded-xl;
+    @apply bg-card border border-border rounded-lg;
     box-shadow: var(--shadow-card);
   }
 
@@ -116,11 +116,11 @@
   }
 
   .hover-lift {
-    @apply transition-all duration-300 ease-out;
+    @apply transition-all duration-200 ease-out;
   }
 
   .hover-lift:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
   }
 
@@ -133,7 +133,32 @@
   }
 
   .tag-premium {
-    @apply bg-purple-50 text-purple-700 border border-purple-200;
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+
+  .product-card {
+    @apply bg-card border border-border rounded-lg overflow-hidden transition-all duration-200;
+  }
+
+  .product-card:hover {
+    @apply border-primary/30;
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .category-card {
+    @apply bg-card border border-border rounded-lg p-4 flex flex-col items-center gap-2 transition-all duration-200 cursor-pointer;
+  }
+
+  .category-card:hover {
+    @apply border-primary/30 bg-primary/5;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold text-foreground;
+  }
+
+  .price-badge {
+    @apply inline-flex items-center px-3 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-md;
   }
 }
 
@@ -147,11 +172,11 @@
   }
 
   .animate-slide-up {
-    animation: slide-up 0.6s ease-out;
+    animation: slide-up 0.4s ease-out;
   }
 
   .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
+    animation: fade-in 0.3s ease-out;
   }
 
   @keyframes float {
