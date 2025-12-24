@@ -2,6 +2,8 @@ export interface LandingPageColors {
   primary: string;
   background: string;
   text: string;
+  buttonBg: string;
+  buttonText: string;
 }
 
 export interface LandingPage {
@@ -36,6 +38,7 @@ export interface LandingPageFormData {
   subheadline: string;
   video_url: string;
   video_storage_path: string;
+  video_thumbnail_url: string;
   description: string;
   image_url: string;
   cta_text: string;
@@ -54,6 +57,7 @@ export const defaultFormData: LandingPageFormData = {
   subheadline: '',
   video_url: '',
   video_storage_path: '',
+  video_thumbnail_url: '',
   description: '',
   image_url: '',
   cta_text: 'QUERO AGORA',
@@ -63,7 +67,9 @@ export const defaultFormData: LandingPageFormData = {
   colors: {
     primary: '#22C55E',
     background: '#000000',
-    text: '#FFFFFF'
+    text: '#FFFFFF',
+    buttonBg: '#22C55E',
+    buttonText: '#FFFFFF'
   }
 };
 

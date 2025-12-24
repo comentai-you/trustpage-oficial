@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LandingPageFormData } from "@/types/landing-page";
-import { MousePointer, MessageCircle, Link as LinkIcon, Lock } from "lucide-react";
+import { MousePointer, MessageCircle, Link as LinkIcon, Lock, Palette } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface AcoesTabProps {
@@ -12,6 +12,15 @@ interface AcoesTabProps {
 
 const AcoesTab = ({ formData, onChange, userPlan = 'essential' }: AcoesTabProps) => {
   const isElite = userPlan === 'elite';
+
+  const handleColorChange = (colorKey: keyof typeof formData.colors, value: string) => {
+    onChange({
+      colors: {
+        ...formData.colors,
+        [colorKey]: value
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -30,6 +39,68 @@ const AcoesTab = ({ formData, onChange, userPlan = 'essential' }: AcoesTabProps)
         <p className="text-xs text-muted-foreground">
           Use verbos de ação: "COMPRAR", "ACESSAR", "GARANTIR"
         </p>
+      </div>
+
+      {/* Button Colors */}
+      <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
+        <Label className="flex items-center gap-2">
+          <Palette className="w-4 h-4" />
+          Cores do Botão
+        </Label>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {/* Button Background Color */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Cor de Fundo</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={formData.colors.buttonBg}
+                onChange={(e) => handleColorChange('buttonBg', e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={formData.colors.buttonBg}
+                onChange={(e) => handleColorChange('buttonBg', e.target.value)}
+                className="flex-1 h-10 font-mono text-xs"
+                placeholder="#22C55E"
+              />
+            </div>
+          </div>
+
+          {/* Button Text Color */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Cor do Texto</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={formData.colors.buttonText}
+                onChange={(e) => handleColorChange('buttonText', e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={formData.colors.buttonText}
+                onChange={(e) => handleColorChange('buttonText', e.target.value)}
+                className="flex-1 h-10 font-mono text-xs"
+                placeholder="#FFFFFF"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div className="pt-2">
+          <p className="text-xs text-muted-foreground mb-2">Prévia:</p>
+          <button
+            className="w-full py-3 rounded-xl font-bold text-sm transition-all"
+            style={{ 
+              backgroundColor: formData.colors.buttonBg, 
+              color: formData.colors.buttonText 
+            }}
+          >
+            {formData.cta_text || 'QUERO AGORA'}
+          </button>
+        </div>
       </div>
 
       {/* CTA URL */}

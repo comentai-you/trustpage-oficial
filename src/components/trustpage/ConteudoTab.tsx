@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LandingPageFormData } from "@/types/landing-page";
 import { Type, FileText, Video } from "lucide-react";
+import ImageUpload from "./ImageUpload";
 
 interface ConteudoTabProps {
   formData: LandingPageFormData;
@@ -62,6 +63,15 @@ const ConteudoTab = ({ formData, onChange }: ConteudoTabProps) => {
           Cole o link do YouTube ou Vimeo
         </p>
       </div>
+
+      {/* Video Thumbnail Upload */}
+      <ImageUpload
+        value={formData.video_thumbnail_url}
+        onChange={(url) => onChange({ video_thumbnail_url: url })}
+        label="Capa do Vídeo (Thumbnail)"
+        hint="Imagem que aparece antes do play (16:9)"
+        aspectRatio="video"
+      />
     </div>
   );
 };
