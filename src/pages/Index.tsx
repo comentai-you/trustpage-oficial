@@ -84,6 +84,7 @@ const popularProducts = [
     seller: { name: "StreamPlus", rating: 4.6, isVerified: true },
     category: "Streaming",
     isFastDelivery: true,
+    status: 'sold' as const,
   },
   {
     id: "8",
@@ -93,6 +94,7 @@ const popularProducts = [
     seller: { name: "GamerPro", rating: 4.9, isVerified: true },
     category: "Free Fire",
     isFastDelivery: true,
+    status: 'sold' as const,
   },
   {
     id: "9",
@@ -101,6 +103,7 @@ const popularProducts = [
     image: "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=300&fit=crop",
     seller: { name: "SocialKing", rating: 4.8, isVerified: true },
     category: "Instagram",
+    status: 'sold' as const,
   },
   {
     id: "10",
@@ -109,6 +112,7 @@ const popularProducts = [
     image: "https://images.unsplash.com/photo-1614680376408-81e91ffe3db7?w=400&h=300&fit=crop",
     seller: { name: "DiscordShop", rating: 4.7, isVerified: true },
     category: "Discord",
+    status: 'sold' as const,
   },
 ];
 
@@ -121,6 +125,7 @@ const recentProducts = [
     seller: { name: "MusicHub", rating: 4.6, isVerified: true },
     category: "Streaming",
     isFastDelivery: true,
+    status: 'sold' as const,
   },
   {
     id: "12",
@@ -129,6 +134,7 @@ const recentProducts = [
     image: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop",
     seller: { name: "YTBusiness", rating: 4.8, isVerified: true },
     category: "YouTube",
+    status: 'sold' as const,
   },
   {
     id: "13",
@@ -137,6 +143,7 @@ const recentProducts = [
     image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=300&fit=crop",
     seller: { name: "StreamPlus", rating: 4.7, isVerified: false },
     category: "Streaming",
+    status: 'sold' as const,
   },
   {
     id: "14",
@@ -146,6 +153,7 @@ const recentProducts = [
     seller: { name: "XBoost", rating: 4.6, isVerified: false },
     category: "Twitter",
     isFastDelivery: true,
+    status: 'sold' as const,
   },
   {
     id: "15",
@@ -154,6 +162,7 @@ const recentProducts = [
     image: "https://images.unsplash.com/photo-1589241062272-c0a000072dfa?w=400&h=300&fit=crop",
     seller: { name: "FortPro", rating: 4.8, isVerified: true },
     category: "Fortnite",
+    status: 'sold' as const,
   },
 ];
 

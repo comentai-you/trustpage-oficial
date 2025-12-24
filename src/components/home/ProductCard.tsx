@@ -21,7 +21,7 @@ const ProductCard = ({ id, title, price, image, seller, category, isFastDelivery
   
   const CardWrapper = isSold ? 'div' : Link;
   const cardProps = isSold 
-    ? { className: "product-card group cursor-not-allowed" }
+    ? { className: "product-card group cursor-default" }
     : { to: `/product/${id}`, className: "product-card group" };
   
   return (
@@ -31,17 +31,8 @@ const ProductCard = ({ id, title, price, image, seller, category, isFastDelivery
         <img
           src={image}
           alt={title}
-          className={`w-full h-full object-cover transition-transform duration-300 ${isSold ? 'grayscale opacity-70' : 'group-hover:scale-105'}`}
+          className={`w-full h-full object-cover transition-transform duration-300 ${!isSold ? 'group-hover:scale-105' : ''}`}
         />
-        
-        {/* SOLD Badge */}
-        {isSold && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <span className="px-4 py-2 bg-red-600 text-white text-sm font-bold uppercase tracking-wider rounded shadow-lg transform -rotate-12">
-              Vendido
-            </span>
-          </div>
-        )}
         
         {isFastDelivery && !isSold && (
           <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded">
@@ -57,7 +48,7 @@ const ProductCard = ({ id, title, price, image, seller, category, isFastDelivery
         <span className="text-xs text-muted-foreground">{category}</span>
         
         {/* Title */}
-        <h3 className={`text-sm font-medium mt-1 line-clamp-2 min-h-[2.5rem] ${isSold ? 'text-muted-foreground' : 'text-foreground'}`}>
+        <h3 className="text-sm font-medium text-foreground mt-1 line-clamp-2 min-h-[2.5rem]">
           {title}
         </h3>
         
@@ -75,11 +66,17 @@ const ProductCard = ({ id, title, price, image, seller, category, isFastDelivery
           </div>
         </div>
         
-        {/* Price */}
+        {/* Price or Sold */}
         <div className="mt-3">
-          <span className={`price-badge ${isSold ? 'opacity-50 line-through' : ''}`}>
-            R$ {price.toFixed(2).replace('.', ',')}
-          </span>
+          {isSold ? (
+            <span className="inline-block px-3 py-1 text-sm font-bold text-red-600 bg-red-50 border border-red-200 rounded-md">
+              Vendido
+            </span>
+          ) : (
+            <span className="price-badge">
+              R$ {price.toFixed(2).replace('.', ',')}
+            </span>
+          )}
         </div>
       </div>
     </CardWrapper>
