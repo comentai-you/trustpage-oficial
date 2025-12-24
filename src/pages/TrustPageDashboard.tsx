@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Sparkles, ExternalLink, BarChart3, Copy, Trash2, LogOut, Loader2 } from "lucide-react";
+import { Plus, Sparkles, ExternalLink, BarChart3, Copy, Trash2, LogOut, Loader2, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import UpgradeModal from "@/components/UpgradeModal";
 
 interface LandingPage {
   id: string;
@@ -16,11 +17,16 @@ interface LandingPage {
   updated_at: string;
 }
 
+const MAX_PAGES_ESSENTIAL = 5;
+
 const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const hasReachedLimit = pages.length >= MAX_PAGES_ESSENTIAL;
 
   useEffect(() => {
     if (user) {
@@ -77,6 +83,14 @@ const TrustPageDashboard = () => {
     toast.success("Link copiado!");
   };
 
+  const handleNewPage = () => {
+    if (hasReachedLimit) {
+      setShowUpgradeModal(true);
+    } else {
+      navigate("/new");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -89,12 +103,10 @@ const TrustPageDashboard = () => {
             </Link>
             
             <div className="flex items-center gap-4">
-              <Link to="/new">
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Página
-                </Button>
-              </Link>
+              <Button onClick={handleNewPage}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Página
+              </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="w-5 h-5" />
               </Button>
@@ -105,9 +117,21 @@ const TrustPageDashboard = () => {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Suas Landing Pages</h1>
-          <p className="text-muted-foreground">Gerencie suas páginas de alta conversão</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Suas Landing Pages</h1>
+            <p className="text-muted-foreground">Gerencie suas páginas de alta conversão</p>
+          </div>
+          
+          {/* Page Counter */}
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+            hasReachedLimit 
+              ? 'bg-amber-100 text-amber-700 border border-amber-300' 
+              : 'bg-primary/10 text-primary'
+          }`}>
+            {hasReachedLimit && <Crown className="w-4 h-4" />}
+            <span className="font-semibold">{pages.length}/{MAX_PAGES_ESSENTIAL} páginas</span>
+          </div>
         </div>
 
         {loading ? (
@@ -125,28 +149,43 @@ const TrustPageDashboard = () => {
                   <h3 className="text-lg font-semibold text-foreground">Crie sua primeira página</h3>
                   <p className="text-muted-foreground">Comece a converter visitantes em clientes</p>
                 </div>
-                <Link to="/new">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Criar Página
-                  </Button>
-                </Link>
+                <Button onClick={handleNewPage}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar Página
+                </Button>
               </div>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Create New Card */}
-            <Link to="/new">
-              <Card className="h-full border-dashed hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardContent className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="font-medium text-foreground">Nova Página</p>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card 
+              className={`h-full border-dashed transition-colors cursor-pointer ${
+                hasReachedLimit 
+                  ? 'hover:border-amber-400 hover:bg-amber-50/50' 
+                  : 'hover:border-primary/50 hover:bg-muted/50'
+              }`}
+              onClick={handleNewPage}
+            >
+              <CardContent className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
+                {hasReachedLimit ? (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                      <Crown className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <p className="font-medium text-amber-700">Limite atingido</p>
+                    <p className="text-sm text-amber-600">Faça upgrade para criar mais</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Plus className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="font-medium text-foreground">Nova Página</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Existing Pages */}
             {pages.map((page) => (
@@ -210,6 +249,8 @@ const TrustPageDashboard = () => {
           </div>
         )}
       </main>
+
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
     </div>
   );
 };
