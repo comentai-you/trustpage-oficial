@@ -23,10 +23,10 @@ const TrustPageDashboard = () => {
       <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <Link to="/dashboard" className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <span className="text-xl font-bold text-foreground">TrustPage</span>
-            </div>
+            </Link>
             
             <div className="flex items-center gap-4">
               <Link to="/new">

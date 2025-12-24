@@ -40,7 +40,7 @@ const TrustPageEditor = () => {
       <header className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-muted-foreground hover:text-foreground">
+            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
