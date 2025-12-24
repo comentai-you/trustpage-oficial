@@ -29,7 +29,7 @@ const TrustPageDashboard = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <Link to="/trustpage/new">
+              <Link to="/new">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
                   Nova Página
@@ -58,7 +58,7 @@ const TrustPageDashboard = () => {
                   <h3 className="text-lg font-semibold text-foreground">Crie sua primeira página</h3>
                   <p className="text-muted-foreground">Comece a converter visitantes em clientes</p>
                 </div>
-                <Link to="/trustpage/new">
+                <Link to="/new">
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Página
@@ -70,7 +70,7 @@ const TrustPageDashboard = () => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Create New Card */}
-            <Link to="/trustpage/new">
+            <Link to="/new">
               <Card className="h-full border-dashed hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
                 <CardContent className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -110,7 +110,7 @@ const TrustPageDashboard = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Link to={`/trustpage/edit/${page.id}`} className="flex-1">
+                    <Link to={`/edit/${page.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         Editar
                       </Button>
