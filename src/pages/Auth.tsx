@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, ArrowLeft, Eye, EyeOff, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 const AuthPage = () => {
@@ -44,9 +44,9 @@ const AuthPage = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">TM</span>
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold gradient-text">TrustMarket</span>
+            <span className="text-2xl font-bold gradient-text">TrustPage</span>
           </div>
 
           {/* Header */}
@@ -57,7 +57,7 @@ const AuthPage = () => {
             <p className="text-muted-foreground">
               {isLogin 
                 ? "Entre na sua conta para continuar" 
-                : "Crie sua conta e comece a negociar"
+                : "Crie sua conta e comece a criar suas landing pages"
               }
             </p>
           </div>
@@ -176,14 +176,14 @@ const AuthPage = () => {
         
         <div className="relative z-10 text-center max-w-lg">
           <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-8 shadow-elevated">
-            <span className="text-5xl font-bold text-primary-foreground">TM</span>
+            <Sparkles className="w-16 h-16 text-primary-foreground" />
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4">
-            Negocie com Segurança
+            Crie Landing Pages que Convertem
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            Sistema de escrow integrado para proteger suas transações. 
-            Compre e venda ativos digitais com total confiança.
+            Páginas de alta conversão para seus links de bio.
+            Simples, rápido e profissional.
           </p>
         </div>
       </div>
