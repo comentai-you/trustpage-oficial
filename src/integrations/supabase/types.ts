@@ -95,6 +95,7 @@ export type Database = {
           id: string
           is_verified: boolean | null
           plan_type: string
+          subscription_status: string
           updated_at: string
           username: string | null
         }
@@ -106,6 +107,7 @@ export type Database = {
           id: string
           is_verified?: boolean | null
           plan_type?: string
+          subscription_status?: string
           updated_at?: string
           username?: string | null
         }
@@ -117,6 +119,7 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           plan_type?: string
+          subscription_status?: string
           updated_at?: string
           username?: string | null
         }
