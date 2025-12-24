@@ -1,21 +1,81 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Sparkles, ExternalLink, BarChart3, Copy, Trash2 } from "lucide-react";
+import { Plus, Sparkles, ExternalLink, BarChart3, Copy, Trash2, LogOut, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface LandingPage {
+  id: string;
+  page_name: string | null;
+  slug: string;
+  views: number | null;
+  is_published: boolean | null;
+  updated_at: string;
+}
 
 const TrustPageDashboard = () => {
-  // Mock data - will be replaced with Supabase data
-  const [pages] = useState([
-    {
-      id: '1',
-      page_name: 'Curso de Marketing Digital',
-      slug: 'curso-marketing',
-      views: 1234,
-      is_published: true,
-      updated_at: '2024-01-15'
+  const [pages, setPages] = useState<LandingPage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      fetchPages();
     }
-  ]);
+  }, [user]);
+
+  const fetchPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("landing_pages")
+        .select("id, page_name, slug, views, is_published, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      setPages(data || []);
+    } catch (error) {
+      console.error("Error fetching pages:", error);
+      toast.error("Erro ao carregar suas páginas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+    toast.success("Você saiu da conta");
+  };
+
+  const handleDelete = async (id: string, pageName: string) => {
+    if (!confirm(`Tem certeza que deseja excluir "${pageName || 'esta página'}"?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from("landing_pages")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      
+      setPages(pages.filter(p => p.id !== id));
+      toast.success("Página excluída com sucesso");
+    } catch (error) {
+      console.error("Error deleting page:", error);
+      toast.error("Erro ao excluir página");
+    }
+  };
+
+  const handleCopyLink = (slug: string) => {
+    const url = `${window.location.origin}/p/${slug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -35,6 +95,9 @@ const TrustPageDashboard = () => {
                   Nova Página
                 </Button>
               </Link>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -47,7 +110,11 @@ const TrustPageDashboard = () => {
           <p className="text-muted-foreground">Gerencie suas páginas de alta conversão</p>
         </div>
 
-        {pages.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : pages.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <div className="flex flex-col items-center gap-4">
@@ -87,9 +154,9 @@ const TrustPageDashboard = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-base">{page.page_name}</CardTitle>
+                      <CardTitle className="text-base">{page.page_name || 'Sem nome'}</CardTitle>
                       <CardDescription className="text-xs mt-1">
-                        trustpage.com/{page.slug}
+                        /p/{page.slug}
                       </CardDescription>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded-full ${
@@ -105,7 +172,7 @@ const TrustPageDashboard = () => {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">
                       <BarChart3 className="w-4 h-4" />
-                      <span>{page.views} views</span>
+                      <span>{page.views || 0} views</span>
                     </div>
                   </div>
                   
@@ -115,13 +182,25 @@ const TrustPageDashboard = () => {
                         Editar
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Link to={`/p/${page.slug}`} target="_blank">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => handleCopyLink(page.slug)}
+                    >
                       <Copy className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => handleDelete(page.id, page.page_name || '')}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
