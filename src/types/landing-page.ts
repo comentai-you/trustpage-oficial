@@ -35,6 +35,7 @@ export interface LandingPageFormData {
   headline: string;
   subheadline: string;
   video_url: string;
+  video_storage_path: string;
   description: string;
   image_url: string;
   cta_text: string;
@@ -47,21 +48,22 @@ export interface LandingPageFormData {
 export const defaultFormData: LandingPageFormData = {
   slug: '',
   template_id: 1,
-  page_name: 'Minha Página',
+  page_name: 'Minha Marca',
   profile_image_url: '',
-  headline: 'Seu Produto Incrível',
-  subheadline: 'A solução perfeita para você',
+  headline: 'Descubra o Segredo Para Transformar Sua Vida',
+  subheadline: '',
   video_url: '',
+  video_storage_path: '',
   description: '',
   image_url: '',
-  cta_text: 'Comprar Agora',
+  cta_text: 'QUERO AGORA',
   cta_url: '',
   whatsapp_number: '',
   pix_pixel_id: '',
   colors: {
-    primary: '#8B5CF6',
-    background: '#FFFFFF',
-    text: '#1F2937'
+    primary: '#22C55E',
+    background: '#000000',
+    text: '#FFFFFF'
   }
 };
 

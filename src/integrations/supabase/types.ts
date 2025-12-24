@@ -33,6 +33,7 @@ export type Database = {
           template_id: number
           updated_at: string
           user_id: string
+          video_storage_path: string | null
           video_url: string | null
           views: number | null
           whatsapp_number: string | null
@@ -55,6 +56,7 @@ export type Database = {
           template_id?: number
           updated_at?: string
           user_id: string
+          video_storage_path?: string | null
           video_url?: string | null
           views?: number | null
           whatsapp_number?: string | null
@@ -77,6 +79,7 @@ export type Database = {
           template_id?: number
           updated_at?: string
           user_id?: string
+          video_storage_path?: string | null
           video_url?: string | null
           views?: number | null
           whatsapp_number?: string | null
@@ -335,6 +338,7 @@ export type Database = {
           is_verified: boolean | null
           pix_key: string | null
           pix_key_type: string | null
+          plan_type: string
           rating: number | null
           telegram_username: string | null
           total_sales: number | null
@@ -352,6 +356,7 @@ export type Database = {
           is_verified?: boolean | null
           pix_key?: string | null
           pix_key_type?: string | null
+          plan_type?: string
           rating?: number | null
           telegram_username?: string | null
           total_sales?: number | null
@@ -369,6 +374,7 @@ export type Database = {
           is_verified?: boolean | null
           pix_key?: string | null
           pix_key_type?: string | null
+          plan_type?: string
           rating?: number | null
           telegram_username?: string | null
           total_sales?: number | null

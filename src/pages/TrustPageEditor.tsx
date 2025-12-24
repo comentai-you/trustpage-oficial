@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Eye, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Eye, Sparkles, User, FileText, MousePointer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LandingPageFormData, defaultFormData } from "@/types/landing-page";
-import IdentityTab from "@/components/trustpage/IdentityTab";
-import OfferTab from "@/components/trustpage/OfferTab";
-import ConversionTab from "@/components/trustpage/ConversionTab";
+import PerfilTab from "@/components/trustpage/PerfilTab";
+import ConteudoTab from "@/components/trustpage/ConteudoTab";
+import AcoesTab from "@/components/trustpage/AcoesTab";
 import MobilePreview from "@/components/trustpage/MobilePreview";
 import { useToast } from "@/hooks/use-toast";
 
 const TrustPageEditor = () => {
   const [formData, setFormData] = useState<LandingPageFormData>(defaultFormData);
   const [isSaving, setIsSaving] = useState(false);
+  const [userPlan] = useState<'essential' | 'elite'>('essential'); // TODO: Get from Supabase
   const { toast } = useToast();
 
   const handleChange = (data: Partial<LandingPageFormData>) => {
@@ -66,23 +67,32 @@ const TrustPageEditor = () => {
         {/* Left Panel - Form */}
         <div className="w-[400px] bg-background border-r border-border overflow-y-auto">
           <div className="p-4">
-            <Tabs defaultValue="identity" className="w-full">
+            <Tabs defaultValue="perfil" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="identity">Identidade</TabsTrigger>
-                <TabsTrigger value="offer">Oferta</TabsTrigger>
-                <TabsTrigger value="conversion">Conversão</TabsTrigger>
+                <TabsTrigger value="perfil" className="flex items-center gap-1.5 text-xs">
+                  <User className="w-3.5 h-3.5" />
+                  Perfil
+                </TabsTrigger>
+                <TabsTrigger value="conteudo" className="flex items-center gap-1.5 text-xs">
+                  <FileText className="w-3.5 h-3.5" />
+                  Conteúdo
+                </TabsTrigger>
+                <TabsTrigger value="acoes" className="flex items-center gap-1.5 text-xs">
+                  <MousePointer className="w-3.5 h-3.5" />
+                  Ações
+                </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="identity">
-                <IdentityTab formData={formData} onChange={handleChange} />
+              <TabsContent value="perfil">
+                <PerfilTab formData={formData} onChange={handleChange} />
               </TabsContent>
               
-              <TabsContent value="offer">
-                <OfferTab formData={formData} onChange={handleChange} />
+              <TabsContent value="conteudo">
+                <ConteudoTab formData={formData} onChange={handleChange} />
               </TabsContent>
               
-              <TabsContent value="conversion">
-                <ConversionTab formData={formData} onChange={handleChange} />
+              <TabsContent value="acoes">
+                <AcoesTab formData={formData} onChange={handleChange} userPlan={userPlan} />
               </TabsContent>
             </Tabs>
           </div>
