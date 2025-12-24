@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock } from "lucide-react";
 
 const HomePage = () => {
   return (
@@ -241,6 +241,123 @@ const HomePage = () => {
                   <span className="text-white font-bold text-xs">₿</span>
                 </div>
                 <span className="font-semibold text-foreground">Boleto</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-24 bg-background relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-2 bg-primary/10 rounded-full text-primary font-semibold text-sm mb-4">
+              Preços simples
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black text-foreground mb-4">
+              Escolha o plano ideal para{" "}
+              <span className="gradient-text">seu negócio</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comece grátis e faça upgrade quando precisar de mais páginas
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Essencial Card */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary rounded-3xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+              <div className="relative bg-card rounded-2xl p-8 border-2 border-primary shadow-3d">
+                {/* Badge */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="px-4 py-1.5 bg-primary text-primary-foreground text-sm font-bold rounded-full shadow-glow">
+                    Mais Popular
+                  </span>
+                </div>
+                
+                <div className="pt-4">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Essencial</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-4xl font-black text-foreground">R$ 29,90</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
+                  
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">
+                        Crie até <span className="font-bold text-primary">5 Páginas</span> Ativas
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Vídeo VSL Integrado</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Botões de Pagamento</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Hospedagem Inclusa</span>
+                    </li>
+                  </ul>
+                  
+                  <Link to="/auth">
+                    <Button className="w-full gradient-button text-lg py-6 font-bold">
+                      Começar com 5 Páginas
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Pro Card */}
+            <div className="relative opacity-80">
+              <div className="bg-card rounded-2xl p-8 border border-border shadow-elevated">
+                {/* Badge */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-muted text-muted-foreground text-sm font-semibold rounded-full border border-border">
+                    <Clock className="w-4 h-4" />
+                    Em Breve
+                  </span>
+                </div>
+                
+                <div className="pt-4">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Pro</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-4xl font-black text-foreground">R$ 69,90</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
+                  
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">
+                        Crie até <span className="font-bold">20 Páginas</span> Ativas
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Pixel de Rastreamento (Meta/Google)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Domínio Personalizado</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">Sem Marca d'água</span>
+                    </li>
+                  </ul>
+                  
+                  <Button variant="outline" className="w-full text-lg py-6 font-semibold border-2" disabled>
+                    Entrar na Lista de Espera
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
