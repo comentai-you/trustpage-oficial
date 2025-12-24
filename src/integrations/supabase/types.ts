@@ -192,10 +192,12 @@ export type Database = {
           images: string[] | null
           is_active: boolean | null
           is_fast_delivery: boolean | null
+          is_featured: boolean | null
           is_premium: boolean | null
           is_verified: boolean | null
           price: number
           seller_id: string
+          status: string | null
           subcategory: string
           tags: string[] | null
           title: string
@@ -210,10 +212,12 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_fast_delivery?: boolean | null
+          is_featured?: boolean | null
           is_premium?: boolean | null
           is_verified?: boolean | null
           price: number
           seller_id: string
+          status?: string | null
           subcategory: string
           tags?: string[] | null
           title: string
@@ -228,10 +232,12 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_fast_delivery?: boolean | null
+          is_featured?: boolean | null
           is_premium?: boolean | null
           is_verified?: boolean | null
           price?: number
           seller_id?: string
+          status?: string | null
           subcategory?: string
           tags?: string[] | null
           title?: string

@@ -5,11 +5,89 @@ import PopularCategoriesSection from "@/components/home/PopularCategoriesSection
 import ProductGridSection from "@/components/home/ProductGridSection";
 import ReviewsSection from "@/components/home/ReviewsSection";
 
-// Mock data for products
+// Import product images
+import valorantImg from "@/assets/products/valorant.jpg";
+import lolImg from "@/assets/products/lol.jpg";
+import csgoImg from "@/assets/products/csgo.png";
+import gtaImg from "@/assets/products/gta-v.jpg";
+import minecraftImg from "@/assets/products/minecraft.jpg";
+import tiktokImg from "@/assets/products/tiktok.jpg";
+import primeVideoImg from "@/assets/products/prime-video.png";
+
+// Mock data for products - 6 primeiros são VENDIDOS para mostrar movimentação
 const featuredProducts = [
   {
     id: "1",
-    title: "Conta Free Fire Level 80 com Skins Raras",
+    title: "Conta Valorant Imortal 3 Full Skins",
+    price: 450.00,
+    image: valorantImg,
+    seller: { name: "ValorantPro", rating: 4.9, isVerified: true },
+    category: "Valorant",
+    isFastDelivery: true,
+    status: 'sold' as const,
+  },
+  {
+    id: "2",
+    title: "Conta LoL Desafiante 200+ Skins",
+    price: 1299.00,
+    image: lolImg,
+    seller: { name: "LolMaster", rating: 5.0, isVerified: true },
+    category: "League of Legends",
+    status: 'sold' as const,
+  },
+  {
+    id: "3",
+    title: "Conta CS2 Prime 5000 Horas Global",
+    price: 280.00,
+    image: csgoImg,
+    seller: { name: "CSMaster", rating: 4.8, isVerified: true },
+    category: "CS2",
+    isFastDelivery: true,
+    status: 'sold' as const,
+  },
+  {
+    id: "4",
+    title: "GTA V Online 500M + Level 200",
+    price: 149.90,
+    image: gtaImg,
+    seller: { name: "GTAKing", rating: 4.9, isVerified: true },
+    category: "GTA V",
+    status: 'sold' as const,
+  },
+  {
+    id: "5",
+    title: "Minecraft Premium Java + Bedrock",
+    price: 69.90,
+    image: minecraftImg,
+    seller: { name: "MinePro", rating: 4.7, isVerified: true },
+    category: "Minecraft",
+    isFastDelivery: true,
+    status: 'sold' as const,
+  },
+];
+
+const popularProducts = [
+  {
+    id: "6",
+    title: "TikTok 25k Seguidores Verificado",
+    price: 1200.00,
+    image: tiktokImg,
+    seller: { name: "TikPro", rating: 4.8, isVerified: true },
+    category: "TikTok",
+    status: 'sold' as const,
+  },
+  {
+    id: "7",
+    title: "Prime Video 1 Ano Garantido",
+    price: 59.90,
+    image: primeVideoImg,
+    seller: { name: "StreamPlus", rating: 4.6, isVerified: true },
+    category: "Streaming",
+    isFastDelivery: true,
+  },
+  {
+    id: "8",
+    title: "Conta Free Fire Level 80 Skins Raras",
     price: 249.90,
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop",
     seller: { name: "GamerPro", rating: 4.9, isVerified: true },
@@ -17,74 +95,12 @@ const featuredProducts = [
     isFastDelivery: true,
   },
   {
-    id: "2",
-    title: "Instagram 50k Seguidores Reais Brasileiros",
+    id: "9",
+    title: "Instagram 50k Seguidores Brasileiros",
     price: 899.00,
     image: "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=300&fit=crop",
     seller: { name: "SocialKing", rating: 4.8, isVerified: true },
     category: "Instagram",
-  },
-  {
-    id: "3",
-    title: "Conta Valorant Imortal 3 com Knife",
-    price: 450.00,
-    image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&h=300&fit=crop",
-    seller: { name: "ValorantPro", rating: 5.0, isVerified: true },
-    category: "Valorant",
-    isFastDelivery: true,
-  },
-  {
-    id: "4",
-    title: "Netflix Premium 1 Ano Garantido",
-    price: 79.90,
-    image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=300&fit=crop",
-    seller: { name: "StreamPlus", rating: 4.7, isVerified: false },
-    category: "Streaming",
-  },
-  {
-    id: "5",
-    title: "Conta LoL Desafiante com 200+ Skins",
-    price: 1299.00,
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop",
-    seller: { name: "LolMaster", rating: 4.9, isVerified: true },
-    category: "League of Legends",
-  },
-];
-
-const popularProducts = [
-  {
-    id: "6",
-    title: "Conta Spotify Premium Vitalício",
-    price: 29.90,
-    image: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=300&fit=crop",
-    seller: { name: "MusicHub", rating: 4.6, isVerified: true },
-    category: "Streaming",
-    isFastDelivery: true,
-  },
-  {
-    id: "7",
-    title: "Canal YouTube 100k Inscritos Monetizado",
-    price: 5500.00,
-    image: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop",
-    seller: { name: "YTBusiness", rating: 4.8, isVerified: true },
-    category: "YouTube",
-  },
-  {
-    id: "8",
-    title: "TikTok 25k Seguidores + Verificado",
-    price: 1200.00,
-    image: "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=400&h=300&fit=crop",
-    seller: { name: "TikPro", rating: 4.5, isVerified: false },
-    category: "TikTok",
-  },
-  {
-    id: "9",
-    title: "Conta CSGO Prime com 5000 Horas",
-    price: 180.00,
-    image: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=400&h=300&fit=crop",
-    seller: { name: "CSMaster", rating: 4.9, isVerified: true },
-    category: "CS:GO",
-    isFastDelivery: true,
   },
   {
     id: "10",
@@ -99,14 +115,31 @@ const popularProducts = [
 const recentProducts = [
   {
     id: "11",
-    title: "Conta Fortnite OG com Skins Raras",
-    price: 350.00,
-    image: "https://images.unsplash.com/photo-1589241062272-c0a000072dfa?w=400&h=300&fit=crop",
-    seller: { name: "FortPro", rating: 4.8, isVerified: true },
-    category: "Fortnite",
+    title: "Conta Spotify Premium Vitalício",
+    price: 29.90,
+    image: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=300&fit=crop",
+    seller: { name: "MusicHub", rating: 4.6, isVerified: true },
+    category: "Streaming",
+    isFastDelivery: true,
   },
   {
     id: "12",
+    title: "Canal YouTube 100k Monetizado",
+    price: 5500.00,
+    image: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop",
+    seller: { name: "YTBusiness", rating: 4.8, isVerified: true },
+    category: "YouTube",
+  },
+  {
+    id: "13",
+    title: "Netflix Premium 1 Ano Garantido",
+    price: 79.90,
+    image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=300&fit=crop",
+    seller: { name: "StreamPlus", rating: 4.7, isVerified: false },
+    category: "Streaming",
+  },
+  {
+    id: "14",
     title: "Twitter/X 10k Seguidores Orgânicos",
     price: 420.00,
     image: "https://images.unsplash.com/photo-1611605698335-8b1569810432?w=400&h=300&fit=crop",
@@ -115,29 +148,12 @@ const recentProducts = [
     isFastDelivery: true,
   },
   {
-    id: "13",
-    title: "GTA V Online 500 Milhões + Level 200",
-    price: 149.90,
-    image: "https://images.unsplash.com/photo-1493711662062-fa541f7f2f19?w=400&h=300&fit=crop",
-    seller: { name: "GTAKing", rating: 4.9, isVerified: true },
-    category: "GTA V",
-  },
-  {
-    id: "14",
-    title: "Conta Amazon Prime 6 Meses",
-    price: 45.00,
-    image: "https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?w=400&h=300&fit=crop",
-    seller: { name: "PrimeDeals", rating: 4.4, isVerified: true },
-    category: "Streaming",
-  },
-  {
     id: "15",
-    title: "Minecraft Premium Java + Bedrock",
-    price: 69.90,
-    image: "https://images.unsplash.com/photo-1587573089734-09e877e3b3d2?w=400&h=300&fit=crop",
-    seller: { name: "MinePro", rating: 4.9, isVerified: true },
-    category: "Minecraft",
-    isFastDelivery: true,
+    title: "Conta Fortnite OG com Skins Raras",
+    price: 350.00,
+    image: "https://images.unsplash.com/photo-1589241062272-c0a000072dfa?w=400&h=300&fit=crop",
+    seller: { name: "FortPro", rating: 4.8, isVerified: true },
+    category: "Fortnite",
   },
 ];
 

@@ -14,6 +14,7 @@ interface Product {
   };
   category: string;
   isFastDelivery?: boolean;
+  status?: 'active' | 'sold' | 'paused';
 }
 
 interface ProductGridSectionProps {
