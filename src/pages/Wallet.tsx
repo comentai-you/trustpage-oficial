@@ -10,8 +10,7 @@ import {
   ArrowDownToLine, 
   ArrowUpFromLine,
   History,
-  AlertCircle,
-  Copy
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -105,10 +104,10 @@ const WalletPage = () => {
               {/* Balance Overview */}
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Pending Balance */}
-                <div className="glass-card p-6 rounded-xl border border-warning/20">
+                <div className="glass-card p-6 rounded-xl border-l-4 border-l-amber-500">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-warning" />
+                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-amber-600" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Saldo Pendente</p>
@@ -124,10 +123,10 @@ const WalletPage = () => {
                 </div>
 
                 {/* Available Balance */}
-                <div className="glass-card p-6 rounded-xl border border-success/20">
+                <div className="glass-card p-6 rounded-xl border-l-4 border-l-emerald-500">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-success" />
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Saldo Disponível</p>
@@ -136,7 +135,7 @@ const WalletPage = () => {
                       </p>
                     </div>
                   </div>
-                  <p className="text-xs text-success">
+                  <p className="text-xs text-emerald-600 font-medium">
                     Disponível para saque imediato
                   </p>
                 </div>
@@ -144,21 +143,21 @@ const WalletPage = () => {
 
               {/* Transaction History */}
               <div className="glass-card rounded-xl">
-                <div className="p-6 border-b border-border/50">
+                <div className="p-6 border-b border-border">
                   <div className="flex items-center gap-2">
                     <History className="w-5 h-5 text-primary" />
                     <h2 className="text-lg font-semibold text-foreground">Histórico de Transações</h2>
                   </div>
                 </div>
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors">
+                    <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          tx.type === "sale" ? "bg-success/10" : "bg-primary/10"
+                          tx.type === "sale" ? "bg-emerald-100" : "bg-primary/10"
                         }`}>
                           {tx.type === "sale" ? (
-                            <ArrowDownToLine className={`w-5 h-5 ${tx.status === "pending" ? "text-warning" : "text-success"}`} />
+                            <ArrowDownToLine className={`w-5 h-5 ${tx.status === "pending" ? "text-amber-600" : "text-emerald-600"}`} />
                           ) : (
                             <ArrowUpFromLine className="w-5 h-5 text-primary" />
                           )}
@@ -169,15 +168,15 @@ const WalletPage = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`font-semibold ${tx.amount > 0 ? "text-success" : "text-foreground"}`}>
+                        <p className={`font-semibold ${tx.amount > 0 ? "text-emerald-600" : "text-foreground"}`}>
                           {tx.amount > 0 ? "+" : ""}R$ {Math.abs(tx.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </p>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           tx.status === "pending" 
-                            ? "bg-warning/10 text-warning" 
+                            ? "bg-amber-100 text-amber-700" 
                             : tx.status === "available" 
-                            ? "bg-success/10 text-success"
-                            : "bg-muted text-muted-foreground"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-secondary text-muted-foreground"
                         }`}>
                           {tx.status === "pending" ? "Pendente" : tx.status === "available" ? "Disponível" : "Concluído"}
                         </span>
@@ -208,7 +207,7 @@ const WalletPage = () => {
                         placeholder="0,00"
                         value={withdrawAmount}
                         onChange={(e) => setWithdrawAmount(e.target.value)}
-                        className="pl-10 bg-secondary/50 border-border/50"
+                        className="pl-10"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -225,7 +224,6 @@ const WalletPage = () => {
                       placeholder="CPF, E-mail, Telefone ou Chave Aleatória"
                       value={pixKey}
                       onChange={(e) => setPixKey(e.target.value)}
-                      className="bg-secondary/50 border-border/50"
                     />
                   </div>
 
@@ -246,23 +244,23 @@ const WalletPage = () => {
               </div>
 
               {/* Info Card */}
-              <div className="glass-card p-6 rounded-xl border border-primary/20">
+              <div className="glass-card p-6 rounded-xl border-l-4 border-l-primary">
                 <h3 className="font-semibold text-foreground mb-3">Como funciona o Escrow?</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">1.</span>
+                    <span className="text-primary font-medium">1.</span>
                     Você realiza uma venda na plataforma
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">2.</span>
+                    <span className="text-primary font-medium">2.</span>
                     O valor (menos 15% de comissão) vai para Saldo Pendente
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">3.</span>
+                    <span className="text-primary font-medium">3.</span>
                     Após o comprador confirmar, aguarda-se 48h
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">4.</span>
+                    <span className="text-primary font-medium">4.</span>
                     O saldo migra para Disponível e pode ser sacado
                   </li>
                 </ul>

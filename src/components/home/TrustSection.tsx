@@ -25,19 +25,16 @@ const features = [
 
 const TrustSection = () => {
   return (
-    <section className="py-20 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
-      
+    <section className="py-20 relative overflow-hidden bg-secondary/30">
       <div className="container mx-auto px-4 relative">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 mb-6">
-              <Shield className="w-4 h-4 text-success" />
-              <span className="text-sm text-success font-medium">Segurança Garantida</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 mb-6">
+              <Shield className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm text-emerald-700 font-medium">Segurança Garantida</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
               Por que escolher a <span className="gradient-text">TrustMarket?</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -50,10 +47,10 @@ const TrustSection = () => {
             {features.map((feature, index) => (
               <div
                 key={feature.title}
-                className="text-center p-6 animate-slide-up"
+                className="text-center p-6 bg-card rounded-xl border border-border animate-slide-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-5 mx-auto">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-5 mx-auto">
                   <feature.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -67,8 +64,8 @@ const TrustSection = () => {
           </div>
 
           {/* CTA Banner */}
-          <div className="mt-16 gradient-border p-8 md:p-12 rounded-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10" />
+          <div className="mt-16 glass-card p-8 md:p-12 rounded-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">

@@ -13,21 +13,10 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: "1s" }} />
+    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-secondary/50 to-background">
+      {/* Subtle Background Decoration */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-full blur-3xl" />
       
-      {/* Grid Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
@@ -37,7 +26,7 @@ const HeroSection = () => {
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-slide-up">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-slide-up text-foreground">
             Compre e Venda{" "}
             <span className="gradient-text">Ativos Digitais</span>
             <br />
@@ -53,8 +42,7 @@ const HeroSection = () => {
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-12 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-accent rounded-2xl opacity-30 blur-lg group-hover:opacity-50 transition-opacity" />
-              <div className="relative flex items-center bg-card border border-border rounded-xl overflow-hidden">
+              <div className="relative flex items-center bg-card border border-border rounded-xl overflow-hidden shadow-soft">
                 <div className="pl-5">
                   <Search className="w-5 h-5 text-muted-foreground" />
                 </div>
@@ -78,7 +66,7 @@ const HeroSection = () => {
             {["Free Fire", "Instagram", "TikTok", "Valorant", "Netflix"].map((tag) => (
               <button
                 key={tag}
-                className="px-3 py-1.5 text-sm bg-secondary/50 hover:bg-secondary border border-border/50 rounded-full text-foreground/80 hover:text-foreground transition-colors"
+                className="px-3 py-1.5 text-sm bg-card hover:bg-secondary border border-border rounded-full text-foreground transition-colors"
               >
                 {tag}
               </button>
@@ -89,7 +77,7 @@ const HeroSection = () => {
           <div className="grid grid-cols-3 gap-8 max-w-xl mx-auto animate-slide-up" style={{ animationDelay: "0.4s" }}>
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 mb-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-3">
                   <stat.icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-2xl font-bold text-foreground">{stat.value}</div>

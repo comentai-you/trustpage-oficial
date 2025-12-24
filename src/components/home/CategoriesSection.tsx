@@ -9,8 +9,8 @@ const categories = [
     icon: Gamepad2,
     href: "/games",
     count: "3.2K+ anúncios",
-    gradient: "from-emerald-500 to-teal-600",
-    bgGlow: "bg-emerald-500/10",
+    iconBg: "bg-emerald-100",
+    iconColor: "text-emerald-600",
   },
   {
     id: "social",
@@ -19,8 +19,8 @@ const categories = [
     icon: Users,
     href: "/social-media",
     count: "1.8K+ anúncios",
-    gradient: "from-pink-500 to-rose-600",
-    bgGlow: "bg-pink-500/10",
+    iconBg: "bg-pink-100",
+    iconColor: "text-pink-600",
   },
   {
     id: "services",
@@ -29,8 +29,8 @@ const categories = [
     icon: Briefcase,
     href: "/services",
     count: "950+ anúncios",
-    gradient: "from-primary to-purple-600",
-    bgGlow: "bg-primary/10",
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
   },
 ];
 
@@ -40,7 +40,7 @@ const CategoriesSection = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Explore por <span className="gradient-text">Categorias</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -54,15 +54,13 @@ const CategoriesSection = () => {
             <Link
               key={category.id}
               to={category.href}
-              className="group relative animate-slide-up"
+              className="group animate-slide-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={`absolute inset-0 ${category.bgGlow} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              <div className="relative glass-card p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift h-full">
+              <div className="glass-card p-8 rounded-2xl hover:border-primary/30 transition-all duration-300 hover-lift h-full">
                 {/* Icon */}
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${category.gradient} mb-6 shadow-lg`}>
-                  <category.icon className="w-7 h-7 text-white" />
+                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${category.iconBg} mb-6`}>
+                  <category.icon className={`w-7 h-7 ${category.iconColor}`} />
                 </div>
 
                 {/* Content */}
@@ -75,7 +73,7 @@ const CategoriesSection = () => {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary/80 bg-primary/10 px-3 py-1 rounded-full">
+                  <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
                     {category.count}
                   </span>
                   <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />

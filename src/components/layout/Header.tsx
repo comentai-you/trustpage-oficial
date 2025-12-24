@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Wallet, User, Plus, MessageCircle } from "lucide-react";
+import { Menu, X, Wallet, User, Plus, MessageCircle, Settings } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -20,20 +20,20 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/games" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/games" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Games
             </Link>
-            <Link to="/social-media" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/social-media" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Social Media
             </Link>
-            <Link to="/services" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/services" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Serviços Digitais
             </Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
               <MessageCircle className="w-4 h-4" />
               Suporte
             </Button>
@@ -41,6 +41,12 @@ const Header = () => {
               <Button variant="outline" size="sm" className="gap-2">
                 <Wallet className="w-4 h-4" />
                 Carteira
+              </Button>
+            </Link>
+            <Link to="/settings">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Configurações
               </Button>
             </Link>
             <Link to="/create-listing">
@@ -68,34 +74,40 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
+          <div className="md:hidden py-4 border-t border-border animate-slide-up">
             <nav className="flex flex-col gap-2">
               <Link 
                 to="/games" 
-                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Games
               </Link>
               <Link 
                 to="/social-media" 
-                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Social Media
               </Link>
               <Link 
                 to="/services" 
-                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Serviços Digitais
               </Link>
-              <div className="border-t border-border/50 my-2" />
+              <div className="border-t border-border my-2" />
               <Link to="/wallet" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="outline" className="w-full justify-start gap-2">
                   <Wallet className="w-4 h-4" />
                   Carteira
+                </Button>
+              </Link>
+              <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="outline" className="w-full justify-start gap-2">
+                  <Settings className="w-4 h-4" />
+                  Configurações
                 </Button>
               </Link>
               <Link to="/create-listing" onClick={() => setIsMenuOpen(false)}>

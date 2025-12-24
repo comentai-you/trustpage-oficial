@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border/50 bg-card/30">
+    <footer className="border-t border-border bg-card">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -80,6 +80,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/settings" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Configurações
+                </Link>
+              </li>
+              <li>
                 <Link to="/create-listing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Criar Anúncio
                 </Link>
@@ -88,7 +93,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/50 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © 2024 TrustMarket. Todos os direitos reservados.
           </p>

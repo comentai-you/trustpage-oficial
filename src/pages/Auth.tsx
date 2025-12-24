@@ -74,7 +74,7 @@ const AuthPage = () => {
                     placeholder="Seu nome completo"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="pl-10 h-12 bg-secondary/50 border-border/50"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
@@ -90,7 +90,7 @@ const AuthPage = () => {
                   placeholder="seu@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 h-12 bg-secondary/50 border-border/50"
+                  className="pl-10 h-12"
                   required
                 />
               </div>
@@ -105,7 +105,7 @@ const AuthPage = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 pr-10 h-12 bg-secondary/50 border-border/50"
+                  className="pl-10 pr-10 h-12"
                   required
                 />
                 <button
@@ -128,7 +128,7 @@ const AuthPage = () => {
                     placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="pl-10 h-12 bg-secondary/50 border-border/50"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
@@ -163,19 +163,19 @@ const AuthPage = () => {
       </div>
 
       {/* Right Side - Visual */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/20 via-background to-accent/20 items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary/10 via-background to-accent/10 items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30">
           <div 
             className="absolute inset-0"
             style={{
-              backgroundImage: `linear-gradient(hsl(var(--foreground)/0.03) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)/0.03) 1px, transparent 1px)`,
+              backgroundImage: `linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px)`,
               backgroundSize: "40px 40px",
             }}
           />
         </div>
         
         <div className="relative z-10 text-center max-w-lg">
-          <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_hsl(var(--primary)/0.4)]">
+          <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-8 shadow-elevated">
             <span className="text-5xl font-bold text-primary-foreground">TM</span>
           </div>
           <h2 className="text-3xl font-bold text-foreground mb-4">
