@@ -98,9 +98,11 @@ const TrustPageEditor = () => {
           </div>
         </div>
 
-        {/* Right Panel - Preview */}
-        <div className="flex-1 bg-muted/50 overflow-hidden">
-          <MobilePreview formData={formData} />
+        {/* Right Panel - Preview (Sticky) */}
+        <div className="flex-1 bg-muted/50 flex items-start justify-center overflow-hidden">
+          <div className="sticky top-0 h-full flex items-center">
+            <MobilePreview formData={formData} />
+          </div>
         </div>
       </div>
     </div>
