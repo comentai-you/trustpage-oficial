@@ -72,14 +72,40 @@ const LandingPageView = () => {
           }
         }
 
-        // Increment view counter (fire and forget - don't block page load)
+        // Increment view counter with fingerprint for server-side deduplication
+        // Generate a simple fingerprint based on browser characteristics
+        const generateFingerprint = (): string => {
+          const nav = navigator;
+          const screen = window.screen;
+          const fingerprint = [
+            nav.userAgent,
+            nav.language,
+            screen.width,
+            screen.height,
+            screen.colorDepth,
+            new Date().getTimezoneOffset(),
+          ].join('|');
+          // Simple hash function
+          let hash = 0;
+          for (let i = 0; i < fingerprint.length; i++) {
+            const char = fingerprint.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+          }
+          return Math.abs(hash).toString(36);
+        };
+
         const viewKey = `viewed_${page.id}`;
         if (!sessionStorage.getItem(viewKey)) {
           sessionStorage.setItem(viewKey, 'true');
+          const fingerprint = generateFingerprint();
           // Use void to explicitly ignore the promise
           void (async () => {
             try {
-              await supabase.rpc('increment_page_views', { page_id: page.id });
+              await supabase.rpc('increment_page_views', { 
+                page_id: page.id,
+                viewer_fingerprint: fingerprint
+              });
             } catch {
               // Silently ignore view count errors
             }
