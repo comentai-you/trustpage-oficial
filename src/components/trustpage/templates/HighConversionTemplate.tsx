@@ -10,6 +10,8 @@ interface HighConversionTemplateProps {
 const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [showCta, setShowCta] = useState(!data.cta_delay_enabled);
 
   // Countdown timer
   useEffect(() => {
@@ -25,6 +27,50 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Update CTA visibility based on video progress
+  useEffect(() => {
+    if (!data.cta_delay_enabled) {
+      setShowCta(true);
+      return;
+    }
+    
+    const targetPercentage = data.cta_delay_percentage || 50;
+    if (videoProgress >= targetPercentage) {
+      setShowCta(true);
+    }
+  }, [videoProgress, data.cta_delay_enabled, data.cta_delay_percentage]);
+
+  // Listen for postMessage from YouTube/Vimeo iframes for progress tracking
+  useEffect(() => {
+    if (!data.cta_delay_enabled || !isVideoPlaying) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      // YouTube API messages
+      if (event.origin === 'https://www.youtube.com') {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data.event === 'infoDelivery' && data.info?.currentTime && data.info?.duration) {
+            const progress = (data.info.currentTime / data.info.duration) * 100;
+            setVideoProgress(progress);
+          }
+        } catch (e) {}
+      }
+      
+      // Vimeo API messages
+      if (event.origin === 'https://player.vimeo.com') {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data.method === 'playProgress' && data.value?.percent) {
+            setVideoProgress(data.value.percent * 100);
+          }
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [data.cta_delay_enabled, isVideoPlaying]);
 
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
@@ -154,17 +200,19 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
         </div>
 
         {/* CTA Button */}
-        <button
-          onClick={handleCtaClick}
-          className="w-full py-3 sm:py-4 rounded-xl font-bold text-xs sm:text-sm shadow-lg transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide"
-          style={{ 
-            backgroundColor: data.colors.buttonBg, 
-            color: data.colors.buttonText,
-            boxShadow: `0 4px 15px ${data.colors.buttonBg}40`
-          }}
-        >
-          {data.cta_text || 'QUERO AGORA'}
-        </button>
+        {showCta && (
+          <button
+            onClick={handleCtaClick}
+            className="w-full py-3 sm:py-4 rounded-xl font-bold text-xs sm:text-sm shadow-lg transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-500"
+            style={{ 
+              backgroundColor: data.colors.buttonBg, 
+              color: data.colors.buttonText,
+              boxShadow: `0 4px 15px ${data.colors.buttonBg}40`
+            }}
+          >
+            {data.cta_text || 'QUERO AGORA'}
+          </button>
+        )}
 
         {/* Watermark - Right below CTA, not at bottom of page */}
         <div className="py-4 sm:py-5 text-center">

@@ -93,6 +93,8 @@ const TrustPageEditor = () => {
           image_url: page.image_url || '',
           cta_text: page.cta_text || '',
           cta_url: page.cta_url || '',
+          cta_delay_enabled: false,
+          cta_delay_percentage: 50,
           whatsapp_number: page.whatsapp_number || '',
           pix_pixel_id: page.pix_pixel_id || '',
           colors: (page.colors as unknown as LandingPageFormData['colors']) || defaultFormData.colors,
