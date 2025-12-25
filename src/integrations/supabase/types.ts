@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           colors: Json | null
           created_at: string
+          cta_delay_enabled: boolean | null
+          cta_delay_percentage: number | null
           cta_text: string | null
           cta_url: string | null
           description: string | null
@@ -41,6 +43,8 @@ export type Database = {
         Insert: {
           colors?: Json | null
           created_at?: string
+          cta_delay_enabled?: boolean | null
+          cta_delay_percentage?: number | null
           cta_text?: string | null
           cta_url?: string | null
           description?: string | null
@@ -64,6 +68,8 @@ export type Database = {
         Update: {
           colors?: Json | null
           created_at?: string
+          cta_delay_enabled?: boolean | null
+          cta_delay_percentage?: number | null
           cta_text?: string | null
           cta_url?: string | null
           description?: string | null

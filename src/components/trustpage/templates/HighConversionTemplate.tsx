@@ -114,7 +114,7 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
 
   return (
     <main
-      className="min-h-screen w-full flex flex-col"
+      className="min-h-full w-full flex flex-col"
       style={{
         backgroundColor: data.colors.background,
         color: data.colors.text,

@@ -36,7 +36,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
             
             {/* Content - scrollable, hidden scrollbar */}
             <div 
-              className="h-[calc(100%-24px)] overflow-y-auto"
+              className="h-[calc(100%-24px)] overflow-y-auto imac-scroll"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none'
@@ -49,9 +49,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   }
                 `}
               </style>
-              <div className="imac-scroll">
-                <HighConversionTemplate data={formData} isMobile={false} />
-              </div>
+              <HighConversionTemplate data={formData} isMobile={false} />
             </div>
           </div>
         </div>

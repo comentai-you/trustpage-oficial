@@ -62,7 +62,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
           
           {/* Content - scrollable with hidden scrollbar */}
           <div 
-            className="h-full overflow-y-auto pt-10"
+            className="h-[calc(100%-40px)] overflow-y-auto iphone-scroll"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
@@ -75,9 +75,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
                 }
               `}
             </style>
-            <div className="iphone-scroll">
-              <HighConversionTemplate data={formData} isMobile={true} />
-            </div>
+            <HighConversionTemplate data={formData} isMobile={true} />
           </div>
         </div>
       </div>
