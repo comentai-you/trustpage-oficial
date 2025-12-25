@@ -92,6 +92,35 @@ export type Database = {
         }
         Relationships: []
       }
+      page_view_tracking: {
+        Row: {
+          id: string
+          page_id: string
+          viewed_at: string
+          viewer_fingerprint: string
+        }
+        Insert: {
+          id?: string
+          page_id: string
+          viewed_at?: string
+          viewer_fingerprint?: string
+        }
+        Update: {
+          id?: string
+          page_id?: string
+          viewed_at?: string
+          viewer_fingerprint?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_view_tracking_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "landing_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -180,7 +209,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      increment_page_views: { Args: { page_id: string }; Returns: undefined }
+      increment_page_views: {
+        Args: { page_id: string; viewer_fingerprint?: string }
+        Returns: boolean
+      }
       is_subscription_active: {
         Args: { check_user_id: string }
         Returns: boolean
