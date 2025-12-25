@@ -65,10 +65,11 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
 
   return (
     <main
-      className="min-h-full w-full flex flex-col"
+      className="min-h-screen w-full flex flex-col"
       style={{
         backgroundColor: data.colors.background,
         color: data.colors.text,
+        minHeight: '100%',
       }}
     >
       {/* Scarcity Timer - Compact top bar */}
