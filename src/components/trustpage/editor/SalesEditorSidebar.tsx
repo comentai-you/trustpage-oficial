@@ -11,9 +11,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import IconSelector from "./IconSelector";
 
 interface SalesEditorSidebarProps {
   formData: LandingPageFormData;
@@ -46,29 +47,54 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione uma imagem válida");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const fileName = `product_${uniqueId}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('uploads')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
         .from('uploads')
         .getPublicUrl(filePath);
 
-      onChange({ image_url: data.publicUrl });
-      toast.success("Imagem enviada com sucesso!");
+      if (data?.publicUrl) {
+        onChange({ image_url: data.publicUrl });
+        toast.success("Imagem enviada com sucesso!");
+      } else {
+        throw new Error("Falha ao obter URL pública");
+      }
     } catch (error) {
       console.error('Error uploading:', error);
-      toast.error("Erro ao enviar imagem");
+      toast.error("Erro ao enviar imagem. Tente novamente.");
     } finally {
       setUploadingImage(false);
+      // Reset file input
+      e.target.value = '';
     }
   };
 
@@ -76,32 +102,56 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione uma imagem válida");
+      return;
+    }
+
+    // Validate file size (max 2MB for avatars)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("O avatar deve ter no máximo 2MB");
+      return;
+    }
+
     setUploadingAvatar(index);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `avatar_${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const fileName = `avatar_${uniqueId}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('uploads')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Avatar upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
         .from('uploads')
         .getPublicUrl(filePath);
 
-      updateTestimonial(index, { avatarUrl: data.publicUrl });
-      toast.success("Avatar enviado!");
+      if (data?.publicUrl) {
+        updateTestimonial(index, { avatarUrl: data.publicUrl });
+        toast.success("Avatar enviado!");
+      } else {
+        throw new Error("Falha ao obter URL pública");
+      }
     } catch (error) {
       console.error('Error uploading:', error);
-      toast.error("Erro ao enviar avatar");
+      toast.error("Erro ao enviar avatar. Tente novamente.");
     } finally {
       setUploadingAvatar(null);
+      // Reset file input
+      e.target.value = '';
     }
   };
-
   return (
     <aside className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto h-full">
       <div className="p-4 border-b border-gray-200">
@@ -324,12 +374,13 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                   <Label className="text-xs font-medium text-gray-700">
                     Benefício {index + 1}
                   </Label>
-                  <Input
-                    value={benefit.emoji}
-                    onChange={(e) => updateBenefit(index, { emoji: e.target.value })}
-                    placeholder="✨"
-                    className="w-14 text-center text-lg"
-                  />
+                  <div className="flex items-center gap-2">
+                    <IconSelector
+                      value={benefit.icon || "Sparkles"}
+                      onChange={(icon) => updateBenefit(index, { icon })}
+                      primaryColor={formData.primary_color}
+                    />
+                  </div>
                 </div>
                 <Input
                   value={benefit.title}

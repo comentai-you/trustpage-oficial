@@ -47,6 +47,7 @@ export interface Benefit {
   title: string;
   description: string;
   emoji: string;
+  icon?: string; // Lucide icon name
 }
 
 export interface Testimonial {
@@ -67,9 +68,9 @@ export interface SalesPageContent {
 export const defaultSalesContent: SalesPageContent = {
   heroMediaType: 'image',
   benefits: [
-    { title: 'Resultado Garantido', description: 'Transformação real em poucos dias', emoji: '✨' },
-    { title: 'Suporte 24h', description: 'Equipe pronta para ajudar', emoji: '💬' },
-    { title: 'Bônus Exclusivos', description: 'Materiais extras inclusos', emoji: '🎁' }
+    { title: 'Resultado Garantido', description: 'Transformação real em poucos dias', emoji: '✨', icon: 'Sparkles' },
+    { title: 'Suporte 24h', description: 'Equipe pronta para ajudar', emoji: '💬', icon: 'MessageCircle' },
+    { title: 'Bônus Exclusivos', description: 'Materiais extras inclusos', emoji: '🎁', icon: 'Gift' }
   ],
   testimonials: [
     { name: 'Maria Silva', text: 'Mudou completamente minha vida! Recomendo a todos.', avatarUrl: '' },

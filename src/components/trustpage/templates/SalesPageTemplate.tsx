@@ -1,6 +1,41 @@
 import { useState, useEffect } from "react";
 import { LandingPageFormData, SalesPageContent } from "@/types/landing-page";
-import { Play, Check, Star, Shield, ArrowRight } from "lucide-react";
+import { 
+  Play, Check, Star, Shield, ArrowRight,
+  Zap, Heart, Award, Gift, Crown,
+  Rocket, Target, TrendingUp, Users, Clock, Lock, Sparkles,
+  ThumbsUp, Gem, Lightbulb, Medal, Trophy, BadgeCheck,
+  DollarSign, CreditCard, Wallet, Percent, Tag,
+  Package, Truck, Headphones, MessageCircle, Phone, Mail,
+  Globe, MapPin, Calendar, Timer, Hourglass, Infinity,
+  Sun, Moon, Cloud, Flame, Droplet, Leaf,
+  Music, Camera, Video, Image, Mic, Volume2,
+  Book, FileText, Folder, Download, Upload, Share2,
+  Settings, Wrench, Cpu, Wifi, Battery,
+  Smile, AlertCircle, Info, HelpCircle,
+  Plus, Minus, X, ArrowUp, ChevronRight,
+  LucideIcon
+} from "lucide-react";
+
+// Icon map for dynamic rendering
+const ICON_MAP: Record<string, LucideIcon> = {
+  Zap, Star, Heart, Shield, Check, Award, Gift, Crown,
+  Rocket, Target, TrendingUp, Users, Clock, Lock, Sparkles,
+  ThumbsUp, Gem, Lightbulb, Medal, Trophy, BadgeCheck,
+  DollarSign, CreditCard, Wallet, Percent, Tag,
+  Package, Truck, Headphones, MessageCircle, Phone, Mail,
+  Globe, MapPin, Calendar, Timer, Hourglass, Infinity,
+  Sun, Moon, Cloud, Flame, Droplet, Leaf,
+  Music, Camera, Video, Image, Mic, Volume2, Play,
+  Book, FileText, Folder, Download, Upload, Share2,
+  Settings, Wrench, Cpu, Wifi, Battery,
+  Smile, AlertCircle, Info, HelpCircle,
+  Plus, Minus, X, ArrowRight, ArrowUp, ChevronRight
+};
+
+const getIconComponent = (iconName: string): LucideIcon => {
+  return ICON_MAP[iconName] || Sparkles;
+};
 
 interface SalesPageTemplateProps {
   data: LandingPageFormData;
@@ -183,26 +218,29 @@ const SalesPageTemplate = ({
           </h2>
           
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
-            {content.benefits.map((benefit, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-xl text-center transition-transform hover:scale-105"
-                style={{ 
-                  backgroundColor: data.colors.background,
-                  border: `2px solid ${primaryColor}30`,
-                  boxShadow: `0 4px 20px ${primaryColor}10`
-                }}
-              >
+            {content.benefits.map((benefit, index) => {
+              const BenefitIcon = benefit.icon ? getIconComponent(benefit.icon) : Sparkles;
+              return (
                 <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"
-                  style={{ backgroundColor: `${primaryColor}15` }}
+                  key={index}
+                  className="p-6 rounded-xl text-center transition-transform hover:scale-105"
+                  style={{ 
+                    backgroundColor: data.colors.background,
+                    border: `2px solid ${primaryColor}30`,
+                    boxShadow: `0 4px 20px ${primaryColor}10`
+                  }}
                 >
-                  {benefit.emoji || '✨'}
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ backgroundColor: `${primaryColor}15` }}
+                  >
+                    <BenefitIcon className="w-7 h-7" style={{ color: primaryColor }} />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
+                  <p className="text-sm opacity-70">{benefit.description}</p>
                 </div>
-                <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
-                <p className="text-sm opacity-70">{benefit.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
