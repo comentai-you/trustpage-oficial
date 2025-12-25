@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import UpgradeModal from "@/components/UpgradeModal";
+import PricingModal from "@/components/PricingModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import StatsBar from "@/components/dashboard/StatsBar";
@@ -34,8 +34,8 @@ interface UserProfile {
   avatar_url: string | null;
 }
 
-const MAX_PAGES_ESSENTIAL = 5;
-const MAX_PAGES_PRO = 20;
+const MAX_PAGES_ESSENTIAL = 3;
+const MAX_PAGES_PRO = 10;
 const TRIAL_DAYS = 14;
 
 const TrustPageDashboard = () => {
@@ -336,7 +336,7 @@ const TrustPageDashboard = () => {
         )}
       </main>
 
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+      <PricingModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} isTrialExpired={isTrialExpired} />
       
       <TemplateSelectionModal 
         open={showTemplateModal} 
