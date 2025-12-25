@@ -23,6 +23,7 @@ interface LandingPage {
   updated_at: string;
   image_url: string | null;
   video_url: string | null;
+  cover_image_url: string | null;
 }
 
 interface UserProfile {
@@ -94,7 +95,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("landing_pages")
-        .select("id, page_name, slug, views, is_published, updated_at, image_url, video_url")
+        .select("id, page_name, slug, views, is_published, updated_at, image_url, video_url, cover_image_url")
         .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
 
@@ -324,6 +325,7 @@ const TrustPageDashboard = () => {
                 updatedAt={page.updated_at}
                 imageUrl={page.image_url}
                 videoUrl={page.video_url}
+                coverImageUrl={page.cover_image_url}
                 isTrialExpired={isTrialExpired}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

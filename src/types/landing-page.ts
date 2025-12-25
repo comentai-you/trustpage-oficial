@@ -200,6 +200,7 @@ export interface LandingPageFormData {
   video_thumbnail_url: string;
   description: string;
   image_url: string;
+  cover_image_url: string;
   cta_text: string;
   cta_url: string;
   cta_delay_enabled: boolean;
@@ -229,6 +230,7 @@ export const defaultFormData: LandingPageFormData = {
   video_thumbnail_url: '',
   description: '',
   image_url: '',
+  cover_image_url: '',
   cta_text: 'QUERO AGORA',
   cta_url: '',
   cta_delay_enabled: false,

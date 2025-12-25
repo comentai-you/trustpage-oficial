@@ -17,6 +17,7 @@ interface PageCardProps {
   updatedAt: string;
   imageUrl?: string | null;
   videoUrl?: string | null;
+  coverImageUrl?: string | null;
   isTrialExpired: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
@@ -43,7 +44,9 @@ const getVimeoThumbnail = (url: string) => {
   return null;
 };
 
-const getThumbnail = (videoUrl?: string | null, imageUrl?: string | null) => {
+const getThumbnail = (coverImageUrl?: string | null, videoUrl?: string | null, imageUrl?: string | null) => {
+  // Priority: cover image > uploaded image > video thumbnail
+  if (coverImageUrl) return coverImageUrl;
   if (imageUrl) return imageUrl;
   if (videoUrl) {
     const ytThumb = getYouTubeThumbnail(videoUrl);
@@ -63,12 +66,13 @@ const PageCard = ({
   updatedAt,
   imageUrl,
   videoUrl,
+  coverImageUrl,
   isTrialExpired,
   onEdit,
   onDelete,
   onCopyLink,
 }: PageCardProps) => {
-  const thumbnail = getThumbnail(videoUrl, imageUrl);
+  const thumbnail = getThumbnail(coverImageUrl, videoUrl, imageUrl);
   const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'short',

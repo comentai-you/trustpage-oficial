@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock } from "lucide-react";
+import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CoverImageUpload from "./CoverImageUpload";
 
 interface EditorSidebarProps {
   formData: LandingPageFormData;
@@ -116,6 +117,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                   <span className="text-primary font-mono">trustpage.com/p/{formData.slug || 'seu-link'}</span>
                 </div>
               </div>
+
+              {/* Cover Image Upload */}
+              <CoverImageUpload 
+                coverImageUrl={formData.cover_image_url || ''} 
+                onChange={(url) => onChange({ cover_image_url: url })} 
+              />
             </AccordionContent>
           </AccordionItem>
 

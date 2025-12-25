@@ -11,13 +11,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images, Settings } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import IconSelector from "./IconSelector";
 import ThemeSelector, { salesThemes, SalesTheme } from "./ThemeSelector";
+import CoverImageUpload from "./CoverImageUpload";
 
 interface SalesEditorSidebarProps {
   formData: LandingPageFormData;

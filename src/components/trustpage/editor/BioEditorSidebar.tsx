@@ -2,17 +2,33 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { LandingPageFormData, BioLinkContent, BioLink, defaultBioContent } from "@/types/landing-page";
 import { 
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
-import { User, Share2, Link2, Palette, Upload, X, Loader2, Plus, Trash2, Star } from "lucide-react";
+import { User, Share2, Link2, Palette, Upload, X, Loader2, Plus, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeSelector, { salesThemes, SalesTheme } from "./ThemeSelector";
+import CoverImageUpload from "./CoverImageUpload";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import SortableLinkItem from "./SortableLinkItem";
 
 interface BioEditorSidebarProps {
   formData: LandingPageFormData;
@@ -30,6 +46,17 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
     socialLinks: { ...defaultBioContent.socialLinks, ...((formData.content as BioLinkContent)?.socialLinks || {}) },
     links: ((formData.content as BioLinkContent)?.links?.length ? (formData.content as BioLinkContent).links : defaultBioContent.links)
   };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const updateContent = (updates: Partial<BioLinkContent>) => {
     onChange({ content: { ...content, ...updates } });
@@ -54,6 +81,18 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
 
   const removeLink = (id: string) => {
     updateContent({ links: content.links.filter(l => l.id !== id) });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = content.links.findIndex((link) => link.id === active.id);
+      const newIndex = content.links.findIndex((link) => link.id === over.id);
+      
+      const newLinks = arrayMove(content.links, oldIndex, newIndex);
+      updateContent({ links: newLinks });
+    }
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,6 +183,19 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Settings - Cover Image */}
+        <AccordionItem value="settings">
+          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <div className="flex items-center gap-2 text-sm font-medium"><Settings className="w-4 h-4 text-primary" />Configurações</div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <CoverImageUpload 
+              coverImageUrl={formData.cover_image_url || ''} 
+              onChange={(url) => onChange({ cover_image_url: url })} 
+            />
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Social */}
         <AccordionItem value="social">
           <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
@@ -164,44 +216,36 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Links */}
+        {/* Links with Drag and Drop */}
         <AccordionItem value="links">
           <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
             <div className="flex items-center gap-2 text-sm font-medium"><Link2 className="w-4 h-4 text-primary" />Links ({content.links.length})</div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-3">
-            {content.links.map((link) => (
-              <div key={link.id} className="p-3 bg-gray-50 rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-700">Link</span>
-                  <button onClick={() => removeLink(link.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
-                </div>
-                <Input value={link.text} onChange={(e) => updateLink(link.id, { text: e.target.value })} placeholder="Texto do botão" className="text-sm" />
-                <Input value={link.url} onChange={(e) => updateLink(link.id, { url: e.target.value })} placeholder="https://..." className="text-sm" />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-500" />
-                    <span className="text-xs">Destacar</span>
-                  </div>
-                  <Switch checked={link.isHighlighted || false} onCheckedChange={(checked) => updateLink(link.id, { isHighlighted: checked })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-gray-500">Miniatura (40x40)</Label>
-                  {link.thumbnailUrl ? (
-                    <div className="relative w-10 h-10">
-                      <img src={link.thumbnailUrl} className="w-full h-full object-cover rounded" />
-                      <button onClick={() => updateLink(link.id, { thumbnailUrl: '' })} className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full text-white"><X className="w-2 h-2" /></button>
-                    </div>
-                  ) : (
-                    <label className="w-10 h-10 border border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-primary">
-                      {uploadingThumbnail === link.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3 text-gray-400" />}
-                      <input type="file" accept="image/*" onChange={(e) => handleThumbnailUpload(e, link.id)} className="hidden" />
-                    </label>
-                  )}
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={addLink} className="w-full gap-2"><Plus className="w-4 h-4" />Adicionar Link</Button>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={content.links.map(link => link.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {content.links.map((link) => (
+                  <SortableLinkItem
+                    key={link.id}
+                    link={link}
+                    onUpdate={updateLink}
+                    onRemove={removeLink}
+                    onThumbnailUpload={handleThumbnailUpload}
+                    uploadingThumbnail={uploadingThumbnail}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+            <Button variant="outline" size="sm" onClick={addLink} className="w-full gap-2">
+              <Plus className="w-4 h-4" />Adicionar Link
+            </Button>
           </AccordionContent>
         </AccordionItem>
 

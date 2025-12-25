@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Crown, Check, Sparkles, Zap } from "lucide-react";
+import { Crown, Check, Zap } from "lucide-react";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -15,35 +15,34 @@ interface UpgradeModalProps {
 
 const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
   const features = [
-    "Até 20 páginas ativas",
-    "Pixel de Rastreamento (Meta/Google)",
-    "Domínio personalizado",
-    "Sem marca d'água",
-    "Suporte prioritário",
+    "Até 5 páginas ativas",
+    "Templates VSL, Sales Page e Bio Link",
+    "Personalização completa de cores e temas",
+    "Suporte via chat",
+    "Domínio trustpageapp.com/p/seulink",
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Crown className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Crown className="w-8 h-8 text-primary-foreground" />
           </div>
           <DialogTitle className="text-2xl font-bold text-foreground">
-            Você atingiu o limite!
+            Seu período de teste expirou
           </DialogTitle>
           <DialogDescription className="text-base text-muted-foreground">
-            O plano Essencial permite até <strong className="text-foreground">5 páginas ativas</strong>.
-            Faça upgrade para o plano Pro e desbloqueie todo o potencial.
+            Continue usando o TrustPage assinando o plano Essencial e mantenha suas páginas no ar.
           </DialogDescription>
         </DialogHeader>
 
         <div className="bg-muted/50 rounded-xl p-4 mt-4">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">Plano Pro</span>
+            <Crown className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-foreground">Plano Essencial</span>
             <span className="ml-auto text-lg font-bold text-foreground">
-              R$ 69,90<span className="text-sm font-normal text-muted-foreground">/mês</span>
+              R$ 29,90<span className="text-sm font-normal text-muted-foreground">/mês</span>
             </span>
           </div>
           
@@ -72,7 +71,7 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
             onClick={() => onOpenChange(false)}
             className="text-muted-foreground"
           >
-            Continuar com plano Essencial
+            Voltar
           </Button>
         </div>
       </DialogContent>
