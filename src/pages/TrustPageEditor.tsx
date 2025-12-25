@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Eye, Sparkles, User, FileText, MousePointer, Loader2, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Save, Eye, Sparkles, User, FileText, MousePointer, Loader2, Menu, Settings2, Monitor, Smartphone } from "lucide-react";
 import { LandingPageFormData, defaultFormData } from "@/types/landing-page";
 import PerfilTab from "@/components/trustpage/PerfilTab";
 import ConteudoTab from "@/components/trustpage/ConteudoTab";
 import AcoesTab from "@/components/trustpage/AcoesTab";
-import MobilePreview from "@/components/trustpage/MobilePreview";
+import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
+import IMacMockup from "@/components/trustpage/editor/IMacMockup";
+import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
+import MobileEditorControls from "@/components/trustpage/editor/MobileEditorControls";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +32,9 @@ const TrustPageEditor = () => {
   const [userPlan, setUserPlan] = useState<'essential' | 'elite'>('essential');
   const [existingPageId, setExistingPageId] = useState<string | null>(null);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [showMobileControls, setShowMobileControls] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
   const { toast } = useToast();
   const { user } = useAuth();
   const lastSavedSlugRef = useRef<string | null>(null);
@@ -134,9 +140,6 @@ const TrustPageEditor = () => {
       .maybeSingle();
 
     if (error) return false;
-    
-    // Se não encontrou, está disponível
-    // Se encontrou mas é a página atual, está ok
     if (!data) return true;
     if (existingPageId && data.id === existingPageId) return true;
     
@@ -167,13 +170,11 @@ const TrustPageEditor = () => {
     setIsSaving(true);
 
     try {
-      // Gerar slug a partir do nome se não existir
       let slug = formData.slug;
       if (!slug) {
         slug = generateSlugFromName(formData.page_name);
       }
 
-      // Validar se o slug é reservado
       if (isReservedSlug(slug)) {
         toast({
           title: "Nome reservado",
@@ -184,7 +185,6 @@ const TrustPageEditor = () => {
         return;
       }
 
-      // Verificar disponibilidade do slug
       const isAvailable = await checkSlugAvailability(slug);
       if (!isAvailable) {
         toast({
@@ -217,14 +217,12 @@ const TrustPageEditor = () => {
       };
 
       if (existingPageId) {
-        // Update existing page
         const { error } = await supabase
           .from("landing_pages")
           .update(pageData)
           .eq("id", existingPageId);
 
         if (error) {
-          // Handle RLS policy violation (subscription expired)
           if (error.message?.includes('row-level security') || error.code === '42501') {
             toast({
               title: "Assinatura expirada",
@@ -237,7 +235,6 @@ const TrustPageEditor = () => {
           throw error;
         }
       } else {
-        // Create new page
         const { data, error } = await supabase
           .from("landing_pages")
           .insert(pageData)
@@ -245,7 +242,6 @@ const TrustPageEditor = () => {
           .single();
 
         if (error) {
-          // Handle slug already exists
           if (error.code === '23505') {
             toast({
               title: "Link já em uso",
@@ -255,7 +251,6 @@ const TrustPageEditor = () => {
             setIsSaving(false);
             return;
           }
-          // Handle reserved slug (trigger exception)
           if (error.message?.includes('reserved by the system')) {
             toast({
               title: "Nome reservado",
@@ -265,7 +260,6 @@ const TrustPageEditor = () => {
             setIsSaving(false);
             return;
           }
-          // Handle RLS policy violation (subscription/limit)
           if (error.message?.includes('row-level security') || error.code === '42501') {
             toast({
               title: "Limite atingido",
@@ -275,7 +269,6 @@ const TrustPageEditor = () => {
             setIsSaving(false);
             return;
           }
-          // Handle CHECK constraint violation (invalid slug format)
           if (error.code === '23514') {
             toast({
               title: "Nome inválido",
@@ -313,7 +306,6 @@ const TrustPageEditor = () => {
   };
 
   const handlePreview = async () => {
-    // Validar nome antes de tentar salvar
     if (!formData.page_name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -323,13 +315,9 @@ const TrustPageEditor = () => {
       return;
     }
 
-    // Salvar primeiro
     await handleSave();
-
-    // Aguardar um pouco para garantir que o banco atualizou
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Verificar se salvou com sucesso
     if (lastSavedSlugRef.current) {
       window.open(
         `${window.location.origin}/p/${lastSavedSlugRef.current}`,
@@ -347,54 +335,60 @@ const TrustPageEditor = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-900">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="flex items-center justify-between px-3 sm:px-4 h-14">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">
+    <div className="min-h-screen bg-zinc-900 flex flex-col">
+      {/* Header - Always visible */}
+      <header className="sticky top-0 z-50 bg-zinc-950 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="text-zinc-400 hover:text-white transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-foreground hidden sm:inline">TrustPage</span>
+              <span className="font-semibold text-white hidden sm:inline">VSL Página</span>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Mobile Preview Toggle */}
+            {/* Mobile: Settings button */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="lg:hidden text-zinc-400 hover:text-white"
+              onClick={() => setShowMobileControls(true)}
+            >
+              <Settings2 className="w-5 h-5" />
+            </Button>
+            
             <Button 
               variant="outline" 
               size="sm" 
-              className="lg:hidden"
-              onClick={() => setShowMobilePreview(true)}
+              onClick={handlePreview}
+              className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
             >
               <Eye className="w-4 h-4" />
-              <span className="hidden sm:inline ml-2">Prévia</span>
+              <span className="hidden sm:inline ml-2">Previewar</span>
             </Button>
             
-            {/* Desktop Preview Button */}
-            <Button variant="outline" size="sm" onClick={handlePreview} className="hidden lg:flex">
-              <Eye className="w-4 h-4 mr-2" />
-              Prévia
-            </Button>
-            <Button size="sm" onClick={handleSave} disabled={isSaving}>
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="bg-primary hover:bg-primary/90"
+            >
               {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="hidden sm:inline ml-2">Salvando...</span>
-                </>
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  <span className="hidden sm:inline ml-2">Salvar</span>
+                  <span className="hidden sm:inline ml-2">Concluir</span>
                 </>
               )}
             </Button>
@@ -402,75 +396,132 @@ const TrustPageEditor = () => {
         </div>
       </header>
 
-      {/* Editor Layout */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-56px)]">
-        {/* Left Panel - Form (Full width on mobile) */}
-        <div className="w-full lg:w-[400px] xl:w-[450px] bg-background lg:border-r border-border overflow-y-auto flex-shrink-0">
-          <div className="p-3 sm:p-4">
-            <Tabs defaultValue="perfil" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6">
-                <TabsTrigger value="perfil" className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-                  <User className="w-3.5 h-3.5" />
-                  <span>Perfil</span>
-                </TabsTrigger>
-                <TabsTrigger value="conteudo" className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Conteúdo</span>
-                </TabsTrigger>
-                <TabsTrigger value="acoes" className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-                  <MousePointer className="w-3.5 h-3.5" />
-                  <span>Ações</span>
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="perfil">
-                <PerfilTab formData={formData} onChange={handleChange} existingPageId={existingPageId} />
-              </TabsContent>
-              
-              <TabsContent value="conteudo">
-                <ConteudoTab formData={formData} onChange={handleChange} />
-              </TabsContent>
-              
-              <TabsContent value="acoes">
-                <AcoesTab formData={formData} onChange={handleChange} userPlan={userPlan} />
-              </TabsContent>
-            </Tabs>
-          </div>
-          
-          {/* Mobile Preview Button (Fixed at bottom on mobile) */}
-          <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
-            <Button 
-              className="w-full gradient-button py-6 font-semibold shadow-lg"
-              onClick={() => setShowMobilePreview(true)}
-            >
-              <Eye className="w-5 h-5 mr-2" />
-              Ver Prévia da Página
-            </Button>
-          </div>
-          
-          {/* Spacer for fixed button */}
-          <div className="lg:hidden h-24" />
+      {/* Main Content */}
+      <div className="flex-1 flex">
+        {/* Desktop Sidebar - Hidden on mobile */}
+        <div className="hidden lg:block">
+          <EditorSidebar formData={formData} onChange={handleChange} />
         </div>
 
-        {/* Right Panel - Preview (Hidden on mobile, visible on lg+) */}
-        <div className="hidden lg:flex flex-1 bg-muted/50 items-start justify-center overflow-hidden">
-          <div className="sticky top-0 h-full flex items-center">
-            <MobilePreview formData={formData} />
+        {/* Main Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Mobile Tab Switcher */}
+          <div className="lg:hidden flex border-b border-zinc-800">
+            <button
+              onClick={() => setActiveTab('form')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'form' 
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-zinc-400'
+              }`}
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => setActiveTab('preview')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'preview' 
+                  ? 'text-primary border-b-2 border-primary' 
+                  : 'text-zinc-400'
+              }`}
+            >
+              Visualizar
+            </button>
+          </div>
+
+          {/* Mobile Form View */}
+          <div className={`lg:hidden flex-1 overflow-y-auto ${activeTab === 'form' ? 'block' : 'hidden'}`}>
+            <div className="p-4 pb-24">
+              <Tabs defaultValue="perfil" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-4 bg-zinc-800">
+                  <TabsTrigger value="perfil" className="text-xs data-[state=active]:bg-zinc-700">
+                    <User className="w-3.5 h-3.5 mr-1" />
+                    Perfil
+                  </TabsTrigger>
+                  <TabsTrigger value="conteudo" className="text-xs data-[state=active]:bg-zinc-700">
+                    <FileText className="w-3.5 h-3.5 mr-1" />
+                    Conteúdo
+                  </TabsTrigger>
+                  <TabsTrigger value="acoes" className="text-xs data-[state=active]:bg-zinc-700">
+                    <MousePointer className="w-3.5 h-3.5 mr-1" />
+                    Ações
+                  </TabsTrigger>
+                </TabsList>
+                
+                <div className="bg-zinc-800/50 rounded-xl p-4">
+                  <TabsContent value="perfil" className="mt-0">
+                    <PerfilTab formData={formData} onChange={handleChange} existingPageId={existingPageId} />
+                  </TabsContent>
+                  
+                  <TabsContent value="conteudo" className="mt-0">
+                    <ConteudoTab formData={formData} onChange={handleChange} />
+                  </TabsContent>
+                  
+                  <TabsContent value="acoes" className="mt-0">
+                    <AcoesTab formData={formData} onChange={handleChange} userPlan={userPlan} />
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Mobile Preview View */}
+          <div className={`lg:hidden flex-1 flex flex-col ${activeTab === 'preview' ? 'flex' : 'hidden'}`}>
+            {/* View Toggle */}
+            <div className="flex items-center justify-center gap-3 py-3 border-b border-zinc-800">
+              <div className="flex items-center gap-2 bg-zinc-800 rounded-full p-1">
+                <button
+                  onClick={() => setPreviewMode('mobile')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    previewMode === 'mobile' 
+                      ? 'bg-primary text-white' 
+                      : 'text-zinc-400'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  Mobile
+                </button>
+                <button
+                  onClick={() => setPreviewMode('desktop')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    previewMode === 'desktop' 
+                      ? 'bg-primary text-white' 
+                      : 'text-zinc-400'
+                  }`}
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                  Desktop
+                </button>
+              </div>
+            </div>
+            
+            {/* Preview Content */}
+            <div className="flex-1 overflow-auto flex items-center justify-center p-4">
+              {previewMode === 'mobile' ? (
+                <IPhoneMockup formData={formData} size="large" />
+              ) : (
+                <div className="transform scale-[0.55] origin-center">
+                  <IMacMockup formData={formData} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop Preview Area */}
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 overflow-auto">
+            <IMacMockup formData={formData} />
+            <IPhoneMockup formData={formData} />
           </div>
         </div>
       </div>
 
-      {/* Mobile Preview Sheet */}
-      <Sheet open={showMobilePreview} onOpenChange={setShowMobilePreview}>
-        <SheetContent side="bottom" className="h-[85vh] p-0 rounded-t-3xl">
-          <SheetHeader className="p-4 border-b">
-            <SheetTitle className="text-center">Prévia da Página</SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto bg-muted/50 flex items-start justify-center p-4 h-[calc(85vh-60px)]">
-            <MobilePreview formData={formData} />
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Controls Sheet */}
+      <MobileEditorControls
+        formData={formData}
+        onChange={handleChange}
+        open={showMobileControls}
+        onOpenChange={setShowMobileControls}
+      />
     </div>
   );
 };
