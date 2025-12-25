@@ -221,7 +221,19 @@ const TrustPageEditor = () => {
           .update(pageData)
           .eq("id", existingPageId);
 
-        if (error) throw error;
+        if (error) {
+          // Handle RLS policy violation (subscription expired)
+          if (error.message?.includes('row-level security') || error.code === '42501') {
+            toast({
+              title: "Assinatura expirada",
+              description: "Sua assinatura expirou. Faça upgrade para continuar editando.",
+              variant: "destructive",
+            });
+            setIsSaving(false);
+            return;
+          }
+          throw error;
+        }
       } else {
         // Create new page
         const { data, error } = await supabase
@@ -231,12 +243,44 @@ const TrustPageEditor = () => {
           .single();
 
         if (error) {
+          // Handle slug already exists
           if (error.code === '23505') {
             toast({
-              title: "Slug já existe",
-              description: "Este endereço já está em uso. Tente um nome diferente.",
+              title: "Link já em uso",
+              description: "Este endereço já está sendo usado. Escolha outro nome.",
               variant: "destructive",
             });
+            setIsSaving(false);
+            return;
+          }
+          // Handle reserved slug (trigger exception)
+          if (error.message?.includes('reserved by the system')) {
+            toast({
+              title: "Nome reservado",
+              description: "Este nome é reservado pelo sistema. Escolha outro.",
+              variant: "destructive",
+            });
+            setIsSaving(false);
+            return;
+          }
+          // Handle RLS policy violation (subscription/limit)
+          if (error.message?.includes('row-level security') || error.code === '42501') {
+            toast({
+              title: "Limite atingido",
+              description: "Você atingiu o limite de páginas do seu plano ou sua assinatura expirou.",
+              variant: "destructive",
+            });
+            setIsSaving(false);
+            return;
+          }
+          // Handle CHECK constraint violation (invalid slug format)
+          if (error.code === '23514') {
+            toast({
+              title: "Nome inválido",
+              description: "O nome deve ter pelo menos 2 caracteres, começar e terminar com letra ou número.",
+              variant: "destructive",
+            });
+            setIsSaving(false);
             return;
           }
           throw error;
@@ -253,11 +297,12 @@ const TrustPageEditor = () => {
         title: "Página salva!",
         description: `Sua página está disponível em /p/${slug}`,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error saving page:", error);
+      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro ao salvar sua página.";
       toast({
         title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar sua página. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
