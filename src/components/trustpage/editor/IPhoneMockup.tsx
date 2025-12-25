@@ -60,9 +60,9 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
             </div>
           </div>
           
-          {/* Content - scrollable with hidden scrollbar */}
+          {/* Content - scrollable with hidden scrollbar, starts below status bar */}
           <div 
-            className="h-[calc(100%-40px)] overflow-y-auto iphone-scroll"
+            className="absolute top-10 left-0 right-0 bottom-0 overflow-y-auto iphone-scroll"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
