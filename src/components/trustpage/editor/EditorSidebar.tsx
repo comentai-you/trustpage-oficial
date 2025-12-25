@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
-import ImageUpload from "@/components/trustpage/ImageUpload";
 import {
   Accordion,
   AccordionContent,
@@ -111,14 +110,6 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                   <span className="text-primary font-mono">trustpage.com/p/{formData.slug || 'seu-link'}</span>
                 </div>
               </div>
-
-              {/* Profile Image */}
-              <ImageUpload
-                value={formData.profile_image_url}
-                onChange={(url) => onChange({ profile_image_url: url })}
-                label="Foto de Perfil"
-                hint="Aparece no topo da página"
-              />
             </AccordionContent>
           </AccordionItem>
 
@@ -164,14 +155,14 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                 />
               </div>
 
-              {/* Subheadline */}
+              {/* Description */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">
                   Descrição (Subtítulo)
                 </Label>
                 <Textarea
-                  value={formData.subheadline}
-                  onChange={(e) => onChange({ subheadline: e.target.value })}
+                  value={formData.description}
+                  onChange={(e) => onChange({ description: e.target.value })}
                   placeholder="Uma breve descrição que complementa o título..."
                   className="bg-gray-50 border-gray-300 focus:border-primary min-h-[60px] resize-none"
                 />
@@ -179,12 +170,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Seção 3: Vídeo & Capa */}
+          {/* Seção 3: Vídeo */}
           <AccordionItem value="video" className="border-b border-gray-200">
             <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
               <div className="flex items-center gap-2">
                 <Video className="w-4 h-4 text-primary" />
-                Vídeo & Capa
+                Vídeo
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
@@ -209,15 +200,6 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                   </p>
                 </div>
               </div>
-
-              {/* Thumbnail */}
-              <ImageUpload
-                value={formData.video_thumbnail_url}
-                onChange={(url) => onChange({ video_thumbnail_url: url })}
-                label="Thumbnail (Capa do Vídeo)"
-                hint="Aparece antes do play"
-                aspectRatio="video"
-              />
             </AccordionContent>
           </AccordionItem>
 
