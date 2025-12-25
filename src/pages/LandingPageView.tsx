@@ -153,7 +153,10 @@ const LandingPageView = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div 
+      className="min-h-screen"
+      style={{ backgroundColor: pageData.colors.background }}
+    >
       {showViolationBar && <AdsViolationBar />}
       <div className={showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}>
         <HighConversionTemplate data={pageData} isMobile={isMobile} />
