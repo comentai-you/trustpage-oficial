@@ -81,6 +81,8 @@ export interface LandingPageFormData {
   image_url: string;
   cta_text: string;
   cta_url: string;
+  cta_delay_enabled: boolean;
+  cta_delay_percentage: number;
   whatsapp_number: string;
   pix_pixel_id: string;
   colors: LandingPageColors;
@@ -104,6 +106,8 @@ export const defaultFormData: LandingPageFormData = {
   image_url: '',
   cta_text: 'QUERO AGORA',
   cta_url: '',
+  cta_delay_enabled: false,
+  cta_delay_percentage: 50,
   whatsapp_number: '',
   pix_pixel_id: '',
   colors: {

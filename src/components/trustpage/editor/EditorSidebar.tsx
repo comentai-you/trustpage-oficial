@@ -3,7 +3,8 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -265,6 +266,44 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                 />
               </div>
 
+              {/* CTA Delay Toggle */}
+              <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <Label className="text-sm font-medium text-gray-700">
+                      Exibir após % do vídeo
+                    </Label>
+                  </div>
+                  <Switch
+                    checked={formData.cta_delay_enabled || false}
+                    onCheckedChange={(checked) => onChange({ cta_delay_enabled: checked })}
+                  />
+                </div>
+                
+                {formData.cta_delay_enabled && (
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">Porcentagem do vídeo</span>
+                      <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                        {formData.cta_delay_percentage || 50}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[formData.cta_delay_percentage || 50]}
+                      onValueChange={(value) => onChange({ cta_delay_percentage: value[0] })}
+                      min={10}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">
+                      O botão aparecerá quando o visitante assistir {formData.cta_delay_percentage || 50}% do vídeo
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Button Color */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">
@@ -282,7 +321,7 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                         } 
                       })}
                       className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                        formData.colors.buttonBg === color.value 
+                        formData.colors.buttonBg === color.value
                           ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' 
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
