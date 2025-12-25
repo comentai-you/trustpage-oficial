@@ -311,21 +311,36 @@ const TrustPageEditor = () => {
   };
 
   const handlePreview = async () => {
+    // Validar nome antes de tentar salvar
+    if (!formData.page_name.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Preencha o nome do negócio antes de visualizar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Salvar primeiro
     await handleSave();
 
+    // Aguardar um pouco para garantir que o banco atualizou
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Verificar se salvou com sucesso
     if (lastSavedSlugRef.current) {
       window.open(
         `${window.location.origin}/p/${lastSavedSlugRef.current}`,
         "_blank",
         "noopener,noreferrer"
       );
-      return;
+    } else {
+      toast({
+        title: "Erro ao abrir prévia",
+        description: "Não foi possível salvar a página. Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: "Salve primeiro",
-      description: "Salve sua página para visualizar a prévia.",
-    });
   };
 
   if (isLoading) {

@@ -39,15 +39,18 @@ const LandingPageView = () => {
           return;
         }
 
-        // Increment view counter (bypass RLS via security definer function)
+        // Increment view counter (fire and forget - don't block page load)
         const viewKey = `viewed_${page.id}`;
         if (!sessionStorage.getItem(viewKey)) {
           sessionStorage.setItem(viewKey, 'true');
-          try {
-            await supabase.rpc('increment_page_views', { page_id: page.id });
-          } catch {
-            // Ignore view count errors silently
-          }
+          // Use void to explicitly ignore the promise
+          void (async () => {
+            try {
+              await supabase.rpc('increment_page_views', { page_id: page.id });
+            } catch {
+              // Silently ignore view count errors
+            }
+          })();
         }
 
         // Map database data to form data format
