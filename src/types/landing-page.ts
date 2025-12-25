@@ -56,6 +56,11 @@ export interface Testimonial {
   avatarUrl: string;
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 export interface SalesPageContent {
   heroMediaType: 'video' | 'image';
   benefits: Benefit[];
@@ -69,6 +74,10 @@ export interface SalesPageContent {
   offerTitle?: string;
   offerSubtitle?: string;
   offerFeatures?: string[];
+  // FAQ section
+  faqEnabled?: boolean;
+  faqTitle?: string;
+  faqItems?: FAQItem[];
 }
 
 export const defaultSalesContent: SalesPageContent = {
@@ -95,6 +104,13 @@ export const defaultSalesContent: SalesPageContent = {
     'Suporte exclusivo VIP',
     'Bônus especiais inclusos',
     'Atualizações gratuitas'
+  ],
+  faqEnabled: true,
+  faqTitle: 'Perguntas Frequentes',
+  faqItems: [
+    { question: 'Como funciona a garantia?', answer: 'Você tem 7 dias para testar. Se não gostar, devolvemos 100% do seu dinheiro.' },
+    { question: 'Quanto tempo tenho acesso?', answer: 'Acesso vitalício! Uma vez adquirido, o conteúdo é seu para sempre.' },
+    { question: 'Preciso ter experiência prévia?', answer: 'Não! O conteúdo foi criado para iniciantes e também agrega valor para avançados.' }
   ]
 };
 
