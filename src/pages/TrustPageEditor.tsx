@@ -422,7 +422,7 @@ const TrustPageEditor = () => {
               </TabsList>
               
               <TabsContent value="perfil">
-                <PerfilTab formData={formData} onChange={handleChange} />
+                <PerfilTab formData={formData} onChange={handleChange} existingPageId={existingPageId} />
               </TabsContent>
               
               <TabsContent value="conteudo">
