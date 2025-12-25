@@ -85,6 +85,7 @@ const CoverImageUpload = ({ coverImageUrl, onChange }: CoverImageUploadProps) =>
               <Upload className="w-8 h-8 text-gray-400" />
               <span className="text-sm text-gray-500">Clique para enviar</span>
               <span className="text-xs text-gray-400">PNG, JPG até 2MB</span>
+              <span className="text-xs text-primary/70 font-medium">Recomendado: 1280x720px</span>
             </div>
           )}
           <input 

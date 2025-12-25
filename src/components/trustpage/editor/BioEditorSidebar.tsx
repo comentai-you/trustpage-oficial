@@ -165,10 +165,13 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
                     <button onClick={() => updateContent({ avatarUrl: '' })} className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white"><X className="w-3 h-3" /></button>
                   </div>
                 ) : (
-                  <label className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary">
-                    {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5 text-gray-400" />}
-                    <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
-                  </label>
+                  <div className="flex flex-col items-center gap-1">
+                    <label className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary">
+                      {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5 text-gray-400" />}
+                      <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+                    </label>
+                    <span className="text-[10px] text-primary/70 font-medium">400x400px</span>
+                  </div>
                 )}
               </div>
             </div>

@@ -79,7 +79,7 @@ const SortableLinkItem = ({
         />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs text-gray-500">Miniatura (40x40)</Label>
+        <Label className="text-xs text-gray-500">Miniatura</Label>
         {link.thumbnailUrl ? (
           <div className="relative w-10 h-10">
             <img src={link.thumbnailUrl} className="w-full h-full object-cover rounded" alt="Thumbnail" />
@@ -91,19 +91,22 @@ const SortableLinkItem = ({
             </button>
           </div>
         ) : (
-          <label className="w-10 h-10 border border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-primary">
-            {uploadingThumbnail === link.id ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Plus className="w-3 h-3 text-gray-400" />
-            )}
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={(e) => onThumbnailUpload(e, link.id)} 
-              className="hidden" 
-            />
-          </label>
+          <div className="flex items-center gap-2">
+            <label className="w-10 h-10 border border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-primary">
+              {uploadingThumbnail === link.id ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Plus className="w-3 h-3 text-gray-400" />
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => onThumbnailUpload(e, link.id)} 
+                className="hidden" 
+              />
+            </label>
+            <span className="text-[10px] text-primary/70 font-medium">80x80px</span>
+          </div>
         )}
       </div>
     </div>

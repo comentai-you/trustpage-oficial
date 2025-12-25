@@ -503,11 +503,12 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                           </button>
                         </div>
                       ) : (
-                        <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                           <Upload className="w-6 h-6 text-gray-400 mb-1" />
                           <span className="text-xs text-gray-500">
                             {uploadingImage ? 'Enviando...' : 'Clique para enviar'}
                           </span>
+                          <span className="text-[10px] text-primary/70 font-medium mt-1">Recomendado: 800x600px</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -617,20 +618,23 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                       </button>
                     </div>
                   ) : (
-                    <label className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300">
-                      {uploadingAvatar === index ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
-                      ) : (
-                        <Upload className="w-4 h-4 text-gray-500" />
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleAvatarUpload(e, index)}
-                        className="hidden"
-                        disabled={uploadingAvatar !== null}
-                      />
-                    </label>
+                    <div className="flex flex-col items-center gap-1">
+                      <label className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300">
+                        {uploadingAvatar === index ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
+                        ) : (
+                          <Upload className="w-4 h-4 text-gray-500" />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleAvatarUpload(e, index)}
+                          className="hidden"
+                          disabled={uploadingAvatar !== null}
+                        />
+                      </label>
+                      <span className="text-[10px] text-primary/70 font-medium">200x200px</span>
+                    </div>
                   )}
                   <Input
                     value={testimonial.name}
