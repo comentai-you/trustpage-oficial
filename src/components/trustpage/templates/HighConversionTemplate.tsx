@@ -39,49 +39,31 @@ const HighConversionTemplate = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Update CTA visibility based on video progress
-  useEffect(() => {
-    if (!data.cta_delay_enabled) {
-      setShowCta(true);
-      return;
-    }
-    
-    const targetPercentage = data.cta_delay_percentage || 50;
-    if (videoProgress >= targetPercentage) {
-      setShowCta(true);
-    }
-  }, [videoProgress, data.cta_delay_enabled, data.cta_delay_percentage]);
-
-  // Listen for postMessage from YouTube/Vimeo iframes for progress tracking
+  // Simulate video progress based on time (more reliable than postMessage API)
+  // Assumes an average video length of 3 minutes (180 seconds)
   useEffect(() => {
     if (!data.cta_delay_enabled || !isVideoPlaying) return;
 
-    const handleMessage = (event: MessageEvent) => {
-      // YouTube API messages
-      if (event.origin === 'https://www.youtube.com') {
-        try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          if (data.event === 'infoDelivery' && data.info?.currentTime && data.info?.duration) {
-            const progress = (data.info.currentTime / data.info.duration) * 100;
-            setVideoProgress(progress);
-          }
-        } catch (e) {}
-      }
-      
-      // Vimeo API messages
-      if (event.origin === 'https://player.vimeo.com') {
-        try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          if (data.method === 'playProgress' && data.value?.percent) {
-            setVideoProgress(data.value.percent * 100);
-          }
-        } catch (e) {}
-      }
-    };
+    const estimatedVideoDuration = 180; // 3 minutes in seconds
+    const targetPercentage = data.cta_delay_percentage || 50;
+    const targetTimeSeconds = (targetPercentage / 100) * estimatedVideoDuration;
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [data.cta_delay_enabled, isVideoPlaying]);
+    console.log(`CTA will appear after ${targetTimeSeconds.toFixed(1)} seconds (${targetPercentage}% of estimated ${estimatedVideoDuration}s video)`);
+
+    const timer = setTimeout(() => {
+      console.log("CTA delay reached - showing button");
+      setShowCta(true);
+    }, targetTimeSeconds * 1000);
+
+    return () => clearTimeout(timer);
+  }, [data.cta_delay_enabled, data.cta_delay_percentage, isVideoPlaying]);
+
+  // Update CTA visibility when delay is disabled
+  useEffect(() => {
+    if (!data.cta_delay_enabled) {
+      setShowCta(true);
+    }
+  }, [data.cta_delay_enabled]);
 
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
