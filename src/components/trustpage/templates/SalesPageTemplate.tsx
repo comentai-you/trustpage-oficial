@@ -56,7 +56,7 @@ const SalesPageTemplate = ({
   const backgroundColor = data.colors.background || '#09090b';
   const textColor = data.colors.text || '#ffffff';
   
-  const content: SalesPageContent = data.content || {
+  const content = (data.content as SalesPageContent) || {
     heroMediaType: 'image',
     benefits: [],
     testimonials: [],

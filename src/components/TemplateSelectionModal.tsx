@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, ArrowRight, Sparkles } from "lucide-react";
+import { Play, ShoppingBag, ArrowRight, Sparkles, LinkIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +33,7 @@ const TemplateSelectionModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -44,7 +44,7 @@ const TemplateSelectionModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           {/* VSL Template */}
           <button
             onClick={() => setSelectedTemplate('vsl')}
@@ -129,6 +129,52 @@ const TemplateSelectionModal = ({
             </div>
 
             {selectedTemplate === 'sales' && (
+              <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            )}
+          </button>
+
+          {/* Bio Link Template */}
+          <button
+            onClick={() => setSelectedTemplate('bio')}
+            className={`group relative p-6 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
+              selectedTemplate === 'bio'
+                ? 'border-primary bg-primary/5 shadow-lg'
+                : 'border-border hover:border-primary/50'
+            }`}
+          >
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+              selectedTemplate === 'bio' 
+                ? 'bg-primary text-white' 
+                : 'bg-primary/10 text-primary group-hover:bg-primary/20'
+            }`}>
+              <LinkIcon className="w-7 h-7" />
+            </div>
+            
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Bio Link Pro
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ideal para <span className="font-medium text-foreground">Instagram e TikTok</span>. 
+              Agregador de links premium com ícones e destaques.
+            </p>
+            
+            <div className="flex flex-wrap gap-2">
+              <span className="px-2 py-1 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                Redes Sociais
+              </span>
+              <span className="px-2 py-1 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                Multi-Links
+              </span>
+              <span className="px-2 py-1 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                Destaques
+              </span>
+            </div>
+
+            {selectedTemplate === 'bio' && (
               <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />

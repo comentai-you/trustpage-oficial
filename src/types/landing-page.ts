@@ -7,7 +7,7 @@ export interface LandingPageColors {
 }
 
 export type PageTheme = 'dark' | 'light' | 'modern-gray';
-export type TemplateType = 'vsl' | 'sales';
+export type TemplateType = 'vsl' | 'sales' | 'bio';
 
 export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
   dark: {
@@ -121,6 +121,43 @@ export const defaultSalesContent: SalesPageContent = {
   carouselInterval: 4
 };
 
+// Bio Link specific types
+export interface BioLink {
+  id: string;
+  text: string;
+  url: string;
+  thumbnailUrl?: string;
+  isHighlighted?: boolean;
+}
+
+export interface BioSocialLinks {
+  instagram?: string;
+  whatsapp?: string;
+  tiktok?: string;
+  youtube?: string;
+  linkedin?: string;
+}
+
+export interface BioLinkContent {
+  avatarUrl: string;
+  profileName: string;
+  bio: string;
+  socialLinks: BioSocialLinks;
+  links: BioLink[];
+}
+
+export const defaultBioContent: BioLinkContent = {
+  avatarUrl: '',
+  profileName: '@seuperfil',
+  bio: 'Sua bio aqui. Conte um pouco sobre você ou sua marca.',
+  socialLinks: {},
+  links: [
+    { id: '1', text: 'Meu Site Principal', url: '', isHighlighted: true },
+    { id: '2', text: 'Meu Canal do YouTube', url: '', thumbnailUrl: '' },
+    { id: '3', text: 'Produto em Destaque', url: '', isHighlighted: false }
+  ]
+};
+
 export interface LandingPage {
   id: string;
   user_id: string;
@@ -140,7 +177,7 @@ export interface LandingPage {
   pix_pixel_id: string | null;
   colors: LandingPageColors;
   primary_color: string;
-  content: SalesPageContent | null;
+  content: SalesPageContent | BioLinkContent | null;
   is_published: boolean;
   views: number;
   created_at: string;
@@ -171,7 +208,8 @@ export interface LandingPageFormData {
   pix_pixel_id: string;
   colors: LandingPageColors;
   primary_color: string;
-  content: SalesPageContent;
+  content: SalesPageContent | BioLinkContent;
+  bioContent?: BioLinkContent;
   theme: PageTheme;
 }
 

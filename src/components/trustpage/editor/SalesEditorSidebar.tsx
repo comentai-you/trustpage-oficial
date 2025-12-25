@@ -30,7 +30,7 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingCarouselImage, setUploadingCarouselImage] = useState(false);
 
-  const content: SalesPageContent = formData.content;
+  const content = formData.content as SalesPageContent;
 
   // Determine current theme based on colors
   const getCurrentThemeId = (): string => {
