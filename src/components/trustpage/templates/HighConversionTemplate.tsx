@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LandingPageFormData } from "@/types/landing-page";
-import { Play, Maximize2, Minimize2 } from "lucide-react";
+import { Play } from "lucide-react";
 
 // Extend Window interface for YouTube API
 declare global {
@@ -22,11 +22,9 @@ const HighConversionTemplate = ({
   fullHeight = true,
 }: HighConversionTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
   const [showCta, setShowCta] = useState(!data.cta_delay_enabled);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -230,30 +228,6 @@ const HighConversionTemplate = ({
     }
   };
 
-  const toggleFullscreen = async () => {
-    if (!videoContainerRef.current) return;
-
-    try {
-      if (!document.fullscreenElement) {
-        await videoContainerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    } catch (err) {
-      console.error("Fullscreen error:", err);
-    }
-  };
-
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
 
   const headlineSizeMobile = data.headline_size_mobile || 1.2;
   const headlineSizeDesktop = data.headline_size_desktop || 2.5;
@@ -310,30 +284,15 @@ const HighConversionTemplate = ({
           {/* Video Section */}
           <div className="w-full mb-4 md:mb-6">
             {isVideoPlaying && embedUrl ? (
-              <div 
-                ref={videoContainerRef}
-                className={`relative w-full rounded-lg overflow-hidden shadow-xl ${isFullscreen ? "bg-black" : "aspect-video"}`}
-              >
+              <div className="relative w-full rounded-lg overflow-hidden shadow-xl aspect-video">
                 <iframe
                   ref={iframeRef}
                   id="video-player"
                   src={embedUrl}
-                  className={`w-full ${isFullscreen ? "h-screen" : "h-full absolute inset-0"}`}
+                  className="w-full h-full absolute inset-0"
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
-                {/* Fullscreen toggle button */}
-                <button
-                  onClick={toggleFullscreen}
-                  className="absolute bottom-3 right-3 z-10 p-2 rounded-lg bg-black/60 hover:bg-black/80 transition-colors"
-                  title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
-                >
-                  {isFullscreen ? (
-                    <Minimize2 className="w-5 h-5 text-white" />
-                  ) : (
-                    <Maximize2 className="w-5 h-5 text-white" />
-                  )}
-                </button>
               </div>
             ) : (
               <div
