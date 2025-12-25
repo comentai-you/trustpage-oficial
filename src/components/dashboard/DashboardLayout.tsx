@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Plus, Settings, HelpCircle, LogOut, User } from "lucide-react";
+import { Sparkles, Plus, Settings, HelpCircle, LogOut, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -99,6 +99,13 @@ const DashboardLayout = ({
                     >
                       <User className="w-4 h-4 mr-2" />
                       Minha Conta
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => navigate("/subscription")}
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Assinatura
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="cursor-pointer"

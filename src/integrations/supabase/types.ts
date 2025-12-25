@@ -135,6 +135,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          asaas_customer_id: string | null
+          asaas_subscription_id: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -143,10 +145,13 @@ export type Database = {
           is_verified: boolean | null
           plan_type: string
           subscription_status: string
+          subscription_updated_at: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          asaas_customer_id?: string | null
+          asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -155,10 +160,13 @@ export type Database = {
           is_verified?: boolean | null
           plan_type?: string
           subscription_status?: string
+          subscription_updated_at?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          asaas_customer_id?: string | null
+          asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -167,6 +175,7 @@ export type Database = {
           is_verified?: boolean | null
           plan_type?: string
           subscription_status?: string
+          subscription_updated_at?: string | null
           updated_at?: string
           username?: string | null
         }

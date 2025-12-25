@@ -15,6 +15,8 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import ContactPage from "./pages/ContactPage";
 import SettingsPage from "./pages/SettingsPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,16 @@ const App = () => (
             <Route path="/settings" element={
               <ProtectedRoute>
                 <SettingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/subscription" element={
+              <ProtectedRoute>
+                <SubscriptionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-success" element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
               </ProtectedRoute>
             } />
             <Route path="/new" element={
