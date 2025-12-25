@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, Monitor, Smartphone, ShoppingBag, Play } from "lucide-react";
+import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, Monitor, Smartphone, ShoppingBag, Play, Link as LinkIcon } from "lucide-react";
 import { LandingPageFormData, defaultFormData, defaultSalesContent, SalesPageContent, TemplateType } from "@/types/landing-page";
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
+import BioEditorSidebar from "@/components/trustpage/editor/BioEditorSidebar";
 import IMacMockup from "@/components/trustpage/editor/IMacMockup";
 import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
 import MobileEditorControls from "@/components/trustpage/editor/MobileEditorControls";
@@ -373,11 +374,13 @@ const TrustPageEditor = () => {
             <div className="flex items-center gap-2">
               {formData.template_type === 'sales' ? (
                 <ShoppingBag className="w-5 h-5 text-primary" />
+              ) : formData.template_type === 'bio' ? (
+                <LinkIcon className="w-5 h-5 text-primary" />
               ) : (
                 <Play className="w-5 h-5 text-primary" />
               )}
               <span className="font-semibold text-gray-900 hidden sm:inline">
-                {formData.template_type === 'sales' ? 'Página de Vendas' : 'VSL Página'}
+                {formData.template_type === 'sales' ? 'Página de Vendas' : formData.template_type === 'bio' ? 'Bio Link' : 'VSL Página'}
               </span>
             </div>
           </div>
@@ -428,6 +431,8 @@ const TrustPageEditor = () => {
         <div className="hidden lg:block">
           {formData.template_type === 'sales' ? (
             <SalesEditorSidebar formData={formData} onChange={handleChange} />
+          ) : formData.template_type === 'bio' ? (
+            <BioEditorSidebar formData={formData} onChange={handleChange} />
           ) : (
             <EditorSidebar formData={formData} onChange={handleChange} />
           )}
@@ -463,6 +468,8 @@ const TrustPageEditor = () => {
           <div className={`lg:hidden flex-1 overflow-y-auto bg-white ${activeTab === 'form' ? 'block' : 'hidden'}`}>
             {formData.template_type === 'sales' ? (
               <SalesEditorSidebar formData={formData} onChange={handleChange} />
+            ) : formData.template_type === 'bio' ? (
+              <BioEditorSidebar formData={formData} onChange={handleChange} />
             ) : (
               <EditorSidebar formData={formData} onChange={handleChange} />
             )}

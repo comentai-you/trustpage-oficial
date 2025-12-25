@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, SalesPageContent, TemplateType } from "@/types/landing-page";
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
+import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -193,6 +194,8 @@ const LandingPageView = () => {
       <div className={showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}>
         {pageData.template_type === 'sales' ? (
           <SalesPageTemplate data={pageData} isMobile={isMobile} />
+        ) : pageData.template_type === 'bio' ? (
+          <BioLinkTemplate data={pageData} isMobile={isMobile} />
         ) : (
           <HighConversionTemplate data={pageData} isMobile={isMobile} />
         )}
