@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LandingPageFormData } from "@/types/landing-page";
-import { Play } from "lucide-react";
-
+import { Play, Maximize2 } from "lucide-react";
 // Extend Window interface for YouTube API
 declare global {
   interface Window {
@@ -195,25 +194,46 @@ const HighConversionTemplate = ({
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
     
-    // YouTube - add enablejsapi for API access
+    // YouTube - Chromeless mode: hide controls but keep API for time tracking
     const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
     if (youtubeMatch) {
+      // controls=0: hide controls, modestbranding=1: minimal branding
+      // rel=0: no related videos, showinfo=0: hide title/uploader
+      // iv_load_policy=3: hide annotations, disablekb=1: disable keyboard
+      // enablejsapi=1: keep API for time tracking
+      const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
       const params = autoplay 
-        ? `?autoplay=1&modestbranding=1&rel=0&showinfo=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`
-        : `?rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
+        ? `?autoplay=1&playsinline=1&${baseParams}`
+        : `?${baseParams}`;
       return `https://www.youtube.com/embed/${youtubeMatch[1]}${params}`;
     }
     
-    // Vimeo - add api=1 for API access
+    // Vimeo - Chromeless mode: hide all UI elements
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {
+      // controls=0: hide controls, title=0: hide title, byline=0: hide author
+      // portrait=0: hide avatar, sidedock=0: hide like/share buttons
+      // api=1: keep API for time tracking
+      const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0&api=1';
       const params = autoplay
-        ? '?autoplay=1&title=0&byline=0&portrait=0&api=1'
-        : '?title=0&byline=0&portrait=0&api=1';
+        ? `?autoplay=1&${baseParams}`
+        : `?${baseParams}`;
       return `https://player.vimeo.com/video/${vimeoMatch[1]}${params}`;
     }
     
     return null;
+  };
+
+  // Handle fullscreen
+  const handleFullscreen = () => {
+    const videoContainer = document.getElementById('video-container');
+    if (videoContainer) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoContainer.requestFullscreen();
+      }
+    }
   };
 
   const embedUrl = getVideoEmbedUrl(data.video_url, isVideoPlaying);
@@ -284,7 +304,11 @@ const HighConversionTemplate = ({
           {/* Video Section */}
           <div className="w-full mb-4 md:mb-6">
             {isVideoPlaying && embedUrl ? (
-              <div className="relative w-full rounded-lg overflow-hidden shadow-xl aspect-video">
+              <div 
+                id="video-container"
+                className="relative w-full rounded-lg overflow-hidden shadow-xl aspect-video group"
+              >
+                {/* Video iframe */}
                 <iframe
                   ref={iframeRef}
                   id="video-player"
@@ -293,6 +317,23 @@ const HighConversionTemplate = ({
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
+                
+                {/* Click Shield - prevents pausing by clicking on video */}
+                <div 
+                  className="absolute inset-0 z-10"
+                  style={{ pointerEvents: 'auto' }}
+                  onClick={(e) => e.preventDefault()}
+                />
+                
+                {/* Fullscreen button - positioned above the shield */}
+                <button
+                  onClick={handleFullscreen}
+                  className="absolute bottom-3 right-3 z-20 p-2 rounded-lg bg-black/60 hover:bg-black/80 transition-opacity opacity-0 group-hover:opacity-100"
+                  style={{ pointerEvents: 'auto' }}
+                  title="Tela cheia"
+                >
+                  <Maximize2 className="w-5 h-5 text-white" />
+                </button>
               </div>
             ) : (
               <div
