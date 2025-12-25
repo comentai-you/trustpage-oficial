@@ -335,24 +335,24 @@ const TrustPageEditor = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 flex flex-col">
-      {/* Header - Always visible */}
-      <header className="sticky top-0 z-50 bg-zinc-950 border-b border-zinc-800">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Header - Always visible (Light Theme) */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="text-zinc-400 hover:text-white transition-colors">
+            <Link to="/dashboard" className="text-gray-500 hover:text-gray-900 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-white hidden sm:inline">VSL Página</span>
+              <span className="font-semibold text-gray-900 hidden sm:inline">VSL Página</span>
             </div>
           </div>
           
@@ -361,7 +361,7 @@ const TrustPageEditor = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="lg:hidden text-zinc-400 hover:text-white"
+              className="lg:hidden text-gray-600 hover:text-gray-900"
               onClick={() => setShowMobileControls(true)}
             >
               <Settings2 className="w-5 h-5" />
@@ -371,7 +371,7 @@ const TrustPageEditor = () => {
               variant="outline" 
               size="sm" 
               onClick={handlePreview}
-              className="border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
             >
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline ml-2">Previewar</span>
@@ -406,13 +406,13 @@ const TrustPageEditor = () => {
         {/* Main Area */}
         <div className="flex-1 flex flex-col">
           {/* Mobile Tab Switcher */}
-          <div className="lg:hidden flex border-b border-zinc-800">
+          <div className="lg:hidden flex border-b border-gray-200 bg-white">
             <button
               onClick={() => setActiveTab('form')}
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'form' 
                   ? 'text-primary border-b-2 border-primary' 
-                  : 'text-zinc-400'
+                  : 'text-gray-500'
               }`}
             >
               Editar
@@ -422,7 +422,7 @@ const TrustPageEditor = () => {
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'preview' 
                   ? 'text-primary border-b-2 border-primary' 
-                  : 'text-zinc-400'
+                  : 'text-gray-500'
               }`}
             >
               Visualizar
@@ -430,25 +430,25 @@ const TrustPageEditor = () => {
           </div>
 
           {/* Mobile Form View */}
-          <div className={`lg:hidden flex-1 overflow-y-auto ${activeTab === 'form' ? 'block' : 'hidden'}`}>
+          <div className={`lg:hidden flex-1 overflow-y-auto bg-white ${activeTab === 'form' ? 'block' : 'hidden'}`}>
             <div className="p-4 pb-24">
               <Tabs defaultValue="perfil" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-4 bg-zinc-800">
-                  <TabsTrigger value="perfil" className="text-xs data-[state=active]:bg-zinc-700">
+                <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-100">
+                  <TabsTrigger value="perfil" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
                     <User className="w-3.5 h-3.5 mr-1" />
                     Perfil
                   </TabsTrigger>
-                  <TabsTrigger value="conteudo" className="text-xs data-[state=active]:bg-zinc-700">
+                  <TabsTrigger value="conteudo" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
                     <FileText className="w-3.5 h-3.5 mr-1" />
                     Conteúdo
                   </TabsTrigger>
-                  <TabsTrigger value="acoes" className="text-xs data-[state=active]:bg-zinc-700">
+                  <TabsTrigger value="acoes" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
                     <MousePointer className="w-3.5 h-3.5 mr-1" />
                     Ações
                   </TabsTrigger>
                 </TabsList>
                 
-                <div className="bg-zinc-800/50 rounded-xl p-4">
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <TabsContent value="perfil" className="mt-0">
                     <PerfilTab formData={formData} onChange={handleChange} existingPageId={existingPageId} />
                   </TabsContent>
@@ -466,16 +466,16 @@ const TrustPageEditor = () => {
           </div>
 
           {/* Mobile Preview View */}
-          <div className={`lg:hidden flex-1 flex flex-col ${activeTab === 'preview' ? 'flex' : 'hidden'}`}>
+          <div className={`lg:hidden flex-1 flex flex-col bg-gray-50 ${activeTab === 'preview' ? 'flex' : 'hidden'}`}>
             {/* View Toggle */}
-            <div className="flex items-center justify-center gap-3 py-3 border-b border-zinc-800">
-              <div className="flex items-center gap-2 bg-zinc-800 rounded-full p-1">
+            <div className="flex items-center justify-center gap-3 py-3 border-b border-gray-200 bg-white">
+              <div className="flex items-center gap-2 bg-gray-100 rounded-full p-1">
                 <button
                   onClick={() => setPreviewMode('mobile')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     previewMode === 'mobile' 
                       ? 'bg-primary text-white' 
-                      : 'text-zinc-400'
+                      : 'text-gray-500'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -486,7 +486,7 @@ const TrustPageEditor = () => {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     previewMode === 'desktop' 
                       ? 'bg-primary text-white' 
-                      : 'text-zinc-400'
+                      : 'text-gray-500'
                   }`}
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -507,8 +507,8 @@ const TrustPageEditor = () => {
             </div>
           </div>
 
-          {/* Desktop Preview Area */}
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 overflow-auto">
+          {/* Desktop Preview Area (Canvas) */}
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 overflow-auto bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
             <IMacMockup formData={formData} />
             <IPhoneMockup formData={formData} />
           </div>
