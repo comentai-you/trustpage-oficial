@@ -17,7 +17,14 @@ const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
   const primaryColor = data.primary_color || '#22c55e';
   const backgroundColor = data.colors.background || '#09090b';
   const textColor = data.colors.text || '#ffffff';
-  const content: BioLinkContent = (data.content as BioLinkContent) || defaultBioContent;
+  const rawContent = (data.content as BioLinkContent | undefined) || defaultBioContent;
+  const content: BioLinkContent = {
+    avatarUrl: rawContent.avatarUrl ?? defaultBioContent.avatarUrl,
+    profileName: rawContent.profileName ?? defaultBioContent.profileName,
+    bio: rawContent.bio ?? defaultBioContent.bio,
+    socialLinks: { ...defaultBioContent.socialLinks, ...(rawContent.socialLinks || {}) },
+    links: rawContent.links?.length ? rawContent.links : defaultBioContent.links
+  };
 
   const isDark = backgroundColor === '#000000' || backgroundColor.startsWith('#0') || backgroundColor.startsWith('#1');
 

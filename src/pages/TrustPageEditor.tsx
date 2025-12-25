@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, Monitor, Smartphone, ShoppingBag, Play, Link as LinkIcon } from "lucide-react";
-import { LandingPageFormData, defaultFormData, defaultSalesContent, SalesPageContent, TemplateType } from "@/types/landing-page";
+import { LandingPageFormData, defaultFormData, defaultSalesContent, defaultBioContent, SalesPageContent, TemplateType } from "@/types/landing-page";
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
 import BioEditorSidebar from "@/components/trustpage/editor/BioEditorSidebar";
@@ -27,9 +27,15 @@ const TrustPageEditor = () => {
   
   // Get template type from URL params for new pages
   const templateTypeParam = searchParams.get('type') as TemplateType | null;
+  const getInitialContent = (type: TemplateType | null) => {
+    if (type === 'bio') return defaultBioContent;
+    if (type === 'sales') return defaultSalesContent;
+    return defaultSalesContent;
+  };
   const initialFormData: LandingPageFormData = {
     ...defaultFormData,
     template_type: templateTypeParam || 'vsl',
+    content: getInitialContent(templateTypeParam),
   };
   
   const [formData, setFormData] = useState<LandingPageFormData>(initialFormData);

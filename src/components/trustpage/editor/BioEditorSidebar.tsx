@@ -24,7 +24,12 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null);
 
-  const content: BioLinkContent = (formData.content as BioLinkContent) || defaultBioContent;
+  const content: BioLinkContent = {
+    ...defaultBioContent,
+    ...((formData.content as BioLinkContent) || {}),
+    socialLinks: { ...defaultBioContent.socialLinks, ...((formData.content as BioLinkContent)?.socialLinks || {}) },
+    links: ((formData.content as BioLinkContent)?.links?.length ? (formData.content as BioLinkContent).links : defaultBioContent.links)
+  };
 
   const updateContent = (updates: Partial<BioLinkContent>) => {
     onChange({ content: { ...content, ...updates } });
