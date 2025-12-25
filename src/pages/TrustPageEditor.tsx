@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ const TrustPageEditor = () => {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const lastSavedSlugRef = useRef<string | null>(null);
 
   // Fetch user plan and existing page data
   useEffect(() => {
@@ -122,6 +123,8 @@ const TrustPageEditor = () => {
   };
 
   const handleSave = async () => {
+    lastSavedSlugRef.current = null;
+
     if (!user) {
       toast({
         title: "Erro",
@@ -209,6 +212,7 @@ const TrustPageEditor = () => {
       }
 
       setFormData(prev => ({ ...prev, slug }));
+      lastSavedSlugRef.current = slug;
       
       toast({
         title: "Página salva!",
@@ -226,15 +230,22 @@ const TrustPageEditor = () => {
     }
   };
 
-  const handlePreview = () => {
-    if (formData.slug) {
-      window.open(`/p/${formData.slug}`, '_blank');
-    } else {
-      toast({
-        title: "Salve primeiro",
-        description: "Salve sua página para visualizar a prévia.",
-      });
+  const handlePreview = async () => {
+    await handleSave();
+
+    if (lastSavedSlugRef.current) {
+      window.open(
+        `${window.location.origin}/p/${lastSavedSlugRef.current}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+      return;
     }
+
+    toast({
+      title: "Salve primeiro",
+      description: "Salve sua página para visualizar a prévia.",
+    });
   };
 
   if (isLoading) {

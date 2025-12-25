@@ -347,11 +347,28 @@ const TrustPageDashboard = () => {
                     >
                       Editar
                     </Button>
-                    <Link to={`/p/${page.slug}`} target="_blank">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                    {page.is_published ? (
+                      <Button asChild variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                        <a
+                          href={`${window.location.origin}/p/${page.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Abrir página pública"
+                        >
+                          <ExternalLink className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 sm:h-9 sm:w-9"
+                        onClick={() => toast.error("Publique a página para abrir o link público.")}
+                        aria-label="Página não publicada"
+                      >
                         <ExternalLink className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                       </Button>
-                    </Link>
+                    )}
                     <Button 
                       variant="ghost" 
                       size="icon" 

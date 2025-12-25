@@ -62,29 +62,30 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
   };
 
   return (
-    <div 
-      className="min-h-full flex flex-col"
-      style={{ 
+    <main
+      className="min-h-screen w-full"
+      style={{
         backgroundColor: data.colors.background,
-        color: data.colors.text 
+        color: data.colors.text,
       }}
     >
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <article className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-xl min-h-screen flex flex-col">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
         {/* Profile Header */}
-        <div className="flex flex-col items-center pt-6 pb-4 px-4">
-          {data.profile_image_url ? (
-            <img
-              src={data.profile_image_url}
-              alt="Profile"
-              className="w-20 h-20 rounded-full object-cover border-4 shadow-lg"
-              style={{ borderColor: data.colors.buttonBg }}
-            />
-          ) : (
-            <div 
-              className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg"
-              style={{ backgroundColor: data.colors.buttonBg, color: data.colors.buttonText }}
-            >
+          <div className="flex flex-col items-center pt-6 sm:pt-10 pb-4 px-4 sm:px-6">
+            {data.profile_image_url ? (
+              <img
+                src={data.profile_image_url}
+                alt="Foto de perfil"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-4 shadow-lg"
+                style={{ borderColor: data.colors.buttonBg }}
+              />
+            ) : (
+              <div 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg"
+                style={{ backgroundColor: data.colors.buttonBg, color: data.colors.buttonText }}
+              >
               {data.page_name?.charAt(0)?.toUpperCase() || 'T'}
             </div>
           )}
@@ -96,7 +97,7 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
         {/* Headline */}
         <div className="px-4 pb-4">
           <h1 
-            className="text-xl font-extrabold leading-tight text-center"
+            className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-center"
             style={{ color: data.colors.text }}
           >
             {data.headline || 'Seu Título Aqui'}
@@ -168,7 +169,7 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
         {/* Description */}
         {data.description && (
           <div className="px-4 py-4">
-            <p className="text-sm leading-relaxed opacity-80 text-center">
+            <p className="text-sm sm:text-base leading-relaxed opacity-80 text-center">
               {data.description}
             </p>
           </div>
@@ -177,13 +178,13 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
 
       {/* CTA Section - Sticky */}
       <div 
-        className="sticky bottom-0 p-4 space-y-3"
+        className="sticky bottom-0 p-4 sm:p-6 space-y-3"
         style={{ backgroundColor: data.colors.background }}
       >
         {/* Main CTA Button - Pulsing */}
         <button
           onClick={handleCtaClick}
-          className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all active:scale-95 animate-pulse hover:animate-none"
+          className="w-full py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all active:scale-95 animate-pulse hover:animate-none"
           style={{ 
             backgroundColor: data.colors.buttonBg, 
             color: data.colors.buttonText,
@@ -218,7 +219,8 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
           Criado com TrustPage
         </p>
       </div>
-    </div>
+      </article>
+    </main>
   );
 };
 
