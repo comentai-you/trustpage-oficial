@@ -114,19 +114,18 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
 
   return (
     <main
-      className="min-h-screen w-full flex flex-col"
+      className="min-h-screen w-full flex flex-col items-center"
       style={{
         backgroundColor: data.colors.background,
         color: data.colors.text,
-        minHeight: '100%',
       }}
     >
       {/* Scarcity Timer - Compact top bar */}
       <div 
-        className="w-full py-2 px-3 text-center flex-shrink-0"
-        style={{ backgroundColor: `${data.colors.buttonBg}20` }}
+        className="w-full py-2 px-4 text-center flex-shrink-0"
+        style={{ backgroundColor: `${data.colors.buttonBg}15` }}
       >
-        <p className="text-[10px] sm:text-xs font-medium">
+        <p className="text-xs md:text-sm font-medium">
           ⏰ Esta oferta expira em{' '}
           <span 
             className="font-bold"
@@ -137,36 +136,35 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
         </p>
       </div>
 
-      {/* Main Content - Compact spacing */}
-      <div className="flex-1 flex flex-col px-4 sm:px-6">
+      {/* Main Content Container - Centered with max-width on desktop */}
+      <div className="w-full max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10 flex flex-col">
         
         {/* Headline */}
-        <div className="pt-4 sm:pt-6 pb-1 sm:pb-2">
-          <h1 
-            className="font-extrabold leading-tight text-center uppercase tracking-wide"
-            style={{ 
-              color: data.colors.text,
-              fontSize: `${currentHeadlineSize}rem`,
-              lineHeight: 1.1
-            }}
-          >
-            {data.headline || 'Seu Título Aqui'}
-          </h1>
-        </div>
+        <h1 
+          className="font-extrabold leading-tight text-center uppercase tracking-wide mb-2 md:mb-3"
+          style={{ 
+            color: data.colors.text,
+            fontSize: isMobile ? `${headlineSizeMobile}rem` : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
+            lineHeight: 1.15
+          }}
+        >
+          {data.headline || 'Seu Título Aqui'}
+        </h1>
 
         {/* Description */}
         {data.description && (
-          <div className="pb-3 sm:pb-4">
-            <p className="text-center leading-snug opacity-80 text-[11px] sm:text-sm">
-              {data.description}
-            </p>
-          </div>
+          <p 
+            className="text-center leading-relaxed opacity-80 text-sm md:text-base mb-4 md:mb-6"
+            style={{ color: data.colors.text }}
+          >
+            {data.description}
+          </p>
         )}
 
-        {/* Video Section - Clean play button like landing page mockup */}
-        <div className="w-full mb-4 sm:mb-5">
+        {/* Video Section */}
+        <div className="w-full mb-4 md:mb-6">
           {isVideoPlaying && embedUrl ? (
-            <div className="aspect-video w-full rounded-lg overflow-hidden">
+            <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl">
               <iframe
                 src={embedUrl}
                 className="w-full h-full"
@@ -176,24 +174,32 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
             </div>
           ) : (
             <div 
-              className="aspect-video w-full relative cursor-pointer group rounded-lg overflow-hidden"
+              className="aspect-video w-full relative cursor-pointer group rounded-lg overflow-hidden shadow-lg"
               onClick={handlePlayClick}
-              style={{ backgroundColor: `${data.colors.text}08` }}
+              style={{ backgroundColor: `${data.colors.text}10` }}
             >
-              {/* Play Button - Clean circular style like the landing page mockup */}
+              {/* Play Button */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div 
-                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
                   style={{ 
                     backgroundColor: data.colors.buttonBg,
                   }}
                 >
                   <Play 
-                    className="w-6 h-6 sm:w-8 sm:h-8 ml-0.5" 
+                    className="w-7 h-7 md:w-9 md:h-9 ml-1" 
                     style={{ color: data.colors.buttonText }}
                     fill={data.colors.buttonText}
                   />
                 </div>
+              </div>
+              
+              {/* Fake progress bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+                <div 
+                  className="h-full w-0"
+                  style={{ backgroundColor: data.colors.buttonBg }}
+                />
               </div>
             </div>
           )}
@@ -203,26 +209,26 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
         {showCta && (
           <button
             onClick={handleCtaClick}
-            className="w-full py-3 sm:py-4 rounded-xl font-bold text-xs sm:text-sm shadow-lg transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="w-full py-4 md:py-5 rounded-xl font-bold text-sm md:text-base shadow-lg transition-all active:scale-[0.98] hover:opacity-90 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ 
               backgroundColor: data.colors.buttonBg, 
               color: data.colors.buttonText,
-              boxShadow: `0 4px 15px ${data.colors.buttonBg}40`
+              boxShadow: `0 8px 25px ${data.colors.buttonBg}50`
             }}
           >
             {data.cta_text || 'QUERO AGORA'}
           </button>
         )}
+      </div>
 
-        {/* Watermark - Right below CTA, not at bottom of page */}
-        <div className="py-4 sm:py-5 text-center">
-          <p 
-            className="text-[9px] sm:text-xs font-medium tracking-wide"
-            style={{ opacity: 0.5, color: data.colors.text }}
-          >
-            ✨ Criado com <span className="font-bold">TrustPage</span>
-          </p>
-        </div>
+      {/* Watermark - Fixed at bottom */}
+      <div className="mt-auto w-full py-6 text-center">
+        <p 
+          className="text-xs font-medium tracking-wide"
+          style={{ opacity: 0.4, color: data.colors.text }}
+        >
+          ✨ Criado com <span className="font-bold">TrustPage</span>
+        </p>
       </div>
     </main>
   );
