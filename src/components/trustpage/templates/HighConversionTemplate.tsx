@@ -114,122 +114,116 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
 
   return (
     <main
-      className="min-h-screen w-full flex flex-col items-center"
+      className="min-h-screen w-full flex flex-col"
       style={{
         backgroundColor: data.colors.background,
         color: data.colors.text,
       }}
     >
       {/* Scarcity Timer - Compact top bar */}
-      <div 
+      <header
         className="w-full py-2 px-4 text-center flex-shrink-0"
         style={{ backgroundColor: `${data.colors.buttonBg}15` }}
       >
         <p className="text-xs md:text-sm font-medium">
-          ⏰ Esta oferta expira em{' '}
-          <span 
-            className="font-bold"
-            style={{ color: data.colors.buttonBg }}
-          >
-            {String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+          ⏰ Esta oferta expira em{" "}
+          <span className="font-bold" style={{ color: data.colors.buttonBg }}>
+            {String(timeLeft.minutes).padStart(2, "0")}:{String(timeLeft.seconds).padStart(2, "0")}
           </span>
         </p>
-      </div>
+      </header>
 
-      {/* Main Content Container - Centered with max-width on desktop */}
-      <div className="w-full max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10 flex flex-col">
-        
-        {/* Headline */}
-        <h1 
-          className="font-extrabold leading-tight text-center uppercase tracking-wide mb-2 md:mb-3"
-          style={{ 
-            color: data.colors.text,
-            fontSize: isMobile ? `${headlineSizeMobile}rem` : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
-            lineHeight: 1.15
-          }}
-        >
-          {data.headline || 'Seu Título Aqui'}
-        </h1>
-
-        {/* Description */}
-        {data.description && (
-          <p 
-            className="text-center leading-relaxed opacity-80 text-sm md:text-base mb-4 md:mb-6"
-            style={{ color: data.colors.text }}
-          >
-            {data.description}
-          </p>
-        )}
-
-        {/* Video Section */}
-        <div className="w-full mb-4 md:mb-6">
-          {isVideoPlaying && embedUrl ? (
-            <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl">
-              <iframe
-                src={embedUrl}
-                className="w-full h-full"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
-            </div>
-          ) : (
-            <div 
-              className="aspect-video w-full relative cursor-pointer group rounded-lg overflow-hidden shadow-lg"
-              onClick={handlePlayClick}
-              style={{ backgroundColor: `${data.colors.text}10` }}
-            >
-              {/* Play Button */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div 
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
-                  style={{ 
-                    backgroundColor: data.colors.buttonBg,
-                  }}
-                >
-                  <Play 
-                    className="w-7 h-7 md:w-9 md:h-9 ml-1" 
-                    style={{ color: data.colors.buttonText }}
-                    fill={data.colors.buttonText}
-                  />
-                </div>
-              </div>
-              
-              {/* Fake progress bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-                <div 
-                  className="h-full w-0"
-                  style={{ backgroundColor: data.colors.buttonBg }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* CTA Button */}
-        {showCta && (
-          <button
-            onClick={handleCtaClick}
-            className="w-full py-4 md:py-5 rounded-xl font-bold text-sm md:text-base shadow-lg transition-all active:scale-[0.98] hover:opacity-90 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-500"
-            style={{ 
-              backgroundColor: data.colors.buttonBg, 
-              color: data.colors.buttonText,
-              boxShadow: `0 8px 25px ${data.colors.buttonBg}50`
+      {/* Main Content (vertically centered between header and footer) */}
+      <section className="flex-1 w-full flex items-center justify-center">
+        <div className="w-full max-w-2xl px-4 md:px-8 py-6 md:py-10 flex flex-col">
+          {/* Headline */}
+          <h1
+            className="font-extrabold leading-tight text-center uppercase tracking-wide mb-2 md:mb-3"
+            style={{
+              color: data.colors.text,
+              fontSize: isMobile
+                ? `${headlineSizeMobile}rem`
+                : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
+              lineHeight: 1.15,
             }}
           >
-            {data.cta_text || 'QUERO AGORA'}
-          </button>
-        )}
-      </div>
+            {data.headline || "Seu Título Aqui"}
+          </h1>
 
-      {/* Watermark - Fixed at bottom */}
-      <div className="mt-auto w-full py-6 text-center">
-        <p 
-          className="text-xs font-medium tracking-wide"
-          style={{ opacity: 0.4, color: data.colors.text }}
-        >
+          {/* Description */}
+          {data.description && (
+            <p
+              className="text-center leading-relaxed opacity-80 text-sm md:text-base mb-4 md:mb-6"
+              style={{ color: data.colors.text }}
+            >
+              {data.description}
+            </p>
+          )}
+
+          {/* Video Section */}
+          <div className="w-full mb-4 md:mb-6">
+            {isVideoPlaying && embedUrl ? (
+              <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl">
+                <iframe
+                  src={embedUrl}
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+              </div>
+            ) : (
+              <div
+                className="aspect-video w-full relative cursor-pointer group rounded-lg overflow-hidden shadow-lg"
+                onClick={handlePlayClick}
+                style={{ backgroundColor: `${data.colors.text}10` }}
+              >
+                {/* Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
+                    style={{
+                      backgroundColor: data.colors.buttonBg,
+                    }}
+                  >
+                    <Play
+                      className="w-7 h-7 md:w-9 md:h-9 ml-1"
+                      style={{ color: data.colors.buttonText }}
+                      fill={data.colors.buttonText}
+                    />
+                  </div>
+                </div>
+
+                {/* Fake progress bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-foreground/20">
+                  <div className="h-full w-0" style={{ backgroundColor: data.colors.buttonBg }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          {showCta && (
+            <button
+              onClick={handleCtaClick}
+              className="w-full py-4 md:py-5 rounded-xl font-bold text-sm md:text-base shadow-lg transition-all active:scale-[0.98] hover:opacity-90 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{
+                backgroundColor: data.colors.buttonBg,
+                color: data.colors.buttonText,
+                boxShadow: `0 8px 25px ${data.colors.buttonBg}50`,
+              }}
+            >
+              {data.cta_text || "QUERO AGORA"}
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* Watermark */}
+      <footer className="w-full py-6 text-center">
+        <p className="text-xs font-medium tracking-wide" style={{ opacity: 0.4, color: data.colors.text }}>
           ✨ Criado com <span className="font-bold">TrustPage</span>
         </p>
-      </div>
+      </footer>
     </main>
   );
 };
