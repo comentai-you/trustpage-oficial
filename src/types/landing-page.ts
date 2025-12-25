@@ -94,7 +94,7 @@ export const defaultFormData: LandingPageFormData = {
   profile_image_url: '',
   headline: 'Descubra o Segredo Para Transformar Sua Vida',
   headline_size: 2,
-  headline_size_mobile: 1.5,
+  headline_size_mobile: 1.2,
   headline_size_desktop: 2.5,
   subheadline: '',
   video_url: '',

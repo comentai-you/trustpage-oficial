@@ -62,7 +62,7 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
     }
   };
 
-  const headlineSizeMobile = data.headline_size_mobile || 1.5;
+  const headlineSizeMobile = data.headline_size_mobile || 1.2;
   const headlineSizeDesktop = data.headline_size_desktop || 2.5;
   const currentHeadlineSize = isMobile ? headlineSizeMobile : headlineSizeDesktop;
 

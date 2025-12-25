@@ -26,9 +26,14 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
     });
   };
 
-  // Convert rem to percentage (1.5rem = 0%, 4rem = 100%)
-  const sizeToPercent = (size: number) => Math.round(((size - 1.5) / 2.5) * 100);
-  const percentToSize = (percent: number) => 1.5 + (percent / 100) * 2.5;
+  // Convert rem to percentage - different ranges for mobile and desktop
+  // Mobile: 0.8rem (0%) to 2rem (100%)
+  const mobileSizeToPercent = (size: number) => Math.round(((size - 0.8) / 1.2) * 100);
+  const mobilePercentToSize = (percent: number) => 0.8 + (percent / 100) * 1.2;
+  
+  // Desktop: 1.5rem (0%) to 4rem (100%)
+  const desktopSizeToPercent = (size: number) => Math.round(((size - 1.5) / 2.5) * 100);
+  const desktopPercentToSize = (percent: number) => 1.5 + (percent / 100) * 2.5;
 
   const buttonColorOptions = [
     { name: 'Verde', value: '#22C55E' },
@@ -143,12 +148,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                     Tamanho Mobile
                   </Label>
                   <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    {sizeToPercent(formData.headline_size_mobile || 1.5)}%
+                    {mobileSizeToPercent(formData.headline_size_mobile || 1.2)}%
                   </span>
                 </div>
                 <Slider
-                  value={[sizeToPercent(formData.headline_size_mobile || 1.5)]}
-                  onValueChange={(value) => onChange({ headline_size_mobile: percentToSize(value[0]) })}
+                  value={[mobileSizeToPercent(formData.headline_size_mobile || 1.2)]}
+                  onValueChange={(value) => onChange({ headline_size_mobile: mobilePercentToSize(value[0]) })}
                   min={0}
                   max={100}
                   step={5}
@@ -164,12 +169,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                     Tamanho Desktop
                   </Label>
                   <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    {sizeToPercent(formData.headline_size_desktop || 2.5)}%
+                    {desktopSizeToPercent(formData.headline_size_desktop || 2.5)}%
                   </span>
                 </div>
                 <Slider
-                  value={[sizeToPercent(formData.headline_size_desktop || 2.5)]}
-                  onValueChange={(value) => onChange({ headline_size_desktop: percentToSize(value[0]) })}
+                  value={[desktopSizeToPercent(formData.headline_size_desktop || 2.5)]}
+                  onValueChange={(value) => onChange({ headline_size_desktop: desktopPercentToSize(value[0]) })}
                   min={0}
                   max={100}
                   step={5}

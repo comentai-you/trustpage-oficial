@@ -96,7 +96,7 @@ const LandingPageView = () => {
           profile_image_url: page.profile_image_url || '',
           headline: page.headline || '',
           headline_size: 2,
-          headline_size_mobile: 1.5,
+          headline_size_mobile: 1.2,
           headline_size_desktop: 2.5,
           subheadline: page.subheadline || '',
           video_url: page.video_url || '',
