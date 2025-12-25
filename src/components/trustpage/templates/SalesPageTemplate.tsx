@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LandingPageFormData, SalesPageContent } from "@/types/landing-page";
+import ImageCarousel from "./ImageCarousel";
 import { 
   Play, Check, Star, Shield, ArrowRight, ChevronDown,
   Zap, Heart, Award, Gift, Crown,
@@ -271,6 +272,14 @@ const SalesPageTemplate = ({
                     </div>
                   </div>
                 )
+              ) : content.carouselEnabled && content.carouselImages && content.carouselImages.length > 0 ? (
+                <ImageCarousel
+                  images={content.carouselImages}
+                  interval={content.carouselInterval || 4}
+                  primaryColor={primaryColor}
+                  isDarkTheme={isDarkTheme}
+                  alt={data.headline || 'Produto'}
+                />
               ) : data.image_url ? (
                 <div 
                   className="rounded-2xl overflow-hidden"

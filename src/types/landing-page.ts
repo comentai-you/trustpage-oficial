@@ -78,6 +78,10 @@ export interface SalesPageContent {
   faqEnabled?: boolean;
   faqTitle?: string;
   faqItems?: FAQItem[];
+  // Carousel settings
+  carouselEnabled?: boolean;
+  carouselImages?: string[];
+  carouselInterval?: number; // seconds
 }
 
 export const defaultSalesContent: SalesPageContent = {
@@ -111,7 +115,10 @@ export const defaultSalesContent: SalesPageContent = {
     { question: 'Como funciona a garantia?', answer: 'Você tem 7 dias para testar. Se não gostar, devolvemos 100% do seu dinheiro.' },
     { question: 'Quanto tempo tenho acesso?', answer: 'Acesso vitalício! Uma vez adquirido, o conteúdo é seu para sempre.' },
     { question: 'Preciso ter experiência prévia?', answer: 'Não! O conteúdo foi criado para iniciantes e também agrega valor para avançados.' }
-  ]
+  ],
+  carouselEnabled: false,
+  carouselImages: [],
+  carouselInterval: 4
 };
 
 export interface LandingPage {

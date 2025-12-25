@@ -11,7 +11,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2 } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +28,7 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
   const { user } = useAuth();
   const [uploadingAvatar, setUploadingAvatar] = useState<number | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCarouselImage, setUploadingCarouselImage] = useState(false);
 
   const content: SalesPageContent = formData.content;
 
@@ -191,6 +193,71 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
       e.target.value = '';
     }
   };
+
+  const handleCarouselImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione uma imagem válida");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploadingCarouselImage(true);
+    try {
+      if (!user) {
+        toast.error("Você precisa estar logado para fazer upload");
+        return;
+      }
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const fileName = `carousel_${uniqueId}.${fileExt}`;
+      const filePath = `${user.id}/carousel/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Carousel upload error:', uploadError);
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (data?.publicUrl) {
+        const currentImages = content.carouselImages || [];
+        updateContent({ carouselImages: [...currentImages, data.publicUrl] });
+        toast.success("Imagem adicionada ao carrossel!");
+      } else {
+        throw new Error("Falha ao obter URL pública");
+      }
+    } catch (error) {
+      console.error('Error uploading carousel image:', error);
+      toast.error("Erro ao enviar imagem. Tente novamente.");
+    } finally {
+      setUploadingCarouselImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeCarouselImage = (index: number) => {
+    const currentImages = content.carouselImages || [];
+    const newImages = currentImages.filter((_, i) => i !== index);
+    updateContent({ carouselImages: newImages });
+    toast.success("Imagem removida do carrossel");
+  };
+
   return (
     <aside className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto h-full">
       <div className="p-4 border-b border-gray-200">
@@ -309,36 +376,112 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                   />
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Label className="text-xs text-gray-600">Imagem do Produto</Label>
-                  {formData.image_url ? (
-                    <div className="relative">
-                      <img 
-                        src={formData.image_url} 
-                        alt="Preview" 
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => onChange({ image_url: '' })}
-                        className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                <div className="space-y-4">
+                  {/* Single image or Carousel toggle */}
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-2">
+                      <Images className="w-4 h-4 text-purple-600" />
+                      <span className="text-xs font-medium text-purple-800">Modo Carrossel</span>
+                    </div>
+                    <Switch
+                      checked={content.carouselEnabled ?? false}
+                      onCheckedChange={(checked) => updateContent({ carouselEnabled: checked })}
+                    />
+                  </div>
+
+                  {content.carouselEnabled ? (
+                    <div className="space-y-3">
+                      {/* Carousel interval slider */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs text-gray-600">Intervalo (segundos)</Label>
+                          <span className="text-xs font-medium text-primary">{content.carouselInterval || 4}s</span>
+                        </div>
+                        <Slider
+                          value={[content.carouselInterval || 4]}
+                          onValueChange={([value]) => updateContent({ carouselInterval: value })}
+                          min={2}
+                          max={10}
+                          step={1}
+                          className="w-full"
+                        />
+                      </div>
+
+                      {/* Carousel images grid */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Imagens do Carrossel ({(content.carouselImages || []).length})</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(content.carouselImages || []).map((img, index) => (
+                            <div key={index} className="relative aspect-square">
+                              <img 
+                                src={img} 
+                                alt={`Carrossel ${index + 1}`}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                              <button
+                                onClick={() => removeCarouselImage(index)}
+                                className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 shadow-md"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                          
+                          {/* Add image button */}
+                          <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-primary transition-colors">
+                            {uploadingCarouselImage ? (
+                              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                            ) : (
+                              <>
+                                <Plus className="w-5 h-5 text-gray-400" />
+                                <span className="text-[10px] text-gray-400 mt-1">Adicionar</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleCarouselImageUpload}
+                              className="hidden"
+                              disabled={uploadingCarouselImage}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-400">Adicione 2 ou mais imagens para ativar o carrossel automático</p>
+                      </div>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                      <span className="text-xs text-gray-500">
-                        {uploadingImage ? 'Enviando...' : 'Clique para enviar'}
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        disabled={uploadingImage}
-                      />
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-gray-600">Imagem do Produto</Label>
+                      {formData.image_url ? (
+                        <div className="relative">
+                          <img 
+                            src={formData.image_url} 
+                            alt="Preview" 
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={() => onChange({ image_url: '' })}
+                            className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                          <span className="text-xs text-gray-500">
+                            {uploadingImage ? 'Enviando...' : 'Clique para enviar'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={uploadingImage}
+                          />
+                        </label>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
