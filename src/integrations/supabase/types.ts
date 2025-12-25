@@ -158,6 +158,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_page_views: { Args: { page_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

@@ -67,25 +67,13 @@ const LandingPageView = () => {
           }
         }
 
-        // Increment view counter usando RPC para bypass RLS
-        // Como visitantes anônimos não podem fazer UPDATE direto,
-        // incrementamos apenas em sessões não-duplicadas
-        try {
-          const viewKey = `viewed_${page.id}`;
-          if (!sessionStorage.getItem(viewKey)) {
-            sessionStorage.setItem(viewKey, 'true');
-            // Use um update que não falhe silenciosamente
-            await supabase.rpc('increment_page_views', { page_id: page.id }).catch(() => {
-              // Fallback: tenta update direto (funciona se o usuário estiver logado)
-              supabase
-                .from("landing_pages")
-                .update({ views: (page.views || 0) + 1 })
-                .eq("id", page.id)
-                .then(() => {});
-            });
-          }
-        } catch {
-          // Ignore view counter errors
+        // Increment view counter (evita contagem duplicada por sessão)
+        const viewKey = `viewed_${page.id}`;
+        if (!sessionStorage.getItem(viewKey)) {
+          sessionStorage.setItem(viewKey, 'true');
+          // Chama a função RPC para incrementar views (bypass RLS)
+          // @ts-ignore - função criada por migração, não está no types.ts gerado
+          supabase.rpc('increment_page_views', { page_id: page.id }).catch(() => {});
         }
 
         // Map database data to form data format
