@@ -5,9 +5,18 @@ import { Play } from "lucide-react";
 interface HighConversionTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
+  /**
+   * Quando true, o template ocupa pelo menos a altura do viewport (página real).
+   * Quando false, ocupa apenas a altura do container pai (mockups do editor).
+   */
+  fullHeight?: boolean;
 }
 
-const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTemplateProps) => {
+const HighConversionTemplate = ({
+  data,
+  isMobile = false,
+  fullHeight = true,
+}: HighConversionTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
   const [videoProgress, setVideoProgress] = useState(0);
@@ -114,7 +123,7 @@ const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTempla
 
   return (
     <main
-      className="min-h-full w-full flex flex-col"
+      className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col`}
       style={{
         backgroundColor: data.colors.background,
         color: data.colors.text,

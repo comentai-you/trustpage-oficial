@@ -49,7 +49,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   }
                 `}
               </style>
-              <HighConversionTemplate data={formData} isMobile={false} />
+              <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
             </div>
           </div>
         </div>
