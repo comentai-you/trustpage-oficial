@@ -4,14 +4,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { LandingPageFormData, SalesPageContent, Benefit, Testimonial } from "@/types/landing-page";
+import { LandingPageFormData, SalesPageContent, Benefit, Testimonial, FAQItem } from "@/types/landing-page";
 import { 
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2 } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import IconSelector from "./IconSelector";
@@ -541,6 +541,93 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                 className="text-sm"
               />
             </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* FAQ */}
+        <AccordionItem value="faq">
+          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <HelpCircle className="w-4 h-4 text-primary" />
+              FAQ
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <Label className="text-xs font-medium text-gray-700">Mostrar seção FAQ</Label>
+              <Switch
+                checked={content.faqEnabled ?? false}
+                onCheckedChange={(checked) => updateContent({ faqEnabled: checked })}
+              />
+            </div>
+
+            {content.faqEnabled && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-xs text-gray-600">Título da Seção</Label>
+                  <Input
+                    value={content.faqTitle || 'Perguntas Frequentes'}
+                    onChange={(e) => updateContent({ faqTitle: e.target.value })}
+                    placeholder="Perguntas Frequentes"
+                    className="text-sm"
+                  />
+                </div>
+
+                {(content.faqItems || []).map((faq, index) => (
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium text-gray-700">
+                        Pergunta {index + 1}
+                      </Label>
+                      <button
+                        onClick={() => {
+                          const newFaqs = [...(content.faqItems || [])];
+                          newFaqs.splice(index, 1);
+                          updateContent({ faqItems: newFaqs });
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <Input
+                      value={faq.question}
+                      onChange={(e) => {
+                        const newFaqs = [...(content.faqItems || [])];
+                        newFaqs[index] = { ...newFaqs[index], question: e.target.value };
+                        updateContent({ faqItems: newFaqs });
+                      }}
+                      placeholder="Qual é a pergunta?"
+                      className="text-sm"
+                    />
+                    <Textarea
+                      value={faq.answer}
+                      onChange={(e) => {
+                        const newFaqs = [...(content.faqItems || [])];
+                        newFaqs[index] = { ...newFaqs[index], answer: e.target.value };
+                        updateContent({ faqItems: newFaqs });
+                      }}
+                      placeholder="Resposta..."
+                      className="text-sm resize-none"
+                      rows={2}
+                    />
+                  </div>
+                ))}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    const newFaqs = [...(content.faqItems || []), { question: '', answer: '' }];
+                    updateContent({ faqItems: newFaqs });
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Pergunta
+                </Button>
+              </>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
