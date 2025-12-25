@@ -250,6 +250,26 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
+            {/* Scarcity Bar Toggle */}
+            <div className="p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-xs font-medium text-orange-800">Barra de Escassez</Label>
+                <Switch
+                  checked={content.scarcityEnabled ?? false}
+                  onCheckedChange={(checked) => updateContent({ scarcityEnabled: checked })}
+                />
+              </div>
+              {content.scarcityEnabled && (
+                <Input
+                  value={content.scarcityText || '🔥 Oferta por tempo limitado!'}
+                  onChange={(e) => updateContent({ scarcityText: e.target.value })}
+                  placeholder="Texto da barra de escassez"
+                  className="text-sm mt-2"
+                />
+              )}
+              <p className="text-xs text-orange-600 mt-1">Aumenta urgência e conversões</p>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">Headline Principal</Label>
               <Textarea

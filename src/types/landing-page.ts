@@ -63,6 +63,8 @@ export interface SalesPageContent {
   priceFrom: string;
   priceTo: string;
   guaranteeText: string;
+  scarcityEnabled?: boolean;
+  scarcityText?: string;
 }
 
 export const defaultSalesContent: SalesPageContent = {
@@ -79,7 +81,9 @@ export const defaultSalesContent: SalesPageContent = {
   ],
   priceFrom: '197',
   priceTo: '97',
-  guaranteeText: '7 dias de garantia incondicional'
+  guaranteeText: '7 dias de garantia incondicional',
+  scarcityEnabled: true,
+  scarcityText: '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.'
 };
 
 export interface LandingPage {

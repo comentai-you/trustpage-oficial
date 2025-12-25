@@ -49,7 +49,6 @@ const SalesPageTemplate = ({
   fullHeight = true,
 }: SalesPageTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
 
   const primaryColor = data.primary_color || '#8B5CF6';
   const content: SalesPageContent = data.content || {
@@ -58,23 +57,15 @@ const SalesPageTemplate = ({
     testimonials: [],
     priceFrom: '197',
     priceTo: '97',
-    guaranteeText: '7 dias de garantia'
+    guaranteeText: '7 dias de garantia',
+    scarcityEnabled: false,
+    scarcityText: ''
   };
 
-  // Countdown timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { minutes: prev.minutes - 1, seconds: 59 };
-        }
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Determine if dark theme based on background color
+  const isDarkTheme = data.colors.background === '#000000' || 
+    data.colors.background.toLowerCase() === '#1a1a1a' ||
+    data.colors.background.toLowerCase() === '#111111';
 
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
@@ -106,138 +97,237 @@ const SalesPageTemplate = ({
     }
   };
 
+  // CTA Button Component for reuse
+  const CTAButton = ({ size = 'large', animate = false }: { size?: 'large' | 'medium'; animate?: boolean }) => (
+    <button
+      onClick={handleCtaClick}
+      className={`
+        w-full font-bold rounded-2xl shadow-xl transition-all duration-300
+        hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
+        uppercase tracking-wider flex items-center justify-center gap-3
+        ${size === 'large' ? 'py-5 md:py-6 text-lg md:text-xl' : 'py-4 text-base md:text-lg'}
+        ${animate ? 'animate-pulse' : ''}
+      `}
+      style={{
+        backgroundColor: primaryColor,
+        color: '#FFFFFF',
+        boxShadow: `0 12px 40px ${primaryColor}40`,
+      }}
+    >
+      {data.cta_text || "QUERO AGORA"}
+      <ArrowRight className={size === 'large' ? 'w-6 h-6' : 'w-5 h-5'} />
+    </button>
+  );
+
   return (
     <main
       className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col`}
       style={{ backgroundColor: data.colors.background, color: data.colors.text }}
     >
-      {/* Urgency Bar */}
-      <header
-        className="w-full py-2 px-4 text-center"
-        style={{ backgroundColor: primaryColor }}
-      >
-        <p className="text-xs md:text-sm font-medium text-white">
-          🔥 OFERTA ESPECIAL - Termina em{" "}
-          <span className="font-bold">
-            {String(timeLeft.minutes).padStart(2, "0")}:{String(timeLeft.seconds).padStart(2, "0")}
-          </span>
-        </p>
-      </header>
+      {/* Scarcity Bar - Optional */}
+      {content.scarcityEnabled && (
+        <div
+          className="w-full py-3 px-4 text-center sticky top-0 z-50"
+          style={{ 
+            backgroundColor: primaryColor,
+            boxShadow: `0 4px 20px ${primaryColor}30`
+          }}
+        >
+          <p className="text-sm md:text-base font-semibold text-white tracking-wide">
+            {content.scarcityText || '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.'}
+          </p>
+        </div>
+      )}
 
-      {/* Hero Section */}
-      <section className="w-full py-8 md:py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Headline */}
-          <h1
-            className="font-extrabold leading-tight mb-4 md:mb-6"
-            style={{
-              fontSize: isMobile ? '1.5rem' : 'clamp(1.8rem, 4vw, 2.8rem)',
-              lineHeight: 1.2,
-            }}
-          >
-            {data.headline || "Transforme Sua Vida Hoje"}
-          </h1>
+      {/* Hero Section - Mobile First with Desktop 2-column option */}
+      <section className="w-full py-12 md:py-20 lg:py-24 px-5 md:px-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Mobile Layout (stacked) or Desktop 2-column */}
+          <div className={`${isMobile ? '' : 'lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center'}`}>
+            
+            {/* Text Content */}
+            <div className={`${isMobile ? 'text-center' : 'text-center lg:text-left'} mb-8 lg:mb-0`}>
+              {/* Headline - Impactful */}
+              <h1
+                className="font-black leading-[1.1] mb-5 md:mb-6"
+                style={{
+                  fontSize: isMobile ? '2rem' : 'clamp(2.2rem, 5vw, 3.5rem)',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {data.headline || "Transforme Sua Vida Hoje"}
+              </h1>
 
-          {/* Subheadline */}
-          {data.subheadline && (
-            <p
-              className="text-base md:text-xl opacity-80 mb-6 md:mb-8 max-w-2xl mx-auto"
-              style={{ color: data.colors.text }}
-            >
-              {data.subheadline}
-            </p>
-          )}
-
-          {/* Hero Media */}
-          <div className="w-full max-w-2xl mx-auto mb-6 md:mb-8">
-            {content.heroMediaType === 'video' && data.video_url ? (
-              isVideoPlaying ? (
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
-                  <iframe
-                    src={getVideoEmbedUrl(data.video_url, true) || ''}
-                    className="w-full h-full"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
-                </div>
-              ) : (
-                <div
-                  className="aspect-video w-full relative cursor-pointer group rounded-xl overflow-hidden shadow-2xl"
-                  onClick={() => setIsVideoPlaying(true)}
-                  style={{ backgroundColor: `${data.colors.text}10` }}
+              {/* Subheadline */}
+              {data.subheadline && (
+                <p
+                  className="text-lg md:text-xl lg:text-2xl opacity-75 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0"
+                  style={{ color: data.colors.text }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      <Play className="w-7 h-7 md:w-9 md:h-9 ml-1 text-white" fill="white" />
+                  {data.subheadline}
+                </p>
+              )}
+
+              {/* CTA for Mobile - appears below text on mobile */}
+              {isMobile && (
+                <div className="mb-8">
+                  <CTAButton size="large" />
+                </div>
+              )}
+
+              {/* Desktop only - CTA next to text */}
+              {!isMobile && (
+                <div className="hidden lg:block max-w-md">
+                  <CTAButton size="large" />
+                  
+                  {/* Trust indicators */}
+                  <div className="flex items-center justify-start gap-6 mt-5 text-sm opacity-60">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" style={{ color: primaryColor }} />
+                      <span>Compra segura</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" style={{ color: primaryColor }} />
+                      <span>Acesso imediato</span>
                     </div>
                   </div>
                 </div>
-              )
-            ) : data.image_url ? (
-              <div className="rounded-xl overflow-hidden shadow-2xl">
-                <img
-                  src={data.image_url}
-                  alt={data.headline || 'Produto'}
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            ) : (
-              <div 
-                className="aspect-video rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${primaryColor}20` }}
-              >
-                <p className="text-sm opacity-50">Adicione uma imagem ou vídeo</p>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Hero Media */}
+            <div className="w-full">
+              {content.heroMediaType === 'video' && data.video_url ? (
+                isVideoPlaying ? (
+                  <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                    <iframe
+                      src={getVideoEmbedUrl(data.video_url, true) || ''}
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="aspect-video w-full relative cursor-pointer group rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+                    onClick={() => setIsVideoPlaying(true)}
+                    style={{ backgroundColor: `${data.colors.text}08` }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/20 to-transparent">
+                      <div
+                        className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-3xl"
+                        style={{ 
+                          backgroundColor: primaryColor,
+                          boxShadow: `0 0 60px ${primaryColor}60`
+                        }}
+                      >
+                        <Play className="w-8 h-8 md:w-10 md:h-10 ml-1 text-white" fill="white" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 text-center">
+                      <span className="text-white/80 text-sm font-medium">Clique para assistir</span>
+                    </div>
+                  </div>
+                )
+              ) : data.image_url ? (
+                <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                  <img
+                    src={data.image_url}
+                    alt={data.headline || 'Produto'}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="aspect-[4/3] rounded-2xl flex items-center justify-center"
+                  style={{ 
+                    backgroundColor: `${primaryColor}15`,
+                    border: `2px dashed ${primaryColor}40`
+                  }}
+                >
+                  <div className="text-center p-8">
+                    <Image className="w-12 h-12 mx-auto mb-3 opacity-40" style={{ color: primaryColor }} />
+                    <p className="text-sm opacity-50">Adicione uma imagem ou vídeo</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* CTA Button */}
-          <button
-            onClick={handleCtaClick}
-            className="w-full max-w-md mx-auto py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg transition-all hover:scale-105 active:scale-[0.98] uppercase tracking-wide flex items-center justify-center gap-2 animate-pulse"
-            style={{
-              backgroundColor: primaryColor,
-              color: '#FFFFFF',
-              boxShadow: `0 8px 25px ${primaryColor}50`,
-            }}
-          >
-            {data.cta_text || "QUERO AGORA"}
-            <ArrowRight className="w-5 h-5" />
-          </button>
+          {/* Mobile: CTA appears after media too for better conversion */}
+          {isMobile && (
+            <div className="mt-8">
+              {/* Trust indicators mobile */}
+              <div className="flex items-center justify-center gap-4 mb-4 text-xs opacity-60">
+                <div className="flex items-center gap-1">
+                  <Shield className="w-3 h-3" style={{ color: primaryColor }} />
+                  <span>Seguro</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" style={{ color: primaryColor }} />
+                  <span>Acesso imediato</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Check className="w-3 h-3" style={{ color: primaryColor }} />
+                  <span>Garantia</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="w-full py-10 md:py-16 px-4" style={{ backgroundColor: `${data.colors.text}05` }}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-12">
+      {/* Benefits Section - Clean Design */}
+      <section 
+        className="w-full py-16 md:py-24 px-5 md:px-8"
+        style={{ 
+          backgroundColor: isDarkTheme 
+            ? `${data.colors.text}05` 
+            : `${data.colors.text}03`
+        }}
+      >
+        <div className="max-w-5xl mx-auto">
+          <h2 
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 md:mb-16"
+            style={{ letterSpacing: '-0.02em' }}
+          >
             Por que escolher nosso produto?
           </h2>
           
-          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
+          <div className={`grid gap-8 md:gap-10 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
             {content.benefits.map((benefit, index) => {
               const BenefitIcon = benefit.icon ? getIconComponent(benefit.icon) : Sparkles;
               return (
                 <div
                   key={index}
-                  className="p-6 rounded-xl text-center transition-transform hover:scale-105"
+                  className="text-center p-8 md:p-10 rounded-3xl transition-all duration-300 hover:scale-[1.02]"
                   style={{ 
                     backgroundColor: data.colors.background,
-                    border: `2px solid ${primaryColor}30`,
-                    boxShadow: `0 4px 20px ${primaryColor}10`
+                    boxShadow: isDarkTheme 
+                      ? `0 8px 40px ${primaryColor}10` 
+                      : `0 8px 40px rgba(0,0,0,0.08)`,
+                    border: `1px solid ${isDarkTheme ? `${primaryColor}20` : `${data.colors.text}08`}`
                   }}
                 >
+                  {/* Large Icon */}
                   <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ backgroundColor: `${primaryColor}15` }}
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                    style={{ 
+                      backgroundColor: `${primaryColor}12`,
+                    }}
                   >
-                    <BenefitIcon className="w-7 h-7" style={{ color: primaryColor }} />
+                    <BenefitIcon 
+                      className="w-10 h-10 md:w-12 md:h-12" 
+                      style={{ color: primaryColor }} 
+                    />
                   </div>
-                  <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
-                  <p className="text-sm opacity-70">{benefit.description}</p>
+                  
+                  <h3 className="font-bold text-xl md:text-2xl mb-3">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-base opacity-65 leading-relaxed">
+                    {benefit.description}
+                  </p>
                 </div>
               );
             })}
@@ -246,44 +336,62 @@ const SalesPageTemplate = ({
       </section>
 
       {/* Testimonials Section */}
-      <section className="w-full py-10 md:py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-xl md:text-2xl font-bold text-center mb-8 md:mb-12">
+      <section className="w-full py-16 md:py-24 px-5 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          <h2 
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 md:mb-16"
+            style={{ letterSpacing: '-0.02em' }}
+          >
             O que nossos clientes dizem
           </h2>
           
-          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
+          <div className={`grid gap-6 md:gap-8 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
             {content.testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="p-6 rounded-xl"
+                className="p-6 md:p-8 rounded-2xl transition-all duration-300"
                 style={{ 
-                  backgroundColor: `${data.colors.text}05`,
-                  border: `1px solid ${data.colors.text}10`
+                  backgroundColor: isDarkTheme 
+                    ? `${data.colors.text}06` 
+                    : `${data.colors.text}04`,
+                  border: `1px solid ${data.colors.text}08`
                 }}
               >
-                <div className="flex items-center gap-1 mb-3">
+                {/* Stars */}
+                <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4" style={{ color: primaryColor }} fill={primaryColor} />
+                    <Star key={i} className="w-5 h-5" style={{ color: primaryColor }} fill={primaryColor} />
                   ))}
                 </div>
-                <p className="text-sm mb-4 italic opacity-80">"{testimonial.text}"</p>
-                <div className="flex items-center gap-3">
+                
+                {/* Quote */}
+                <p className="text-base md:text-lg mb-6 leading-relaxed opacity-85">
+                  "{testimonial.text}"
+                </p>
+                
+                {/* Author */}
+                <div className="flex items-center gap-4">
                   {testimonial.avatarUrl ? (
                     <img 
                       src={testimonial.avatarUrl} 
                       alt={testimonial.name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover"
+                      style={{ 
+                        boxShadow: `0 0 0 2px ${primaryColor}40`
+                      }}
                     />
                   ) : (
                     <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
                       style={{ backgroundColor: primaryColor }}
                     >
                       {testimonial.name.charAt(0)}
                     </div>
                   )}
-                  <span className="font-medium text-sm">{testimonial.name}</span>
+                  <div>
+                    <span className="font-semibold block">{testimonial.name}</span>
+                    <span className="text-sm opacity-50">Cliente verificado</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -291,78 +399,103 @@ const SalesPageTemplate = ({
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Pricing/Offer Section - High Impact */}
       <section 
-        className="w-full py-10 md:py-16 px-4"
-        style={{ backgroundColor: `${primaryColor}10` }}
+        className="w-full py-16 md:py-24 px-5 md:px-8"
+        style={{ 
+          backgroundColor: isDarkTheme 
+            ? `${primaryColor}08` 
+            : '#F8FAFC',
+        }}
       >
-        <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">
-            Oferta Especial por Tempo Limitado
+        <div className="max-w-xl mx-auto text-center">
+          <h2 
+            className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Oferta Especial
           </h2>
           
           <div 
-            className="p-6 md:p-8 rounded-2xl shadow-xl"
+            className="p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden"
             style={{ 
               backgroundColor: data.colors.background,
-              border: `3px solid ${primaryColor}`
+              border: `3px solid ${primaryColor}`,
+              boxShadow: `0 20px 60px ${primaryColor}25`
             }}
           >
-            {/* Price From */}
-            <div className="mb-2">
-              <span className="text-sm opacity-60">De </span>
-              <span className="text-xl line-through opacity-50">
-                R$ {content.priceFrom || '197'}
-              </span>
-            </div>
+            {/* Decorative elements */}
+            <div 
+              className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
+              style={{ backgroundColor: primaryColor }}
+            />
+            <div 
+              className="absolute bottom-0 left-0 w-24 h-24 rounded-full blur-2xl opacity-15"
+              style={{ backgroundColor: primaryColor }}
+            />
             
-            {/* Price To */}
-            <div className="mb-4">
-              <span className="text-sm opacity-80">Por apenas </span>
-              <span 
-                className="text-4xl md:text-5xl font-extrabold"
-                style={{ color: primaryColor }}
-              >
-                R$ {content.priceTo || '97'}
-              </span>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-2 mb-6 text-left">
-              {['Acesso imediato', 'Suporte exclusivo', 'Bônus especiais'].map((feature, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4" style={{ color: primaryColor }} />
-                  <span>{feature}</span>
+            <div className="relative z-10">
+              {/* Price From - Small and muted */}
+              <div className="mb-2">
+                <span className="text-base opacity-40">De </span>
+                <span 
+                  className="text-2xl line-through opacity-35 font-medium"
+                  style={{ color: data.colors.text }}
+                >
+                  R$ {content.priceFrom || '197'}
+                </span>
+              </div>
+              
+              {/* Price To - GIGANTIC */}
+              <div className="mb-6">
+                <span className="text-base opacity-60">Por apenas </span>
+                <div className="mt-1">
+                  <span 
+                    className="text-6xl md:text-7xl lg:text-8xl font-black"
+                    style={{ 
+                      color: primaryColor,
+                      textShadow: `0 4px 20px ${primaryColor}30`
+                    }}
+                  >
+                    R$ {content.priceTo || '97'}
+                  </span>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* CTA */}
-            <button
-              onClick={handleCtaClick}
-              className="w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-105 active:scale-[0.98] uppercase flex items-center justify-center gap-2"
-              style={{
-                backgroundColor: primaryColor,
-                color: '#FFFFFF',
-                animation: 'pulse 2s infinite'
-              }}
-            >
-              {data.cta_text || "QUERO AGORA"}
-              <ArrowRight className="w-5 h-5" />
-            </button>
+              {/* Features List */}
+              <div className="space-y-3 mb-8 text-left max-w-xs mx-auto">
+                {['Acesso imediato ao conteúdo', 'Suporte exclusivo VIP', 'Bônus especiais inclusos', 'Atualizações gratuitas'].map((feature, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: `${primaryColor}20` }}
+                    >
+                      <Check className="w-4 h-4" style={{ color: primaryColor }} />
+                    </div>
+                    <span className="text-sm md:text-base">{feature}</span>
+                  </div>
+                ))}
+              </div>
 
-            {/* Guarantee */}
-            <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-70">
-              <Shield className="w-4 h-4" style={{ color: primaryColor }} />
-              <span>{content.guaranteeText || '7 dias de garantia'}</span>
+              {/* Final CTA - Pulsing */}
+              <CTAButton size="large" animate={true} />
+
+              {/* Guarantee */}
+              <div className="flex items-center justify-center gap-2 mt-6 text-sm opacity-65">
+                <Shield className="w-5 h-5" style={{ color: primaryColor }} />
+                <span className="font-medium">{content.guaranteeText || '7 dias de garantia'}</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-6 text-center">
-        <p className="text-xs font-medium tracking-wide" style={{ opacity: 0.4 }}>
+      <footer className="w-full py-8 text-center">
+        <p 
+          className="text-sm font-medium tracking-wide"
+          style={{ opacity: 0.5 }}
+        >
           ✨ Criado com <span className="font-bold">TrustPage</span>
         </p>
       </footer>
