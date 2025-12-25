@@ -14,6 +14,7 @@ import LandingPageView from "./pages/LandingPageView";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import ContactPage from "./pages/ContactPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <TrustPageDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             } />
             <Route path="/new" element={

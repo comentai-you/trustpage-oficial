@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Plus, Sparkles, Crown, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Sparkles, ExternalLink, BarChart3, Copy, Trash2, LogOut, Loader2, Crown, Clock, AlertTriangle, Menu } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import UpgradeModal from "@/components/UpgradeModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import StatsBar from "@/components/dashboard/StatsBar";
+import PageCard from "@/components/dashboard/PageCard";
 
 interface LandingPage {
   id: string;
@@ -16,12 +19,16 @@ interface LandingPage {
   views: number | null;
   is_published: boolean | null;
   updated_at: string;
+  image_url: string | null;
+  video_url: string | null;
 }
 
 interface UserProfile {
   created_at: string;
   subscription_status: string;
   plan_type: string;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 const MAX_PAGES_ESSENTIAL = 5;
@@ -34,7 +41,7 @@ const TrustPageDashboard = () => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Calculate trial days remaining
@@ -55,6 +62,9 @@ const TrustPageDashboard = () => {
   const maxPages = profile?.plan_type === 'pro' ? MAX_PAGES_PRO : MAX_PAGES_ESSENTIAL;
   const hasReachedLimit = pages.length >= maxPages;
 
+  // Calculate total views
+  const totalViews = pages.reduce((sum, page) => sum + (page.views || 0), 0);
+
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -66,7 +76,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("created_at, subscription_status, plan_type")
+        .select("created_at, subscription_status, plan_type, full_name, avatar_url")
         .eq("id", user!.id)
         .maybeSingle();
 
@@ -81,7 +91,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("landing_pages")
-        .select("id, page_name, slug, views, is_published, updated_at")
+        .select("id, page_name, slug, views, is_published, updated_at, image_url, video_url")
         .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
 
@@ -93,12 +103,6 @@ const TrustPageDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/");
-    toast.success("Você saiu da conta");
   };
 
   const handleDelete = async (id: string, pageName: string) => {
@@ -152,47 +156,30 @@ const TrustPageDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <Sparkles className="w-5 sm:w-6 h-5 sm:h-6 text-primary" />
-              <span className="text-lg sm:text-xl font-bold text-foreground">TrustPage</span>
-            </Link>
-            
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Button onClick={handleNewPage} disabled={isTrialExpired} size="sm" className="sm:size-default">
-                <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Nova Página</span>
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="h-9 w-9 sm:h-10 sm:w-10">
-                <LogOut className="w-4 sm:w-5 h-4 sm:h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <DashboardLayout
+      avatarUrl={profile?.avatar_url}
+      fullName={profile?.full_name}
+      onNewPage={handleNewPage}
+      newPageDisabled={isTrialExpired}
+    >
       {/* Trial Banner */}
       {profile && profile.subscription_status === 'trial' && (
         <div className={`border-b ${
           isTrialExpired 
-            ? 'bg-red-50 border-red-200' 
+            ? 'bg-destructive/5 border-destructive/20' 
             : trialDaysRemaining <= 3 
-              ? 'bg-amber-50 border-amber-200' 
+              ? 'bg-warning/5 border-warning/20' 
               : 'bg-primary/5 border-primary/20'
         }`}>
-          <div className="container mx-auto px-4 py-2 sm:py-3">
+          <div className="container mx-auto px-4 py-2.5 sm:py-3">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3 text-center sm:text-left">
                 {isTrialExpired ? (
-                  <AlertTriangle className="w-4 sm:w-5 h-4 sm:h-5 text-red-600 flex-shrink-0" />
+                  <AlertTriangle className="w-4 sm:w-5 h-4 sm:h-5 text-destructive flex-shrink-0" />
                 ) : (
                   <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-primary flex-shrink-0" />
                 )}
-                <p className={`text-xs sm:text-sm font-medium ${isTrialExpired ? 'text-red-700' : 'text-foreground'}`}>
+                <p className={`text-xs sm:text-sm font-medium ${isTrialExpired ? 'text-destructive' : 'text-foreground'}`}>
                   {isTrialExpired 
                     ? 'Período de teste expirado. Suas páginas estão suspensas.' 
                     : `Seu teste grátis acaba em ${trialDaysRemaining} dia${trialDaysRemaining !== 1 ? 's' : ''}. Aproveite para vender!`
@@ -200,10 +187,10 @@ const TrustPageDashboard = () => {
                 </p>
               </div>
               <Button 
-                variant={isTrialExpired ? "default" : "outline"} 
+                variant={isTrialExpired ? "destructive" : "outline"} 
                 size="sm"
                 onClick={() => setShowUpgradeModal(true)}
-                className={`${isTrialExpired ? 'bg-red-600 hover:bg-red-700' : ''} whitespace-nowrap`}
+                className="whitespace-nowrap"
               >
                 <Crown className="w-3.5 sm:w-4 h-3.5 sm:h-4 mr-1.5 sm:mr-2" />
                 {isTrialExpired ? 'Assinar Agora' : 'Fazer Upgrade'}
@@ -213,33 +200,37 @@ const TrustPageDashboard = () => {
         </div>
       )}
 
-      {/* Active subscription badge */}
-      {profile && isActive && (
-        <div className="bg-green-50 border-b border-green-200">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-green-600" />
-              <p className="text-xs sm:text-sm font-medium text-green-700">
-                Plano {profile.plan_type === 'pro' ? 'Pro' : 'Essencial'} ativo
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Content */}
       <main className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Suas Landing Pages</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Gerencie suas páginas de alta conversão</p>
-          </div>
+        {/* Welcome Section */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
+            Olá{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}! 👋
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Gerencie suas landing pages de alta conversão
+          </p>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="mb-6 sm:mb-8">
+          <StatsBar
+            totalViews={totalViews}
+            totalPages={pages.length}
+            planType={profile?.plan_type || 'essential'}
+            subscriptionStatus={profile?.subscription_status || 'trial'}
+          />
+        </div>
+
+        {/* Pages Section */}
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">Suas Páginas</h2>
           
           {/* Page Counter */}
           <div className={`inline-flex self-start sm:self-auto items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm ${
             hasReachedLimit 
-              ? 'bg-amber-100 text-amber-700 border border-amber-300' 
-              : 'bg-primary/10 text-primary'
+              ? 'bg-warning/10 text-warning border border-warning/30' 
+              : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
             {hasReachedLimit && <Crown className="w-3.5 sm:w-4 h-3.5 sm:h-4" />}
             <span className="font-semibold">{pages.length}/{maxPages} páginas</span>
@@ -251,17 +242,21 @@ const TrustPageDashboard = () => {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : pages.length === 0 ? (
-          <Card className="text-center py-10 sm:py-12">
+          <Card className="text-center py-10 sm:py-12 border-dashed">
             <CardContent>
               <div className="flex flex-col items-center gap-4">
-                <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                   <Sparkles className="w-7 sm:w-8 h-7 sm:h-8 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Crie sua primeira página</h3>
                   <p className="text-sm sm:text-base text-muted-foreground">Comece a converter visitantes em clientes</p>
                 </div>
-                <Button onClick={handleNewPage} disabled={isTrialExpired}>
+                <Button 
+                  onClick={handleNewPage} 
+                  disabled={isTrialExpired}
+                  className="gradient-button text-primary-foreground border-0"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Criar Página
                 </Button>
@@ -269,41 +264,42 @@ const TrustPageDashboard = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
             {/* Create New Card */}
             <Card 
-              className={`h-full border-dashed transition-colors cursor-pointer ${
+              className={`h-full border-dashed transition-all cursor-pointer hover-lift ${
                 isTrialExpired
                   ? 'opacity-50 cursor-not-allowed'
                   : hasReachedLimit 
-                    ? 'hover:border-amber-400 hover:bg-amber-50/50' 
-                    : 'hover:border-primary/50 hover:bg-muted/50'
+                    ? 'hover:border-warning/50 hover:bg-warning/5' 
+                    : 'hover:border-primary/50 hover:bg-primary/5'
               }`}
               onClick={handleNewPage}
             >
-              <CardContent className="flex flex-col items-center justify-center h-full min-h-[160px] sm:min-h-[200px] gap-2 sm:gap-3">
+              <CardContent className="flex flex-col items-center justify-center h-full min-h-[140px] sm:min-h-[160px] gap-2 sm:gap-3 p-6">
                 {isTrialExpired ? (
                   <>
-                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <AlertTriangle className="w-5 sm:w-6 h-5 sm:h-6 text-red-600" />
+                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-destructive" />
                     </div>
-                    <p className="font-medium text-red-700 text-sm sm:text-base">Trial expirado</p>
-                    <p className="text-xs sm:text-sm text-red-600">Assine para continuar</p>
+                    <p className="font-semibold text-destructive">Trial expirado</p>
+                    <p className="text-sm text-destructive/80">Assine para continuar</p>
                   </>
                 ) : hasReachedLimit ? (
                   <>
-                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                      <Crown className="w-5 sm:w-6 h-5 sm:h-6 text-amber-600" />
+                    <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                      <Crown className="w-6 h-6 text-warning" />
                     </div>
-                    <p className="font-medium text-amber-700 text-sm sm:text-base">Limite atingido</p>
-                    <p className="text-xs sm:text-sm text-amber-600">Faça upgrade para criar mais</p>
+                    <p className="font-semibold text-warning">Limite atingido</p>
+                    <p className="text-sm text-warning/80">Faça upgrade para criar mais</p>
                   </>
                 ) : (
                   <>
-                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Plus className="w-5 sm:w-6 h-5 sm:h-6 text-primary" />
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Plus className="w-6 h-6 text-primary" />
                     </div>
-                    <p className="font-medium text-foreground text-sm sm:text-base">Nova Página</p>
+                    <p className="font-semibold text-foreground">Nova Página</p>
+                    <p className="text-sm text-muted-foreground">Clique para criar</p>
                   </>
                 )}
               </CardContent>
@@ -311,90 +307,21 @@ const TrustPageDashboard = () => {
 
             {/* Existing Pages */}
             {pages.map((page) => (
-              <Card key={page.id} className={`hover:shadow-md transition-shadow ${isTrialExpired ? 'opacity-75' : ''}`}>
-                <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-sm sm:text-base truncate">{page.page_name || 'Sem nome'}</CardTitle>
-                      <CardDescription className="text-xs mt-1 truncate">
-                        /p/{page.slug}
-                      </CardDescription>
-                    </div>
-                    <div className="flex flex-col gap-1 items-end flex-shrink-0">
-                      <span className={`text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
-                        page.is_published 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {page.is_published ? 'Publicado' : 'Rascunho'}
-                      </span>
-                      {isTrialExpired && page.is_published && (
-                        <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full bg-red-100 text-red-700 whitespace-nowrap">
-                          Suspenso
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-                  <div className="flex items-center gap-4 text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-                    <div className="flex items-center gap-1">
-                      <BarChart3 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                      <span>{page.views || 0} views</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs sm:text-sm h-8 sm:h-9"
-                      onClick={() => handleEdit(page.id)}
-                      disabled={isTrialExpired}
-                    >
-                      Editar
-                    </Button>
-                    {page.is_published ? (
-                      <Button asChild variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
-                        <a
-                          href={`${window.location.origin}/p/${page.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Abrir página pública"
-                        >
-                          <ExternalLink className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 sm:h-9 sm:w-9"
-                        onClick={() => toast.error("Publique a página para abrir o link público.")}
-                        aria-label="Página não publicada"
-                      >
-                        <ExternalLink className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                      </Button>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 sm:h-9 sm:w-9"
-                      onClick={() => handleCopyLink(page.slug)}
-                    >
-                      <Copy className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 sm:h-9 sm:w-9 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(page.id, page.page_name || '')}
-                    >
-                      <Trash2 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <PageCard
+                key={page.id}
+                id={page.id}
+                pageName={page.page_name}
+                slug={page.slug}
+                views={page.views}
+                isPublished={page.is_published}
+                updatedAt={page.updated_at}
+                imageUrl={page.image_url}
+                videoUrl={page.video_url}
+                isTrialExpired={isTrialExpired}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onCopyLink={handleCopyLink}
+              />
             ))}
           </div>
         )}
@@ -412,7 +339,7 @@ const TrustPageDashboard = () => {
         onConfirm={confirmDelete}
         variant="destructive"
       />
-    </div>
+    </DashboardLayout>
   );
 };
 
