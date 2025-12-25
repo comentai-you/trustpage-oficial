@@ -99,31 +99,46 @@ const TrustPageEditor = () => {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
-  // Lista de slugs reservados pelo sistema
+  // Lista de slugs reservados pelo sistema (rotas internas)
   const RESERVED_SLUGS = [
     'admin', 'dashboard', 'login', 'auth', 'register', 'signup', 
     'pricing', 'api', '404', 'suporte', 'ajuda', 'termos',
     'settings', 'profile', 'user', 'users', 'pages', 'page',
-    'edit', 'new', 'create', 'delete', 'p', 'app'
+    'edit', 'new', 'create', 'delete', 'p', 'app', 'home',
+    'about', 'contact', 'blog', 'checkout', 'cart', 'account'
   ];
 
-  const generateSlug = (name: string): string => {
-    const baseSlug = name
+  const generateSlugFromName = (name: string): string => {
+    return name
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
       .substring(0, 40);
-
-    // Append random suffix for uniqueness
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    return `${baseSlug}-${randomSuffix}`;
   };
 
   const isReservedSlug = (slug: string): boolean => {
     return RESERVED_SLUGS.includes(slug.toLowerCase().trim());
+  };
+
+  const checkSlugAvailability = async (slug: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from("landing_pages")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) return false;
+    
+    // Se não encontrou, está disponível
+    // Se encontrou mas é a página atual, está ok
+    if (!data) return true;
+    if (existingPageId && data.id === existingPageId) return true;
+    
+    return false;
   };
 
   const handleSave = async () => {
@@ -150,13 +165,29 @@ const TrustPageEditor = () => {
     setIsSaving(true);
 
     try {
-      const slug = formData.slug || generateSlug(formData.page_name);
-      
+      // Gerar slug a partir do nome se não existir
+      let slug = formData.slug;
+      if (!slug) {
+        slug = generateSlugFromName(formData.page_name);
+      }
+
       // Validar se o slug é reservado
       if (isReservedSlug(slug)) {
         toast({
           title: "Nome reservado",
-          description: "Este nome de página é reservado pelo sistema. Escolha outro.",
+          description: "Este nome é reservado pelo sistema. Escolha outro nome para sua página.",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Verificar disponibilidade do slug
+      const isAvailable = await checkSlugAvailability(slug);
+      if (!isAvailable) {
+        toast({
+          title: "Link já em uso",
+          description: `O endereço "/p/${slug}" já está sendo usado. Escolha outro nome.`,
           variant: "destructive",
         });
         setIsSaving(false);
