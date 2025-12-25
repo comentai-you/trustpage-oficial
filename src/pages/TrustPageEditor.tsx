@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Eye, Sparkles, User, FileText, MousePointer, Loader2, Menu, Settings2, Monitor, Smartphone } from "lucide-react";
+import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, Monitor, Smartphone } from "lucide-react";
 import { LandingPageFormData, defaultFormData } from "@/types/landing-page";
-import PerfilTab from "@/components/trustpage/PerfilTab";
-import ConteudoTab from "@/components/trustpage/ConteudoTab";
-import AcoesTab from "@/components/trustpage/AcoesTab";
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import IMacMockup from "@/components/trustpage/editor/IMacMockup";
 import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
@@ -435,40 +430,9 @@ const TrustPageEditor = () => {
             </button>
           </div>
 
-          {/* Mobile Form View */}
+          {/* Mobile Form View - Uses same EditorSidebar as desktop */}
           <div className={`lg:hidden flex-1 overflow-y-auto bg-white ${activeTab === 'form' ? 'block' : 'hidden'}`}>
-            <div className="p-4 pb-24">
-              <Tabs defaultValue="perfil" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-100">
-                  <TabsTrigger value="perfil" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
-                    <User className="w-3.5 h-3.5 mr-1" />
-                    Perfil
-                  </TabsTrigger>
-                  <TabsTrigger value="conteudo" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
-                    <FileText className="w-3.5 h-3.5 mr-1" />
-                    Conteúdo
-                  </TabsTrigger>
-                  <TabsTrigger value="acoes" className="text-xs data-[state=active]:bg-white data-[state=active]:text-gray-900">
-                    <MousePointer className="w-3.5 h-3.5 mr-1" />
-                    Ações
-                  </TabsTrigger>
-                </TabsList>
-                
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <TabsContent value="perfil" className="mt-0">
-                    <PerfilTab formData={formData} onChange={handleChange} existingPageId={existingPageId} />
-                  </TabsContent>
-                  
-                  <TabsContent value="conteudo" className="mt-0">
-                    <ConteudoTab formData={formData} onChange={handleChange} />
-                  </TabsContent>
-                  
-                  <TabsContent value="acoes" className="mt-0">
-                    <AcoesTab formData={formData} onChange={handleChange} userPlan={userPlan} />
-                  </TabsContent>
-                </div>
-              </Tabs>
-            </div>
+            <EditorSidebar formData={formData} onChange={handleChange} />
           </div>
 
           {/* Mobile Preview View */}
