@@ -17,6 +17,7 @@ import ContactPage from "./pages/ContactPage";
 import SettingsPage from "./pages/SettingsPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
+import HelpPage from "./pages/HelpPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,11 @@ const App = () => (
             <Route path="/payment-success" element={
               <ProtectedRoute>
                 <PaymentSuccessPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/help" element={
+              <ProtectedRoute>
+                <HelpPage />
               </ProtectedRoute>
             } />
             <Route path="/new" element={

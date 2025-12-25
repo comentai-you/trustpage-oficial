@@ -109,7 +109,7 @@ const DashboardLayout = ({
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       className="cursor-pointer"
-                      onClick={() => window.open("https://wa.me/5511999999999?text=Preciso de ajuda com o TrustPage", "_blank")}
+                      onClick={() => navigate("/help")}
                     >
                       <HelpCircle className="w-4 h-4 mr-2" />
                       Central de Ajuda
