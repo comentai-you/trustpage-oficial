@@ -93,6 +93,7 @@ const LandingPageView = () => {
           page_name: page.page_name || '',
           profile_image_url: page.profile_image_url || '',
           headline: page.headline || '',
+          headline_size: 2,
           subheadline: page.subheadline || '',
           video_url: page.video_url || '',
           video_storage_path: page.video_storage_path || '',
@@ -104,6 +105,7 @@ const LandingPageView = () => {
           whatsapp_number: page.whatsapp_number || '',
           pix_pixel_id: page.pix_pixel_id || '',
           colors,
+          theme: 'dark',
         });
       } catch (error) {
         console.error("Error fetching page:", error);

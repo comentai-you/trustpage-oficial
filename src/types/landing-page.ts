@@ -6,6 +6,41 @@ export interface LandingPageColors {
   buttonText: string;
 }
 
+export type PageTheme = 'dark' | 'light' | 'modern-gray';
+
+export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
+  dark: {
+    name: 'Dark (Padrão)',
+    colors: {
+      primary: '#22C55E',
+      background: '#000000',
+      text: '#FFFFFF',
+      buttonBg: '#22C55E',
+      buttonText: '#FFFFFF'
+    }
+  },
+  light: {
+    name: 'Light',
+    colors: {
+      primary: '#2563EB',
+      background: '#FFFFFF',
+      text: '#111827',
+      buttonBg: '#2563EB',
+      buttonText: '#FFFFFF'
+    }
+  },
+  'modern-gray': {
+    name: 'Modern Gray',
+    colors: {
+      primary: '#10B981',
+      background: '#1f2937',
+      text: '#F9FAFB',
+      buttonBg: '#10B981',
+      buttonText: '#FFFFFF'
+    }
+  }
+};
+
 export interface LandingPage {
   id: string;
   user_id: string;
@@ -35,6 +70,7 @@ export interface LandingPageFormData {
   page_name: string;
   profile_image_url: string;
   headline: string;
+  headline_size: number;
   subheadline: string;
   video_url: string;
   video_storage_path: string;
@@ -46,6 +82,7 @@ export interface LandingPageFormData {
   whatsapp_number: string;
   pix_pixel_id: string;
   colors: LandingPageColors;
+  theme: PageTheme;
 }
 
 export const defaultFormData: LandingPageFormData = {
@@ -54,6 +91,7 @@ export const defaultFormData: LandingPageFormData = {
   page_name: '',
   profile_image_url: '',
   headline: 'Descubra o Segredo Para Transformar Sua Vida',
+  headline_size: 2,
   subheadline: '',
   video_url: '',
   video_storage_path: '',
@@ -70,7 +108,8 @@ export const defaultFormData: LandingPageFormData = {
     text: '#FFFFFF',
     buttonBg: '#22C55E',
     buttonText: '#FFFFFF'
-  }
+  },
+  theme: 'dark'
 };
 
 export const templates = [
