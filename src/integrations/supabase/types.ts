@@ -125,6 +125,21 @@ export type Database = {
         }
         Relationships: []
       }
+      reserved_slugs: {
+        Row: {
+          reason: string
+          slug: string
+        }
+        Insert: {
+          reason: string
+          slug: string
+        }
+        Update: {
+          reason?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -151,6 +166,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_create_page: { Args: { check_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -159,6 +175,10 @@ export type Database = {
         Returns: boolean
       }
       increment_page_views: { Args: { page_id: string }; Returns: undefined }
+      is_subscription_active: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
