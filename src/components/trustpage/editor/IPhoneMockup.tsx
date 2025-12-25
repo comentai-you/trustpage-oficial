@@ -1,5 +1,6 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "../templates/HighConversionTemplate";
+import SalesPageTemplate from "../templates/SalesPageTemplate";
 
 interface IPhoneMockupProps {
   formData: LandingPageFormData;
@@ -10,6 +11,8 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
   const dimensions = size === 'large' 
     ? { width: 'w-[340px]', height: 'h-[690px]', radius: 'rounded-[50px]', innerRadius: 'rounded-[42px]' }
     : { width: 'w-[260px]', height: 'h-[530px]', radius: 'rounded-[40px]', innerRadius: 'rounded-[34px]' };
+
+  const isSalesPage = formData.template_type === 'sales';
 
   return (
     <div className="relative">
@@ -75,7 +78,11 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
                 }
               `}
             </style>
-            <HighConversionTemplate data={formData} isMobile={true} fullHeight={false} />
+            {isSalesPage ? (
+              <SalesPageTemplate data={formData} isMobile={true} />
+            ) : (
+              <HighConversionTemplate data={formData} isMobile={true} fullHeight={false} />
+            )}
           </div>
         </div>
       </div>

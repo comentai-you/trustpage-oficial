@@ -1,11 +1,14 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "../templates/HighConversionTemplate";
+import SalesPageTemplate from "../templates/SalesPageTemplate";
 
 interface IMacMockupProps {
   formData: LandingPageFormData;
 }
 
 const IMacMockup = ({ formData }: IMacMockupProps) => {
+  const isSalesPage = formData.template_type === 'sales';
+
   return (
     <div className="relative">
       {/* iMac Frame */}
@@ -49,7 +52,11 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   }
                 `}
               </style>
-              <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
+              {isSalesPage ? (
+                <SalesPageTemplate data={formData} isMobile={false} />
+              ) : (
+                <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
+              )}
             </div>
           </div>
         </div>

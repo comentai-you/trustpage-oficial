@@ -1,11 +1,14 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "./templates/HighConversionTemplate";
+import SalesPageTemplate from "./templates/SalesPageTemplate";
 
 interface MobilePreviewProps {
   formData: LandingPageFormData;
 }
 
 const MobilePreview = ({ formData }: MobilePreviewProps) => {
+  const isSalesPage = formData.template_type === 'sales';
+
   return (
     <div className="h-full flex items-center justify-center p-6">
       {/* iPhone Frame - Realistic */}
@@ -73,7 +76,11 @@ const MobilePreview = ({ formData }: MobilePreviewProps) => {
                 `}
               </style>
               <div className="mobile-preview-scroll">
-                <HighConversionTemplate data={formData} />
+                {isSalesPage ? (
+                  <SalesPageTemplate data={formData} isMobile={true} />
+                ) : (
+                  <HighConversionTemplate data={formData} />
+                )}
               </div>
             </div>
           </div>
