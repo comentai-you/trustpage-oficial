@@ -81,6 +81,20 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
+              {/* Nome da Página */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">
+                  Nome da Página
+                </Label>
+                <Input
+                  value={formData.page_name}
+                  onChange={(e) => onChange({ page_name: e.target.value })}
+                  placeholder="Minha VSL de Vendas"
+                  className="bg-gray-50 border-gray-300 focus:border-primary"
+                />
+                <p className="text-xs text-gray-500">Nome interno para organização</p>
+              </div>
+
               {/* Slug Input */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">
