@@ -472,6 +472,16 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600">Título da Seção</Label>
+              <Input
+                value={content.offerTitle || 'Oferta Especial'}
+                onChange={(e) => updateContent({ offerTitle: e.target.value })}
+                placeholder="Oferta Especial"
+                className="text-sm"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label className="text-xs text-gray-600">Preço DE (riscado)</Label>
@@ -497,6 +507,29 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600">Texto antes do preço</Label>
+              <Input
+                value={content.offerSubtitle || 'Por apenas'}
+                onChange={(e) => updateContent({ offerSubtitle: e.target.value })}
+                placeholder="Por apenas"
+                className="text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600">Lista de Benefícios (um por linha)</Label>
+              <Textarea
+                value={(content.offerFeatures || []).join('\n')}
+                onChange={(e) => updateContent({ 
+                  offerFeatures: e.target.value.split('\n').filter(f => f.trim()) 
+                })}
+                placeholder="Acesso imediato ao conteúdo&#10;Suporte exclusivo VIP&#10;Bônus especiais inclusos"
+                className="text-sm resize-none"
+                rows={4}
+              />
             </div>
 
             <div className="space-y-2">

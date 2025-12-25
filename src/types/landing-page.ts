@@ -65,6 +65,10 @@ export interface SalesPageContent {
   guaranteeText: string;
   scarcityEnabled?: boolean;
   scarcityText?: string;
+  // Offer section editable fields
+  offerTitle?: string;
+  offerSubtitle?: string;
+  offerFeatures?: string[];
 }
 
 export const defaultSalesContent: SalesPageContent = {
@@ -83,7 +87,15 @@ export const defaultSalesContent: SalesPageContent = {
   priceTo: '97',
   guaranteeText: '7 dias de garantia incondicional',
   scarcityEnabled: true,
-  scarcityText: '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.'
+  scarcityText: '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.',
+  offerTitle: 'Oferta Especial',
+  offerSubtitle: 'Por apenas',
+  offerFeatures: [
+    'Acesso imediato ao conteúdo',
+    'Suporte exclusivo VIP',
+    'Bônus especiais inclusos',
+    'Atualizações gratuitas'
+  ]
 };
 
 export interface LandingPage {

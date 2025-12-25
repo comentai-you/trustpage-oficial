@@ -100,13 +100,13 @@ const SalesPageTemplate = ({
     }
   };
 
-  // CTA Button Component for reuse
+  // CTA Button Component for reuse with improved micro-interactions
   const CTAButton = ({ size = 'large', animate = false }: { size?: 'large' | 'medium'; animate?: boolean }) => (
     <button
       onClick={handleCtaClick}
       className={`
         w-full font-bold rounded-2xl shadow-xl transition-all duration-300
-        hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]
+        hover:scale-105 hover:brightness-110 active:scale-[0.98]
         uppercase tracking-wider flex items-center justify-center gap-3
         ${size === 'large' ? 'py-5 md:py-6 text-lg md:text-xl' : 'py-4 text-base md:text-lg'}
         ${animate ? 'animate-pulse' : ''}
@@ -115,6 +115,12 @@ const SalesPageTemplate = ({
         backgroundColor: primaryColor,
         color: '#FFFFFF',
         boxShadow: `0 12px 40px ${primaryColor}40`,
+      }}
+      onMouseEnter={(e) => {
+        (e.target as HTMLElement).style.boxShadow = `0 16px 50px ${primaryColor}60`;
+      }}
+      onMouseLeave={(e) => {
+        (e.target as HTMLElement).style.boxShadow = `0 12px 40px ${primaryColor}40`;
       }}
     >
       {data.cta_text || "QUERO AGORA"}
@@ -142,8 +148,8 @@ const SalesPageTemplate = ({
         </div>
       )}
 
-      {/* Hero Section - Mobile First with Desktop 2-column option */}
-      <section className="w-full py-12 md:py-20 lg:py-24 px-5 md:px-8">
+      {/* Hero Section - Mobile First with Desktop 2-column option - Increased spacing */}
+      <section className="w-full py-16 md:py-24 lg:py-32 px-5 md:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Mobile Layout (stacked) or Desktop 2-column */}
           <div className={`${isMobile ? '' : 'lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center'}`}>
@@ -161,11 +167,15 @@ const SalesPageTemplate = ({
                 {data.headline || "Transforme Sua Vida Hoje"}
               </h1>
 
-              {/* Subheadline */}
+              {/* Subheadline - Improved typography */}
               {data.subheadline && (
                 <p
-                  className="text-lg md:text-xl lg:text-2xl opacity-75 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0"
-                  style={{ color: data.colors.text }}
+                  className="text-xl md:text-2xl lg:text-[1.65rem] opacity-75 mb-8 max-w-xl mx-auto lg:mx-0"
+                  style={{ 
+                    color: data.colors.text,
+                    lineHeight: '1.7',
+                    letterSpacing: '0.01em'
+                  }}
                 >
                   {data.subheadline}
                 </p>
@@ -280,9 +290,9 @@ const SalesPageTemplate = ({
         </div>
       </section>
 
-      {/* Benefits Section - Clean Design */}
+      {/* Benefits Section - Clean Design with increased spacing */}
       <section 
-        className="w-full py-16 md:py-24 px-5 md:px-8"
+        className="w-full py-20 md:py-32 px-5 md:px-8"
         style={{ 
           backgroundColor: isDarkTheme 
             ? `${data.colors.text}05` 
@@ -297,7 +307,7 @@ const SalesPageTemplate = ({
             Por que escolher nosso produto?
           </h2>
           
-          <div className={`grid gap-8 md:gap-10 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
+          <div className={`grid gap-8 md:gap-12 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
             {content.benefits.map((benefit, index) => {
               const BenefitIcon = benefit.icon ? getIconComponent(benefit.icon) : Sparkles;
               return (
@@ -305,11 +315,15 @@ const SalesPageTemplate = ({
                   key={index}
                   className="text-center p-8 md:p-10 rounded-3xl transition-all duration-300 hover:scale-[1.02]"
                   style={{ 
-                    backgroundColor: data.colors.background,
+                    backgroundColor: isDarkTheme 
+                      ? `${data.colors.text}08` 
+                      : data.colors.background,
                     boxShadow: isDarkTheme 
                       ? `0 8px 40px ${primaryColor}10` 
-                      : `0 8px 40px rgba(0,0,0,0.08)`,
-                    border: `1px solid ${isDarkTheme ? `${primaryColor}20` : `${data.colors.text}08`}`
+                      : `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`,
+                    border: isDarkTheme 
+                      ? `1px solid ${primaryColor}20` 
+                      : `1px solid #e5e7eb`
                   }}
                 >
                   {/* Large Icon */}
@@ -338,8 +352,8 @@ const SalesPageTemplate = ({
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="w-full py-16 md:py-24 px-5 md:px-8">
+      {/* Testimonials Section - Increased spacing */}
+      <section className="w-full py-20 md:py-32 px-5 md:px-8">
         <div className="max-w-5xl mx-auto">
           <h2 
             className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 md:mb-16"
@@ -348,16 +362,21 @@ const SalesPageTemplate = ({
             O que nossos clientes dizem
           </h2>
           
-          <div className={`grid gap-6 md:gap-8 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
+          <div className={`grid gap-8 md:gap-10 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
             {content.testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="p-6 md:p-8 rounded-2xl transition-all duration-300"
+                className="p-6 md:p-8 rounded-2xl transition-all duration-300 hover:scale-[1.01]"
                 style={{ 
                   backgroundColor: isDarkTheme 
-                    ? `${data.colors.text}06` 
-                    : `${data.colors.text}04`,
-                  border: `1px solid ${data.colors.text}08`
+                    ? `${data.colors.text}08` 
+                    : data.colors.background,
+                  boxShadow: isDarkTheme 
+                    ? `0 4px 20px ${primaryColor}08` 
+                    : `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`,
+                  border: isDarkTheme 
+                    ? `1px solid ${data.colors.text}10` 
+                    : `1px solid #e5e7eb`
                 }}
               >
                 {/* Stars */}
@@ -402,9 +421,9 @@ const SalesPageTemplate = ({
         </div>
       </section>
 
-      {/* Pricing/Offer Section - High Impact */}
+      {/* Pricing/Offer Section - High Impact with increased spacing */}
       <section 
-        className="w-full py-16 md:py-24 px-5 md:px-8"
+        className="w-full py-20 md:py-32 px-5 md:px-8"
         style={{ 
           backgroundColor: isDarkTheme 
             ? `${primaryColor}08` 
@@ -413,10 +432,10 @@ const SalesPageTemplate = ({
       >
         <div className="max-w-xl mx-auto text-center">
           <h2 
-            className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8"
+            className="text-2xl md:text-3xl lg:text-4xl font-bold mb-10"
             style={{ letterSpacing: '-0.02em' }}
           >
-            Oferta Especial
+            {content.offerTitle || 'Oferta Especial'}
           </h2>
           
           <div 
@@ -450,8 +469,8 @@ const SalesPageTemplate = ({
               </div>
               
               {/* Price To - GIGANTIC */}
-              <div className="mb-6">
-                <span className="text-base opacity-60">Por apenas </span>
+              <div className="mb-8">
+                <span className="text-base opacity-60">{content.offerSubtitle || 'Por apenas'} </span>
                 <div className="mt-1">
                   <span 
                     className="text-6xl md:text-7xl lg:text-8xl font-black"
@@ -465,9 +484,9 @@ const SalesPageTemplate = ({
                 </div>
               </div>
 
-              {/* Features List */}
-              <div className="space-y-3 mb-8 text-left max-w-xs mx-auto">
-                {['Acesso imediato ao conteúdo', 'Suporte exclusivo VIP', 'Bônus especiais inclusos', 'Atualizações gratuitas'].map((feature, i) => (
+              {/* Features List - Now editable */}
+              <div className="space-y-4 mb-10 text-left max-w-xs mx-auto">
+                {(content.offerFeatures || ['Acesso imediato ao conteúdo', 'Suporte exclusivo VIP', 'Bônus especiais inclusos', 'Atualizações gratuitas']).map((feature, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div 
                       className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
