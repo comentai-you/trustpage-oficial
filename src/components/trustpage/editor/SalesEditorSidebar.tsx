@@ -267,6 +267,22 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
       </div>
 
       <Accordion type="multiple" defaultValue={["appearance", "hero", "benefits"]} className="w-full">
+        {/* Settings - Cover Image */}
+        <AccordionItem value="settings">
+          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Settings className="w-4 h-4 text-primary" />
+              Configurações
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <CoverImageUpload 
+              coverImageUrl={formData.cover_image_url || ''} 
+              onChange={(url) => onChange({ cover_image_url: url })} 
+            />
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Appearance */}
         <AccordionItem value="appearance">
           <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
