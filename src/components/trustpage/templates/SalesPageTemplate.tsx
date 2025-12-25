@@ -226,8 +226,12 @@ const SalesPageTemplate = ({
                   <div 
                     className="relative aspect-video rounded-2xl overflow-hidden"
                     style={{ 
-                      boxShadow: `0 25px 50px -12px ${primaryColor}20`,
-                      border: `1px solid ${cardBorder}`
+                      boxShadow: isDarkTheme 
+                        ? `0 0 80px ${primaryColor}30, 0 25px 50px -12px rgba(0,0,0,0.5)` 
+                        : `0 25px 50px -12px rgba(0,0,0,0.25)`,
+                      border: isDarkTheme 
+                        ? `2px solid ${primaryColor}40` 
+                        : `1px solid rgba(0,0,0,0.1)`
                     }}
                   >
                     <iframe
@@ -242,9 +246,13 @@ const SalesPageTemplate = ({
                     className="aspect-video w-full relative cursor-pointer group rounded-2xl overflow-hidden"
                     onClick={() => setIsVideoPlaying(true)}
                     style={{ 
-                      backgroundColor: cardBg,
-                      border: `1px solid ${cardBorder}`,
-                      boxShadow: `0 25px 50px -12px ${primaryColor}20`
+                      backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0,0,0,0.03)',
+                      border: isDarkTheme 
+                        ? `2px solid ${primaryColor}50` 
+                        : `1px solid rgba(0,0,0,0.1)`,
+                      boxShadow: isDarkTheme 
+                        ? `0 0 80px ${primaryColor}25, 0 25px 60px -12px rgba(0,0,0,0.6), inset 0 1px 0 ${primaryColor}20` 
+                        : `0 25px 50px -12px rgba(0,0,0,0.15)`
                     }}
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -252,7 +260,7 @@ const SalesPageTemplate = ({
                         className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110"
                         style={{ 
                           backgroundColor: primaryColor,
-                          boxShadow: `0 0 60px ${primaryColor}60`
+                          boxShadow: `0 0 80px ${primaryColor}80, 0 0 40px ${primaryColor}60`
                         }}
                       >
                         <Play className="w-8 h-8 md:w-10 md:h-10 ml-1 text-white" fill="white" />
@@ -267,8 +275,12 @@ const SalesPageTemplate = ({
                 <div 
                   className="rounded-2xl overflow-hidden"
                   style={{ 
-                    boxShadow: `0 25px 50px -12px ${primaryColor}20`,
-                    border: `1px solid ${cardBorder}`
+                    boxShadow: isDarkTheme 
+                      ? `0 0 80px ${primaryColor}25, 0 25px 60px -12px rgba(0,0,0,0.5)` 
+                      : `0 25px 50px -12px rgba(0,0,0,0.2)`,
+                    border: isDarkTheme 
+                      ? `2px solid ${primaryColor}40` 
+                      : `1px solid rgba(0,0,0,0.1)`
                   }}
                 >
                   <img
@@ -281,12 +293,17 @@ const SalesPageTemplate = ({
                 <div 
                   className="aspect-[4/3] rounded-2xl flex items-center justify-center"
                   style={{ 
-                    backgroundColor: cardBg,
-                    border: `2px dashed ${primaryColor}40`
+                    backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0,0,0,0.02)',
+                    border: isDarkTheme 
+                      ? `2px dashed ${primaryColor}60` 
+                      : `2px dashed rgba(0,0,0,0.2)`,
+                    boxShadow: isDarkTheme 
+                      ? `0 0 60px ${primaryColor}15, inset 0 0 40px ${primaryColor}05` 
+                      : 'none'
                   }}
                 >
                   <div className="text-center p-8">
-                    <Image className="w-12 h-12 mx-auto mb-3" style={{ color: primaryColor, opacity: 0.5 }} />
+                    <Image className="w-12 h-12 mx-auto mb-3" style={{ color: primaryColor, opacity: 0.6 }} />
                     <p className="text-sm" style={{ color: textColor, opacity: 0.5 }}>Adicione uma imagem ou vídeo</p>
                   </div>
                 </div>
@@ -339,21 +356,24 @@ const SalesPageTemplate = ({
               return (
                 <div
                   key={index}
-                  className="text-center p-8 md:p-10 rounded-3xl transition-all duration-300 hover:scale-[1.02]"
+                  className="text-center p-8 md:p-10 rounded-3xl transition-all duration-300 hover:scale-[1.03] hover:translate-y-[-4px]"
                   style={{ 
-                    backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.04)' : '#FFFFFF',
+                    backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.07)' : '#FFFFFF',
                     boxShadow: isDarkTheme 
-                      ? `0 0 0 1px ${primaryColor}15, 0 8px 32px rgba(0,0,0,0.3)` 
-                      : `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`,
+                      ? `0 0 60px ${primaryColor}20, 0 20px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)` 
+                      : `0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.08)`,
                     border: isDarkTheme 
-                      ? `1px solid ${primaryColor}25` 
+                      ? `1.5px solid ${primaryColor}40` 
                       : `1px solid rgba(0, 0, 0, 0.08)`
                   }}
                 >
-                  {/* Large Icon */}
+                  {/* Large Icon with glow */}
                   <div
                     className="w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                    style={{ backgroundColor: `${primaryColor}15` }}
+                    style={{ 
+                      backgroundColor: `${primaryColor}20`,
+                      boxShadow: isDarkTheme ? `0 0 40px ${primaryColor}30` : 'none'
+                    }}
                   >
                     <BenefitIcon 
                       className="w-10 h-10 md:w-12 md:h-12" 
@@ -369,7 +389,7 @@ const SalesPageTemplate = ({
                   </h3>
                   <p 
                     className="text-base leading-relaxed"
-                    style={{ color: textColor, opacity: 0.7 }}
+                    style={{ color: textColor, opacity: 0.75 }}
                   >
                     {benefit.description}
                   </p>
@@ -394,14 +414,14 @@ const SalesPageTemplate = ({
             {content.testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="p-6 md:p-8 rounded-2xl transition-all duration-300 hover:scale-[1.01]"
+                className="p-6 md:p-8 rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-2px]"
                 style={{ 
-                  backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.04)' : '#FFFFFF',
+                  backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.07)' : '#FFFFFF',
                   boxShadow: isDarkTheme 
-                    ? `0 0 0 1px rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3)` 
-                    : `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`,
+                    ? `0 0 50px ${primaryColor}15, 0 20px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)` 
+                    : `0 10px 40px -10px rgba(0, 0, 0, 0.12), 0 4px 6px -1px rgba(0, 0, 0, 0.06)`,
                   border: isDarkTheme 
-                    ? `1px solid rgba(255,255,255,0.08)` 
+                    ? `1.5px solid rgba(255,255,255,0.12)` 
                     : `1px solid rgba(0, 0, 0, 0.08)`
                 }}
               >
@@ -415,7 +435,7 @@ const SalesPageTemplate = ({
                 {/* Quote */}
                 <p 
                   className="text-base md:text-lg mb-6 leading-relaxed"
-                  style={{ color: textColor, opacity: 0.85 }}
+                  style={{ color: textColor, opacity: 0.9 }}
                 >
                   "{testimonial.text}"
                 </p>
@@ -427,19 +447,24 @@ const SalesPageTemplate = ({
                       src={testimonial.avatarUrl} 
                       alt={testimonial.name}
                       className="w-12 h-12 rounded-full object-cover"
-                      style={{ boxShadow: `0 0 0 2px ${primaryColor}40` }}
+                      style={{ 
+                        boxShadow: `0 0 0 3px ${primaryColor}50, 0 0 20px ${primaryColor}30`
+                      }}
                     />
                   ) : (
                     <div 
                       className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                      style={{ backgroundColor: primaryColor }}
+                      style={{ 
+                        backgroundColor: primaryColor,
+                        boxShadow: isDarkTheme ? `0 0 30px ${primaryColor}50` : 'none'
+                      }}
                     >
                       {testimonial.name.charAt(0)}
                     </div>
                   )}
                   <div>
                     <span className="font-semibold block" style={{ color: textColor }}>{testimonial.name}</span>
-                    <span className="text-sm" style={{ color: textColor, opacity: 0.5 }}>Cliente verificado</span>
+                    <span className="text-sm" style={{ color: textColor, opacity: 0.6 }}>Cliente verificado</span>
                   </div>
                 </div>
               </div>
@@ -470,15 +495,15 @@ const SalesPageTemplate = ({
               {content.faqItems.map((faq, index) => (
                 <div
                   key={index}
-                  className="rounded-2xl overflow-hidden transition-all duration-300"
+                  className="rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01]"
                   style={{ 
-                    backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.04)' : '#FFFFFF',
+                    backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.06)' : '#FFFFFF',
                     border: isDarkTheme 
-                      ? `1px solid rgba(255,255,255,0.08)` 
+                      ? `1.5px solid ${primaryColor}30` 
                       : `1px solid rgba(0, 0, 0, 0.08)`,
                     boxShadow: isDarkTheme 
-                      ? `0 4px 16px rgba(0,0,0,0.2)` 
-                      : `0 2px 8px rgba(0, 0, 0, 0.06)`
+                      ? `0 0 40px ${primaryColor}10, 0 10px 30px -10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)` 
+                      : `0 4px 20px -5px rgba(0, 0, 0, 0.1)`
                   }}
                 >
                   <button
@@ -497,7 +522,7 @@ const SalesPageTemplate = ({
                   >
                     <div 
                       className="px-5 md:px-6 pb-5 md:pb-6 text-base leading-relaxed"
-                      style={{ color: textColor, opacity: 0.75 }}
+                      style={{ color: textColor, opacity: 0.8 }}
                     >
                       {faq.answer}
                     </div>
@@ -529,19 +554,21 @@ const SalesPageTemplate = ({
           <div 
             className="p-8 md:p-12 rounded-3xl relative overflow-hidden"
             style={{ 
-              backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.03)' : '#FFFFFF',
+              backgroundColor: isDarkTheme ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
               border: `3px solid ${primaryColor}`,
-              boxShadow: `0 20px 60px ${primaryColor}25, 0 0 0 1px ${primaryColor}20`
+              boxShadow: isDarkTheme 
+                ? `0 0 100px ${primaryColor}30, 0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)` 
+                : `0 25px 60px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px ${primaryColor}20`
             }}
           >
-            {/* Decorative elements */}
+            {/* Decorative elements with stronger glow */}
             <div 
-              className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
-              style={{ backgroundColor: primaryColor }}
+              className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl"
+              style={{ backgroundColor: primaryColor, opacity: isDarkTheme ? 0.3 : 0.15 }}
             />
             <div 
-              className="absolute bottom-0 left-0 w-24 h-24 rounded-full blur-2xl opacity-15"
-              style={{ backgroundColor: primaryColor }}
+              className="absolute bottom-0 left-0 w-36 h-36 rounded-full blur-2xl"
+              style={{ backgroundColor: primaryColor, opacity: isDarkTheme ? 0.25 : 0.1 }}
             />
             
             <div className="relative z-10">
