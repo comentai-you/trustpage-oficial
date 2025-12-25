@@ -63,9 +63,12 @@ const SalesPageTemplate = ({
   };
 
   // Determine if dark theme based on background color
-  const isDarkTheme = data.colors.background === '#000000' || 
-    data.colors.background.toLowerCase() === '#1a1a1a' ||
-    data.colors.background.toLowerCase() === '#111111';
+  const bgColor = data.colors.background.toLowerCase();
+  const isDarkTheme = bgColor === '#000000' || 
+    bgColor === '#09090b' ||
+    bgColor === '#1e1b4b' ||
+    bgColor === '#1a1a1a' ||
+    bgColor === '#111111';
 
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
