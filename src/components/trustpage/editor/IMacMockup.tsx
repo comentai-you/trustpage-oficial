@@ -50,7 +50,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                 `}
               </style>
               <div className="imac-scroll">
-                <HighConversionTemplate data={formData} />
+                <HighConversionTemplate data={formData} isMobile={false} />
               </div>
             </div>
           </div>

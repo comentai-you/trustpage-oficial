@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdsViolationBar from "@/components/AdsViolationBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const LandingPageView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +16,7 @@ const LandingPageView = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Detect if user came from paid ads (fbclid, gclid, utm_source=ads)
   const isFromPaidAds = useMemo(() => {
@@ -152,7 +154,7 @@ const LandingPageView = () => {
     <div className="min-h-screen">
       {showViolationBar && <AdsViolationBar />}
       <div className={showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}>
-        <HighConversionTemplate data={pageData} />
+        <HighConversionTemplate data={pageData} isMobile={isMobile} />
       </div>
     </div>
   );

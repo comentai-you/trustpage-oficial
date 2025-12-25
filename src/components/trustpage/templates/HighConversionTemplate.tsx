@@ -4,9 +4,10 @@ import { Play } from "lucide-react";
 
 interface HighConversionTemplateProps {
   data: LandingPageFormData;
+  isMobile?: boolean;
 }
 
-const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
+const HighConversionTemplate = ({ data, isMobile = false }: HighConversionTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
 
@@ -63,6 +64,7 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
 
   const headlineSizeMobile = data.headline_size_mobile || 1.5;
   const headlineSizeDesktop = data.headline_size_desktop || 2.5;
+  const currentHeadlineSize = isMobile ? headlineSizeMobile : headlineSizeDesktop;
 
   return (
     <main
@@ -94,23 +96,11 @@ const HighConversionTemplate = ({ data }: HighConversionTemplateProps) => {
         
         {/* Headline */}
         <div className="pt-4 sm:pt-6 pb-1 sm:pb-2">
-          {/* Mobile headline */}
           <h1 
-            className="sm:hidden font-extrabold leading-tight text-center uppercase tracking-wide"
+            className="font-extrabold leading-tight text-center uppercase tracking-wide"
             style={{ 
               color: data.colors.text,
-              fontSize: `${headlineSizeMobile}rem`,
-              lineHeight: 1.1
-            }}
-          >
-            {data.headline || 'Seu Título Aqui'}
-          </h1>
-          {/* Desktop headline */}
-          <h1 
-            className="hidden sm:block font-extrabold leading-tight text-center uppercase tracking-wide"
-            style={{ 
-              color: data.colors.text,
-              fontSize: `${headlineSizeDesktop}rem`,
+              fontSize: `${currentHeadlineSize}rem`,
               lineHeight: 1.1
             }}
           >

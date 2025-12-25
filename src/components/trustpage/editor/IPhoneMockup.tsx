@@ -76,7 +76,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
               `}
             </style>
             <div className="iphone-scroll">
-              <HighConversionTemplate data={formData} />
+              <HighConversionTemplate data={formData} isMobile={true} />
             </div>
           </div>
         </div>
