@@ -447,6 +447,10 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                           </label>
                         </div>
                         <p className="text-xs text-gray-400">Adicione 2 ou mais imagens para ativar o carrossel automático</p>
+                        <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-xs text-blue-700 font-medium">📐 Tamanho ideal: 800x600px (4:3)</p>
+                          <p className="text-[10px] text-blue-600 mt-0.5">Use imagens com mesma proporção para melhor resultado</p>
+                        </div>
                       </div>
                     </div>
                   ) : (
