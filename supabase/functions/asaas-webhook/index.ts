@@ -31,23 +31,27 @@ interface AsaasWebhookEvent {
 function validateWebhookToken(req: Request): boolean {
   const webhookToken = Deno.env.get('ASAAS_WEBHOOK_TOKEN');
   
-  // If no webhook token is configured, fall back to checking the access token header
-  // Asaas sends this header with webhook requests
+  // SECURITY: Reject all requests if webhook token is not configured
+  if (!webhookToken) {
+    console.error('ASAAS_WEBHOOK_TOKEN not configured - rejecting webhook request for security');
+    return false;
+  }
+  
+  // Validate the received token against the configured token
   const receivedToken = req.headers.get('asaas-access-token');
   
-  if (webhookToken && receivedToken) {
-    return receivedToken === webhookToken;
+  if (!receivedToken) {
+    console.error('Missing asaas-access-token header in webhook request');
+    return false;
   }
   
-  // Additional validation: Check if request comes from Asaas IP ranges
-  // For now, log a warning if no token verification is possible
-  if (!webhookToken) {
-    console.warn('ASAAS_WEBHOOK_TOKEN not configured - webhook verification skipped. Configure this for production security.');
-    // Allow request but log for monitoring - in production this should be strict
-    return true;
+  const isValid = receivedToken === webhookToken;
+  
+  if (!isValid) {
+    console.error('Invalid webhook token received');
   }
   
-  return false;
+  return isValid;
 }
 
 serve(async (req) => {
