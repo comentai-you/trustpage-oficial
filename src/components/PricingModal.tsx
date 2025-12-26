@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { Crown, Check, Zap, Clock, Sparkles, Loader2 } from "lucide-react";
+import { Crown, Check, Zap, Clock, Sparkles, Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,12 +99,20 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          {/* Essential Plan */}
-          <Card className="relative border-border/50 hover:border-primary/30 transition-all">
-            <CardContent className="p-5">
+          {/* Essential Plan - Popular */}
+          <Card className="relative border-primary/50 bg-primary/5 shadow-lg shadow-primary/10">
+            {/* Popular Badge */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-md">
+                <Star className="w-3 h-3" fill="currentColor" />
+                Mais Popular
+              </span>
+            </div>
+
+            <CardContent className="p-5 pt-6">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-muted-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">Essencial</h3>
@@ -127,7 +135,7 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
               </ul>
 
               <Button 
-                variant="outline" 
+                variant="gradient" 
                 className="w-full"
                 onClick={() => handleSubscribe("essential")}
                 disabled={loadingPlan !== null}
@@ -138,7 +146,10 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
                     Processando...
                   </>
                 ) : (
-                  'Assinar Essencial'
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Assinar Essencial
+                  </>
                 )}
               </Button>
             </CardContent>
