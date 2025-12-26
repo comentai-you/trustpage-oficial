@@ -27,6 +27,29 @@ interface AsaasWebhookEvent {
   };
 }
 
+// Validate webhook authenticity using Asaas access token header
+function validateWebhookToken(req: Request): boolean {
+  const webhookToken = Deno.env.get('ASAAS_WEBHOOK_TOKEN');
+  
+  // If no webhook token is configured, fall back to checking the access token header
+  // Asaas sends this header with webhook requests
+  const receivedToken = req.headers.get('asaas-access-token');
+  
+  if (webhookToken && receivedToken) {
+    return receivedToken === webhookToken;
+  }
+  
+  // Additional validation: Check if request comes from Asaas IP ranges
+  // For now, log a warning if no token verification is possible
+  if (!webhookToken) {
+    console.warn('ASAAS_WEBHOOK_TOKEN not configured - webhook verification skipped. Configure this for production security.');
+    // Allow request but log for monitoring - in production this should be strict
+    return true;
+  }
+  
+  return false;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -34,6 +57,18 @@ serve(async (req) => {
   }
 
   try {
+    // Validate webhook token first
+    if (!validateWebhookToken(req)) {
+      console.error('Invalid or missing webhook token - rejecting request');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -43,6 +78,16 @@ serve(async (req) => {
     console.log('Received Asaas webhook:', JSON.stringify(webhookData));
 
     const { event, payment, subscription } = webhookData;
+
+    // Validate event type is a known Asaas event
+    const validEvents = [
+      'PAYMENT_CONFIRMED', 'PAYMENT_RECEIVED', 'PAYMENT_OVERDUE', 
+      'PAYMENT_REFUNDED', 'SUBSCRIPTION_DELETED', 'SUBSCRIPTION_INACTIVE'
+    ];
+    
+    if (!validEvents.includes(event) && !event.startsWith('PAYMENT_') && !event.startsWith('SUBSCRIPTION_')) {
+      console.warn(`Unknown event type received: ${event}`);
+    }
 
     // Handle payment events
     if (event === 'PAYMENT_CONFIRMED' || event === 'PAYMENT_RECEIVED') {
@@ -61,10 +106,16 @@ serve(async (req) => {
       let planType: string = 'essential';
 
       if (payment.externalReference) {
-        const parts = payment.externalReference.split('_');
-        if (parts.length >= 2) {
-          userId = parts[0];
-          planType = parts[1];
+        // Validate externalReference format (UUID_planType)
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i;
+        if (uuidRegex.test(payment.externalReference)) {
+          const parts = payment.externalReference.split('_');
+          if (parts.length >= 2) {
+            userId = parts[0];
+            planType = parts[1];
+          }
+        } else {
+          console.warn(`Invalid externalReference format: ${payment.externalReference}`);
         }
       }
 
@@ -89,11 +140,14 @@ serve(async (req) => {
         });
       }
 
-      // Determine plan type from payment value if not in reference
-      if (payment.value >= 69) {
-        planType = 'pro';
-      } else if (payment.value >= 29) {
-        planType = 'essential';
+      // Validate planType
+      if (planType !== 'essential' && planType !== 'pro') {
+        // Determine plan type from payment value
+        if (payment.value >= 69) {
+          planType = 'pro';
+        } else {
+          planType = 'essential';
+        }
       }
 
       // Update user subscription status
@@ -204,7 +258,7 @@ serve(async (req) => {
     console.error('Webhook error:', errorMessage);
 
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
