@@ -59,7 +59,7 @@ const CoverImageUpload = ({ coverImageUrl, onChange }: CoverImageUploadProps) =>
       </p>
       
       {coverImageUrl ? (
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+        <div className="relative w-32 aspect-[3/4] rounded-lg overflow-hidden border border-gray-200">
           <img 
             src={coverImageUrl} 
             alt="Capa do template" 
@@ -74,7 +74,7 @@ const CoverImageUpload = ({ coverImageUrl, onChange }: CoverImageUploadProps) =>
           </button>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+        <label className="flex flex-col items-center justify-center w-32 aspect-[3/4] border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -85,7 +85,7 @@ const CoverImageUpload = ({ coverImageUrl, onChange }: CoverImageUploadProps) =>
               <Upload className="w-8 h-8 text-gray-400" />
               <span className="text-sm text-gray-500">Clique para enviar</span>
               <span className="text-xs text-gray-400">PNG, JPG até 2MB</span>
-              <span className="text-xs text-primary/70 font-medium">Recomendado: 1280x720px</span>
+              <span className="text-xs text-primary/70 font-medium text-center">240x320px</span>
             </div>
           )}
           <input 
