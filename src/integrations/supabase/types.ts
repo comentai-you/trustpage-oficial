@@ -131,13 +131,6 @@ export type Database = {
             referencedRelation: "landing_pages"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "page_view_tracking_page_id_fkey"
-            columns: ["page_id"]
-            isOneToOne: false
-            referencedRelation: "public_landing_pages"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
@@ -226,93 +219,7 @@ export type Database = {
       }
     }
     Views: {
-      public_landing_pages: {
-        Row: {
-          colors: Json | null
-          content: Json | null
-          cover_image_url: string | null
-          created_at: string | null
-          cta_delay_enabled: boolean | null
-          cta_delay_percentage: number | null
-          cta_text: string | null
-          cta_url: string | null
-          description: string | null
-          headline: string | null
-          id: string | null
-          image_url: string | null
-          is_published: boolean | null
-          page_name: string | null
-          pix_pixel_id: string | null
-          primary_color: string | null
-          profile_image_url: string | null
-          slug: string | null
-          subheadline: string | null
-          template_id: number | null
-          template_type: string | null
-          updated_at: string | null
-          video_storage_path: string | null
-          video_url: string | null
-          views: number | null
-          whatsapp_number: string | null
-        }
-        Insert: {
-          colors?: Json | null
-          content?: Json | null
-          cover_image_url?: string | null
-          created_at?: string | null
-          cta_delay_enabled?: boolean | null
-          cta_delay_percentage?: number | null
-          cta_text?: string | null
-          cta_url?: string | null
-          description?: string | null
-          headline?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_published?: boolean | null
-          page_name?: string | null
-          pix_pixel_id?: string | null
-          primary_color?: string | null
-          profile_image_url?: string | null
-          slug?: string | null
-          subheadline?: string | null
-          template_id?: number | null
-          template_type?: string | null
-          updated_at?: string | null
-          video_storage_path?: string | null
-          video_url?: string | null
-          views?: number | null
-          whatsapp_number?: string | null
-        }
-        Update: {
-          colors?: Json | null
-          content?: Json | null
-          cover_image_url?: string | null
-          created_at?: string | null
-          cta_delay_enabled?: boolean | null
-          cta_delay_percentage?: number | null
-          cta_text?: string | null
-          cta_url?: string | null
-          description?: string | null
-          headline?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_published?: boolean | null
-          page_name?: string | null
-          pix_pixel_id?: string | null
-          primary_color?: string | null
-          profile_image_url?: string | null
-          slug?: string | null
-          subheadline?: string | null
-          template_id?: number | null
-          template_type?: string | null
-          updated_at?: string | null
-          video_storage_path?: string | null
-          video_url?: string | null
-          views?: number | null
-          whatsapp_number?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
@@ -321,6 +228,37 @@ export type Database = {
         Returns: {
           is_trial: boolean
           plan_type: string
+        }[]
+      }
+      get_published_page_by_slug: {
+        Args: { page_slug: string }
+        Returns: {
+          colors: Json
+          content: Json
+          cover_image_url: string
+          created_at: string
+          cta_delay_enabled: boolean
+          cta_delay_percentage: number
+          cta_text: string
+          cta_url: string
+          description: string
+          headline: string
+          id: string
+          image_url: string
+          is_published: boolean
+          page_name: string
+          pix_pixel_id: string
+          primary_color: string
+          profile_image_url: string
+          slug: string
+          subheadline: string
+          template_id: number
+          template_type: string
+          updated_at: string
+          video_storage_path: string
+          video_url: string
+          views: number
+          whatsapp_number: string
         }[]
       }
       has_role: {

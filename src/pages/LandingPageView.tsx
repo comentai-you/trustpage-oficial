@@ -40,37 +40,32 @@ const LandingPageView = () => {
       }
 
       try {
-        // Fetch page data - RLS policy already filters by:
-        // - is_published = true
-        // - owner has active subscription or valid trial
+        // Use secure RPC function that doesn't expose user_id
+        // This function only returns published pages from users with active subscriptions
         const { data: page, error } = await supabase
-          .from("landing_pages")
-          .select("*")
-          .eq("slug", slug)
+          .rpc('get_published_page_by_slug', { page_slug: slug })
           .maybeSingle();
 
         if (error) throw error;
 
         if (!page) {
-          // Page not found OR owner's subscription expired (RLS hides it)
+          // Page not found OR owner's subscription expired (RPC hides it)
           setNotFound(true);
           setLoading(false);
           return;
         }
 
-        // Fetch owner's plan type to check ads violation
-        const { data: ownerProfile } = await supabase
-          .from("profiles")
-          .select("plan_type, subscription_status")
-          .eq("id", page.user_id)
+        // Fetch owner's plan type using secure RPC function
+        // This doesn't expose the user_id, only returns plan info for the page
+        const { data: ownerPlanData } = await supabase
+          .rpc('get_page_owner_plan', { page_id: page.id })
           .maybeSingle();
         
-        if (ownerProfile) {
-          // If trial, treat as essential for ads detection
-          if (ownerProfile.subscription_status === 'trial') {
+        if (ownerPlanData) {
+          if (ownerPlanData.is_trial) {
             setOwnerPlan('trial');
           } else {
-            setOwnerPlan(ownerProfile.plan_type || 'essential');
+            setOwnerPlan(ownerPlanData.plan_type || 'essential');
           }
         }
 
@@ -111,7 +106,7 @@ const LandingPageView = () => {
           video_thumbnail_url: '',
           description: page.description || '',
           image_url: page.image_url || '',
-          cover_image_url: (page as any).cover_image_url || '',
+          cover_image_url: page.cover_image_url || '',
           cta_text: page.cta_text || 'QUERO AGORA',
           cta_url: page.cta_url || '',
           cta_delay_enabled: page.cta_delay_enabled ?? false,
