@@ -74,39 +74,15 @@ const LandingPageView = () => {
           }
         }
 
-        // Increment view counter with fingerprint for server-side deduplication
-        // Generate a simple fingerprint based on browser characteristics
-        const generateFingerprint = (): string => {
-          const nav = navigator;
-          const screen = window.screen;
-          const fingerprint = [
-            nav.userAgent,
-            nav.language,
-            screen.width,
-            screen.height,
-            screen.colorDepth,
-            new Date().getTimezoneOffset(),
-          ].join('|');
-          // Simple hash function
-          let hash = 0;
-          for (let i = 0; i < fingerprint.length; i++) {
-            const char = fingerprint.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-          }
-          return Math.abs(hash).toString(36);
-        };
-
+        // Increment view counter via Edge Function with IP-based rate limiting
         const viewKey = `viewed_${page.id}`;
         if (!sessionStorage.getItem(viewKey)) {
           sessionStorage.setItem(viewKey, 'true');
-          const fingerprint = generateFingerprint();
-          // Use void to explicitly ignore the promise
+          // Call Edge Function for server-side IP-based view tracking
           void (async () => {
             try {
-              await supabase.rpc('increment_page_views', { 
-                page_id: page.id,
-                viewer_fingerprint: fingerprint
+              await supabase.functions.invoke('increment-page-view', {
+                body: { page_id: page.id }
               });
             } catch {
               // Silently ignore view count errors

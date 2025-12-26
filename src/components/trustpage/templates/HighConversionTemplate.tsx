@@ -28,21 +28,33 @@ const HighConversionTemplate = ({
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Get video ID and type
+  // Get video ID and type with strict domain validation
   const getVideoInfo = useCallback((url: string) => {
     if (!url) return null;
     
-    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
-    if (youtubeMatch) {
-      return { type: 'youtube', id: youtubeMatch[1] };
+    try {
+      const parsed = new URL(url);
+      
+      // Strict YouTube domain validation
+      const youtubeHosts = ['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com'];
+      if (youtubeHosts.includes(parsed.hostname)) {
+        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (!youtubeMatch) return null;
+        return { type: 'youtube', id: youtubeMatch[1] };
+      }
+      
+      // Strict Vimeo domain validation
+      const vimeoHosts = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
+      if (vimeoHosts.includes(parsed.hostname)) {
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (!vimeoMatch) return null;
+        return { type: 'vimeo', id: vimeoMatch[1] };
+      }
+      
+      return null;
+    } catch {
+      return null;
     }
-    
-    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-    if (vimeoMatch) {
-      return { type: 'vimeo', id: vimeoMatch[1] };
-    }
-    
-    return null;
   }, []);
 
   const videoInfo = getVideoInfo(data.video_url);
@@ -194,34 +206,40 @@ const HighConversionTemplate = ({
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
     
-    // YouTube - Chromeless mode: hide controls but keep API for time tracking
-    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
-    if (youtubeMatch) {
-      // controls=0: hide controls, modestbranding=1: minimal branding
-      // rel=0: no related videos, showinfo=0: hide title/uploader
-      // iv_load_policy=3: hide annotations, disablekb=1: disable keyboard
-      // enablejsapi=1: keep API for time tracking
-      const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
-      const params = autoplay 
-        ? `?autoplay=1&playsinline=1&${baseParams}`
-        : `?${baseParams}`;
-      return `https://www.youtube.com/embed/${youtubeMatch[1]}${params}`;
+    try {
+      const parsed = new URL(url);
+      
+      // YouTube - Strict domain validation + Chromeless mode
+      const youtubeHosts = ['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com'];
+      if (youtubeHosts.includes(parsed.hostname)) {
+        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (!youtubeMatch) return null;
+        const videoId = youtubeMatch[1];
+        const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
+        const params = autoplay 
+          ? `?autoplay=1&playsinline=1&${baseParams}`
+          : `?${baseParams}`;
+        return `https://www.youtube.com/embed/${videoId}${params}`;
+      }
+      
+      // Vimeo - Strict domain validation + Chromeless mode
+      const vimeoHosts = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
+      if (vimeoHosts.includes(parsed.hostname)) {
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (!vimeoMatch) return null;
+        const videoId = vimeoMatch[1];
+        const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0&api=1';
+        const params = autoplay
+          ? `?autoplay=1&${baseParams}`
+          : `?${baseParams}`;
+        return `https://player.vimeo.com/video/${videoId}${params}`;
+      }
+      
+      // Reject all other domains
+      return null;
+    } catch {
+      return null;
     }
-    
-    // Vimeo - Chromeless mode: hide all UI elements
-    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-    if (vimeoMatch) {
-      // controls=0: hide controls, title=0: hide title, byline=0: hide author
-      // portrait=0: hide avatar, sidedock=0: hide like/share buttons
-      // api=1: keep API for time tracking
-      const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0&api=1';
-      const params = autoplay
-        ? `?autoplay=1&${baseParams}`
-        : `?${baseParams}`;
-      return `https://player.vimeo.com/video/${vimeoMatch[1]}${params}`;
-    }
-    
-    return null;
   };
 
   // Handle fullscreen

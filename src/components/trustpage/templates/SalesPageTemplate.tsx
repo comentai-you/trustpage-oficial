@@ -91,25 +91,41 @@ const SalesPageTemplate = ({
   const getVideoEmbedUrl = (url: string, autoplay = false) => {
     if (!url) return null;
     
-    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
-    if (youtubeMatch) {
-      const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
-      const params = autoplay 
-        ? `?autoplay=1&playsinline=1&${baseParams}`
-        : `?${baseParams}`;
-      return `https://www.youtube.com/embed/${youtubeMatch[1]}${params}`;
+    try {
+      const parsed = new URL(url);
+      
+      // Strict YouTube domain validation
+      const youtubeHosts = ['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com'];
+      if (youtubeHosts.includes(parsed.hostname)) {
+        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (!youtubeMatch) return null;
+        const videoId = youtubeMatch[1];
+        const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
+        const params = autoplay 
+          ? `?autoplay=1&playsinline=1&${baseParams}`
+          : `?${baseParams}`;
+        return `https://www.youtube.com/embed/${videoId}${params}`;
+      }
+      
+      // Strict Vimeo domain validation
+      const vimeoHosts = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
+      if (vimeoHosts.includes(parsed.hostname)) {
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (!vimeoMatch) return null;
+        const videoId = vimeoMatch[1];
+        const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0';
+        const params = autoplay
+          ? `?autoplay=1&${baseParams}`
+          : `?${baseParams}`;
+        return `https://player.vimeo.com/video/${videoId}${params}`;
+      }
+      
+      // Reject all other domains
+      return null;
+    } catch {
+      // Invalid URL
+      return null;
     }
-    
-    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-    if (vimeoMatch) {
-      const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0';
-      const params = autoplay
-        ? `?autoplay=1&${baseParams}`
-        : `?${baseParams}`;
-      return `https://player.vimeo.com/video/${vimeoMatch[1]}${params}`;
-    }
-    
-    return null;
   };
 
   const handleCtaClick = () => {
