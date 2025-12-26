@@ -551,11 +551,11 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
           <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Star className="w-4 h-4 text-primary" />
-              Benefícios
+              Benefícios ({content.benefits?.length || 0})
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            {content.benefits.map((benefit, index) => (
+            {(content.benefits || []).map((benefit, index) => (
               <div key={index} className="p-3 bg-gray-50 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-medium text-gray-700">
@@ -567,6 +567,17 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                       onChange={(icon) => updateBenefit(index, { icon })}
                       primaryColor={formData.primary_color}
                     />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => {
+                        const newBenefits = content.benefits.filter((_, i) => i !== index);
+                        updateContent({ benefits: newBenefits });
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
                 <Input
@@ -584,6 +595,25 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                 />
               </div>
             ))}
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full border-dashed"
+              onClick={() => {
+                const newBenefit: Benefit = {
+                  icon: "Sparkles",
+                  emoji: "✨",
+                  title: "",
+                  description: ""
+                };
+                const currentBenefits = content.benefits || [];
+                updateContent({ benefits: [...currentBenefits, newBenefit] });
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Benefício
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
