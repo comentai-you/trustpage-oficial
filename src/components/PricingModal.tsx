@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { Crown, Check, Zap, Star, Sparkles, Loader2 } from "lucide-react";
+import { Crown, Check, Zap, Clock, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,8 +76,9 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
   const proFeatures = [
     { text: "Tudo do Essencial", highlight: false },
     { text: "10 Páginas Ativas", highlight: true },
+    { text: "Domínio Personalizado", highlight: false },
     { text: "Prioridade no Suporte", highlight: false },
-    { text: "Remoção da Marca d'água (Em breve)", highlight: false },
+    { text: "Remoção da Marca d'água", highlight: false },
   ];
 
   return (
@@ -143,20 +144,20 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
             </CardContent>
           </Card>
 
-          {/* PRO Plan */}
-          <Card className="relative border-primary/50 bg-primary/5 shadow-lg shadow-primary/10">
-            {/* Popular Badge */}
+          {/* PRO Plan - Coming Soon */}
+          <Card className="relative border-border/50 opacity-75">
+            {/* Coming Soon Badge */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-md">
-                <Star className="w-3 h-3" fill="currentColor" />
-                Mais Popular
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-semibold border border-border">
+                <Clock className="w-3 h-3" />
+                Disponível em Breve
               </span>
             </div>
 
             <CardContent className="p-5 pt-6">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">PRO</h3>
@@ -181,22 +182,11 @@ const PricingModal = ({ open, onOpenChange, isTrialExpired = false, userFullName
               </ul>
 
               <Button 
-                variant="gradient" 
+                variant="outline" 
                 className="w-full"
-                onClick={() => handleSubscribe("pro")}
-                disabled={loadingPlan !== null}
+                disabled
               >
-                {loadingPlan === 'pro' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4 mr-2" />
-                    Quero ser PRO
-                  </>
-                )}
+                Em Breve
               </Button>
             </CardContent>
           </Card>
