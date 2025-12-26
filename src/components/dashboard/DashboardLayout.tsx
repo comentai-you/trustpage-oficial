@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import InstallAppBanner from "@/components/pwa/InstallAppBanner";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -133,6 +134,9 @@ const DashboardLayout = ({
       </header>
 
       {children}
+
+      {/* PWA Install Banner */}
+      <InstallAppBanner />
     </div>
   );
 };
