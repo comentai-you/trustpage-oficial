@@ -14,6 +14,7 @@ const contactSchema = z.object({
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo"),
   subject: z.string().trim().min(5, "Assunto deve ter pelo menos 5 caracteres").max(200, "Assunto muito longo"),
   message: z.string().trim().min(20, "Mensagem deve ter pelo menos 20 caracteres").max(2000, "Mensagem muito longa"),
+  honeypot: z.string().optional(), // Honeypot field for bot detection
 });
 
 // HTML escape function to prevent XSS in email content
@@ -26,13 +27,94 @@ const escapeHtml = (text: string): string => {
     .replace(/'/g, "&#039;");
 };
 
+// Simple hash function for IP fingerprinting
+const hashString = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36);
+};
+
+// In-memory rate limiting (resets on function cold start)
+// For production, consider using Supabase table or KV store
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 contact form submissions per IP per hour
+
+const checkRateLimit = (ipHash: string): { allowed: boolean; remaining: number } => {
+  const now = Date.now();
+  const record = rateLimitMap.get(ipHash);
+
+  if (!record || now > record.resetTime) {
+    // New window
+    rateLimitMap.set(ipHash, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1 };
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count };
+};
+
+// Suspicious email patterns
+const suspiciousEmailPatterns = [
+  /^test\d+@/i,
+  /^spam\d+@/i,
+  /^no-?reply@/i,
+  /@(tempmail|guerrillamail|10minutemail|mailinator|throwaway)\./i,
+];
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Get client IP for rate limiting
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                     req.headers.get("x-real-ip") ||
+                     req.headers.get("cf-connecting-ip") ||
+                     "unknown";
+
+    const ipHash = hashString(clientIp);
+
+    // Check rate limit
+    const { allowed, remaining } = checkRateLimit(ipHash);
+    if (!allowed) {
+      console.log(`Rate limit exceeded for IP hash: ${ipHash}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Limite de envios atingido. Tente novamente em 1 hora." 
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "X-RateLimit-Remaining": "0",
+            "Retry-After": "3600"
+          } 
+        }
+      );
+    }
+
     const body = await req.json();
+
+    // Check honeypot - if filled, it's likely a bot
+    if (body.honeypot) {
+      console.log(`Bot detected via honeypot from IP hash: ${ipHash}`);
+      // Return fake success to not alert bots
+      return new Response(
+        JSON.stringify({ success: true, message: "Email enviado com sucesso" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Validate with Zod (server-side validation)
     const validation = contactSchema.safeParse(body);
@@ -49,7 +131,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { name, email, subject, message } = validation.data;
 
-    console.log("Received contact form submission:", { name, email: email.substring(0, 5) + "***", subject });
+    // Check for suspicious email patterns
+    if (suspiciousEmailPatterns.some(pattern => pattern.test(email))) {
+      console.log(`Suspicious email pattern detected: ${email.substring(0, 10)}***`);
+      return new Response(
+        JSON.stringify({ error: "Email inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Received contact form submission:", { 
+      name, 
+      email: email.substring(0, 5) + "***", 
+      subject,
+      ipHash,
+      remaining 
+    });
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -96,7 +193,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(
       JSON.stringify({ success: true, message: "Email enviado com sucesso" }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        status: 200, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": String(remaining)
+        } 
+      }
     );
   } catch (error: any) {
     console.error("Error sending contact email:", error);
