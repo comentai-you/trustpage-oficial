@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, Monitor, Smartphone, ShoppingBag, Play, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, ShoppingBag, Play, Link as LinkIcon } from "lucide-react";
 import { LandingPageFormData, defaultFormData, defaultSalesContent, defaultBioContent, SalesPageContent, TemplateType } from "@/types/landing-page";
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
@@ -45,7 +45,7 @@ const TrustPageEditor = () => {
   const [existingPageId, setExistingPageId] = useState<string | null>(null);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showMobileControls, setShowMobileControls] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
+  
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
   const { toast } = useToast();
   const { user } = useAuth();
@@ -485,43 +485,9 @@ const TrustPageEditor = () => {
 
           {/* Mobile Preview View */}
           <div className={`lg:hidden flex-1 flex flex-col bg-gray-50 ${activeTab === 'preview' ? 'flex' : 'hidden'}`}>
-            {/* View Toggle */}
-            <div className="flex items-center justify-center gap-3 py-3 border-b border-gray-200 bg-white">
-              <div className="flex items-center gap-2 bg-gray-100 rounded-full p-1">
-                <button
-                  onClick={() => setPreviewMode('mobile')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    previewMode === 'mobile' 
-                      ? 'bg-primary text-white' 
-                      : 'text-gray-500'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  Mobile
-                </button>
-                <button
-                  onClick={() => setPreviewMode('desktop')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    previewMode === 'desktop' 
-                      ? 'bg-primary text-white' 
-                      : 'text-gray-500'
-                  }`}
-                >
-                  <Monitor className="w-3.5 h-3.5" />
-                  Desktop
-                </button>
-              </div>
-            </div>
-            
-            {/* Preview Content */}
+            {/* Preview Content - Only Mobile */}
             <div className="flex-1 overflow-auto flex items-center justify-center p-4">
-              {previewMode === 'mobile' ? (
-                <IPhoneMockup formData={formData} size="large" />
-              ) : (
-                <div className="transform scale-[0.55] origin-center">
-                  <IMacMockup formData={formData} />
-                </div>
-              )}
+              <IPhoneMockup formData={formData} size="large" />
             </div>
           </div>
 
