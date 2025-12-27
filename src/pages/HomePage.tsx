@@ -346,7 +346,15 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Vídeo VSL Integrado</span>
+                      <span className="text-foreground text-sm sm:text-base">Link na Bio personalizado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Página VSL com vídeo integrado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Página de Vendas completa</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -395,6 +403,18 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Link na Bio personalizado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Página VSL com vídeo integrado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Página de Vendas completa</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">Pixel de Rastreamento (Meta/Google)</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
@@ -403,7 +423,7 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Sem Marca d'água</span>
+                      <span className="text-foreground text-sm sm:text-base">Sem Marca d'água (White Label)</span>
                     </li>
                   </ul>
                   
