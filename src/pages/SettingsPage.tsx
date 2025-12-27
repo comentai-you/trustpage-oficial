@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle } from "lucide-react";
+import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle, Globe, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import PricingModal from "@/components/PricingModal";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UserProfile {
   id: string;
@@ -21,6 +22,8 @@ interface UserProfile {
   created_at: string;
   subscription_status: string;
   plan_type: string;
+  custom_domain: string | null;
+  domain_verified: boolean;
 }
 
 const TRIAL_DAYS = 14;
@@ -38,6 +41,11 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resettingPassword, setResettingPassword] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  
+  // Domain states
+  const [domainInput, setDomainInput] = useState("");
+  const [addingDomain, setAddingDomain] = useState(false);
+  const [showDnsInstructions, setShowDnsInstructions] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -49,13 +57,16 @@ const SettingsPage = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url, created_at, subscription_status, plan_type")
+        .select("id, full_name, avatar_url, created_at, subscription_status, plan_type, custom_domain, domain_verified")
         .eq("id", user!.id)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
       setFullName(data?.full_name || "");
+      if (data?.custom_domain) {
+        setShowDnsInstructions(true);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast.error("Erro ao carregar perfil");
@@ -193,6 +204,49 @@ const SettingsPage = () => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
+  const handleAddDomain = async () => {
+    if (!domainInput.trim()) {
+      toast.error("Digite um domínio válido");
+      return;
+    }
+
+    // Basic domain validation
+    const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    if (!domainRegex.test(domainInput.trim())) {
+      toast.error("Formato de domínio inválido. Ex: meusite.com.br");
+      return;
+    }
+
+    setAddingDomain(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('add-domain', {
+        body: { domain: domainInput.trim().toLowerCase() }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      toast.success("Domínio adicionado com sucesso!");
+      setProfile(prev => prev ? { ...prev, custom_domain: domainInput.trim().toLowerCase(), domain_verified: false } : null);
+      setShowDnsInstructions(true);
+      setDomainInput("");
+    } catch (error: any) {
+      console.error("Error adding domain:", error);
+      toast.error(error.message || "Erro ao adicionar domínio");
+    } finally {
+      setAddingDomain(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copiado para a área de transferência!");
+  };
+
   if (loading) {
     return (
       <DashboardLayout avatarUrl={null} fullName={null}>
@@ -237,6 +291,13 @@ const SettingsPage = () => {
               <Shield className="w-4 h-4" />
               <span>Segurança</span>
             </TabsTrigger>
+            {profile?.subscription_status !== 'trial' && (
+              <TabsTrigger value="domains" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <Globe className="w-4 h-4" />
+                <span className="hidden sm:inline">Domínios</span>
+                <span className="sm:hidden">DNS</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Profile Tab */}
@@ -464,6 +525,189 @@ const SettingsPage = () => {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Domains Tab */}
+          <TabsContent value="domains" className="space-y-6 animate-fade-in">
+            {profile?.subscription_status === 'trial' ? (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-6 h-6 text-warning" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                        Recurso não disponível no Trial
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Domínios personalizados estão disponíveis nos planos Essential e Pro.
+                      </p>
+                      <Button 
+                        className="gradient-button text-primary-foreground border-0"
+                        onClick={() => setShowPricingModal(true)}
+                      >
+                        Fazer Upgrade
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Current Domain */}
+                {profile?.custom_domain && (
+                  <Card className="border-success/30 bg-success/5">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center flex-shrink-0">
+                          <Globe className="w-6 h-6 text-success" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            Domínio Configurado
+                          </h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-2">
+                            <span className="font-mono bg-muted px-2 py-1 rounded">{profile.custom_domain}</span>
+                            {profile.domain_verified ? (
+                              <span className="text-success flex items-center gap-1">
+                                <Check className="w-4 h-4" /> Verificado
+                              </span>
+                            ) : (
+                              <span className="text-warning flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" /> Aguardando DNS
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Add Domain Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe className="w-5 h-5" />
+                      Conectar Domínio Personalizado
+                    </CardTitle>
+                    <CardDescription>
+                      Use seu próprio domínio para suas páginas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="domain">Seu Domínio</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="domain"
+                          value={domainInput}
+                          onChange={(e) => setDomainInput(e.target.value)}
+                          placeholder="meusite.com.br"
+                          disabled={addingDomain}
+                        />
+                        <Button 
+                          onClick={handleAddDomain} 
+                          disabled={addingDomain || !domainInput.trim()}
+                        >
+                          {addingDomain ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Conectando...
+                            </>
+                          ) : (
+                            "Conectar"
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Digite apenas o domínio, sem "https://" ou "www"
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* DNS Instructions */}
+                {(showDnsInstructions || profile?.custom_domain) && (
+                  <Card className="border-primary/30">
+                    <CardHeader className="bg-primary/5">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <AlertCircle className="w-5 h-5 text-primary" />
+                        Configure seu DNS agora
+                      </CardTitle>
+                      <CardDescription>
+                        Adicione o seguinte registro no painel do seu provedor de domínio
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      <div className="bg-muted rounded-lg p-4 space-y-3">
+                        <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground border-b border-border pb-2">
+                          <span>Tipo</span>
+                          <span>Nome</span>
+                          <span>Destino</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 items-center">
+                          <span className="font-mono bg-background px-2 py-1 rounded text-sm">CNAME</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-mono bg-background px-2 py-1 rounded text-sm">www</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 w-7 p-0"
+                              onClick={() => copyToClipboard('www')}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-mono bg-background px-2 py-1 rounded text-sm text-xs sm:text-sm">cname.vercel-dns.com</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 w-7 p-0 flex-shrink-0"
+                              onClick={() => copyToClipboard('cname.vercel-dns.com')}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          <strong>Para domínio raiz (sem www):</strong> Configure um registro A apontando para <code className="bg-muted px-1 rounded">76.76.21.21</code>
+                        </AlertDescription>
+                      </Alert>
+
+                      <div className="text-sm text-muted-foreground space-y-2">
+                        <p className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          A propagação do DNS pode levar até 48 horas
+                        </p>
+                        <p className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          O SSL será provisionado automaticamente após a verificação
+                        </p>
+                      </div>
+
+                      <Button variant="outline" className="w-full" asChild>
+                        <a 
+                          href="https://docs.lovable.dev/features/custom-domain" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Ver documentação completa
+                        </a>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </main>
