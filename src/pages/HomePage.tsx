@@ -86,11 +86,11 @@ const HomePage = () => {
                 <span className="text-foreground font-medium">Sem designers, sem código.</span>
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+              <div className="flex justify-center lg:justify-start">
                 <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto gradient-button text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 font-bold group">
-                    Começar Grátis
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <Button size="xl" className="w-full sm:w-auto gradient-button text-lg sm:text-xl px-10 sm:px-14 py-6 sm:py-7 font-bold group shadow-lg">
+                    Começar 14 dias Grátis
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
               </div>
