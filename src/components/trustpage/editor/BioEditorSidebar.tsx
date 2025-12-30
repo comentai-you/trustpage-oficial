@@ -209,12 +209,18 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
               <Label className="text-xs text-gray-600">Facebook Pixel ID</Label>
               <Input 
                 value={formData.facebook_pixel_id || ''} 
-                onChange={(e) => onChange({ facebook_pixel_id: e.target.value })} 
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                  onChange({ facebook_pixel_id: value });
+                }} 
                 placeholder="Ex: 123456789012345" 
                 className="text-sm font-mono" 
+                maxLength={16}
+                pattern="[0-9]*"
+                inputMode="numeric"
               />
               <p className="text-[10px] text-muted-foreground">
-                Cole o ID do seu Pixel para rastrear PageViews automaticamente.
+                Cole o ID do seu Pixel (15-16 dígitos) para rastrear PageViews.
               </p>
             </div>
           </AccordionContent>
