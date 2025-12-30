@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle, Globe, Copy, ExternalLink, Crown } from "lucide-react";
+import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle, Globe, Copy, ExternalLink, Crown, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,13 @@ interface UserProfile {
   domain_verified: boolean;
 }
 
+type VercelVerificationRecord = {
+  type: string;
+  domain: string;
+  value: string;
+  reason?: string;
+};
+
 const TRIAL_DAYS = 14;
 
 const SettingsPage = () => {
@@ -46,12 +53,85 @@ const SettingsPage = () => {
   const [domainInput, setDomainInput] = useState("");
   const [addingDomain, setAddingDomain] = useState(false);
   const [showDnsInstructions, setShowDnsInstructions] = useState(false);
+  const [verifyingDomain, setVerifyingDomain] = useState(false);
+  const [lastDomainCheckAt, setLastDomainCheckAt] = useState<string | null>(null);
+  const [vercelVerification, setVercelVerification] = useState<VercelVerificationRecord[] | null>(null);
+  const [domainMisconfigured, setDomainMisconfigured] = useState<boolean | null>(null);
+
+  const handleVerifyDomain = useCallback(
+    async ({
+      silent,
+      domain,
+    }: {
+      silent?: boolean;
+      domain?: string;
+    } = {}) => {
+      const domainToCheck = (domain || profile?.custom_domain || '').trim().toLowerCase();
+      if (!domainToCheck) {
+        if (!silent) toast.error("Nenhum domínio para verificar");
+        return;
+      }
+
+      const isManual = !silent;
+      if (isManual) setVerifyingDomain(true);
+
+      try {
+        const { data, error } = await supabase.functions.invoke('verify-domain', {
+          body: { domain: domainToCheck },
+        });
+
+        if (error) throw error;
+        if (data?.error) {
+          if (!silent) toast.error(data.error);
+          return;
+        }
+
+        const verified = !!data?.verified;
+
+        setProfile((prev) => (prev ? { ...prev, domain_verified: verified } : prev));
+        setLastDomainCheckAt(typeof data?.checkedAt === 'string' ? data.checkedAt : new Date().toISOString());
+        setVercelVerification(Array.isArray(data?.verification) ? data.verification : null);
+        setDomainMisconfigured(typeof data?.misconfigured === 'boolean' ? data.misconfigured : null);
+
+        if (!silent) {
+          toast.success(
+            verified
+              ? 'Domínio verificado com sucesso!'
+              : 'Ainda aguardando DNS. Veja os registros necessários abaixo.',
+          );
+        }
+      } catch (err: any) {
+        console.error('Error verifying domain:', err);
+        if (!silent) toast.error(err?.message || 'Erro ao verificar domínio');
+      } finally {
+        if (isManual) setVerifyingDomain(false);
+      }
+    },
+    [profile?.custom_domain],
+  );
 
   useEffect(() => {
     if (user) {
       fetchProfile();
     }
   }, [user]);
+
+  // Auto-check domain status once (helps show the right DNS records from Vercel)
+  useEffect(() => {
+    if (!profile?.custom_domain || profile.domain_verified) return;
+    handleVerifyDomain({ silent: true });
+  }, [profile?.custom_domain, profile?.domain_verified, handleVerifyDomain]);
+
+  // Auto-refresh domain verification every 60s while pending
+  useEffect(() => {
+    if (!profile?.custom_domain || profile.domain_verified) return;
+
+    const intervalId = window.setInterval(() => {
+      handleVerifyDomain({ silent: true });
+    }, 60_000);
+
+    return () => window.clearInterval(intervalId);
+  }, [profile?.custom_domain, profile?.domain_verified, handleVerifyDomain]);
 
   const fetchProfile = async () => {
     try {
@@ -560,8 +640,9 @@ const SettingsPage = () => {
                           <h3 className="text-lg font-semibold text-foreground">
                             Domínio Configurado
                           </h3>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="font-mono bg-muted px-2 py-1 rounded">{profile.custom_domain}</span>
+
                             {profile.domain_verified ? (
                               <span className="text-success flex items-center gap-1">
                                 <Check className="w-4 h-4" /> Verificado
@@ -571,7 +652,29 @@ const SettingsPage = () => {
                                 <AlertCircle className="w-4 h-4" /> Aguardando DNS
                               </span>
                             )}
-                          </p>
+
+                            {!profile.domain_verified && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleVerifyDomain()}
+                                disabled={verifyingDomain}
+                              >
+                                {verifyingDomain ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="w-4 h-4 mr-2" />
+                                )}
+                                Verificar agora
+                              </Button>
+                            )}
+                          </div>
+
+                          {lastDomainCheckAt && !profile.domain_verified && (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              Última verificação: {new Date(lastDomainCheckAt).toLocaleString('pt-BR')}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -673,6 +776,61 @@ const SettingsPage = () => {
                           <strong>Para domínio raiz (sem www):</strong> Configure um registro A apontando para <code className="bg-muted px-1 rounded">76.76.21.21</code>
                         </AlertDescription>
                       </Alert>
+
+                      {domainMisconfigured ? (
+                        <Alert>
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription className="text-sm">
+                            A Vercel detectou que o DNS pode estar <strong>apontando para outro serviço</strong>. Revise os registros no provedor.
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
+
+                      {vercelVerification?.length ? (
+                        <div className="bg-muted rounded-lg p-4 space-y-3">
+                          <p className="text-sm font-medium text-foreground">Registros exigidos pela Vercel</p>
+                          <div className="space-y-2">
+                            {vercelVerification.map((rec, idx) => (
+                              <div
+                                key={`${rec.type}-${idx}`}
+                                className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-start"
+                              >
+                                <span className="font-mono bg-background px-2 py-1 rounded text-xs sm:text-sm">
+                                  {rec.type}
+                                </span>
+
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span className="font-mono bg-background px-2 py-1 rounded text-xs sm:text-sm break-all">
+                                    {rec.domain}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 flex-shrink-0"
+                                    onClick={() => copyToClipboard(rec.domain)}
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                  </Button>
+                                </div>
+
+                                <div className="flex items-center gap-1 min-w-0">
+                                  <span className="font-mono bg-background px-2 py-1 rounded text-xs sm:text-sm break-all">
+                                    {rec.value}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 flex-shrink-0"
+                                    onClick={() => copyToClipboard(rec.value)}
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
 
                       <div className="text-sm text-muted-foreground space-y-2">
                         <p className="flex items-start gap-2">

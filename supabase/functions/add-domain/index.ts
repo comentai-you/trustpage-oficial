@@ -67,6 +67,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (profile.subscription_status === 'free' || profile.plan_type === 'free') {
+      return new Response(
+        JSON.stringify({ error: 'Domínios personalizados não estão disponíveis no plano Gratuito. Faça upgrade para um plano pago.' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (profile.subscription_status === 'trial') {
       return new Response(
         JSON.stringify({ error: 'Domínios personalizados não estão disponíveis no plano Trial. Faça upgrade para um plano pago.' }),
