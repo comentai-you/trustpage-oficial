@@ -11,9 +11,20 @@ import AdsViolationBar from "@/components/AdsViolationBar";
 import TrustPageWatermark from "@/components/TrustPageWatermark";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Inject Facebook Pixel script
+// Validate Facebook Pixel ID format (15-16 digits only)
+const isValidFacebookPixelId = (pixelId: string): boolean => {
+  return /^[0-9]{15,16}$/.test(pixelId);
+};
+
+// Inject Facebook Pixel script with validation to prevent XSS
 const injectFacebookPixel = (pixelId: string) => {
   if (!pixelId || typeof window === 'undefined') return;
+  
+  // Validate pixel ID format to prevent script injection
+  if (!isValidFacebookPixelId(pixelId)) {
+    console.warn('Invalid Facebook Pixel ID format - must be 15-16 digits');
+    return;
+  }
   
   // Check if already injected
   if (document.getElementById('fb-pixel-script')) return;
