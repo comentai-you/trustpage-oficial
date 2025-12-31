@@ -167,6 +167,13 @@ const SettingsPage = () => {
     }
   };
 
+  // Fetch profile on mount
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
   // Auto-refresh domain verification every 60s while pending
   useEffect(() => {
     if (!profile?.custom_domain || profile.domain_verified) return;
