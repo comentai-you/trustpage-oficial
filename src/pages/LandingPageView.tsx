@@ -11,6 +11,10 @@ import AdsViolationBar from "@/components/AdsViolationBar";
 import TrustPageWatermark from "@/components/TrustPageWatermark";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface LandingPageViewProps {
+  slugOverride?: string;
+}
+
 // Validate Facebook Pixel ID format (15-16 digits only)
 const isValidFacebookPixelId = (pixelId: string): boolean => {
   return /^[0-9]{15,16}$/.test(pixelId);
@@ -52,8 +56,9 @@ const injectFacebookPixel = (pixelId: string) => {
   document.body.appendChild(noscript);
 };
 
-const LandingPageView = () => {
-  const { slug } = useParams<{ slug: string }>();
+const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
+  const { slug: paramSlug } = useParams<{ slug: string }>();
+  const slug = slugOverride || paramSlug;
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const [pageData, setPageData] = useState<LandingPageFormData | null>(null);

@@ -840,71 +840,39 @@ const SettingsPage = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
-                      {/* Dynamic DNS instructions based on domain type */}
-                      {dnsInstructions ? (
-                        <div className="bg-muted rounded-lg p-4 space-y-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Info className="w-4 h-4 text-primary" />
-                            <p className="text-sm font-medium text-foreground">
-                              {isSubdomain ? 'Configuração para Subdomínio' : 'Configuração para Domínio'}
-                            </p>
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground border-b border-border pb-2">
-                            <span>Tipo</span>
-                            <span>Nome</span>
-                            <span>Destino</span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 items-center">
-                            <span className="font-mono bg-background px-2 py-1 rounded text-sm">{dnsInstructions.type}</span>
-                            <div className="flex items-center gap-1">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">{dnsInstructions.name}</span>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-7 w-7 p-0"
-                                onClick={() => copyToClipboard(dnsInstructions.name)}
-                              >
-                                <Copy className="w-3 h-3" />
-                              </Button>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">{dnsInstructions.value}</span>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-7 w-7 p-0 flex-shrink-0"
-                                onClick={() => copyToClipboard(dnsInstructions.value)}
-                              >
-                                <Copy className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </div>
-                          {dnsInstructions.note && (
-                            <p className="text-xs text-muted-foreground mt-2">{dnsInstructions.note}</p>
-                          )}
+                      {/* DNS Instructions - always show based on domain type */}
+                      <div className="bg-muted rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Info className="w-4 h-4 text-primary" />
+                          <p className="text-sm font-medium text-foreground">
+                            {isSubdomain ? 'Configuração para Subdomínio' : 'Configuração para Domínio Raiz'}
+                          </p>
                         </div>
-                      ) : (
-                        <div className="bg-muted rounded-lg p-4 space-y-3">
-                          <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground border-b border-border pb-2">
-                            <span>Tipo</span>
-                            <span>Nome</span>
-                            <span>Destino</span>
-                          </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground border-b border-border pb-2">
+                          <span>Tipo</span>
+                          <span>Nome</span>
+                          <span>Destino</span>
+                        </div>
+                        
+                        {isSubdomain ? (
+                          /* Subdomain: show CNAME */
                           <div className="grid grid-cols-3 gap-4 items-center">
                             <span className="font-mono bg-background px-2 py-1 rounded text-sm">CNAME</span>
                             <div className="flex items-center gap-1">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">www</span>
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">
+                                {dnsInstructions?.name || profile?.custom_domain?.split('.')[0] || 'subdomain'}
+                              </span>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 className="h-7 w-7 p-0"
-                                onClick={() => copyToClipboard('www')}
+                                onClick={() => copyToClipboard(dnsInstructions?.name || profile?.custom_domain?.split('.')[0] || 'subdomain')}
                               >
                                 <Copy className="w-3 h-3" />
                               </Button>
                             </div>
                             <div className="flex items-center gap-1">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm text-xs sm:text-sm">cname.vercel-dns.com</span>
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">cname.vercel-dns.com</span>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -915,17 +883,71 @@ const SettingsPage = () => {
                               </Button>
                             </div>
                           </div>
-                        </div>
-                      )}
-
-                      {!isSubdomain && (
-                        <Alert>
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription className="text-sm">
-                            <strong>Para domínio raiz (sem www):</strong> Configure um registro A apontando para <code className="bg-muted px-1 rounded">76.76.21.21</code>
-                          </AlertDescription>
-                        </Alert>
-                      )}
+                        ) : (
+                          /* Apex domain: show A record (required) */
+                          <div className="grid grid-cols-3 gap-4 items-center">
+                            <span className="font-mono bg-background px-2 py-1 rounded text-sm">A</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">@</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 w-7 p-0"
+                                onClick={() => copyToClipboard('@')}
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">76.76.21.21</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 w-7 p-0 flex-shrink-0"
+                                onClick={() => copyToClipboard('76.76.21.21')}
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* For apex domain, also suggest adding www CNAME */}
+                        {!isSubdomain && (
+                          <>
+                            <div className="border-t border-border pt-3 mt-3">
+                              <p className="text-xs text-muted-foreground mb-2">
+                                <strong>Opcional:</strong> Para que www.{profile?.custom_domain} também funcione:
+                              </p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 items-center opacity-70">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">CNAME</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm">www</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => copyToClipboard('www')}
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">cname.vercel-dns.com</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-7 w-7 p-0 flex-shrink-0"
+                                  onClick={() => copyToClipboard('cname.vercel-dns.com')}
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
 
                       {domainMisconfigured && (
                         <Alert variant="destructive">

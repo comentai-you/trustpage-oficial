@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.remove-domain]
 verify_jwt = false
+
+[functions.resolve-custom-domain]
+verify_jwt = false
