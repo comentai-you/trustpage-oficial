@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Trash2, BarChart3, Edit3, Play, Image as ImageIcon } from "lucide-react";
+import { ExternalLink, Copy, Trash2, BarChart3, Edit3, Play, Image as ImageIcon, Globe, ChevronDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,6 +6,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 interface PageCardProps {
@@ -19,9 +25,10 @@ interface PageCardProps {
   videoUrl?: string | null;
   coverImageUrl?: string | null;
   isTrialExpired: boolean;
+  customDomain?: string | null;
   onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
-  onCopyLink: (slug: string) => void;
+  onCopyLink: (slug: string, useCustomDomain?: boolean) => void;
 }
 
 // Extract YouTube video ID and generate thumbnail
@@ -68,6 +75,7 @@ const PageCard = ({
   videoUrl,
   coverImageUrl,
   isTrialExpired,
+  customDomain,
   onEdit,
   onDelete,
   onCopyLink,
@@ -78,12 +86,16 @@ const PageCard = ({
     month: 'short',
   });
 
-  const handleViewPage = () => {
+  const handleViewPage = (useCustomDomain?: boolean) => {
     if (!isPublished) {
       toast.error("Publique a página para abrir o link público.");
       return;
     }
-    window.open(`${window.location.origin}/p/${slug}`, "_blank");
+    if (useCustomDomain && customDomain) {
+      window.open(`https://${customDomain}/${slug}`, "_blank");
+    } else {
+      window.open(`${window.location.origin}/p/${slug}`, "_blank");
+    }
   };
 
   return (
@@ -164,33 +176,73 @@ const PageCard = ({
             <TooltipContent>Editar página</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={handleViewPage}
-              >
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Ver página</TooltipContent>
-          </Tooltip>
+          {customDomain ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-9 w-9">
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleViewPage(false)}>
+                  <Globe className="w-4 h-4 mr-2" />
+                  Abrir em trustpageapp.com
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewPage(true)}>
+                  <Globe className="w-4 h-4 mr-2" />
+                  Abrir em {customDomain}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => handleViewPage(false)}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Ver página</TooltipContent>
+            </Tooltip>
+          )}
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-9 w-9"
-                onClick={() => onCopyLink(slug)}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Copiar link</TooltipContent>
-          </Tooltip>
+          {customDomain ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-9 w-9">
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onCopyLink(slug, false)}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar trustpageapp.com/p/{slug}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onCopyLink(slug, true)}>
+                  <Globe className="w-4 h-4 mr-2" />
+                  Copiar {customDomain}/{slug}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9"
+                  onClick={() => onCopyLink(slug, false)}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copiar link</TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>

@@ -34,6 +34,8 @@ interface UserProfile {
   plan_type: string;
   full_name: string | null;
   avatar_url: string | null;
+  custom_domain: string | null;
+  domain_verified: boolean | null;
 }
 
 const getMaxPages = (planType: string) => {
@@ -78,7 +80,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("created_at, subscription_status, plan_type, full_name, avatar_url")
+        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified")
         .eq("id", user!.id)
         .maybeSingle();
 
@@ -131,11 +133,18 @@ const TrustPageDashboard = () => {
     }
   };
 
-  const handleCopyLink = (slug: string) => {
-    const url = `${window.location.origin}/p/${slug}`;
+  const handleCopyLink = (slug: string, useCustomDomain?: boolean) => {
+    let url: string;
+    if (useCustomDomain && profile?.custom_domain && profile?.domain_verified) {
+      url = `https://${profile.custom_domain}/${slug}`;
+    } else {
+      url = `${window.location.origin}/p/${slug}`;
+    }
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
+
+  const customDomain = profile?.domain_verified ? profile.custom_domain : null;
 
   const handleNewPage = () => {
     if (hasReachedLimit) {
@@ -302,6 +311,7 @@ const TrustPageDashboard = () => {
                 videoUrl={page.video_url}
                 coverImageUrl={page.cover_image_url}
                 isTrialExpired={false}
+                customDomain={customDomain}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCopyLink={handleCopyLink}
