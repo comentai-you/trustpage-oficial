@@ -28,6 +28,7 @@ const KNOWN_APP_DOMAINS = [
   'localhost',
   '127.0.0.1',
   'trustpage.app',
+  'trustpageapp.com',
   'lovable.app',
   'lovableproject.com',
 ];
