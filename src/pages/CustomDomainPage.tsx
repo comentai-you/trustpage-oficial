@@ -38,10 +38,14 @@ const CustomDomainPage = () => {
       const hostname = window.location.hostname;
       const path = location.pathname;
 
-      console.log(`[CustomDomain] Resolving: ${hostname}${path}`);
-      console.log(`[CustomDomain] Supabase URL configured: ${!!import.meta.env.VITE_SUPABASE_URL}`);
+      console.log(`[CustomDomain] Starting resolution for: ${hostname}${path}`);
 
+      // Extract slug directly from path for faster resolution
+      const pathSlug = path.replace(/^\//, '').split('/')[0] || '';
+      
       try {
+        // First, try to resolve via edge function for domain validation
+        console.log('[CustomDomain] Calling edge function...');
         const response = await supabase.functions.invoke<ResolvedDomain>('resolve-custom-domain', {
           body: { hostname, path }
         });
@@ -50,6 +54,13 @@ const CustomDomainPage = () => {
 
         if (response.error) {
           console.error('[CustomDomain] Edge function error:', response.error);
+          // If edge function fails, try direct slug lookup as fallback
+          if (pathSlug) {
+            console.log('[CustomDomain] Trying direct slug lookup:', pathSlug);
+            setResolvedSlug(pathSlug);
+            setLoading(false);
+            return;
+          }
           throw response.error;
         }
 
@@ -57,6 +68,13 @@ const CustomDomainPage = () => {
 
         if (!data?.found) {
           console.log('[CustomDomain] Domain not found or not verified');
+          // Try direct slug lookup as fallback
+          if (pathSlug) {
+            console.log('[CustomDomain] Trying direct slug lookup:', pathSlug);
+            setResolvedSlug(pathSlug);
+            setLoading(false);
+            return;
+          }
           setNotFound(true);
           setLoading(false);
           return;
@@ -68,15 +86,12 @@ const CustomDomainPage = () => {
         let slugToShow: string | null = null;
 
         if (data.type === 'page' && data.slug) {
-          // Direct page access via path
           slugToShow = data.slug;
           console.log('[CustomDomain] Using page slug:', slugToShow);
         } else if (data.type === 'homepage' && data.defaultPage?.slug) {
-          // Homepage - show default page
           slugToShow = data.defaultPage.slug;
           console.log('[CustomDomain] Using homepage slug:', slugToShow);
         } else if (data.type === 'no_pages') {
-          // No pages published
           console.log('[CustomDomain] No pages published for this domain');
           setNotFound(true);
           setLoading(false);
@@ -92,7 +107,13 @@ const CustomDomainPage = () => {
         }
       } catch (err) {
         console.error('[CustomDomain] Error resolving custom domain:', err);
-        setNotFound(true);
+        // Final fallback: try using path slug directly
+        if (pathSlug) {
+          console.log('[CustomDomain] Using path slug as final fallback:', pathSlug);
+          setResolvedSlug(pathSlug);
+        } else {
+          setNotFound(true);
+        }
       } finally {
         setLoading(false);
       }
