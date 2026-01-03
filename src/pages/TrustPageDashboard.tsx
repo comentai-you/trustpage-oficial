@@ -13,6 +13,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import StatsBar from "@/components/dashboard/StatsBar";
 import PageCard from "@/components/dashboard/PageCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
+import OnboardingModal from "@/components/OnboardingModal";
 import { TemplateType } from "@/types/landing-page";
 
 interface LandingPage {
@@ -36,6 +37,8 @@ interface UserProfile {
   avatar_url: string | null;
   custom_domain: string | null;
   domain_verified: boolean | null;
+  company_name: string | null;
+  support_email: string | null;
 }
 
 const getMaxPages = (planType: string) => {
@@ -56,6 +59,7 @@ const TrustPageDashboard = () => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit'>('limit');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
@@ -80,12 +84,17 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified")
+        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified, company_name, support_email")
         .eq("id", user!.id)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
+      
+      // Check if onboarding is needed (no company_name or support_email)
+      if (data && (!data.company_name || !data.support_email)) {
+        setShowOnboardingModal(true);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -351,6 +360,18 @@ const TrustPageDashboard = () => {
         onConfirm={confirmDelete}
         variant="destructive"
       />
+
+      {user && (
+        <OnboardingModal
+          open={showOnboardingModal}
+          userId={user.id}
+          onComplete={() => {
+            setShowOnboardingModal(false);
+            fetchProfile();
+            fetchPages();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 };

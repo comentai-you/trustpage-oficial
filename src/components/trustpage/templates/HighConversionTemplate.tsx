@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LandingPageFormData } from "@/types/landing-page";
 import { Play, Maximize2 } from "lucide-react";
+import LegalFooter from "./LegalFooter";
 // Extend Window interface for YouTube API
 declare global {
   interface Window {
@@ -400,12 +401,8 @@ const HighConversionTemplate = ({
         </div>
       </section>
 
-      {/* Watermark */}
-      <footer className="w-full py-6 text-center">
-        <p className="text-xs font-medium tracking-wide" style={{ opacity: 0.4, color: data.colors.text }}>
-          ✨ Criado com <span className="font-bold">TrustPage</span>
-        </p>
-      </footer>
+      {/* Legal Footer */}
+      <LegalFooter textColor={data.colors.text} showWatermark={true} />
     </main>
   );
 };

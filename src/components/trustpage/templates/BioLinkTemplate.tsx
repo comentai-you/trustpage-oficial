@@ -1,6 +1,6 @@
 import { LandingPageFormData, BioLinkContent, defaultBioContent } from "@/types/landing-page";
 import { Instagram, MessageCircle, Youtube, Linkedin, ExternalLink } from "lucide-react";
-
+import LegalFooter from "./LegalFooter";
 interface BioLinkTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
@@ -91,12 +91,10 @@ const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
         ))}
       </div>
 
-      {/* Watermark */}
-      <footer className="mt-auto pt-10">
-        <p className="text-xs" style={{ color: textColor, opacity: 0.4 }}>
-          ✨ Criado com <span className="font-bold">TrustPage</span>
-        </p>
-      </footer>
+      {/* Legal Footer */}
+      <div className="mt-auto pt-10">
+        <LegalFooter textColor={textColor} showWatermark={true} />
+      </div>
     </main>
   );
 };
