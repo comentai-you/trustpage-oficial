@@ -77,8 +77,22 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse path to find slug (e.g., /my-page or just /)
-    const pathSlug = path?.replace(/^\//, '').split('/')[0] || '';
+    // Parse path to find slug - handle legacy /p/ prefix and clean URLs
+    // Examples: /p/oferta-natal -> oferta-natal, /oferta-natal -> oferta-natal
+    let pathSlug = path || '';
+    
+    // Step 1: Remove /p/ prefix if present (legacy route support)
+    if (pathSlug.startsWith('/p/')) {
+      pathSlug = pathSlug.substring(3);
+    }
+    
+    // Step 2: Remove leading slashes
+    pathSlug = pathSlug.replace(/^\/+/, '');
+    
+    // Step 3: Get only the first segment (before any additional slashes)
+    pathSlug = pathSlug.split('/')[0] || '';
+    
+    console.log(`Extracted slug from path "${path}": "${pathSlug}"`);
 
     // If path has a slug, find that specific page
     if (pathSlug && pathSlug !== '') {

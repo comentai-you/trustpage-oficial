@@ -13,16 +13,19 @@ interface PerfilTabProps {
   existingPageId?: string | null;
 }
 
+// Extended list of reserved system slugs
 const RESERVED_SLUGS = [
   'admin', 'dashboard', 'login', 'auth', 'register', 'signup', 
   'pricing', 'api', '404', 'suporte', 'ajuda', 'termos',
   'settings', 'profile', 'user', 'users', 'pages', 'page',
-  'edit', 'new', 'create', 'delete', 'p', 'app', 'home',
-  'about', 'contact', 'blog', 'checkout', 'cart', 'account'
+  'edit', 'new', 'create', 'delete', 'p', 'app', 'home', 'index',
+  'about', 'contact', 'blog', 'checkout', 'cart', 'account',
+  'subscription', 'payment', 'privacy', 'terms', 'help'
 ];
 
 const generateSlugFromName = (name: string): string => {
   if (!name.trim()) return "";
+  // Clean slug - NO brand suffix, just the sanitized name
   return name
     .toLowerCase()
     .normalize("NFD")
@@ -209,7 +212,7 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
               <div className="flex-1 relative">
                 <div className="flex items-center">
                   <span className="text-xs text-muted-foreground bg-muted px-2 py-2 rounded-l-md border border-r-0 border-border">
-                    /p/
+                    /
                   </span>
                   <Input
                     value={slugInput}
@@ -254,7 +257,7 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
             )}>
               <Link2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <p className="text-sm text-muted-foreground truncate flex-1">
-                <span className="opacity-60">seusite.com/p/</span>
+                <span className="opacity-60">seusite.com/</span>
                 <span className="font-medium text-foreground">{displaySlug}</span>
               </p>
               {hasCustomSlug && (

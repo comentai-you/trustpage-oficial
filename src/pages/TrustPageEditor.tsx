@@ -131,16 +131,18 @@ const TrustPageEditor = () => {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
-  // Lista de slugs reservados pelo sistema (rotas internas)
+  // Extended list of reserved system slugs
   const RESERVED_SLUGS = [
     'admin', 'dashboard', 'login', 'auth', 'register', 'signup', 
     'pricing', 'api', '404', 'suporte', 'ajuda', 'termos',
     'settings', 'profile', 'user', 'users', 'pages', 'page',
-    'edit', 'new', 'create', 'delete', 'p', 'app', 'home',
-    'about', 'contact', 'blog', 'checkout', 'cart', 'account'
+    'edit', 'new', 'create', 'delete', 'p', 'app', 'home', 'index',
+    'about', 'contact', 'blog', 'checkout', 'cart', 'account',
+    'subscription', 'payment', 'privacy', 'terms', 'help'
   ];
 
   const generateSlugFromName = (name: string): string => {
+    // Clean slug - NO brand suffix, just the sanitized name
     return name
       .toLowerCase()
       .normalize("NFD")
