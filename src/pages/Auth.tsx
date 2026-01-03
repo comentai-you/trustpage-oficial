@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, User, ArrowLeft, Eye, EyeOff, Sparkles, Loader2, Check, Play, Zap, Globe, TrendingUp } from "lucide-react";
@@ -9,7 +9,10 @@ import { useAuth } from "@/contexts/AuthContext";
 type AuthMode = "login" | "signup" | "forgot";
 
 const AuthPage = () => {
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get("mode") === "login" ? "login" : "signup";
+  
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
