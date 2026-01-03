@@ -91,8 +91,11 @@ const PageCard = ({
       toast.error("Publique a página para abrir o link público.");
       return;
     }
+
+    // Segurança: sempre usar /p/:slug no domínio customizado (funciona em todas as configs)
     if (useCustomDomain && customDomain) {
-      window.open(`https://${customDomain}/${slug}`, "_blank");
+      const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+      window.open(`https://${normalizedDomain}/p/${slug}`, "_blank");
     } else {
       window.open(`${window.location.origin}/p/${slug}`, "_blank");
     }
@@ -144,7 +147,7 @@ const PageCard = ({
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground truncate mb-2">
-                trustpageapp.com/p/{slug}
+                {customDomain ? `${customDomain}/p/${slug}` : `trustpageapp.com/p/${slug}`}
               </p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -224,7 +227,7 @@ const PageCard = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onCopyLink(slug, true)}>
                   <Globe className="w-4 h-4 mr-2" />
-                  Copiar {customDomain}/{slug}
+                  Copiar {customDomain}/p/{slug}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

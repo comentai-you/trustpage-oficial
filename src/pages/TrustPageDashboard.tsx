@@ -136,7 +136,8 @@ const TrustPageDashboard = () => {
   const handleCopyLink = (slug: string, useCustomDomain?: boolean) => {
     let url: string;
     if (useCustomDomain && profile?.custom_domain && profile?.domain_verified) {
-      url = `https://${profile.custom_domain}/${slug}`;
+      const normalizedDomain = profile.custom_domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+      url = `https://${normalizedDomain}/p/${slug}`;
     } else {
       url = `${window.location.origin}/p/${slug}`;
     }
