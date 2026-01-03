@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images, Settings } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images, Settings, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -542,6 +542,23 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                 placeholder="https://..."
                 className="text-sm"
               />
+            </div>
+
+            {/* WhatsApp Floating Button */}
+            <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 space-y-3">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-green-600" />
+                <Label className="text-xs font-medium text-green-800">Botão WhatsApp Flutuante</Label>
+              </div>
+              <Input
+                value={formData.whatsapp_number || ''}
+                onChange={(e) => onChange({ whatsapp_number: e.target.value })}
+                placeholder="5511999999999"
+                className="text-sm"
+              />
+              <p className="text-[11px] text-green-700">
+                Número com DDD e código do país (ex: 5511999999999). Deixe vazio para ocultar o botão.
+              </p>
             </div>
           </AccordionContent>
         </AccordionItem>
