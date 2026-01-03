@@ -21,7 +21,7 @@ const HomePage = () => {
           
           {/* Desktop Menu */}
           <div className="hidden sm:flex items-center gap-3">
-            <Link to="/auth">
+            <Link to="/auth?mode=login">
               <Button variant="ghost" className="font-medium">
                 Login
               </Button>
@@ -45,7 +45,7 @@ const HomePage = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-background border-b border-border px-4 py-4 space-y-3">
-            <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+            <Link to="/auth?mode=login" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" className="w-full justify-center font-medium">
                 Login
               </Button>

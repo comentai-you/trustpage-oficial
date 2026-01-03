@@ -912,15 +912,15 @@ const SettingsPage = () => {
                           </div>
                         )}
                         
-                        {/* For apex domain, also suggest adding www CNAME */}
+                        {/* For apex domain, also require adding www CNAME */}
                         {!isSubdomain && (
                           <>
                             <div className="border-t border-border pt-3 mt-3">
-                              <p className="text-xs text-muted-foreground mb-2">
-                                <strong>Opcional:</strong> Para que www.{profile?.custom_domain} também funcione:
+                              <p className="text-xs text-foreground font-medium mb-2">
+                                <strong>Obrigatório:</strong> Para que www.{profile?.custom_domain} também funcione:
                               </p>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 items-center opacity-70">
+                            <div className="grid grid-cols-3 gap-4 items-center">
                               <span className="font-mono bg-background px-2 py-1 rounded text-sm">CNAME</span>
                               <div className="flex items-center gap-1">
                                 <span className="font-mono bg-background px-2 py-1 rounded text-sm">www</span>
