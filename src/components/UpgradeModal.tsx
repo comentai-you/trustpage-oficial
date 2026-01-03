@@ -49,7 +49,7 @@ const featureDetails = {
   limit: {
     icon: Crown,
     title: 'Limite de Páginas',
-    description: 'Você atingiu o limite de 1 página do plano gratuito. Faça upgrade para criar mais páginas.',
+    description: 'Você atingiu o limite de páginas do seu plano. Faça upgrade para criar mais páginas.',
   },
 };
 
