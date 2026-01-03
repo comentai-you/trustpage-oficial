@@ -399,13 +399,6 @@ const HighConversionTemplate = ({
           )}
         </div>
       </section>
-
-      {/* Watermark */}
-      <footer className="w-full py-6 text-center">
-        <p className="text-xs font-medium tracking-wide" style={{ opacity: 0.4, color: data.colors.text }}>
-          ✨ Criado com <span className="font-bold">TrustPage</span>
-        </p>
-      </footer>
     </main>
   );
 };

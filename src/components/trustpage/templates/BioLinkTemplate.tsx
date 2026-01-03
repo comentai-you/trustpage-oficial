@@ -90,11 +90,6 @@ const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
           </a>
         ))}
       </div>
-
-      {/* Watermark */}
-      <footer className="mt-auto pt-10">
-        <p className="text-xs" style={{ color: textColor, opacity: 0.4 }}>✨ Criado com <span className="font-bold">TrustPage</span></p>
-      </footer>
     </main>
   );
 };

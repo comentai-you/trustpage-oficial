@@ -675,16 +675,6 @@ const SalesPageTemplate = ({
           </span>
         </a>
       )}
-
-      {/* Footer */}
-      <footer className="w-full py-8 text-center">
-        <p 
-          className="text-sm font-medium tracking-wide"
-          style={{ color: textColor, opacity: 0.5 }}
-        >
-          ✨ Criado com <span className="font-bold">TrustPage</span>
-        </p>
-      </footer>
     </main>
   );
 };
