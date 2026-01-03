@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LandingPageFormData, SalesPageContent } from "@/types/landing-page";
 import ImageCarousel from "./ImageCarousel";
+import LegalFooter from "./LegalFooter";
 import { 
   Play, Check, Star, Shield, ArrowRight, ChevronDown,
   Zap, Heart, Award, Gift, Crown,
@@ -676,15 +677,8 @@ const SalesPageTemplate = ({
         </a>
       )}
 
-      {/* Footer */}
-      <footer className="w-full py-8 text-center">
-        <p
-          className="text-sm font-medium tracking-wide"
-          style={{ color: textColor, opacity: 0.5 }}
-        >
-          ✨ Criado com <span className="font-bold">TrustPage</span>
-        </p>
-      </footer>
+      {/* Legal Footer */}
+      <LegalFooter textColor={textColor} showWatermark={true} />
     </main>
   );
 };

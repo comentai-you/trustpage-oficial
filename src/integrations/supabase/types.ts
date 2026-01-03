@@ -142,8 +142,10 @@ export type Database = {
           asaas_subscription_id: string | null
           avatar_url: string | null
           bio: string | null
+          company_name: string | null
           created_at: string
           custom_domain: string | null
+          document_id: string | null
           domain_verified: boolean | null
           full_name: string | null
           id: string
@@ -151,6 +153,7 @@ export type Database = {
           plan_type: string
           subscription_status: string
           subscription_updated_at: string | null
+          support_email: string | null
           updated_at: string
           username: string | null
         }
@@ -159,8 +162,10 @@ export type Database = {
           asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
+          company_name?: string | null
           created_at?: string
           custom_domain?: string | null
+          document_id?: string | null
           domain_verified?: boolean | null
           full_name?: string | null
           id: string
@@ -168,6 +173,7 @@ export type Database = {
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
+          support_email?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -176,8 +182,10 @@ export type Database = {
           asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
+          company_name?: string | null
           created_at?: string
           custom_domain?: string | null
+          document_id?: string | null
           domain_verified?: boolean | null
           full_name?: string | null
           id?: string
@@ -185,6 +193,7 @@ export type Database = {
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
+          support_email?: string | null
           updated_at?: string
           username?: string | null
         }
