@@ -381,12 +381,12 @@ const HomePage = () => {
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">
-                        Crie até <span className="font-bold text-primary">3 Páginas</span> Ativas
+                        Crie até <span className="font-bold text-primary">2 Páginas</span> Ativas
                       </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">Páginas VSL Ilimitadas</span>
+                      <span className="text-foreground text-sm sm:text-base font-semibold">Página VSL com Vídeo</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -398,7 +398,15 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Domínio Personalizado</span>
+                      <span className="text-foreground text-sm sm:text-base">1 Domínio Personalizado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Pixel do Facebook/Google ADS</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Marca d'água no rodapé</span>
                     </li>
                   </ul>
                   
@@ -413,17 +421,9 @@ const HomePage = () => {
             </div>
 
             {/* Pro Card */}
-            <div className="relative opacity-80">
+            <div className="relative">
               <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border shadow-elevated h-full">
-                {/* Badge */}
-                <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1 sm:py-1.5 bg-muted text-muted-foreground text-xs sm:text-sm font-semibold rounded-full border border-border whitespace-nowrap">
-                    <Clock className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                    Em Breve
-                  </span>
-                </div>
-                
-                <div className="pt-4">
+                <div className="pt-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Pro</h3>
                   <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
                     <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 69,90</span>
@@ -434,12 +434,12 @@ const HomePage = () => {
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">
-                        Crie até <span className="font-bold">10 Páginas</span> Ativas
+                        Crie até <span className="font-bold">8 Páginas</span> Ativas
                       </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">API de Conversão (Server-Side)</span>
+                      <span className="text-foreground text-sm sm:text-base font-semibold">Conecte até 3 Domínios</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -447,13 +447,19 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Pixel do Facebook/Google ADS</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">Suporte Prioritário</span>
                     </li>
                   </ul>
                   
-                  <Button variant="outline" className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2" disabled>
-                    Entrar na Lista de Espera
-                  </Button>
+                  <Link to="/auth">
+                    <Button variant="outline" className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2">
+                      Assinar Pro
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
