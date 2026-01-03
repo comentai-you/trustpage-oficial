@@ -19,11 +19,11 @@ import SettingsPage from "./pages/SettingsPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import HelpPage from "./pages/HelpPage";
-import useCustomDomain from "./hooks/useCustomDomain";
 
 const queryClient = new QueryClient();
 
-// Known app domains that should use standard routing
+// ALLOWLIST ESTRITA: Domínios que pertencem ao SISTEMA (dashboard, auth, etc)
+// Qualquer domínio fora desta lista = domínio de CLIENTE
 const KNOWN_APP_DOMAINS = [
   'localhost',
   '127.0.0.1',
@@ -31,91 +31,104 @@ const KNOWN_APP_DOMAINS = [
   'trustpageapp.com',
   'lovable.app',
   'lovableproject.com',
-];
+  'vercel.app',
+  'trustpage-one.vercel.app',
+] as const;
 
-const isCustomDomain = () => {
-  const hostname = window.location.hostname;
+// Verifica se o hostname atual é um domínio de cliente (NÃO está na allowlist)
+const isCustomDomain = (): boolean => {
+  const hostname = window.location.hostname.toLowerCase();
   return !KNOWN_APP_DOMAINS.some(domain => hostname.includes(domain));
 };
 
-const AppRoutes = () => {
-  // If it's a custom domain, use custom domain routing
+// Rotas para domínios de CLIENTES - apenas páginas públicas, sem contexto de sistema
+const CustomDomainRoutes = () => (
+  <Routes>
+    <Route path="/" element={<CustomDomainPage />} />
+    <Route path="/:slug" element={<CustomDomainPage />} />
+    <Route path="*" element={<CustomDomainPage />} />
+  </Routes>
+);
+
+// Rotas do SISTEMA - dashboard, auth, etc
+const SystemRoutes = () => (
+  <Routes>
+    {/* Public Routes */}
+    <Route path="/" element={<HomePage />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/p/:slug" element={<LandingPageView />} />
+    <Route path="/termos" element={<TermsPage />} />
+    <Route path="/privacidade" element={<PrivacyPage />} />
+    <Route path="/contato" element={<ContactPage />} />
+    
+    {/* Protected Routes */}
+    <Route path="/dashboard" element={
+      <ProtectedRoute>
+        <TrustPageDashboard />
+      </ProtectedRoute>
+    } />
+    <Route path="/settings" element={
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    } />
+    <Route path="/subscription" element={
+      <ProtectedRoute>
+        <SubscriptionPage />
+      </ProtectedRoute>
+    } />
+    <Route path="/payment-success" element={
+      <ProtectedRoute>
+        <PaymentSuccessPage />
+      </ProtectedRoute>
+    } />
+    <Route path="/help" element={
+      <ProtectedRoute>
+        <HelpPage />
+      </ProtectedRoute>
+    } />
+    <Route path="/new" element={
+      <ProtectedRoute>
+        <TrustPageEditor />
+      </ProtectedRoute>
+    } />
+    <Route path="/edit/:id" element={
+      <ProtectedRoute>
+        <TrustPageEditor />
+      </ProtectedRoute>
+    } />
+    
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
+// App principal com separação RÍGIDA entre Sistema e Cliente
+const App = () => {
+  // Se é domínio de cliente, renderiza APENAS as rotas públicas (leve, sem providers desnecessários)
   if (isCustomDomain()) {
     return (
-      <Routes>
-        {/* Custom domain serves landing pages directly */}
-        <Route path="/" element={<CustomDomainPage />} />
-        <Route path="/:slug" element={<CustomDomainPage />} />
-        <Route path="*" element={<CustomDomainPage />} />
-      </Routes>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <CustomDomainRoutes />
+        </BrowserRouter>
+      </QueryClientProvider>
     );
   }
 
-  // Standard app routing
+  // Sistema completo com todos os providers
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/p/:slug" element={<LandingPageView />} />
-      <Route path="/termos" element={<TermsPage />} />
-      <Route path="/privacidade" element={<PrivacyPage />} />
-      <Route path="/contato" element={<ContactPage />} />
-      
-      {/* Protected Routes */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <TrustPageDashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <SettingsPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/subscription" element={
-        <ProtectedRoute>
-          <SubscriptionPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/payment-success" element={
-        <ProtectedRoute>
-          <PaymentSuccessPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/help" element={
-        <ProtectedRoute>
-          <HelpPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/new" element={
-        <ProtectedRoute>
-          <TrustPageEditor />
-        </ProtectedRoute>
-      } />
-      <Route path="/edit/:id" element={
-        <ProtectedRoute>
-          <TrustPageEditor />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <SystemRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
 
 export default App;
