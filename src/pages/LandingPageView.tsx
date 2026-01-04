@@ -1,9 +1,10 @@
 import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, SalesPageContent, TemplateType } from "@/types/landing-page";
+import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, TemplateType } from "@/types/landing-page";
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
+import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,6 +15,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface LandingPageViewProps {
   slugOverride?: string;
 }
+
+const LEGAL_SLUGS = new Set(["politica-de-privacidade", "termos-de-uso", "contato"]);
 
 // Validate Facebook Pixel ID format (15-16 digits only)
 const isValidFacebookPixelId = (pixelId: string): boolean => {
@@ -66,6 +69,11 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
   const [notFound, setNotFound] = useState(false);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
   const isMobile = useIsMobile();
+
+  const isLegalPage = useMemo(() => {
+    if (!slug) return false;
+    return LEGAL_SLUGS.has(String(slug).toLowerCase());
+  }, [slug]);
 
   // Detect if user came from paid ads (fbclid, gclid, utm_source=ads)
   const isFromPaidAds = useMemo(() => {
@@ -130,9 +138,13 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
         }
 
         const colors = page.colors as unknown as LandingPageColors || defaultFormData.colors;
-        const content = page.content as unknown as SalesPageContent || defaultSalesContent;
+        const content = (page.content ?? defaultSalesContent) as any;
         const templateType = (page.template_type as TemplateType) || 'vsl';
-        
+
+        const headline = page.headline || '';
+        const pageTitle = headline || page.page_name || page.slug;
+        if (pageTitle) document.title = `${pageTitle} | TrustPage`;
+
         setPageData({
           slug: page.slug,
           template_id: page.template_id,
@@ -171,7 +183,7 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
     };
 
     fetchPage();
-  }, [slug]);
+  }, [slug, location.pathname]);
 
   if (loading) {
     return (
@@ -199,6 +211,11 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
         </div>
       </div>
     );
+  }
+
+  // Páginas legais sempre renderizam como documento (não como template Bio/VSL)
+  if (isLegalPage) {
+    return <LegalPageTemplate data={pageData} />;
   }
 
   return (

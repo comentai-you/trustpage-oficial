@@ -75,11 +75,9 @@ Esta política pode ser atualizada periodicamente. Recomendamos revisar regularm
     return {
       headline: 'Política de Privacidade',
       description,
-      content: {
-        sections: [
-          { id: '1', type: 'text', title: 'Política de Privacidade', body: description }
-        ]
-      }
+      content: [
+        { id: '1', type: 'text', content: description }
+      ],
     };
   }
 
@@ -132,11 +130,9 @@ Para dúvidas:
     return {
       headline: 'Termos de Uso',
       description,
-      content: {
-        sections: [
-          { id: '1', type: 'text', title: 'Termos de Uso', body: description }
-        ]
-      }
+      content: [
+        { id: '1', type: 'text', content: description }
+      ],
     };
   }
 
@@ -168,11 +164,9 @@ Obrigado por entrar em contato!`;
   return {
     headline: 'Contato',
     description,
-    content: {
-      sections: [
-        { id: '1', type: 'text', title: 'Contato', body: description }
-      ]
-    }
+    content: [
+      { id: '1', type: 'text', content: description }
+    ],
   };
 };
 
