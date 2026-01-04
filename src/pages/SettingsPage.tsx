@@ -350,25 +350,11 @@ const SettingsPage = () => {
       // Check if legal pages already exist
       const { data: existingPages } = await supabase
         .from("landing_pages")
-        .select("slug")
+        .select("id, slug")
         .eq("user_id", user.id)
         .in("slug", ["politica-de-privacidade", "termos-de-uso", "contato"]);
 
-      const existingSlugs = new Set(existingPages?.map(p => p.slug) || []);
-
-      const pagesToCreate: Array<{
-        user_id: string;
-        slug: string;
-        page_name: string;
-        headline: string;
-        description: string;
-        content: Json;
-        template_type: string;
-        template_id: number;
-        is_published: boolean;
-        primary_color: string;
-        colors: { background: string; text: string; primary: string };
-      }> = [];
+      const existingMap = new Map((existingPages || []).map(p => [p.slug, p.id]));
 
       const legalPages: Array<{ type: 'privacy' | 'terms' | 'contact'; slug: string; name: string }> = [
         { type: 'privacy', slug: 'politica-de-privacidade', name: 'Política de Privacidade' },
@@ -376,34 +362,64 @@ const SettingsPage = () => {
         { type: 'contact', slug: 'contato', name: 'Contato' },
       ];
 
+      let createdCount = 0;
+      let updatedCount = 0;
+
+      // Upsert: update existing or create new
       for (const page of legalPages) {
-        if (!existingSlugs.has(page.slug)) {
-          const generatedContent = generateLegalPageContent(page.type, companyName.trim(), supportEmailField.trim());
-          pagesToCreate.push({
-            user_id: user.id,
-            slug: page.slug,
-            page_name: page.name,
-            headline: generatedContent.headline,
-            description: generatedContent.description,
-            content: generatedContent.content,
-            template_type: 'bio',
-            template_id: 1,
-            is_published: true,
-            primary_color: '#8B5CF6',
-            colors: { background: '#FFFFFF', text: '#1F2937', primary: '#8B5CF6' },
-          });
+        const generatedContent = generateLegalPageContent(page.type, companyName.trim(), supportEmailField.trim());
+        const existingId = existingMap.get(page.slug);
+
+        if (existingId) {
+          // Update existing page with fresh content
+          const { error: updateError } = await supabase
+            .from("landing_pages")
+            .update({
+              headline: generatedContent.headline,
+              description: generatedContent.description,
+              content: generatedContent.content,
+              is_published: true,
+            })
+            .eq("id", existingId);
+
+          if (updateError) {
+            console.error(`Error updating ${page.slug}:`, updateError);
+          } else {
+            updatedCount++;
+          }
+        } else {
+          // Create new page
+          const { error: insertError } = await supabase
+            .from("landing_pages")
+            .insert({
+              user_id: user.id,
+              slug: page.slug,
+              page_name: page.name,
+              headline: generatedContent.headline,
+              description: generatedContent.description,
+              content: generatedContent.content,
+              template_type: 'bio',
+              template_id: 1,
+              is_published: true,
+              primary_color: '#8B5CF6',
+              colors: { background: '#FFFFFF', text: '#1F2937', primary: '#8B5CF6' },
+            });
+
+          if (insertError) {
+            console.error(`Error creating ${page.slug}:`, insertError);
+            throw insertError;
+          }
+          createdCount++;
         }
       }
 
-      if (pagesToCreate.length > 0) {
-        const { error: pagesError } = await supabase
-          .from("landing_pages")
-          .insert(pagesToCreate);
-
-        if (pagesError) throw pagesError;
-        toast.success(`${pagesToCreate.length} página(s) legal(is) criada(s) com sucesso!`);
+      if (createdCount > 0 || updatedCount > 0) {
+        const msgs: string[] = [];
+        if (createdCount > 0) msgs.push(`${createdCount} criada(s)`);
+        if (updatedCount > 0) msgs.push(`${updatedCount} atualizada(s)`);
+        toast.success(`Páginas legais: ${msgs.join(', ')}`);
       } else {
-        toast.info("Todas as páginas legais já existem");
+        toast.info("Páginas legais já estão atualizadas");
       }
 
       setHasLegalPages(true);
