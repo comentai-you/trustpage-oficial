@@ -292,7 +292,7 @@ const SettingsPage = () => {
     });
 
     if (type === 'privacy') {
-      const description = `# Política de Privacidade\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Informações que Coletamos\n\nColetamos informações que você nos fornece diretamente, como nome, e-mail e outras informações de contato.\n\n## 2. Como Usamos Suas Informações\n\nUtilizamos as informações coletadas para:\n- Fornecer e melhorar nossos serviços\n- Processar transações e enviar notificações\n- Responder a solicitações e fornecer suporte\n\n## 3. Seus Direitos\n\nVocê tem direito a acessar, corrigir ou excluir seus dados pessoais.\n\n## 4. Contato\n\n**E-mail:** ${email}`;
+      const description = `# Política de Privacidade\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Informações que Coletamos\n\nColetamos informações que você nos fornece diretamente, como nome, e-mail e outras informações de contato.\n\n## 2. Como Usamos Suas Informações\n\nUtilizamos as informações coletadas para:\n- Fornecer e melhorar nossos serviços\n- Processar transações e enviar notificações\n- Responder a solicitações e fornecer suporte\n\n## 3. Cookies e Tecnologias de Rastreamento\n\nUtilizamos cookies e tecnologias de rastreamento de terceiros (como Facebook Pixel e Google Analytics) para analisar o tráfego e personalizar anúncios. Ao utilizar nosso site, você concorda com o uso dessas tecnologias.\n\n## 4. Seus Direitos\n\nVocê tem direito a acessar, corrigir ou excluir seus dados pessoais.\n\n## 5. Contato\n\n**E-mail:** ${email}`;
       return {
         headline: 'Política de Privacidade',
         description,

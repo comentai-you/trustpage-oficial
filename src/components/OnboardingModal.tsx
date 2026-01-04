@@ -45,17 +45,21 @@ Utilizamos as informações coletadas para:
 - Responder a solicitações e fornecer suporte
 - Enviar comunicações de marketing (com seu consentimento)
 
-## 3. Compartilhamento de Informações
+## 3. Cookies e Tecnologias de Rastreamento
+
+Utilizamos cookies e tecnologias de rastreamento de terceiros (como Facebook Pixel e Google Analytics) para analisar o tráfego e personalizar anúncios. Ao utilizar nosso site, você concorda com o uso dessas tecnologias.
+
+## 4. Compartilhamento de Informações
 
 Não vendemos suas informações pessoais. Podemos compartilhar dados com:
 - Prestadores de serviços que auxiliam em nossas operações
 - Autoridades quando exigido por lei
 
-## 4. Segurança
+## 5. Segurança
 
 Implementamos medidas de segurança para proteger suas informações pessoais contra acesso não autorizado.
 
-## 5. Seus Direitos
+## 6. Seus Direitos
 
 Você tem direito a:
 - Acessar seus dados pessoais
@@ -63,7 +67,7 @@ Você tem direito a:
 - Solicitar a exclusão de seus dados
 - Revogar consentimentos concedidos
 
-## 6. Contato
+## 7. Contato
 
 Para dúvidas sobre esta política, entre em contato:
 **E-mail:** ${supportEmail}
