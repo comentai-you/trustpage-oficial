@@ -296,7 +296,7 @@ const SettingsPage = () => {
       return {
         headline: 'Política de Privacidade',
         description,
-        content: { sections: [{ id: '1', type: 'text', title: 'Política de Privacidade', body: description }] }
+        content: [{ id: '1', type: 'text', content: description }]
       };
     }
 
@@ -305,7 +305,7 @@ const SettingsPage = () => {
       return {
         headline: 'Termos de Uso',
         description,
-        content: { sections: [{ id: '1', type: 'text', title: 'Termos de Uso', body: description }] }
+        content: [{ id: '1', type: 'text', content: description }]
       };
     }
 
@@ -313,7 +313,7 @@ const SettingsPage = () => {
     return {
       headline: 'Contato',
       description,
-      content: { sections: [{ id: '1', type: 'text', title: 'Contato', body: description }] }
+      content: [{ id: '1', type: 'text', content: description }]
     };
   };
 

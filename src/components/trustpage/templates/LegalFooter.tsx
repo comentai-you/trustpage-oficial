@@ -1,17 +1,23 @@
+import useCustomDomain from "@/hooks/useCustomDomain";
+
 interface LegalFooterProps {
   textColor?: string;
   showWatermark?: boolean;
 }
 
 const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFooterProps) => {
+  const { isCustomDomain } = useCustomDomain();
+
   const footerLinks = [
     { label: "Políticas de Privacidade", slug: "politica-de-privacidade" },
     { label: "Termos de Uso", slug: "termos-de-uso" },
     { label: "Contato", slug: "contato" },
   ];
 
-  // Links relativos - funcionam tanto em domínios customizados quanto no padrão
+  // Domínio customizado: usa URL limpa /slug
+  // Domínio do sistema: usa /p/slug (evita conflitos com rotas fixas como /contato)
   const getLinkHref = (slug: string) => {
+    if (isCustomDomain) return `/${slug}`;
     return `/p/${slug}`;
   };
 
