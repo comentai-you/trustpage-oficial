@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle, Globe, Copy, ExternalLink, Crown, RefreshCw, Trash2, Lock, ShieldCheck, Info } from "lucide-react";
+import { User, CreditCard, Shield, ArrowLeft, Loader2, Camera, Check, AlertCircle, Globe, Copy, ExternalLink, Crown, RefreshCw, Trash2, Lock, ShieldCheck, Info, Building2, Mail, FileText, Sparkles, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,9 @@ interface UserProfile {
   plan_type: string;
   custom_domain: string | null;
   domain_verified: boolean;
+  company_name: string | null;
+  support_email: string | null;
+  document_id: string | null;
 }
 
 type VercelVerificationRecord = {
@@ -61,6 +64,13 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resettingPassword, setResettingPassword] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  
+  // Company/Legal states
+  const [companyName, setCompanyName] = useState("");
+  const [supportEmailField, setSupportEmailField] = useState("");
+  const [documentId, setDocumentId] = useState("");
+  const [generatingLegalPages, setGeneratingLegalPages] = useState(false);
+  const [hasLegalPages, setHasLegalPages] = useState(false);
   
   // Domain states
   const [domainInput, setDomainInput] = useState("");
@@ -171,8 +181,24 @@ const SettingsPage = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      checkLegalPages();
     }
   }, [user]);
+
+  const checkLegalPages = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from("landing_pages")
+        .select("slug")
+        .eq("user_id", user.id)
+        .in("slug", ["politica-de-privacidade", "termos-de-uso", "contato"]);
+      
+      setHasLegalPages(data?.length === 3);
+    } catch (error) {
+      console.error("Error checking legal pages:", error);
+    }
+  };
 
   // Auto-refresh domain verification every 60s while pending
   useEffect(() => {
@@ -189,13 +215,16 @@ const SettingsPage = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url, created_at, subscription_status, plan_type, custom_domain, domain_verified")
+        .select("id, full_name, avatar_url, created_at, subscription_status, plan_type, custom_domain, domain_verified, company_name, support_email, document_id")
         .eq("id", user!.id)
         .maybeSingle();
 
       if (error) throw error;
       setProfile(data);
       setFullName(data?.full_name || "");
+      setCompanyName(data?.company_name || "");
+      setSupportEmailField(data?.support_email || "");
+      setDocumentId(data?.document_id || "");
       if (data?.custom_domain) {
         setShowDnsInstructions(true);
       }
@@ -225,17 +254,161 @@ const SettingsPage = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName })
+        .update({ 
+          full_name: fullName,
+          company_name: companyName.trim() || null,
+          support_email: supportEmailField.trim() || null,
+          document_id: documentId.trim() || null,
+        })
         .eq("id", user.id);
 
       if (error) throw error;
-      setProfile(prev => prev ? { ...prev, full_name: fullName } : null);
+      setProfile(prev => prev ? { 
+        ...prev, 
+        full_name: fullName,
+        company_name: companyName.trim() || null,
+        support_email: supportEmailField.trim() || null,
+        document_id: documentId.trim() || null,
+      } : null);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Erro ao atualizar perfil");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const generateLegalPageContent = (
+    type: 'privacy' | 'terms' | 'contact',
+    company: string,
+    email: string
+  ) => {
+    const currentDate = new Date().toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    if (type === 'privacy') {
+      return {
+        headline: 'Política de Privacidade',
+        description: `# Política de Privacidade\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Informações que Coletamos\n\nColetamos informações que você nos fornece diretamente, como nome, e-mail e outras informações de contato.\n\n## 2. Como Usamos Suas Informações\n\nUtilizamos as informações coletadas para:\n- Fornecer e melhorar nossos serviços\n- Processar transações e enviar notificações\n- Responder a solicitações e fornecer suporte\n\n## 3. Seus Direitos\n\nVocê tem direito a acessar, corrigir ou excluir seus dados pessoais.\n\n## 4. Contato\n\n**E-mail:** ${email}`
+      };
+    }
+
+    if (type === 'terms') {
+      return {
+        headline: 'Termos de Uso',
+        description: `# Termos de Uso\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Aceitação dos Termos\n\nAo acessar e utilizar nossos serviços, você concorda com estes Termos de Uso.\n\n## 2. Responsabilidades do Usuário\n\nVocê concorda em fornecer informações verdadeiras e não utilizar os serviços para fins ilegais.\n\n## 3. Propriedade Intelectual\n\nTodo o conteúdo é protegido por direitos autorais.\n\n## 4. Contato\n\n**E-mail:** ${email}`
+      };
+    }
+
+    return {
+      headline: 'Contato',
+      description: `# Entre em Contato\n\n**${company}**\n\nEstamos aqui para ajudar!\n\n---\n\n## 📧 E-mail\n\n**${email}**\n\nRespondemos em até 48 horas úteis.\n\n---\n\n## Horário de Atendimento\n\nSegunda a Sexta: 9h às 18h (horário de Brasília)`
+    };
+  };
+
+  const handleGenerateLegalPages = async () => {
+    if (!user) return;
+    
+    // Validate required fields
+    if (!companyName.trim() || !supportEmailField.trim()) {
+      toast.error("Preencha o nome da empresa e e-mail de suporte antes de gerar as páginas");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(supportEmailField)) {
+      toast.error("E-mail de suporte inválido");
+      return;
+    }
+
+    setGeneratingLegalPages(true);
+
+    try {
+      // First save the profile data
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          company_name: companyName.trim(),
+          support_email: supportEmailField.trim(),
+          document_id: documentId.trim() || null,
+        })
+        .eq("id", user.id);
+
+      if (profileError) throw profileError;
+
+      // Check if legal pages already exist
+      const { data: existingPages } = await supabase
+        .from("landing_pages")
+        .select("slug")
+        .eq("user_id", user.id)
+        .in("slug", ["politica-de-privacidade", "termos-de-uso", "contato"]);
+
+      const existingSlugs = new Set(existingPages?.map(p => p.slug) || []);
+
+      const pagesToCreate: Array<{
+        user_id: string;
+        slug: string;
+        page_name: string;
+        headline: string;
+        description: string;
+        template_type: string;
+        template_id: number;
+        is_published: boolean;
+        primary_color: string;
+        colors: { background: string; text: string; primary: string };
+      }> = [];
+
+      const legalPages: Array<{ type: 'privacy' | 'terms' | 'contact'; slug: string; name: string }> = [
+        { type: 'privacy', slug: 'politica-de-privacidade', name: 'Política de Privacidade' },
+        { type: 'terms', slug: 'termos-de-uso', name: 'Termos de Uso' },
+        { type: 'contact', slug: 'contato', name: 'Contato' },
+      ];
+
+      for (const page of legalPages) {
+        if (!existingSlugs.has(page.slug)) {
+          const content = generateLegalPageContent(page.type, companyName.trim(), supportEmailField.trim());
+          pagesToCreate.push({
+            user_id: user.id,
+            slug: page.slug,
+            page_name: page.name,
+            headline: content.headline,
+            description: content.description,
+            template_type: 'bio',
+            template_id: 1,
+            is_published: true,
+            primary_color: '#8B5CF6',
+            colors: { background: '#FFFFFF', text: '#1F2937', primary: '#8B5CF6' },
+          });
+        }
+      }
+
+      if (pagesToCreate.length > 0) {
+        const { error: pagesError } = await supabase
+          .from("landing_pages")
+          .insert(pagesToCreate);
+
+        if (pagesError) throw pagesError;
+        toast.success(`${pagesToCreate.length} página(s) legal(is) criada(s) com sucesso!`);
+      } else {
+        toast.info("Todas as páginas legais já existem");
+      }
+
+      setHasLegalPages(true);
+      setProfile(prev => prev ? {
+        ...prev,
+        company_name: companyName.trim(),
+        support_email: supportEmailField.trim(),
+        document_id: documentId.trim() || null,
+      } : null);
+    } catch (error: any) {
+      console.error("Error generating legal pages:", error);
+      toast.error(error.message || "Erro ao gerar páginas legais");
+    } finally {
+      setGeneratingLegalPages(false);
     }
   };
 
@@ -514,6 +687,109 @@ const SettingsPage = () => {
                     </>
                   )}
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Company/Legal Data Card */}
+            <Card className={!hasLegalPages ? "border-amber-500/50 bg-amber-500/5" : ""}>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-primary" />
+                  <CardTitle>Dados Legais / Empresa</CardTitle>
+                </div>
+                <CardDescription>
+                  Informações necessárias para gerar suas páginas legais obrigatórias
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!hasLegalPages && (
+                  <Alert className="border-amber-500/50 bg-amber-500/10">
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-800 dark:text-amber-200">
+                      <strong>Importante:</strong> As páginas legais (Política de Privacidade, Termos de Uso e Contato) são obrigatórias 
+                      para evitar problemas jurídicos com as plataformas de anúncios (Facebook, Google, etc.) e para cumprir 
+                      a LGPD. Preencha os dados abaixo e clique em "Gerar Páginas Legais".
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="companyName" className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    Nome da Empresa ou Pessoa *
+                  </Label>
+                  <Input
+                    id="companyName"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Ex: João Silva ou Empresa XYZ Ltda"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="supportEmail" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    E-mail de Suporte *
+                  </Label>
+                  <Input
+                    id="supportEmail"
+                    type="email"
+                    value={supportEmailField}
+                    onChange={(e) => setSupportEmailField(e.target.value)}
+                    placeholder="suporte@exemplo.com"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Este e-mail será exibido nas páginas legais para contato
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="documentId" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    CPF/CNPJ <span className="text-xs text-muted-foreground">(opcional)</span>
+                  </Label>
+                  <Input
+                    id="documentId"
+                    value={documentId}
+                    onChange={(e) => setDocumentId(e.target.value)}
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button 
+                    onClick={handleGenerateLegalPages} 
+                    disabled={generatingLegalPages || !companyName.trim() || !supportEmailField.trim()}
+                    className={hasLegalPages ? "bg-muted text-muted-foreground hover:bg-muted" : ""}
+                    variant={hasLegalPages ? "outline" : "default"}
+                  >
+                    {generatingLegalPages ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {hasLegalPages ? "Regenerar Páginas Legais" : "Gerar Páginas Legais"}
+                      </>
+                    )}
+                  </Button>
+                  
+                  {hasLegalPages && (
+                    <div className="flex items-center gap-2 text-sm text-success">
+                      <Check className="w-4 h-4" />
+                      <span>Páginas legais já criadas</span>
+                    </div>
+                  )}
+                </div>
+
+                {(!companyName.trim() || !supportEmailField.trim()) && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    Preencha o nome e e-mail para habilitar a geração das páginas
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
