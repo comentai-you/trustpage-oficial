@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import PricingModal from "@/components/PricingModal";
@@ -283,7 +284,7 @@ const SettingsPage = () => {
     type: 'privacy' | 'terms' | 'contact',
     company: string,
     email: string
-  ) => {
+  ): { headline: string; description: string; content: Json } => {
     const currentDate = new Date().toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
@@ -291,22 +292,28 @@ const SettingsPage = () => {
     });
 
     if (type === 'privacy') {
+      const description = `# Política de Privacidade\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Informações que Coletamos\n\nColetamos informações que você nos fornece diretamente, como nome, e-mail e outras informações de contato.\n\n## 2. Como Usamos Suas Informações\n\nUtilizamos as informações coletadas para:\n- Fornecer e melhorar nossos serviços\n- Processar transações e enviar notificações\n- Responder a solicitações e fornecer suporte\n\n## 3. Seus Direitos\n\nVocê tem direito a acessar, corrigir ou excluir seus dados pessoais.\n\n## 4. Contato\n\n**E-mail:** ${email}`;
       return {
         headline: 'Política de Privacidade',
-        description: `# Política de Privacidade\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Informações que Coletamos\n\nColetamos informações que você nos fornece diretamente, como nome, e-mail e outras informações de contato.\n\n## 2. Como Usamos Suas Informações\n\nUtilizamos as informações coletadas para:\n- Fornecer e melhorar nossos serviços\n- Processar transações e enviar notificações\n- Responder a solicitações e fornecer suporte\n\n## 3. Seus Direitos\n\nVocê tem direito a acessar, corrigir ou excluir seus dados pessoais.\n\n## 4. Contato\n\n**E-mail:** ${email}`
+        description,
+        content: { sections: [{ id: '1', type: 'text', title: 'Política de Privacidade', body: description }] }
       };
     }
 
     if (type === 'terms') {
+      const description = `# Termos de Uso\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Aceitação dos Termos\n\nAo acessar e utilizar nossos serviços, você concorda com estes Termos de Uso.\n\n## 2. Responsabilidades do Usuário\n\nVocê concorda em fornecer informações verdadeiras e não utilizar os serviços para fins ilegais.\n\n## 3. Propriedade Intelectual\n\nTodo o conteúdo é protegido por direitos autorais.\n\n## 4. Contato\n\n**E-mail:** ${email}`;
       return {
         headline: 'Termos de Uso',
-        description: `# Termos de Uso\n\n**${company}**\n\n*Última atualização: ${currentDate}*\n\n## 1. Aceitação dos Termos\n\nAo acessar e utilizar nossos serviços, você concorda com estes Termos de Uso.\n\n## 2. Responsabilidades do Usuário\n\nVocê concorda em fornecer informações verdadeiras e não utilizar os serviços para fins ilegais.\n\n## 3. Propriedade Intelectual\n\nTodo o conteúdo é protegido por direitos autorais.\n\n## 4. Contato\n\n**E-mail:** ${email}`
+        description,
+        content: { sections: [{ id: '1', type: 'text', title: 'Termos de Uso', body: description }] }
       };
     }
 
+    const description = `# Entre em Contato\n\n**${company}**\n\nEstamos aqui para ajudar!\n\n---\n\n## 📧 E-mail\n\n**${email}**\n\nRespondemos em até 48 horas úteis.\n\n---\n\n## Horário de Atendimento\n\nSegunda a Sexta: 9h às 18h (horário de Brasília)`;
     return {
       headline: 'Contato',
-      description: `# Entre em Contato\n\n**${company}**\n\nEstamos aqui para ajudar!\n\n---\n\n## 📧 E-mail\n\n**${email}**\n\nRespondemos em até 48 horas úteis.\n\n---\n\n## Horário de Atendimento\n\nSegunda a Sexta: 9h às 18h (horário de Brasília)`
+      description,
+      content: { sections: [{ id: '1', type: 'text', title: 'Contato', body: description }] }
     };
   };
 
@@ -355,6 +362,7 @@ const SettingsPage = () => {
         page_name: string;
         headline: string;
         description: string;
+        content: Json;
         template_type: string;
         template_id: number;
         is_published: boolean;
@@ -370,13 +378,14 @@ const SettingsPage = () => {
 
       for (const page of legalPages) {
         if (!existingSlugs.has(page.slug)) {
-          const content = generateLegalPageContent(page.type, companyName.trim(), supportEmailField.trim());
+          const generatedContent = generateLegalPageContent(page.type, companyName.trim(), supportEmailField.trim());
           pagesToCreate.push({
             user_id: user.id,
             slug: page.slug,
             page_name: page.name,
-            headline: content.headline,
-            description: content.description,
+            headline: generatedContent.headline,
+            description: generatedContent.description,
+            content: generatedContent.content,
             template_type: 'bio',
             template_id: 1,
             is_published: true,

@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 interface LegalFooterProps {
   textColor?: string;
   showWatermark?: boolean;
@@ -12,6 +10,11 @@ const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFoote
     { label: "Contato", slug: "contato" },
   ];
 
+  // Links relativos - funcionam tanto em domínios customizados quanto no padrão
+  const getLinkHref = (slug: string) => {
+    return `/p/${slug}`;
+  };
+
   return (
     <footer className="w-full py-6 text-center space-y-3">
       {/* Legal Links */}
@@ -19,9 +22,7 @@ const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFoote
         {footerLinks.map((link, index) => (
           <span key={link.slug} className="flex items-center gap-2">
             <a
-              href={`/p/${link.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={getLinkHref(link.slug)}
               className="hover:opacity-80 transition-opacity underline-offset-2 hover:underline"
             >
               {link.label}
