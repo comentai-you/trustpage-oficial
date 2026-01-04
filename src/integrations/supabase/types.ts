@@ -290,6 +290,7 @@ export type Database = {
         Args: { page_id: string; viewer_fingerprint?: string }
         Returns: boolean
       }
+      is_legal_page_slug: { Args: { page_slug: string }; Returns: boolean }
       is_subscription_active: {
         Args: { check_user_id: string }
         Returns: boolean
