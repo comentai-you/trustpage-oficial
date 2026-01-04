@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Building2, Mail, FileText, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
 
 interface OnboardingModalProps {
   open: boolean;
@@ -13,11 +14,12 @@ interface OnboardingModalProps {
   onComplete: () => void;
 }
 
+// Gera conteúdo JSON estruturado para as páginas legais
 const generateLegalPageContent = (
   type: 'privacy' | 'terms' | 'contact',
   companyName: string,
   supportEmail: string
-) => {
+): { headline: string; description: string; content: Json } => {
   const currentDate = new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'long',
@@ -25,10 +27,7 @@ const generateLegalPageContent = (
   });
 
   if (type === 'privacy') {
-    return {
-      headline: 'Política de Privacidade',
-      description: `
-# Política de Privacidade
+    const description = `# Política de Privacidade
 
 **${companyName}**
 
@@ -71,16 +70,21 @@ Para dúvidas sobre esta política, entre em contato:
 
 ---
 
-Esta política pode ser atualizada periodicamente. Recomendamos revisar regularmente.
-      `.trim()
+Esta política pode ser atualizada periodicamente. Recomendamos revisar regularmente.`;
+
+    return {
+      headline: 'Política de Privacidade',
+      description,
+      content: {
+        sections: [
+          { id: '1', type: 'text', title: 'Política de Privacidade', body: description }
+        ]
+      }
     };
   }
 
   if (type === 'terms') {
-    return {
-      headline: 'Termos de Uso',
-      description: `
-# Termos de Uso
+    const description = `# Termos de Uso
 
 **${companyName}**
 
@@ -123,16 +127,21 @@ Estes termos são regidos pelas leis do Brasil.
 ## 8. Contato
 
 Para dúvidas:
-**E-mail:** ${supportEmail}
-      `.trim()
+**E-mail:** ${supportEmail}`;
+
+    return {
+      headline: 'Termos de Uso',
+      description,
+      content: {
+        sections: [
+          { id: '1', type: 'text', title: 'Termos de Uso', body: description }
+        ]
+      }
     };
   }
 
   // Contact page
-  return {
-    headline: 'Contato',
-    description: `
-# Entre em Contato
+  const description = `# Entre em Contato
 
 **${companyName}**
 
@@ -154,8 +163,16 @@ Segunda a Sexta: 9h às 18h (horário de Brasília)
 
 ---
 
-Obrigado por entrar em contato!
-    `.trim()
+Obrigado por entrar em contato!`;
+
+  return {
+    headline: 'Contato',
+    description,
+    content: {
+      sections: [
+        { id: '1', type: 'text', title: 'Contato', body: description }
+      ]
+    }
   };
 };
 
@@ -209,6 +226,7 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
         page_name: string;
         headline: string;
         description: string;
+        content: Json;
         template_type: string;
         template_id: number;
         is_published: boolean;
@@ -224,14 +242,15 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
 
       for (const page of legalPages) {
         if (!existingSlugs.has(page.slug)) {
-          const content = generateLegalPageContent(page.type, companyName.trim(), supportEmail.trim());
+          const generatedContent = generateLegalPageContent(page.type, companyName.trim(), supportEmail.trim());
           pagesToCreate.push({
             user_id: userId,
             slug: page.slug,
             page_name: page.name,
-            headline: content.headline,
-            description: content.description,
-            template_type: 'bio', // Using bio template for simple text pages
+            headline: generatedContent.headline,
+            description: generatedContent.description,
+            content: generatedContent.content,
+            template_type: 'bio',
             template_id: 1,
             is_published: true,
             primary_color: '#8B5CF6',
