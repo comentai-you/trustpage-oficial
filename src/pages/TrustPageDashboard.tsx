@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2 } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import PageCard from "@/components/dashboard/PageCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
 import OnboardingModal from "@/components/OnboardingModal";
 import { TemplateType } from "@/types/landing-page";
+import { Badge } from "@/components/ui/badge";
 
 interface LandingPage {
   id: string;
@@ -41,6 +42,11 @@ interface UserProfile {
   support_email: string | null;
 }
 
+// Legal page slugs - these don't count towards plan limits
+const LEGAL_PAGE_SLUGS = ['politica-de-privacidade', 'termos-de-uso', 'contato'];
+
+const isLegalPage = (slug: string) => LEGAL_PAGE_SLUGS.includes(slug);
+
 const getMaxPages = (planType: string) => {
   switch (planType) {
     case 'pro':
@@ -66,12 +72,17 @@ const TrustPageDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Separate regular pages from legal pages
+  const regularPages = pages.filter(page => !isLegalPage(page.slug));
+  const legalPages = pages.filter(page => isLegalPage(page.slug));
+
   const isFreePlan = profile?.plan_type === 'free';
   const maxPages = getMaxPages(profile?.plan_type || 'free');
-  const hasReachedLimit = pages.length >= maxPages;
+  // Only count regular pages towards the limit
+  const hasReachedLimit = regularPages.length >= maxPages;
 
-  // Calculate total views
-  const totalViews = pages.reduce((sum, page) => sum + (page.views || 0), 0);
+  // Calculate total views (only from regular pages)
+  const totalViews = regularPages.reduce((sum, page) => sum + (page.views || 0), 0);
 
   useEffect(() => {
     if (user) {
@@ -180,6 +191,37 @@ const TrustPageDashboard = () => {
     navigate(`/edit/${pageId}`);
   };
 
+  const handleViewPage = (slug: string) => {
+    window.open(`${window.location.origin}/p/${slug}`, '_blank');
+  };
+
+  const getLegalPageIcon = (slug: string) => {
+    switch (slug) {
+      case 'politica-de-privacidade':
+        return <Shield className="w-4 h-4" />;
+      case 'termos-de-uso':
+        return <FileText className="w-4 h-4" />;
+      case 'contato':
+        return <Mail className="w-4 h-4" />;
+      default:
+        return <Scale className="w-4 h-4" />;
+    }
+  };
+
+  const getLegalPageName = (slug: string, pageName: string | null) => {
+    if (pageName) return pageName;
+    switch (slug) {
+      case 'politica-de-privacidade':
+        return 'Política de Privacidade';
+      case 'termos-de-uso':
+        return 'Termos de Uso';
+      case 'contato':
+        return 'Contato';
+      default:
+        return slug;
+    }
+  };
+
   return (
     <DashboardLayout
       avatarUrl={profile?.avatar_url}
@@ -227,7 +269,7 @@ const TrustPageDashboard = () => {
         <div className="mb-6 sm:mb-8">
           <StatsBar
             totalViews={totalViews}
-            totalPages={pages.length}
+            totalPages={regularPages.length}
             planType={profile?.plan_type || 'free'}
             subscriptionStatus={profile?.subscription_status || 'free'}
           />
@@ -237,14 +279,14 @@ const TrustPageDashboard = () => {
         <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground">Suas Páginas</h2>
           
-          {/* Page Counter */}
+          {/* Page Counter - Only counts regular pages */}
           <div className={`inline-flex self-start sm:self-auto items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm ${
             hasReachedLimit 
               ? 'bg-warning/10 text-warning border border-warning/30' 
               : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
             {hasReachedLimit && <Crown className="w-3.5 sm:w-4 h-3.5 sm:h-4" />}
-            <span className="font-semibold">{pages.length}/{maxPages} {maxPages === 1 ? 'página' : 'páginas'}</span>
+            <span className="font-semibold">{regularPages.length}/{maxPages} {maxPages === 1 ? 'página' : 'páginas'}</span>
           </div>
         </div>
 
@@ -252,7 +294,7 @@ const TrustPageDashboard = () => {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : pages.length === 0 ? (
+        ) : regularPages.length === 0 ? (
           <Card className="text-center py-10 sm:py-12 border-dashed">
             <CardContent>
               <div className="flex flex-col items-center gap-4">
@@ -307,8 +349,8 @@ const TrustPageDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Existing Pages */}
-            {pages.map((page) => (
+            {/* Existing Regular Pages (excluding legal pages) */}
+            {regularPages.map((page) => (
               <PageCard
                 key={page.id}
                 id={page.id}
@@ -329,6 +371,87 @@ const TrustPageDashboard = () => {
             ))}
           </div>
         )}
+
+        {/* Legal Pages Section - Always shown, separate from templates */}
+        <div className="mt-10 sm:mt-12">
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Scale className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground">Páginas Legais</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Obrigatórias para compliance. Não contam no limite do plano.
+                </p>
+              </div>
+            </div>
+            <Badge variant="outline" className="self-start sm:self-auto text-muted-foreground border-muted-foreground/30">
+              Automáticas
+            </Badge>
+          </div>
+
+          {legalPages.length === 0 ? (
+            <Card className="border-dashed border-amber-500/50 bg-amber-500/5">
+              <CardContent className="py-8">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                    <Scale className="w-7 h-7 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Páginas legais não configuradas</h3>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1">
+                      Configure seus dados da empresa nas Configurações para gerar automaticamente as páginas de Privacidade, Termos e Contato.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate('/settings')}
+                    className="border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+                  >
+                    Ir para Configurações
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {legalPages.map((page) => (
+                <Card key={page.id} className="bg-muted/30 border-muted hover:border-primary/30 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          {getLegalPageIcon(page.slug)}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm">
+                            {getLegalPageName(page.slug, page.page_name)}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">/{page.slug}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {page.is_published && (
+                          <Badge variant="secondary" className="text-xs bg-success/10 text-success border-0">
+                            Ativa
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleViewPage(page.slug)}
+                          title="Visualizar página"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       <PricingModal 
