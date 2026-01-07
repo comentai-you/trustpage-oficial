@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FacebookPixelTracker from "./components/FacebookPixelTracker";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import HomePage from "./pages/HomePage";
@@ -41,9 +42,12 @@ const isKnownAppDomain = (hostname: string): boolean =>
 
 // Rotas para domínios de CLIENTES - TUDO resolve via CustomDomainPage
 const CustomDomainRoutes = () => (
-  <Routes>
-    <Route path="*" element={<CustomDomainPage />} />
-  </Routes>
+  <>
+    <FacebookPixelTracker />
+    <Routes>
+      <Route path="*" element={<CustomDomainPage />} />
+    </Routes>
+  </>
 );
 
 // Rotas do SISTEMA - dashboard, auth, etc
@@ -134,6 +138,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <FacebookPixelTracker />
           <AuthProvider>
             <SystemRoutes />
           </AuthProvider>

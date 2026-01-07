@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { trackCompleteRegistration } from "@/hooks/useFacebookPixel";
 
 interface AuthContextType {
   user: User | null;
@@ -39,6 +40,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Dispara CompleteRegistration quando usuário faz login E é recém-criado (< 30 segundos)
+        if (event === 'SIGNED_IN' && session?.user) {
+          const createdAt = new Date(session.user.created_at).getTime();
+          const now = Date.now();
+          const isNewUser = (now - createdAt) < 30000; // Criado há menos de 30 segundos
+          
+          if (isNewUser) {
+            trackCompleteRegistration();
+          }
+        }
       }
     );
 
