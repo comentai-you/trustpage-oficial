@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { LandingPageFormData, SalesPageContent } from "@/types/landing-page";
+import { SectionBuilderContent } from "@/types/section-builder";
+import { DynamicSectionsRenderer } from "./section-renderers";
 import ImageCarousel from "./ImageCarousel";
 import LegalFooter from "./LegalFooter";
 import { 
@@ -57,7 +59,13 @@ const SalesPageTemplate = ({
   const backgroundColor = data.colors.background || '#09090b';
   const textColor = data.colors.text || '#ffffff';
   
-  const content = (data.content as SalesPageContent) || {
+  // Check if content is new SectionBuilder format
+  const contentData = data.content as unknown;
+  const isSectionBuilder = contentData && typeof contentData === 'object' && 'sections' in (contentData as object);
+  
+  const builderContent = isSectionBuilder ? contentData as SectionBuilderContent : null;
+  
+  const content = (!isSectionBuilder ? data.content : null) as SalesPageContent | null || {
     heroMediaType: 'image',
     benefits: [],
     testimonials: [],
@@ -157,13 +165,48 @@ const SalesPageTemplate = ({
     </button>
   );
 
+  // If using SectionBuilder, render dynamic sections
+  if (builderContent && builderContent.sections && builderContent.sections.length > 0) {
+    return (
+      <main
+        className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col`}
+        style={{ backgroundColor, color: textColor }}
+      >
+        {/* Scarcity Bar */}
+        {builderContent.scarcityEnabled && builderContent.scarcityText && (
+          <div
+            className="w-full py-3 px-4 text-center sticky top-0 z-50"
+            style={{ backgroundColor: primaryColor, boxShadow: `0 4px 20px ${primaryColor}40` }}
+          >
+            <p className="text-sm md:text-base font-semibold text-white tracking-wide">
+              {builderContent.scarcityText}
+            </p>
+          </div>
+        )}
+
+        <DynamicSectionsRenderer
+          content={builderContent}
+          primaryColor={primaryColor}
+          textColor={textColor}
+          backgroundColor={backgroundColor}
+          isDarkTheme={isDarkTheme}
+          isMobile={isMobile}
+          ctaUrl={data.cta_url}
+        />
+
+        <LegalFooter textColor={textColor} />
+      </main>
+    );
+  }
+
+  // Legacy rendering for old content format
   return (
     <main
       className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col`}
       style={{ backgroundColor, color: textColor }}
     >
       {/* Scarcity Bar - Optional */}
-      {content.scarcityEnabled && (
+      {content?.scarcityEnabled && (
         <div
           className="w-full py-3 px-4 text-center sticky top-0 z-50"
           style={{ 
@@ -172,7 +215,7 @@ const SalesPageTemplate = ({
           }}
         >
           <p className="text-sm md:text-base font-semibold text-white tracking-wide">
-            {content.scarcityText || '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.'}
+            {content?.scarcityText || '🔥 Oferta por tempo limitado! Garanta o preço promocional hoje.'}
           </p>
         </div>
       )}
