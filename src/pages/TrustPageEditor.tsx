@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Eye, Sparkles, Loader2, Settings2, ShoppingBag, Play, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Eye, Loader2, Settings2, ShoppingBag, Play, Link as LinkIcon, Check, Cloud } from "lucide-react";
 import { LandingPageFormData, defaultFormData, defaultSalesContent, defaultBioContent, SalesPageContent, TemplateType } from "@/types/landing-page";
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
@@ -48,9 +48,12 @@ const TrustPageEditor = () => {
   const [showMobileControls, setShowMobileControls] = useState(false);
   
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const { toast } = useToast();
   const { user } = useAuth();
   const lastSavedSlugRef = useRef<string | null>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFormDataRef = useRef<string>('');
 
   // Fetch user plan and existing page data
   useEffect(() => {
@@ -128,9 +131,115 @@ const TrustPageEditor = () => {
     fetchData();
   }, [id, user, navigate, toast]);
 
-  const handleChange = (data: Partial<LandingPageFormData>) => {
+  const handleChange = useCallback((data: Partial<LandingPageFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
-  };
+  }, []);
+
+  // Auto-save function (silent, no toasts)
+  const performAutoSave = useCallback(async () => {
+    if (!user || !existingPageId) return;
+    
+    const currentFormDataString = JSON.stringify(formData);
+    if (currentFormDataString === lastFormDataRef.current) return;
+    
+    if (!formData.page_name.trim()) return;
+
+    setAutoSaveStatus('saving');
+
+    try {
+      let slug = formData.slug;
+      if (!slug) {
+        slug = formData.page_name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .substring(0, 40);
+      }
+
+      if (RESERVED_SLUGS.includes(slug.toLowerCase().trim())) {
+        setAutoSaveStatus('error');
+        return;
+      }
+
+      const pageData = {
+        user_id: user.id,
+        slug,
+        template_id: formData.template_id,
+        template_type: formData.template_type,
+        page_name: formData.page_name,
+        profile_image_url: formData.profile_image_url || null,
+        headline: formData.headline || null,
+        subheadline: formData.subheadline || null,
+        video_url: formData.video_url || null,
+        video_storage_path: formData.video_storage_path || null,
+        description: formData.description || null,
+        image_url: formData.image_url || null,
+        cover_image_url: formData.cover_image_url || null,
+        cta_text: formData.cta_text || null,
+        cta_url: formData.cta_url || null,
+        cta_delay_enabled: formData.cta_delay_enabled,
+        cta_delay_percentage: formData.cta_delay_percentage,
+        whatsapp_number: formData.whatsapp_number || null,
+        pix_pixel_id: formData.pix_pixel_id || null,
+        facebook_pixel_id: formData.facebook_pixel_id || null,
+        colors: formData.colors as unknown as Json,
+        primary_color: formData.primary_color,
+        content: formData.content as unknown as Json,
+        is_published: true,
+      };
+
+      const { error } = await supabase
+        .from("landing_pages")
+        .update(pageData)
+        .eq("id", existingPageId);
+
+      if (error) {
+        console.error("Auto-save error:", error);
+        setAutoSaveStatus('error');
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, slug }));
+      lastFormDataRef.current = JSON.stringify({ ...formData, slug });
+      setAutoSaveStatus('saved');
+      
+      // Reset to idle after 2 seconds
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    } catch (error) {
+      console.error("Auto-save error:", error);
+      setAutoSaveStatus('error');
+    }
+  }, [user, existingPageId, formData]);
+
+  // Trigger auto-save on formData changes (debounced 3 seconds)
+  useEffect(() => {
+    if (!existingPageId || !user) return;
+    
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 3000);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [formData, existingPageId, user, performAutoSave]);
+
+  // Initialize lastFormDataRef after loading
+  useEffect(() => {
+    if (!isLoading && existingPageId) {
+      lastFormDataRef.current = JSON.stringify(formData);
+    }
+  }, [isLoading, existingPageId]);
 
   // Extended list of reserved system slugs
   const RESERVED_SLUGS = [
@@ -418,6 +527,27 @@ const TrustPageEditor = () => {
               <Eye className="w-4 h-4" />
               <span className="hidden sm:inline ml-2">Previewar</span>
             </Button>
+            
+            {/* Auto-save status indicator */}
+            {existingPageId && (
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 mr-1">
+                {autoSaveStatus === 'saving' && (
+                  <>
+                    <Cloud className="w-3.5 h-3.5 animate-pulse" />
+                    <span>Salvando...</span>
+                  </>
+                )}
+                {autoSaveStatus === 'saved' && (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-green-500" />
+                    <span className="text-green-600">Salvo</span>
+                  </>
+                )}
+                {autoSaveStatus === 'error' && (
+                  <span className="text-red-500">Erro ao salvar</span>
+                )}
+              </div>
+            )}
             
             <Button 
               size="sm" 
