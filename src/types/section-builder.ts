@@ -40,12 +40,11 @@ export interface HeroSection extends BaseSection {
 export interface TextSection extends BaseSection {
   type: 'text';
   data: {
-    content: string; // Rich text / markdown content
-    alignment?: 'left' | 'center' | 'right';
-    maxWidth?: 'sm' | 'md' | 'lg' | 'full';
-    fontSize?: number; // Custom font size in px
-    textColor?: string; // Custom text color (hex)
-    isBold?: boolean; // Bold text toggle
+    content: string; // HTML content from rich text editor
+    alignment?: 'left' | 'center' | 'right' | 'justify';
+    maxWidth?: 'narrow' | 'wide';
+    hasBackground?: boolean; // Card background option
+    accentColor?: string; // Accent color for highlighted text
   };
 }
 
@@ -280,9 +279,10 @@ export const createDefaultSection = (type: SectionType, order: number): ContentS
         type: 'text',
         order,
         data: {
-          content: 'Escreva seu texto aqui. Este bloco suporta parágrafos longos para argumentação e copy de vendas.',
+          content: '<p>Escreva seu texto aqui. Este bloco suporta formatação rica com <strong>negrito</strong>, <em>itálico</em> e muito mais.</p>',
           alignment: 'left',
-          maxWidth: 'lg'
+          maxWidth: 'narrow',
+          hasBackground: false
         }
       };
     case 'full-image':
