@@ -6,6 +6,7 @@ import { LandingPageFormData, defaultFormData, defaultSalesContent, defaultBioCo
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
 import BioEditorSidebar from "@/components/trustpage/editor/BioEditorSidebar";
+import SectionBuilderSidebar from "@/components/trustpage/editor/SectionBuilderSidebar";
 import IMacMockup from "@/components/trustpage/editor/IMacMockup";
 import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
 import MobileEditorControls from "@/components/trustpage/editor/MobileEditorControls";
@@ -442,7 +443,7 @@ const TrustPageEditor = () => {
         {/* Desktop Sidebar - Hidden on mobile */}
         <div className="hidden lg:block">
           {formData.template_type === 'sales' ? (
-            <SalesEditorSidebar formData={formData} onChange={handleChange} />
+            <SectionBuilderSidebar formData={formData} onChange={handleChange} />
           ) : formData.template_type === 'bio' ? (
             <BioEditorSidebar formData={formData} onChange={handleChange} />
           ) : (
@@ -479,7 +480,7 @@ const TrustPageEditor = () => {
           {/* Mobile Form View */}
           <div className={`lg:hidden flex-1 overflow-y-auto bg-white ${activeTab === 'form' ? 'block' : 'hidden'}`}>
             {formData.template_type === 'sales' ? (
-              <SalesEditorSidebar formData={formData} onChange={handleChange} />
+              <SectionBuilderSidebar formData={formData} onChange={handleChange} />
             ) : formData.template_type === 'bio' ? (
               <BioEditorSidebar formData={formData} onChange={handleChange} />
             ) : (
