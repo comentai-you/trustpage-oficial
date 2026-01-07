@@ -52,6 +52,46 @@ export const salesThemes: SalesTheme[] = [
       text: '#f8fafc',
       primary: '#a855f7'
     }
+  },
+  {
+    id: 'femme-luxury',
+    name: 'Femme Luxury',
+    description: 'Beleza, Moda, Estética',
+    colors: {
+      background: '#faf9f7',
+      text: '#374151',
+      primary: '#b76e79'
+    }
+  },
+  {
+    id: 'money-maker',
+    name: 'Money Maker',
+    description: 'Finanças, Investimentos, Crypto',
+    colors: {
+      background: '#0f172a',
+      text: '#ffffff',
+      primary: '#22c55e'
+    }
+  },
+  {
+    id: 'energy-fit',
+    name: 'Energy Fit',
+    description: 'Fitness, Suplementos, Academia',
+    colors: {
+      background: '#1c1c1e',
+      text: '#ffffff',
+      primary: '#f97316'
+    }
+  },
+  {
+    id: 'organic-life',
+    name: 'Organic Life',
+    description: 'Produtos Naturais, Saúde',
+    colors: {
+      background: '#fefcf3',
+      text: '#5c4033',
+      primary: '#4ade80'
+    }
   }
 ];
 
@@ -66,7 +106,7 @@ const ThemeSelector = ({ selectedThemeId, onSelectTheme }: ThemeSelectorProps) =
       <p className="text-xs text-gray-500">
         Escolha um tema profissional para sua página
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
         {salesThemes.map((theme) => {
           const isSelected = selectedThemeId === theme.id;
           
@@ -75,7 +115,7 @@ const ThemeSelector = ({ selectedThemeId, onSelectTheme }: ThemeSelectorProps) =
               key={theme.id}
               onClick={() => onSelectTheme(theme)}
               className={cn(
-                "relative p-3 rounded-lg border-2 transition-all text-left",
+                "relative p-2.5 rounded-lg border-2 transition-all text-left",
                 "hover:shadow-md hover:scale-[1.02]",
                 isSelected 
                   ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
