@@ -165,8 +165,34 @@ const SalesPageTemplate = ({
     </button>
   );
 
-  // If using SectionBuilder, render dynamic sections
-  if (builderContent && builderContent.sections && builderContent.sections.length > 0) {
+  // If using SectionBuilder format (even if empty)
+  if (builderContent && 'sections' in builderContent) {
+    // Empty state - no sections added yet
+    if (!builderContent.sections || builderContent.sections.length === 0) {
+      return (
+        <main
+          className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col items-center justify-center`}
+          style={{ backgroundColor, color: textColor }}
+        >
+          <div className="text-center p-8 max-w-md">
+            <div 
+              className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
+              style={{ backgroundColor: `${primaryColor}20` }}
+            >
+              <Plus className="w-10 h-10" style={{ color: primaryColor }} />
+            </div>
+            <h2 className="text-2xl font-bold mb-3" style={{ color: textColor }}>
+              Sua página está vazia
+            </h2>
+            <p className="text-lg" style={{ color: textColor, opacity: 0.7 }}>
+              Adicione seções no painel à esquerda para construir sua página de vendas.
+            </p>
+          </div>
+        </main>
+      );
+    }
+
+    // Has sections - render them
     return (
       <main
         className={`${fullHeight ? "min-h-screen" : "h-full min-h-0"} w-full flex flex-col`}

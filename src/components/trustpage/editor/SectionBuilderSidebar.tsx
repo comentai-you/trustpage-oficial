@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Settings, Palette } from "lucide-react";
+import { Plus, Settings, Palette, RefreshCw } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -29,7 +29,8 @@ import {
   ContentSection, 
   SectionType, 
   SectionBuilderContent,
-  createDefaultSection 
+  createDefaultSection,
+  migrateToSectionBuilder
 } from "@/types/section-builder";
 import SortableSectionItem from "./SortableSectionItem";
 import AddSectionModal from "./AddSectionModal";
@@ -54,9 +55,30 @@ interface SectionBuilderSidebarProps {
 const SectionBuilderSidebar = ({ formData, onChange }: SectionBuilderSidebarProps) => {
   const [showAddModal, setShowAddModal] = useState(false);
   
+  // Check if content is legacy format or new SectionBuilder format
+  const contentData = formData.content as unknown;
+  const isLegacyFormat = contentData && typeof contentData === 'object' && 
+    !('sections' in (contentData as object)) && 
+    ('benefits' in (contentData as object) || 'testimonials' in (contentData as object));
+  
   // Parse sections from content
   const builderContent = (formData.content as unknown as SectionBuilderContent) || { sections: [] };
-  const sections = builderContent.sections || [];
+  const sections = isLegacyFormat ? [] : (builderContent.sections || []);
+  
+  // Handle migration from legacy to section builder
+  const handleMigrateLegacy = () => {
+    const legacyContent = formData.content as any;
+    const migratedContent = migrateToSectionBuilder(
+      legacyContent,
+      formData.headline,
+      formData.subheadline,
+      formData.video_url,
+      formData.image_url,
+      formData.cta_text,
+      formData.cta_url
+    );
+    onChange({ content: migratedContent as unknown as LandingPageFormData['content'] });
+  };
 
   // Sensors for drag and drop
   const sensors = useSensors(
@@ -313,10 +335,29 @@ const SectionBuilderSidebar = ({ formData, onChange }: SectionBuilderSidebarProp
               </SortableContext>
             </DndContext>
 
-            {sections.length === 0 && (
+            {sections.length === 0 && !isLegacyFormat && (
               <div className="text-center py-8 text-muted-foreground">
                 <p className="text-sm">Nenhuma seção adicionada</p>
                 <p className="text-xs mt-1">Clique em "Adicionar Seção" para começar</p>
+              </div>
+            )}
+
+            {isLegacyFormat && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm font-medium text-amber-800 mb-2">
+                  Esta página usa o formato antigo
+                </p>
+                <p className="text-xs text-amber-700 mb-3">
+                  Migre para o novo Section Builder para editar seções individualmente.
+                </p>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={handleMigrateLegacy}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Migrar para Section Builder
+                </Button>
               </div>
             )}
           </AccordionContent>
