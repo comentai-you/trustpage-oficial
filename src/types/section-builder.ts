@@ -43,6 +43,9 @@ export interface TextSection extends BaseSection {
     content: string; // Rich text / markdown content
     alignment?: 'left' | 'center' | 'right';
     maxWidth?: 'sm' | 'md' | 'lg' | 'full';
+    fontSize?: number; // Custom font size in px
+    textColor?: string; // Custom text color (hex)
+    isBold?: boolean; // Bold text toggle
   };
 }
 
