@@ -111,7 +111,7 @@ const SubscriptionPage = () => {
       case 'pro':
         return {
           name: 'PRO',
-          price: 'R$ 69,90/mês',
+          price: 'R$ 79,90/mês',
           pages: 8,
           domains: 3,
           icon: Crown,
@@ -121,7 +121,7 @@ const SubscriptionPage = () => {
       default:
         return {
           name: 'Essencial',
-          price: 'R$ 29,90/mês',
+          price: 'R$ 39,90/mês',
           pages: 2,
           domains: 1,
           icon: Sparkles,

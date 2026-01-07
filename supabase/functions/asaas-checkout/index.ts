@@ -212,11 +212,11 @@ serve(async (req) => {
     // Step B: Create subscription
     const planConfig = {
       essential: {
-        value: 29.90,
+        value: 39.90,
         description: 'TrustPage - Plano Essencial',
       },
       pro: {
-        value: 69.90,
+        value: 79.90,
         description: 'TrustPage - Plano PRO',
       },
     };
