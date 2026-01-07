@@ -88,7 +88,7 @@ const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
             </div>
             <div>
               <p className="font-semibold text-foreground text-sm">Plano Essencial</p>
-              <p className="text-xs text-muted-foreground">A partir de R$ 29,90/mês</p>
+              <p className="text-xs text-muted-foreground">A partir de R$ 39,90/mês</p>
             </div>
           </div>
         </div>

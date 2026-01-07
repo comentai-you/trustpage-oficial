@@ -373,7 +373,7 @@ const HomePage = () => {
                 <div className="pt-4">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Essencial</h3>
                   <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
-                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 29,90</span>
+                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 39,90</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
                   
@@ -426,7 +426,7 @@ const HomePage = () => {
                 <div className="pt-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Pro</h3>
                   <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
-                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 69,90</span>
+                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 79,90</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
                   

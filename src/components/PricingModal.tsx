@@ -168,7 +168,7 @@ const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) =
               </div>
 
               <div className="mb-4">
-                <span className="text-3xl font-bold text-foreground">R$ 29,90</span>
+                <span className="text-3xl font-bold text-foreground">R$ 39,90</span>
                 <span className="text-muted-foreground text-sm">/mês</span>
               </div>
 
@@ -218,7 +218,7 @@ const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) =
               </div>
 
               <div className="mb-4">
-                <span className="text-3xl font-bold text-foreground">R$ 69,90</span>
+                <span className="text-3xl font-bold text-foreground">R$ 79,90</span>
                 <span className="text-muted-foreground text-sm">/mês</span>
               </div>
 

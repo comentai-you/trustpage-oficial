@@ -211,8 +211,8 @@ serve(async (req) => {
 
     if (action === 'change_plan' && new_plan_type) {
       const planConfig = {
-        essential: { value: 29.90, description: 'TrustPage - Plano Essencial' },
-        pro: { value: 69.90, description: 'TrustPage - Plano PRO' },
+        essential: { value: 39.90, description: 'TrustPage - Plano Essencial' },
+        pro: { value: 79.90, description: 'TrustPage - Plano PRO' },
       };
 
       const plan = planConfig[new_plan_type];

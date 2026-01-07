@@ -147,7 +147,7 @@ serve(async (req) => {
       // Validate planType
       if (planType !== 'essential' && planType !== 'pro') {
         // Determine plan type from payment value
-        if (payment.value >= 69) {
+        if (payment.value >= 79) {
           planType = 'pro';
         } else {
           planType = 'essential';
