@@ -70,8 +70,8 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
           <div key={item.id} className="p-3 border border-border rounded-lg space-y-2">
             <div className="flex items-center gap-2">
               <IconSelector
-                selectedIcon={item.icon || 'Sparkles'}
-                onSelectIcon={(icon) => updateItem(index, { icon })}
+                value={item.icon || 'Sparkles'}
+                onChange={(icon) => updateItem(index, { icon })}
               />
               <Input
                 value={item.title}
