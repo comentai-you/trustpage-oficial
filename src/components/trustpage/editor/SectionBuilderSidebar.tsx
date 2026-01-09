@@ -46,6 +46,8 @@ import BenefitsSectionEditor from "./sections/BenefitsSectionEditor";
 import FAQSectionEditor from "./sections/FAQSectionEditor";
 import { CTASectionEditor } from "./sections/CTASectionEditor";
 import TestimonialsSectionEditor from "./sections/TestimonialsSectionEditor";
+import VideoGridSectionEditor from "./sections/VideoGridSectionEditor";
+import OfferSectionEditor from "./sections/OfferSectionEditor";
 
 interface SectionBuilderSidebarProps {
   formData: LandingPageFormData;
@@ -207,6 +209,20 @@ const SectionBuilderSidebar = ({ formData, onChange }: SectionBuilderSidebarProp
       case 'cta':
         return (
           <CTASectionEditor
+            data={section.data}
+            onChange={(data) => handleUpdateSection(section.id, data)}
+          />
+        );
+      case 'video-grid':
+        return (
+          <VideoGridSectionEditor
+            data={section.data}
+            onChange={(data) => handleUpdateSection(section.id, data)}
+          />
+        );
+      case 'offer':
+        return (
+          <OfferSectionEditor
             data={section.data}
             onChange={(data) => handleUpdateSection(section.id, data)}
           />

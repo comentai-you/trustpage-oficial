@@ -8,6 +8,8 @@ import FAQRenderer from "./FAQRenderer";
 import TestimonialsRenderer from "./TestimonialsRenderer";
 import CTARenderer from "./CTARenderer";
 import SpacerRenderer from "./SpacerRenderer";
+import VideoGridRenderer from "./VideoGridRenderer";
+import OfferRenderer from "./OfferRenderer";
 
 interface SectionRendererProps {
   section: ContentSection;
@@ -98,6 +100,25 @@ export const SectionRenderer = ({
     case 'cta':
       return (
         <CTARenderer
+          data={section.data}
+          primaryColor={primaryColor}
+          textColor={textColor}
+          isDarkTheme={isDarkTheme}
+        />
+      );
+    case 'video-grid':
+      return (
+        <VideoGridRenderer
+          data={section.data}
+          primaryColor={primaryColor}
+          textColor={textColor}
+          isDarkTheme={isDarkTheme}
+          isMobile={isMobile}
+        />
+      );
+    case 'offer':
+      return (
+        <OfferRenderer
           data={section.data}
           primaryColor={primaryColor}
           textColor={textColor}

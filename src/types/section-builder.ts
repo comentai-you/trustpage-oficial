@@ -10,7 +10,8 @@ export type SectionType =
   | 'faq'
   | 'testimonials'
   | 'cta'
-  | 'spacer';
+  | 'spacer'
+  | 'offer';
 
 // Base interface for all sections
 export interface BaseSection {
@@ -45,6 +46,7 @@ export interface TextSection extends BaseSection {
     maxWidth?: 'narrow' | 'wide';
     hasBackground?: boolean; // Card background option
     accentColor?: string; // Accent color for highlighted text
+    textColor?: string; // Base text color
   };
 }
 
@@ -56,6 +58,7 @@ export interface FullImageSection extends BaseSection {
     alt?: string;
     linkUrl?: string;
     maxHeight?: number; // in px
+    hasBackground?: boolean; // Background behind image
   };
 }
 
@@ -151,6 +154,26 @@ export interface SpacerSection extends BaseSection {
   };
 }
 
+// Offer Section
+export interface OfferSection extends BaseSection {
+  type: 'offer';
+  data: {
+    title?: string;
+    subtitle?: string;
+    originalPrice?: string;
+    finalPrice?: string;
+    installments?: string;
+    benefits?: Array<{
+      id: string;
+      text: string;
+    }>;
+    ctaText?: string;
+    ctaUrl?: string;
+    showGuarantee?: boolean;
+    guaranteeText?: string;
+  };
+}
+
 // Union type for all sections
 export type ContentSection = 
   | HeroSection
@@ -162,7 +185,8 @@ export type ContentSection =
   | FAQSection
   | TestimonialsSection
   | CTASection
-  | SpacerSection;
+  | SpacerSection
+  | OfferSection;
 
 // Content structure that replaces fixed SalesPageContent
 export interface SectionBuilderContent {
@@ -251,6 +275,13 @@ export const sectionCatalog: SectionCatalogItem[] = [
     description: 'Espaço vertical entre seções',
     icon: 'Maximize2',
     category: 'content'
+  },
+  {
+    type: 'offer',
+    name: 'Seção de Oferta',
+    description: 'Preço, benefícios e botão de compra',
+    icon: 'DollarSign',
+    category: 'conversion'
   }
 ];
 
@@ -378,6 +409,28 @@ export const createDefaultSection = (type: SectionType, order: number): ContentS
         order,
         data: {
           height: 'md'
+        }
+      };
+    case 'offer':
+      return {
+        id,
+        type: 'offer',
+        order,
+        data: {
+          title: 'Oferta Especial',
+          subtitle: 'Por tempo limitado',
+          originalPrice: 'R$ 497,00',
+          finalPrice: 'R$ 97,00',
+          installments: 'ou 12x de R$ 9,70',
+          benefits: [
+            { id: '1', text: 'Acesso vitalício' },
+            { id: '2', text: 'Suporte exclusivo' },
+            { id: '3', text: 'Bônus especiais' }
+          ],
+          ctaText: 'QUERO APROVEITAR AGORA',
+          ctaUrl: '',
+          showGuarantee: true,
+          guaranteeText: '7 dias de garantia incondicional'
         }
       };
   }

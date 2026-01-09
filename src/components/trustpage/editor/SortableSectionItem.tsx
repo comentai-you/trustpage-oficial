@@ -5,7 +5,7 @@ import {
   GripVertical, Trash2, ChevronDown, ChevronUp,
   Layout, FileText, Image, Columns, Video, CheckSquare, 
   HelpCircle, MessageSquare, MousePointerClick, Maximize2,
-  LucideIcon
+  DollarSign, LucideIcon
 } from "lucide-react";
 import { ContentSection, SectionType } from "@/types/section-builder";
 import {
@@ -25,7 +25,8 @@ const ICON_MAP: Record<SectionType, LucideIcon> = {
   'faq': HelpCircle,
   'testimonials': MessageSquare,
   'cta': MousePointerClick,
-  'spacer': Maximize2
+  'spacer': Maximize2,
+  'offer': DollarSign
 };
 
 const TYPE_LABELS: Record<SectionType, string> = {
@@ -38,7 +39,8 @@ const TYPE_LABELS: Record<SectionType, string> = {
   'faq': 'FAQ',
   'testimonials': 'Depoimentos',
   'cta': 'Botão CTA',
-  'spacer': 'Espaçador'
+  'spacer': 'Espaçador',
+  'offer': 'Seção de Oferta'
 };
 
 interface SortableSectionItemProps {
@@ -92,6 +94,8 @@ const SortableSectionItem = ({
         return section.data.title || 'Coluna Dupla';
       case 'video-grid':
         return `${section.data.videos?.length || 0} vídeos`;
+      case 'offer':
+        return section.data.finalPrice || 'Oferta';
       default:
         return TYPE_LABELS[section.type];
     }
