@@ -1,15 +1,34 @@
 import { BenefitsSection } from "@/types/section-builder";
 import { 
-  Check, Sparkles, Star, Heart, Shield, Award, Gift, Crown,
-  Rocket, Target, TrendingUp, Users, Clock, Lock,
+  Zap, Star, Heart, Shield, Check, Award, Gift, Crown,
+  Rocket, Target, TrendingUp, Users, Clock, Lock, Sparkles,
   ThumbsUp, Gem, Lightbulb, Medal, Trophy, BadgeCheck,
+  DollarSign, CreditCard, Wallet, Percent, Tag,
+  Package, Truck, Headphones, MessageCircle, Phone, Mail,
+  Globe, MapPin, Calendar, Timer, Hourglass, Infinity,
+  Sun, Moon, Cloud, Flame, Droplet, Leaf, 
+  Music, Camera, Video, Image, Mic, Volume2, Play,
+  Book, FileText, Folder, Download, Upload, Share2,
+  Settings, Wrench, Cpu, Wifi, Battery,
+  Smile, AlertCircle, Info, HelpCircle,
+  Plus, Minus, X, ArrowRight, ArrowUp, ChevronRight,
   LucideIcon
 } from "lucide-react";
 
+// Full icon map matching IconSelector.tsx
 const ICON_MAP: Record<string, LucideIcon> = {
-  Check, Sparkles, Star, Heart, Shield, Award, Gift, Crown,
-  Rocket, Target, TrendingUp, Users, Clock, Lock,
-  ThumbsUp, Gem, Lightbulb, Medal, Trophy, BadgeCheck
+  Zap, Star, Heart, Shield, Check, Award, Gift, Crown,
+  Rocket, Target, TrendingUp, Users, Clock, Lock, Sparkles,
+  ThumbsUp, Gem, Lightbulb, Medal, Trophy, BadgeCheck,
+  DollarSign, CreditCard, Wallet, Percent, Tag,
+  Package, Truck, Headphones, MessageCircle, Phone, Mail,
+  Globe, MapPin, Calendar, Timer, Hourglass, Infinity,
+  Sun, Moon, Cloud, Flame, Droplet, Leaf,
+  Music, Camera, Video, Image, Mic, Volume2, Play,
+  Book, FileText, Folder, Download, Upload, Share2,
+  Settings, Wrench, Cpu, Wifi, Battery,
+  Smile, AlertCircle, Info, HelpCircle,
+  Plus, Minus, X, ArrowRight, ArrowUp, ChevronRight
 };
 
 interface BenefitsRendererProps {

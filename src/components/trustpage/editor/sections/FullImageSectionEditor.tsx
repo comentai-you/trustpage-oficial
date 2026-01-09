@@ -1,12 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { FullImageSection } from "@/types/section-builder";
-import { Upload, Loader2, X } from "lucide-react";
+import { Upload, Loader2, X, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FullImageSectionEditorProps {
   data: FullImageSection['data'];
@@ -61,6 +63,14 @@ const FullImageSectionEditor = ({ data, onChange }: FullImageSectionEditorProps)
 
   return (
     <div className="space-y-4">
+      {/* Recommendation */}
+      <Alert className="bg-amber-50 border-amber-200">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-xs text-amber-700">
+          <strong>Tamanho recomendado:</strong> 1200x600px ou 1920x800px (proporção 2:1). Use imagens <strong>sem fundo</strong> ou com fundo transparente para melhor resultado.
+        </AlertDescription>
+      </Alert>
+
       {/* Image Upload */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Imagem</Label>
@@ -94,10 +104,25 @@ const FullImageSectionEditor = ({ data, onChange }: FullImageSectionEditorProps)
               <>
                 <Upload className="w-8 h-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground mt-2">Enviar imagem</span>
+                <span className="text-[10px] text-muted-foreground">1200x600px recomendado</span>
               </>
             )}
           </label>
         )}
+      </div>
+
+      {/* Background Option */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label className="text-xs">Fundo na Seção</Label>
+          <p className="text-[10px] text-muted-foreground">
+            Adiciona um fundo para destacar a imagem
+          </p>
+        </div>
+        <Switch
+          checked={data.hasBackground || false}
+          onCheckedChange={(checked) => onChange({ ...data, hasBackground: checked })}
+        />
       </div>
 
       {/* Alt text */}
