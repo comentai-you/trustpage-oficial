@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { AICopywriterProvider } from "@/contexts/AICopywriterContext";
 import {
   Sheet,
   SheetContent,
@@ -484,7 +485,15 @@ const TrustPageEditor = () => {
     );
   }
 
+  // Map template type to AI page type
+  const getAIPageType = (templateType: TemplateType): 'sales' | 'vsl' | 'bio' => {
+    if (templateType === 'bio') return 'bio';
+    if (templateType === 'sales') return 'sales';
+    return 'vsl';
+  };
+
   return (
+    <AICopywriterProvider initialPageType={getAIPageType(formData.template_type)}>
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header - Always visible (Light Theme) */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -642,6 +651,7 @@ const TrustPageEditor = () => {
         onOpenChange={setShowMobileControls}
       />
     </div>
+    </AICopywriterProvider>
   );
 };
 

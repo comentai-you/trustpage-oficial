@@ -1,7 +1,8 @@
 import { LandingPageFormData, PageTheme, pageThemes } from "@/types/landing-page";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { InputWithAI } from "@/components/ui/input-with-ai";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon } from "lucide-react";
@@ -13,6 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import CoverImageUpload from "./CoverImageUpload";
+import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 
 interface EditorSidebarProps {
   formData: LandingPageFormData;
@@ -67,11 +69,16 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
 
       {/* Section Title */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-transparent">
-        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <Settings className="w-5 h-5 text-primary" />
-          Editor VSL
-        </h2>
-        <p className="text-xs text-gray-500 mt-1">Configure sua página de vendas</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Editor VSL
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">Configure sua página de vendas</p>
+          </div>
+          <AIConfigDialog />
+        </div>
       </div>
 
       {/* Accordion Sections */}
@@ -140,11 +147,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                 <Label className="text-sm font-medium text-gray-700">
                   Título (Headline)
                 </Label>
-                <Textarea
+                <TextareaWithAI
                   value={formData.headline}
                   onChange={(e) => onChange({ headline: e.target.value })}
                   placeholder="Descubra o Segredo Para..."
                   className="bg-gray-50 border-gray-300 focus:border-primary min-h-[80px] resize-none"
+                  aiFieldType="headline"
                 />
               </div>
 
@@ -195,11 +203,12 @@ const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
                 <Label className="text-sm font-medium text-gray-700">
                   Descrição (Subtítulo)
                 </Label>
-                <Textarea
+                <TextareaWithAI
                   value={formData.description}
                   onChange={(e) => onChange({ description: e.target.value })}
                   placeholder="Uma breve descrição que complementa o título..."
                   className="bg-gray-50 border-gray-300 focus:border-primary min-h-[60px] resize-none"
+                  aiFieldType="subheadline"
                 />
               </div>
             </AccordionContent>

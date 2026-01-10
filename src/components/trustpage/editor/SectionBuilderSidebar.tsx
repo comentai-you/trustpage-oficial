@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Settings, Palette, RefreshCw } from "lucide-react";
+import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 import {
   DndContext,
   closestCenter,
@@ -257,8 +258,13 @@ const SectionBuilderSidebar = ({ formData, onChange }: SectionBuilderSidebarProp
   return (
     <aside className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto h-full">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-900">Section Builder</h2>
-        <p className="text-sm text-gray-500">Arraste para reordenar</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-gray-900">Section Builder</h2>
+            <p className="text-sm text-gray-500">Arraste para reordenar</p>
+          </div>
+          <AIConfigDialog />
+        </div>
       </div>
 
       <Accordion type="multiple" defaultValue={["appearance", "sections"]} className="w-full">
