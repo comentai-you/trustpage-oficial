@@ -120,7 +120,7 @@ const categories: Category[] = [
     faqs: [
       {
         question: "Quais as formas de pagamento?",
-        answer: "Aceitamos PIX e Boleto através da nossa integração segura com o Asaas."
+        answer: "Aceitamos PIX, Boleto e Cartão de Crédito através da nossa integração segura com a Kiwify."
       },
       {
         question: "Como faço upgrade?",
