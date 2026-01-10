@@ -25,12 +25,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-// Placeholder URLs - substituir pelos links reais do Kiwify
+// Links reais do Kiwify
 const CHECKOUT_URLS = {
-  basic_monthly: "https://pay.kiwify.com.br/basic-monthly",
-  basic_yearly: "https://pay.kiwify.com.br/basic-yearly",
-  pro_monthly: "https://pay.kiwify.com.br/pro-monthly",
-  pro_yearly: "https://pay.kiwify.com.br/pro-yearly",
+  basic_monthly: "https://pay.kiwify.com.br/P7MaOJK",
+  basic_yearly: "https://pay.kiwify.com.br/f8Tg6DT",
+  pro_monthly: "https://pay.kiwify.com.br/ODBfbnA",
+  pro_yearly: "https://pay.kiwify.com.br/TQlihDk",
 };
 
 const WHY_TRUSTPAGE = [
@@ -183,15 +183,17 @@ const OfertaPage = () => {
             ⚡ Oferta por tempo limitado — Preços podem aumentar a qualquer momento
           </p>
 
-          {/* Video Placeholder */}
+          {/* Video VSL */}
           <div className="relative mx-auto max-w-3xl mb-10">
-            <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 rounded-2xl shadow-2xl border border-border/50 flex items-center justify-center overflow-hidden">
-              <div className="text-center p-8">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-primary border-b-[12px] border-b-transparent ml-1" />
-                </div>
-                <p className="text-muted-foreground text-sm">Vídeo de Apresentação (VSL)</p>
-              </div>
+            <div className="aspect-video rounded-2xl shadow-2xl border border-border/50 overflow-hidden">
+              <iframe
+                src="https://player.vimeo.com/video/1149934775?badge=0&autopause=0&player_id=0&app_id=58479"
+                className="w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                allowFullScreen
+                title="TrustPage VSL"
+              />
             </div>
             {/* Decorative glow */}
             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-3xl blur-2xl -z-10 opacity-50" />
