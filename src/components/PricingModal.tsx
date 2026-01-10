@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,10 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { Crown, Check, Zap, Sparkles, Loader2, Star, Gift } from "lucide-react";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { Crown, Check, Zap, Sparkles, Star, Gift } from "lucide-react";
 
 interface PricingModalProps {
   open: boolean;
@@ -19,51 +15,20 @@ interface PricingModalProps {
   userFullName?: string | null;
 }
 
-const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) => {
-  const { user } = useAuth();
-  const [loadingPlan, setLoadingPlan] = useState<'essential' | 'pro' | null>(null);
+// Links externos para checkout na Kiwify
+const KIWIFY_LINKS = {
+  essential_monthly: 'https://pay.kiwify.com.br/P7MaOJK',
+  pro_monthly: 'https://pay.kiwify.com.br/ODBfbnA',
+  essential_yearly: 'https://pay.kiwify.com.br/f8Tg6DT',
+  pro_yearly: 'https://pay.kiwify.com.br/TQlihDk',
+};
 
-  const handleSubscribe = async (planType: 'essential' | 'pro') => {
-    if (!user) {
-      toast.error("Você precisa estar logado para assinar");
-      return;
-    }
+const PricingModal = ({ open, onOpenChange }: PricingModalProps) => {
 
-    setLoadingPlan(planType);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('asaas-checkout', {
-        body: {
-          user_id: user.id,
-          email: user.email,
-          full_name: userFullName || user.email?.split('@')[0] || 'Cliente',
-          plan_type: planType,
-        },
-      });
-
-      if (error) {
-        console.error('Error calling asaas-checkout:', error);
-        throw new Error(error.message || 'Erro ao processar pagamento');
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || 'Erro ao criar assinatura');
-      }
-
-      if (data.invoiceUrl) {
-        toast.success("Redirecionando para pagamento...");
-        window.location.href = data.invoiceUrl;
-      } else {
-        throw new Error('Link de pagamento não disponível');
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast.error("Erro ao processar assinatura", {
-        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
-      });
-    } finally {
-      setLoadingPlan(null);
-    }
+  const handleSubscribe = (planKey: keyof typeof KIWIFY_LINKS) => {
+    const url = KIWIFY_LINKS[planKey];
+    window.open(url, '_blank');
+    onOpenChange(false);
   };
 
   const freeFeatures = [
@@ -186,20 +151,10 @@ const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) =
               <Button 
                 variant="gradient" 
                 className="w-full"
-                onClick={() => handleSubscribe("essential")}
-                disabled={loadingPlan !== null}
+                onClick={() => handleSubscribe("essential_monthly")}
               >
-                {loadingPlan === 'essential' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4 mr-2" />
-                    Assinar Essencial
-                  </>
-                )}
+                <Zap className="w-4 h-4 mr-2" />
+                Assinar Essencial
               </Button>
             </CardContent>
           </Card>
@@ -236,20 +191,10 @@ const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) =
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => handleSubscribe("pro")}
-                disabled={loadingPlan !== null}
+                onClick={() => handleSubscribe("pro_monthly")}
               >
-                {loadingPlan === 'pro' ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Crown className="w-4 h-4 mr-2" />
-                    Assinar PRO
-                  </>
-                )}
+                <Crown className="w-4 h-4 mr-2" />
+                Assinar PRO
               </Button>
             </CardContent>
           </Card>
@@ -260,7 +205,6 @@ const PricingModal = ({ open, onOpenChange, userFullName }: PricingModalProps) =
             variant="ghost" 
             onClick={() => onOpenChange(false)}
             className="text-muted-foreground text-sm"
-            disabled={loadingPlan !== null}
           >
             Voltar
           </Button>

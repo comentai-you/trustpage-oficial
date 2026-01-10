@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Crown, Sparkles, CreditCard, AlertCircle, ExternalLink, Loader2, Check, X } from "lucide-react";
+import { Crown, Sparkles, CreditCard, ExternalLink, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import PricingModal from "@/components/PricingModal";
-import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface SubscriptionProfile {
   id: string;
@@ -17,20 +15,23 @@ interface SubscriptionProfile {
   avatar_url: string | null;
   plan_type: string;
   subscription_status: string;
-  asaas_customer_id: string | null;
-  asaas_subscription_id: string | null;
   subscription_updated_at: string | null;
   created_at: string;
 }
+
+// Links externos para checkout na Kiwify
+const KIWIFY_LINKS = {
+  essential_monthly: 'https://pay.kiwify.com.br/P7MaOJK',
+  pro_monthly: 'https://pay.kiwify.com.br/ODBfbnA',
+  essential_yearly: 'https://pay.kiwify.com.br/f8Tg6DT',
+  pro_yearly: 'https://pay.kiwify.com.br/TQlihDk',
+};
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<SubscriptionProfile | null>(null);
-  const [showPricingModal, setShowPricingModal] = useState(false);
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -42,7 +43,7 @@ const SubscriptionPage = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url, plan_type, subscription_status, asaas_customer_id, asaas_subscription_id, subscription_updated_at, created_at")
+        .select("id, full_name, avatar_url, plan_type, subscription_status, subscription_updated_at, created_at")
         .eq("id", user!.id)
         .maybeSingle();
 
@@ -56,39 +57,9 @@ const SubscriptionPage = () => {
     }
   };
 
-  const handleCancelSubscription = async () => {
-    if (!profile?.asaas_subscription_id) {
-      toast.error("Nenhuma assinatura ativa encontrada");
-      return;
-    }
-
-    setCancelling(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('asaas-manage-subscription', {
-        body: {
-          action: 'cancel',
-          user_id: user!.id,
-          subscription_id: profile.asaas_subscription_id,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        toast.success("Assinatura cancelada com sucesso");
-        await fetchProfile();
-      } else {
-        throw new Error(data?.error || 'Erro ao cancelar assinatura');
-      }
-    } catch (error) {
-      console.error("Error cancelling subscription:", error);
-      toast.error("Erro ao cancelar assinatura", {
-        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
-      });
-    } finally {
-      setCancelling(false);
-      setShowCancelDialog(false);
-    }
+  const handleUpgrade = (planKey: keyof typeof KIWIFY_LINKS) => {
+    const url = KIWIFY_LINKS[planKey];
+    window.open(url, '_blank');
   };
 
   const getStatusBadge = (status: string) => {
@@ -98,9 +69,10 @@ const SubscriptionPage = () => {
       case 'trial':
         return <Badge className="bg-warning/20 text-warning border-warning/30">Período de Teste</Badge>;
       case 'cancelled':
+      case 'canceled':
         return <Badge className="bg-destructive/20 text-destructive border-destructive/30">Cancelada</Badge>;
-      case 'refunded':
-        return <Badge className="bg-muted text-muted-foreground border-muted">Reembolsada</Badge>;
+      case 'inactive':
+        return <Badge className="bg-muted text-muted-foreground border-muted">Inativa</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -118,12 +90,22 @@ const SubscriptionPage = () => {
           color: 'text-primary',
           bgColor: 'bg-primary/10',
         };
-      default:
+      case 'essential':
         return {
           name: 'Essencial',
           price: 'R$ 39,90/mês',
           pages: 2,
           domains: 1,
+          icon: Sparkles,
+          color: 'text-primary',
+          bgColor: 'bg-primary/10',
+        };
+      default:
+        return {
+          name: 'Gratuito',
+          price: 'R$ 0/mês',
+          pages: 1,
+          domains: 0,
           icon: Sparkles,
           color: 'text-muted-foreground',
           bgColor: 'bg-muted',
@@ -141,11 +123,10 @@ const SubscriptionPage = () => {
     );
   }
 
-  const plan = getPlanDetails(profile?.plan_type || 'essential');
+  const plan = getPlanDetails(profile?.plan_type || 'free');
   const PlanIcon = plan.icon;
   const isActive = profile?.subscription_status === 'active';
-  const isTrial = profile?.subscription_status === 'trial';
-  const canCancel = isActive && profile?.asaas_subscription_id;
+  const isFree = profile?.plan_type === 'free' || !profile?.plan_type;
 
   return (
     <DashboardLayout
@@ -178,23 +159,23 @@ const SubscriptionPage = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-xl font-bold text-foreground">Plano {plan.name}</h3>
-                      {getStatusBadge(profile?.subscription_status || 'trial')}
+                      {getStatusBadge(profile?.subscription_status || 'free')}
                     </div>
                     <p className="text-muted-foreground">{plan.price}</p>
                     <p className="text-sm text-muted-foreground">
-                      Até {plan.pages} páginas ativas
+                      Até {plan.pages} página{plan.pages > 1 ? 's' : ''} ativa{plan.pages > 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  {!isActive && (
-                    <Button variant="gradient" onClick={() => setShowPricingModal(true)}>
-                      {isTrial ? 'Fazer Upgrade' : 'Reativar Plano'}
+                  {isFree && (
+                    <Button variant="gradient" onClick={() => handleUpgrade('essential_monthly')}>
+                      Fazer Upgrade
                     </Button>
                   )}
-                  {profile?.plan_type !== 'pro' && isActive && (
-                    <Button variant="outline" onClick={() => setShowPricingModal(true)}>
+                  {profile?.plan_type === 'essential' && (
+                    <Button variant="outline" onClick={() => handleUpgrade('pro_monthly')}>
                       <Crown className="w-4 h-4 mr-2" />
                       Upgrade para PRO
                     </Button>
@@ -225,7 +206,7 @@ const SubscriptionPage = () => {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-success" />
-                  <span>Até {plan.pages} páginas ativas</span>
+                  <span>Até {plan.pages} página{plan.pages > 1 ? 's' : ''} ativa{plan.pages > 1 ? 's' : ''}</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-success" />
@@ -239,10 +220,12 @@ const SubscriptionPage = () => {
                   <Check className="w-5 h-5 text-success" />
                   <span>Pixel do Facebook/Google ADS</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-success" />
-                  <span>Até {plan.domains} domínio{plan.domains > 1 ? 's' : ''} personalizado{plan.domains > 1 ? 's' : ''}</span>
-                </li>
+                {plan.domains > 0 && (
+                  <li className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-success" />
+                    <span>Até {plan.domains} domínio{plan.domains > 1 ? 's' : ''} personalizado{plan.domains > 1 ? 's' : ''}</span>
+                  </li>
+                )}
                 {profile?.plan_type === 'pro' ? (
                   <>
                     <li className="flex items-center gap-3">
@@ -254,53 +237,62 @@ const SubscriptionPage = () => {
                       <span>Suporte prioritário</span>
                     </li>
                   </>
-                ) : (
+                ) : profile?.plan_type === 'essential' ? (
                   <li className="flex items-center gap-3 text-muted-foreground">
                     <Check className="w-5 h-5 text-muted-foreground" />
                     <span>Marca d'água no rodapé</span>
                   </li>
-                )}
+                ) : null}
               </ul>
             </CardContent>
           </Card>
 
-          {/* Danger Zone */}
-          {canCancel && (
-            <Card className="border-destructive/30">
+          {/* Upgrade Options - Only show for non-pro users */}
+          {profile?.plan_type !== 'pro' && (
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertCircle className="w-5 h-5" />
-                  Zona de Perigo
-                </CardTitle>
-                <CardDescription>
-                  Ações irreversíveis relacionadas à sua assinatura
-                </CardDescription>
+                <CardTitle>Opções de Upgrade</CardTitle>
+                <CardDescription>Escolha o plano ideal para você</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <h4 className="font-medium text-foreground">Cancelar Assinatura</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Sua assinatura será cancelada ao final do período atual
-                    </p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* Essential */}
+                  {profile?.plan_type !== 'essential' && (
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-primary" />
+                        <h4 className="font-semibold">Essencial</h4>
+                      </div>
+                      <p className="text-2xl font-bold">R$ 39,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• 2 páginas ativas</li>
+                        <li>• 1 domínio personalizado</li>
+                        <li>• Página VSL e Vendas</li>
+                      </ul>
+                      <Button className="w-full" onClick={() => handleUpgrade('essential_monthly')}>
+                        Assinar Essencial
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* PRO */}
+                  <div className="border-2 border-primary rounded-lg p-4 space-y-3 relative">
+                    <Badge className="absolute -top-2 right-2 bg-primary">Recomendado</Badge>
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-5 h-5 text-primary" />
+                      <h4 className="font-semibold">PRO</h4>
+                    </div>
+                    <p className="text-2xl font-bold">R$ 79,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• 8 páginas ativas</li>
+                      <li>• 3 domínios personalizados</li>
+                      <li>• Zero marca d'água</li>
+                      <li>• Suporte prioritário</li>
+                    </ul>
+                    <Button variant="gradient" className="w-full" onClick={() => handleUpgrade('pro_monthly')}>
+                      Assinar PRO
+                    </Button>
                   </div>
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => setShowCancelDialog(true)}
-                    disabled={cancelling}
-                  >
-                    {cancelling ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Cancelando...
-                      </>
-                    ) : (
-                      <>
-                        <X className="w-4 h-4 mr-2" />
-                        Cancelar Assinatura
-                      </>
-                    )}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -325,23 +317,6 @@ const SubscriptionPage = () => {
           </Card>
         </div>
       </main>
-
-      <PricingModal 
-        open={showPricingModal} 
-        onOpenChange={setShowPricingModal}
-        userFullName={profile?.full_name}
-      />
-
-      <ConfirmDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        title="Cancelar Assinatura"
-        description="Tem certeza que deseja cancelar sua assinatura? Você perderá acesso aos recursos premium ao final do período atual."
-        confirmText="Sim, Cancelar"
-        cancelText="Manter Assinatura"
-        onConfirm={handleCancelSubscription}
-        variant="destructive"
-      />
     </DashboardLayout>
   );
 };
