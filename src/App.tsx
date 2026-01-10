@@ -57,15 +57,14 @@ const SystemRoutes = () => (
     {/* Public Routes */}
     <Route path="/" element={<HomePage />} />
     <Route path="/auth" element={<Auth />} />
-
-    {/* Landing pages públicas (suporta URL limpa e legado /p/:slug) */}
-    <Route path="/p/:slug" element={<LandingPageView />} />
-    <Route path="/:slug" element={<LandingPageView />} />
-
     <Route path="/termos" element={<TermsPage />} />
     <Route path="/privacidade" element={<PrivacyPage />} />
     <Route path="/contato" element={<ContactPage />} />
     <Route path="/oferta" element={<OfertaPage />} />
+
+    {/* Landing pages públicas - DEVE vir depois das rotas específicas */}
+    <Route path="/p/:slug" element={<LandingPageView />} />
+    <Route path="/:slug" element={<LandingPageView />} />
     
     {/* Protected Routes */}
     <Route path="/dashboard" element={
