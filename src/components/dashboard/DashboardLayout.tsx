@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Plus, Settings, HelpCircle, LogOut, User, CreditCard } from "lucide-react";
+import { Sparkles, Plus, HelpCircle, LogOut, User, CreditCard, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -112,8 +112,8 @@ const DashboardLayout = ({
                       className="cursor-pointer"
                       onClick={() => navigate("/help")}
                     >
-                      <HelpCircle className="w-4 h-4 mr-2" />
-                      Central de Ajuda
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Ajuda & Tutoriais
                     </DropdownMenuItem>
                   </div>
                   <DropdownMenuSeparator />
