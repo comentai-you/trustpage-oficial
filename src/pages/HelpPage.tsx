@@ -524,9 +524,9 @@ const HelpPage = () => {
                 3
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-foreground mb-2">Configure o WWW (opcional)</h4>
+                <h4 className="font-semibold text-foreground mb-2">Configure o registro WWW</h4>
                 <p className="text-muted-foreground text-sm mb-3">
-                  Se quiser que <strong>www.seudominio.com</strong> também funcione, adicione outro registro A:
+                  Adicione também um registro A para <strong>www.seudominio.com</strong>:
                 </p>
                 <div className="bg-muted rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
