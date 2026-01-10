@@ -138,8 +138,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          asaas_customer_id: string | null
-          asaas_subscription_id: string | null
           avatar_url: string | null
           bio: string | null
           company_name: string | null
@@ -150,6 +148,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_verified: boolean | null
+          kiwify_customer_id: string | null
           plan_type: string
           subscription_status: string
           subscription_updated_at: string | null
@@ -158,8 +157,6 @@ export type Database = {
           username: string | null
         }
         Insert: {
-          asaas_customer_id?: string | null
-          asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           company_name?: string | null
@@ -170,6 +167,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_verified?: boolean | null
+          kiwify_customer_id?: string | null
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
@@ -178,8 +176,6 @@ export type Database = {
           username?: string | null
         }
         Update: {
-          asaas_customer_id?: string | null
-          asaas_subscription_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           company_name?: string | null
@@ -190,6 +186,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          kiwify_customer_id?: string | null
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
@@ -293,6 +290,14 @@ export type Database = {
       is_legal_page_slug: { Args: { page_slug: string }; Returns: boolean }
       is_subscription_active: {
         Args: { check_user_id: string }
+        Returns: boolean
+      }
+      update_user_plan: {
+        Args: {
+          new_plan_type: string
+          new_status?: string
+          target_user_id: string
+        }
         Returns: boolean
       }
     }
