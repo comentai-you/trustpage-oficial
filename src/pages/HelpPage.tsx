@@ -43,7 +43,7 @@ interface Tutorial {
 }
 
 const WHATSAPP_NUMBER = "5561999686641";
-const VERCEL_IP = "185.158.133.1";
+const VERCEL_IP = "216.198.79.1";
 
 const tutorials: Tutorial[] = [
   {
