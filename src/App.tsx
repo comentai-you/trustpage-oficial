@@ -20,6 +20,7 @@ import SettingsPage from "./pages/SettingsPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import HelpPage from "./pages/HelpPage";
+import OfertaPage from "./pages/OfertaPage";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const SystemRoutes = () => (
     <Route path="/termos" element={<TermsPage />} />
     <Route path="/privacidade" element={<PrivacyPage />} />
     <Route path="/contato" element={<ContactPage />} />
+    <Route path="/oferta" element={<OfertaPage />} />
     
     {/* Protected Routes */}
     <Route path="/dashboard" element={
