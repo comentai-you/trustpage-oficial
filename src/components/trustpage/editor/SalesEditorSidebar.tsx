@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { LandingPageFormData, SalesPageContent, Benefit, Testimonial, FAQItem } from "@/types/landing-page";
@@ -19,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import IconSelector from "./IconSelector";
 import ThemeSelector, { salesThemes, SalesTheme } from "./ThemeSelector";
 import CoverImageUpload from "./CoverImageUpload";
+import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 
 interface SalesEditorSidebarProps {
   formData: LandingPageFormData;
@@ -262,8 +265,13 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
   return (
     <aside className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto h-full">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="font-semibold text-gray-900">Editor de Página de Vendas</h2>
-        <p className="text-sm text-gray-500">Personalize sua página</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-gray-900">Editor de Página de Vendas</h2>
+            <p className="text-sm text-gray-500">Personalize sua página</p>
+          </div>
+          <AIConfigDialog />
+        </div>
       </div>
 
       <Accordion type="multiple" defaultValue={["appearance", "hero", "benefits"]} className="w-full">
