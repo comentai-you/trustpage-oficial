@@ -21,6 +21,7 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import HelpPage from "./pages/HelpPage";
 import OfertaPage from "./pages/OfertaPage";
+import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const SystemRoutes = () => (
     {/* Public Routes */}
     <Route path="/" element={<HomePage />} />
     <Route path="/auth" element={<Auth />} />
+    <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
     <Route path="/termos" element={<TermsPage />} />
     <Route path="/privacidade" element={<PrivacyPage />} />
     <Route path="/contato" element={<ContactPage />} />

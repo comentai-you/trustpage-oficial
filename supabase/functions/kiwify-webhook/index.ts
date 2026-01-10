@@ -180,7 +180,7 @@ serve(async (req) => {
             plan_type: newPlan,
             accepted_terms: true,
           },
-          redirectTo: `${SITE_URL}/auth?mode=set-password`,
+          redirectTo: `${SITE_URL}/auth/update-password`,
         }
       );
 
