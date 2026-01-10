@@ -3,13 +3,7 @@ project_id = "myqrydgbrxhrjkrvkgqq"
 [functions.send-contact-email]
 verify_jwt = false
 
-[functions.asaas-checkout]
-verify_jwt = false
-
-[functions.asaas-webhook]
-verify_jwt = false
-
-[functions.asaas-manage-subscription]
+[functions.kiwify-webhook]
 verify_jwt = false
 
 [functions.increment-page-view]
