@@ -22,6 +22,18 @@ const hardResetPwaCaches = async () => {
 const bootstrap = async () => {
   const url = new URL(window.location.href);
 
+  // Garantia de fluxo: se o Supabase redirecionar convites/recuperação para a HOME por qualquer motivo,
+  // nós forçamos a navegação para a tela correta de definição de senha (sem dar "flash" na UI).
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const flowType = url.searchParams.get("type") || hashParams.get("type");
+  const isPasswordFlow = flowType === "invite" || flowType === "recovery" || flowType === "password_recovery";
+  const isOnUpdatePassword = window.location.pathname.replace(/\/+$/, "") === "/auth/update-password";
+
+  if (isPasswordFlow && !isOnUpdatePassword) {
+    window.location.replace(`${url.origin}/auth/update-password${window.location.search}${window.location.hash}`);
+    return;
+  }
+
   // Acesse qualquer página com ?tp_force_update=1 para forçar atualização no domínio (inclui custom domains)
   if (url.searchParams.has("tp_force_update")) {
     await hardResetPwaCaches();
