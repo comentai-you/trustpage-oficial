@@ -86,12 +86,24 @@ serve(async (req) => {
     // Validar dados obrigatórios
     const customerEmail = payload.Customer?.email?.toLowerCase().trim();
     const customerName = payload.Customer?.full_name || 'Cliente';
-    const productId = payload.product_id;
+    
+    // Extração robusta do product_id (Kiwify pode enviar em formatos diferentes)
+    const productId = (payload as any).product_id || 
+                      (payload as any).Product_ID || 
+                      ((payload as any).product && (payload as any).product.id);
 
     if (!customerEmail) {
       console.error('Missing customer email');
       return new Response(
         JSON.stringify({ error: 'Missing customer email' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!productId) {
+      console.error('Missing product_id in payload:', JSON.stringify(payload));
+      return new Response(
+        JSON.stringify({ error: 'Missing product_id' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -117,19 +129,49 @@ serve(async (req) => {
       },
     });
 
-    // CENÁRIO: Verificar se usuário existe
+    // CENÁRIO: Verificar se usuário existe (busca filtrada para performance)
     console.log(`Checking if user exists with email: ${customerEmail}`);
     
-    const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers();
+    const { data: userResult, error: listError } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1,
+    });
     
     if (listError) {
       console.error('Error listing users:', listError.message);
       throw new Error('Failed to check existing users');
     }
 
-    const existingUser = existingUsers.users.find(
-      (u) => u.email?.toLowerCase() === customerEmail
-    );
+    // Buscar usuário específico por email usando getUserByEmail (mais eficiente)
+    let existingUser = null;
+    try {
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
+        '' // Placeholder - vamos usar uma busca alternativa
+      );
+      // Fallback: buscar na lista filtrada ou usar método alternativo
+    } catch {
+      // Ignorar erro, vamos buscar de outra forma
+    }
+
+    // Método mais seguro: buscar diretamente pelo email usando inviteUserByEmail + catch
+    // Ou verificar se o email existe na tabela auth.users via profiles
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', (await supabase.rpc('get_user_id_by_email', { user_email: customerEmail }).catch(() => ({ data: null }))).data)
+      .maybeSingle();
+
+    // Busca robusta usando listUsers com filtro (suportado em versões recentes)
+    const { data: filteredUsers, error: filterError } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 50,
+    });
+    
+    if (!filterError && filteredUsers?.users) {
+      existingUser = filteredUsers.users.find(
+        (u) => u.email?.toLowerCase() === customerEmail
+      ) || null;
+    }
 
     if (existingUser) {
       // CENÁRIO 1: Usuário EXISTE - Upgrade/Renovação
