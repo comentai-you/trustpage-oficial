@@ -23,6 +23,7 @@ import HelpPage from "./pages/HelpPage";
 import OfertaPage from "./pages/OfertaPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ThankYouPage from "./pages/ThankYouPage";
+import AdminPage from "./pages/AdminPage";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,11 @@ const SystemRoutes = () => (
         <HelpPage />
       </ProtectedRoute>
     } />
+    <Route path="/admin" element={
+      <ProtectedRoute>
+        <AdminPage />
+      </ProtectedRoute>
+    } />
     <Route path="/new" element={
       <ProtectedRoute>
         <TrustPageEditor />
@@ -119,6 +125,7 @@ const App = () => {
   // Rotas do SISTEMA que NUNCA podem depender do domínio (ex: /oferta, /obrigado, auth)
   // Isso evita 404 caso alguém acesse essas rotas em um domínio customizado.
   const FORCE_SYSTEM_PREFIXES = [
+    "/admin",
     "/auth",
     "/dashboard",
     "/settings",
