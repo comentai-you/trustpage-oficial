@@ -42,7 +42,7 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Por que escolher"
           className="text-sm"
-          aiFieldType="headline"
+          aiFieldType="section_title"
         />
       </div>
 
@@ -96,7 +96,7 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
               placeholder="Descrição"
               className="text-sm resize-none"
               rows={2}
-              aiFieldType="body"
+              aiFieldType="benefit_desc"
             />
           </div>
         ))}

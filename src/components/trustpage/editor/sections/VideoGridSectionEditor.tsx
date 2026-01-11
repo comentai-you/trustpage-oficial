@@ -60,7 +60,7 @@ const VideoGridSectionEditor = ({ data, onChange }: VideoGridSectionEditorProps)
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Veja o que nossos clientes dizem"
           className="text-sm"
-          aiFieldType="headline"
+          aiFieldType="section_title"
         />
       </div>
 

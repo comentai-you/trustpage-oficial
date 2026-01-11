@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,23 @@ import {
   Type,
   Underline,
   Undo,
+  Wand2,
+  Loader2,
+  RefreshCw,
+  Crown,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useAICopywriter } from "@/contexts/AICopywriterContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface TextSectionEditorProps {
   data: TextSection["data"];
@@ -44,8 +60,96 @@ interface TextSectionEditorProps {
  * - Destaque por cor no texto selecionado (inline)
  */
 const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSectionEditorProps) => {
+  const { settings, isConfigured } = useAICopywriter();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const editorRef = useRef<HTMLDivElement>(null);
   const savedRangeRef = useRef<Range | null>(null);
+  
+  // AI state
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiOptions, setAiOptions] = useState<string[]>([]);
+  const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showConfigWarning, setShowConfigWarning] = useState(false);
+
+  // Check if user is PRO
+  useEffect(() => {
+    const checkPlan = async () => {
+      if (!user) {
+        setIsPro(false);
+        return;
+      }
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('plan_type')
+        .eq('id', user.id)
+        .single();
+      setIsPro(profileData?.plan_type === 'pro' || profileData?.plan_type === 'elite');
+    };
+    checkPlan();
+  }, [user]);
+
+  const handleAIGenerate = async () => {
+    setAiLoading(true);
+    setAiOptions([]);
+    setShowUpgrade(false);
+    setShowConfigWarning(false);
+
+    try {
+      const { data: aiData, error } = await supabase.functions.invoke('generate-copy', {
+        body: {
+          niche: settings.niche,
+          pageType: settings.pageType,
+          fieldType: 'richtext',
+          currentText: data.content?.replace(/<[^>]*>/g, ' ').substring(0, 200) || ''
+        }
+      });
+
+      if (error) throw error;
+
+      if (aiData?.options && Array.isArray(aiData.options)) {
+        setAiOptions(aiData.options);
+      } else {
+        throw new Error('Resposta inválida da IA');
+      }
+    } catch (error) {
+      console.error('Error generating copy:', error);
+      toast.error('Erro ao gerar sugestões');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAIClick = () => {
+    if (!user) {
+      toast.error('Faça login para usar a IA Copywriter');
+      return;
+    }
+    setAiOpen(true);
+    setAiOptions([]);
+    setShowUpgrade(false);
+    setShowConfigWarning(false);
+
+    if (!isPro) {
+      setShowUpgrade(true);
+      return;
+    }
+    if (!isConfigured) {
+      setShowConfigWarning(true);
+      return;
+    }
+    handleAIGenerate();
+  };
+
+  const handleSelectOption = (option: string) => {
+    // Convert to HTML paragraphs
+    const htmlContent = option.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+    onChange({ ...data, content: htmlContent });
+    setAiOpen(false);
+    toast.success('Texto aplicado!');
+  };
 
   const syncEditorHtml = useCallback(() => {
     if (!editorRef.current) return;
@@ -289,6 +393,133 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
               title="Cor do texto (bloco)"
             />
           </div>
+
+          <div className="w-px h-6 bg-border self-center mx-1" />
+
+          {/* AI Magic Button */}
+          <Popover open={aiOpen} onOpenChange={setAiOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-purple-500 hover:text-purple-700 hover:bg-purple-50"
+                title={isPro ? 'Gerar texto com IA' : 'Recurso PRO'}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleAIClick();
+                }}
+              >
+                {isPro === false ? (
+                  <Crown className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <Wand2 className="w-4 h-4" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end" sideOffset={4}>
+              {/* Upgrade CTA for Free users */}
+              {showUpgrade && (
+                <div className="p-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                    <Crown className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Funcionalidade Exclusiva PRO
+                  </h4>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Faça upgrade para desbloquear a IA Copywriter.
+                  </p>
+                  <Button 
+                    onClick={() => { setAiOpen(false); navigate('/oferta'); }}
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                  >
+                    Ver Planos
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Config Warning */}
+              {showConfigWarning && !showUpgrade && (
+                <div className="p-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Configure a IA primeiro
+                  </h4>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Clique no botão <strong>"Cérebro IA"</strong> na barra lateral.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setAiOpen(false)}
+                    className="w-full"
+                  >
+                    Entendi
+                  </Button>
+                </div>
+              )}
+
+              {/* Normal flow for PRO + Configured */}
+              {!showUpgrade && !showConfigWarning && (
+                <>
+                  <div className="p-3 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+                    <div className="flex items-center gap-2 text-sm font-medium text-purple-800">
+                      <Sparkles className="w-4 h-4" />
+                      Sugestões de Texto Livre
+                    </div>
+                    <p className="text-xs text-purple-600 mt-0.5">
+                      Nicho: {settings.niche}
+                    </p>
+                  </div>
+
+                  <div className="p-2">
+                    {aiLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                        <span className="ml-2 text-sm text-gray-500">Gerando sugestões...</span>
+                      </div>
+                    ) : aiOptions.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {aiOptions.map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSelectOption(option)}
+                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all group"
+                          >
+                            <span className="text-sm text-gray-700 group-hover:text-purple-800 line-clamp-3">
+                              {option}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center text-sm text-gray-500">
+                        Gerando opções...
+                      </div>
+                    )}
+                  </div>
+
+                  {aiOptions.length > 0 && (
+                    <div className="p-2 border-t bg-gray-50">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleAIGenerate}
+                        disabled={aiLoading}
+                        className="w-full text-xs text-purple-600 hover:text-purple-800"
+                      >
+                        <RefreshCw className={`w-3 h-3 mr-1 ${aiLoading ? 'animate-spin' : ''}`} />
+                        Tentar Novamente
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </PopoverContent>
+          </Popover>
         </div>
         <p className="text-[10px] text-muted-foreground">
           Selecione um trecho e use o marcador para destacar com cor. A paleta define a cor do bloco todo no preview.

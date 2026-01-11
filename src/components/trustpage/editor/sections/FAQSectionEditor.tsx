@@ -40,7 +40,7 @@ const FAQSectionEditor = ({ data, onChange }: FAQSectionEditorProps) => {
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Perguntas Frequentes"
           className="text-sm"
-          aiFieldType="headline"
+          aiFieldType="section_title"
         />
       </div>
 

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { AIMagicButton } from "@/components/ai/AIMagicButton";
 
 interface TextareaWithAIProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  aiFieldType?: 'headline' | 'subheadline' | 'button' | 'body' | 'benefit' | 'testimonial' | 'faq_question' | 'faq_answer' | 'offer' | 'default';
+  aiFieldType?: 'headline' | 'subheadline' | 'button' | 'body' | 'benefit' | 'benefit_desc' | 'testimonial' | 'faq_question' | 'faq_answer' | 'offer' | 'section_title' | 'richtext' | 'default';
   showAI?: boolean;
 }
 
