@@ -42,8 +42,8 @@ const WHY_TRUSTPAGE = [
   },
   {
     icon: <Server className="w-8 h-8" />,
-    title: "Hospedagem AWS Premium",
-    description: "Sua página fica em servidores de primeira linha, os mesmos usados pela Netflix e Spotify.",
+    title: "Hospedagem Vercel Premium",
+    description: "Sua página fica em servidores de primeira linha, com CDN global para máxima velocidade.",
     highlight: "99.9% de uptime garantido"
   },
   {
@@ -81,7 +81,7 @@ const PAIN_POINTS = [
   {
     icon: <AlertTriangle className="w-6 h-6" />,
     problem: "Cansado de plataformas lentas?",
-    solution: "Hospedagem AWS com carregamento em menos de 2 segundos"
+    solution: "Hospedagem Vercel com carregamento em menos de 2 segundos"
   },
   {
     icon: <Clock className="w-6 h-6" />,
@@ -174,7 +174,7 @@ const OfertaPage = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-            A única ferramenta com <strong className="text-foreground">Hospedagem AWS</strong>, <strong className="text-foreground">Anti-Bloqueio</strong> e{" "}
+            A única ferramenta com <strong className="text-foreground">Hospedagem Vercel</strong>, <strong className="text-foreground">Anti-Bloqueio</strong> e{" "}
             <strong className="text-foreground">Inteligência Artificial</strong> inclusas.
           </p>
 
@@ -367,7 +367,7 @@ const OfertaPage = () => {
 
               <ul className="space-y-3 mb-8">
                 <FeatureItem included>2 Páginas Ativas</FeatureItem>
-                <FeatureItem included>Hospedagem AWS Inclusa</FeatureItem>
+                <FeatureItem included>Hospedagem Vercel Inclusa</FeatureItem>
                 <FeatureItem included>Página VSL com Vídeo</FeatureItem>
                 <FeatureItem included>Delay no Botão CTA</FeatureItem>
                 <FeatureItem included>Página de Vendas completa</FeatureItem>
