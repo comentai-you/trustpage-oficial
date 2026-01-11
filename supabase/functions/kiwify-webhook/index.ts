@@ -87,10 +87,18 @@ serve(async (req) => {
     const customerEmail = payload.Customer?.email?.toLowerCase().trim();
     const customerName = payload.Customer?.full_name || 'Cliente';
     
-    // Extração robusta do product_id (Kiwify pode enviar em formatos diferentes)
+    // Extração robusta do product_id (Kiwify envia em payload.Product.product_id)
     const productId = (payload as any).product_id || 
                       (payload as any).Product_ID || 
+                      ((payload as any).Product && (payload as any).Product.product_id) ||
                       ((payload as any).product && (payload as any).product.id);
+    
+    // Fallback: usar checkout_link como identificador do produto (mapeado em PRODUCTS)
+    const checkoutLink = (payload as any).checkout_link;
+    
+    // O productId pode ser um UUID, mas o PRODUCTS usa checkout_link como chave
+    // Priorizar checkout_link para mapear o plano
+    const productKey = checkoutLink && PRODUCTS[checkoutLink] ? checkoutLink : productId;
 
     if (!customerEmail) {
       console.error('Missing customer email');
@@ -100,26 +108,27 @@ serve(async (req) => {
       );
     }
 
-    if (!productId) {
-      console.error('Missing product_id in payload:', JSON.stringify(payload));
+    // Verificar se temos uma forma de identificar o produto
+    if (!productKey && !checkoutLink) {
+      console.error('Missing product identification in payload:', JSON.stringify(payload));
       return new Response(
-        JSON.stringify({ error: 'Missing product_id' }),
+        JSON.stringify({ error: 'Missing product_id or checkout_link' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Mapear produto para plano
-    const productConfig = PRODUCTS[productId];
+    // Mapear produto para plano usando productKey (checkout_link tem prioridade)
+    const productConfig = PRODUCTS[productKey] || PRODUCTS[checkoutLink];
     if (!productConfig) {
-      console.error(`Unknown product ID: ${productId}`);
+      console.error(`Unknown product key: ${productKey}, checkout_link: ${checkoutLink}`);
       return new Response(
-        JSON.stringify({ error: `Unknown product ID: ${productId}` }),
+        JSON.stringify({ error: `Unknown product: ${productKey || checkoutLink}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const newPlan = productConfig.plan;
-    console.log(`Product ${productId} mapped to plan: ${newPlan} (${productConfig.billing})`);
+    console.log(`Product mapped to plan: ${newPlan} (${productConfig.billing}) - key: ${productKey}, checkout_link: ${checkoutLink}`);
 
     // Criar cliente Supabase com service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
