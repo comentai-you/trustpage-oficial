@@ -68,6 +68,7 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
+  const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const isLegalPage = useMemo(() => {

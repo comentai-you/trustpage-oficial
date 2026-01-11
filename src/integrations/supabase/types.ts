@@ -238,6 +238,20 @@ export type Database = {
     }
     Functions: {
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
+      get_legal_page_by_owner: {
+        Args: { owner_user_id: string; page_slug: string }
+        Returns: {
+          colors: Json
+          content: Json
+          description: string
+          headline: string
+          id: string
+          is_published: boolean
+          page_name: string
+          slug: string
+          template_type: string
+        }[]
+      }
       get_page_owner_plan: {
         Args: { page_id: string }
         Returns: {
