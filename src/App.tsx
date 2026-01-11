@@ -114,6 +114,30 @@ const SystemRoutes = () => (
 // App principal com separação RÍGIDA entre Sistema e Cliente
 const App = () => {
   const hostname = window.location.hostname.toLowerCase();
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  // Rotas do SISTEMA que NUNCA podem depender do domínio (ex: /oferta, /obrigado, auth)
+  // Isso evita 404 caso alguém acesse essas rotas em um domínio customizado.
+  const FORCE_SYSTEM_PREFIXES = [
+    "/auth",
+    "/dashboard",
+    "/settings",
+    "/subscription",
+    "/payment-success",
+    "/help",
+    "/new",
+    "/edit",
+    "/oferta",
+    "/obrigado",
+    "/termos",
+    "/privacidade",
+    "/contato",
+  ];
+
+  const forceSystemRoutes = FORCE_SYSTEM_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
   const customDomain = !isKnownAppDomain(hostname);
 
   // Debug opcional: adicione ?tp_debug=1 na URL
@@ -121,12 +145,14 @@ const App = () => {
     console.log('[DomainRouting]', {
       hostname,
       customDomain,
+      forceSystemRoutes,
       pathname: window.location.pathname,
     });
   }
 
-  // Se é domínio de cliente, renderiza APENAS as rotas públicas
-  if (customDomain) {
+  // Se é domínio de cliente, renderiza APENAS as rotas públicas,
+  // EXCETO quando a rota é do SISTEMA (forçada) como /oferta e /obrigado.
+  if (customDomain && !forceSystemRoutes) {
     return (
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
