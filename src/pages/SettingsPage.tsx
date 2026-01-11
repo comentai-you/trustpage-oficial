@@ -1089,6 +1089,13 @@ const SettingsPage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <Alert className="border-amber-500/50 bg-amber-500/10">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                      <AlertDescription className="text-sm text-amber-700 dark:text-amber-300">
+                        <strong>Atenção:</strong> O domínio personalizado funcionará <strong>exclusivamente</strong> para suas páginas do TrustPage. 
+                        Ele não funcionará para e-mails, outros sites ou serviços externos.
+                      </AlertDescription>
+                    </Alert>
                     <div className="space-y-2">
                       <Label htmlFor="domain">Seu Domínio ou Subdomínio</Label>
                       <div className="flex gap-2">
