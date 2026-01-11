@@ -78,7 +78,7 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
   }, [data, onChange]);
 
   const insertHeading = (level: 1 | 2 | 3 | 4) => {
-    execCommand('formatBlock', `h${level}`);
+    execCommand('formatBlock', `<h${level}>`);
   };
 
   const applyAccentColor = () => {
@@ -132,7 +132,7 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
               <DropdownMenuItem onClick={() => insertHeading(4)} className="gap-2">
                 <Heading4 className="w-4 h-4" /> Título 4 (H4)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => execCommand('formatBlock', 'p')} className="gap-2">
+              <DropdownMenuItem onClick={() => execCommand('formatBlock', '<p>')} className="gap-2">
                 Parágrafo
               </DropdownMenuItem>
             </DropdownMenuContent>

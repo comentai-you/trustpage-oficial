@@ -127,12 +127,16 @@ const TextRenderer = ({ data, textColor, bgColor }: TextRendererProps) => {
         #${scopeId} *:first-child {
           margin-top: 0;
         }
-        /* Preserve inline color styles from the editor */
+        /* Preserve inline color styles from the editor - DO NOT override */
         #${scopeId} [style*="color"] {
-          color: inherit;
+          color: unset;
         }
         #${scopeId} font[color] {
-          color: attr(color);
+          color: attr(color) !important;
+        }
+        /* Allow span with inline color styles */
+        #${scopeId} span[style*="color"] {
+          color: unset;
         }
       `}</style>
     </section>
