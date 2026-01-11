@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Button } from "@/components/ui/button";
 import { DualColumnSection } from "@/types/section-builder";
 import { Upload, Loader2, X, ArrowLeftRight } from "lucide-react";
@@ -126,34 +127,37 @@ const DualColumnSectionEditor = ({ data, onChange }: DualColumnSectionEditorProp
       {/* Title */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Título da seção"
           className="text-sm"
+          aiFieldType="headline"
         />
       </div>
 
       {/* Content */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Conteúdo</Label>
-        <Textarea
+        <TextareaWithAI
           value={data.content || ''}
           onChange={(e) => onChange({ ...data, content: e.target.value })}
           placeholder="Descrição..."
           className="text-sm resize-none"
           rows={4}
+          aiFieldType="body"
         />
       </div>
 
       {/* CTA (Optional) */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Botão (opcional)</Label>
-        <Input
+        <InputWithAI
           value={data.ctaText || ''}
           onChange={(e) => onChange({ ...data, ctaText: e.target.value })}
           placeholder="Texto do botão"
           className="text-sm"
+          aiFieldType="button"
         />
         {data.ctaText && (
           <Input

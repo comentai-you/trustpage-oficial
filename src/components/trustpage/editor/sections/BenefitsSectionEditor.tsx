@@ -1,6 +1,6 @@
-import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Button } from "@/components/ui/button";
 import { BenefitsSection } from "@/types/section-builder";
 import { Plus, Trash2 } from "lucide-react";
@@ -37,11 +37,12 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título da Seção</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Por que escolher"
           className="text-sm"
+          aiFieldType="headline"
         />
       </div>
 
@@ -73,11 +74,12 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
                 value={item.icon || 'Sparkles'}
                 onChange={(icon) => updateItem(index, { icon })}
               />
-              <Input
+              <InputWithAI
                 value={item.title}
                 onChange={(e) => updateItem(index, { title: e.target.value })}
                 placeholder="Título"
                 className="text-sm flex-1"
+                aiFieldType="benefit"
               />
               <Button
                 variant="ghost"
@@ -88,12 +90,13 @@ const BenefitsSectionEditor = ({ data, onChange }: BenefitsSectionEditorProps) =
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
-            <Textarea
+            <TextareaWithAI
               value={item.description || ''}
               onChange={(e) => updateItem(index, { description: e.target.value })}
               placeholder="Descrição"
               className="text-sm resize-none"
               rows={2}
+              aiFieldType="body"
             />
           </div>
         ))}

@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
 import { CTASection, SpacerSection } from "@/types/section-builder";
 import { Button } from "@/components/ui/button";
@@ -13,11 +14,12 @@ export const CTASectionEditor = ({ data, onChange }: CTASectionEditorProps) => {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Texto do Botão</Label>
-        <Input
+        <InputWithAI
           value={data.text || ''}
           onChange={(e) => onChange({ ...data, text: e.target.value })}
           placeholder="QUERO AGORA"
           className="text-sm"
+          aiFieldType="button"
         />
       </div>
 
@@ -33,11 +35,12 @@ export const CTASectionEditor = ({ data, onChange }: CTASectionEditorProps) => {
 
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Subtexto (opcional)</Label>
-        <Input
+        <InputWithAI
           value={data.subtext || ''}
           onChange={(e) => onChange({ ...data, subtext: e.target.value })}
           placeholder="Garantia de 7 dias"
           className="text-sm"
+          aiFieldType="body"
         />
       </div>
 

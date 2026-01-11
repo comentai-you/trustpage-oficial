@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { OfferSection } from "@/types/section-builder";
@@ -36,22 +37,24 @@ const OfferSectionEditor = ({ data, onChange }: OfferSectionEditorProps) => {
       {/* Title */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título da Oferta</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Oferta Especial"
           className="text-sm"
+          aiFieldType="offer"
         />
       </div>
 
       {/* Subtitle */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Subtítulo (opcional)</Label>
-        <Input
+        <InputWithAI
           value={data.subtitle || ''}
           onChange={(e) => onChange({ ...data, subtitle: e.target.value })}
           placeholder="Por tempo limitado"
           className="text-sm"
+          aiFieldType="subheadline"
         />
       </div>
 
@@ -102,11 +105,12 @@ const OfferSectionEditor = ({ data, onChange }: OfferSectionEditorProps) => {
             <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
               <Check className="w-3 h-3 text-primary" />
             </div>
-            <Input
+            <InputWithAI
               value={benefit.text}
               onChange={(e) => updateBenefit(index, e.target.value)}
               placeholder="Benefício"
               className="text-sm flex-1"
+              aiFieldType="benefit"
             />
             <Button
               variant="ghost"
@@ -130,11 +134,12 @@ const OfferSectionEditor = ({ data, onChange }: OfferSectionEditorProps) => {
         
         <div className="space-y-2">
           <Label className="text-[10px] text-muted-foreground">Texto do Botão</Label>
-          <Input
+          <InputWithAI
             value={data.ctaText || ''}
             onChange={(e) => onChange({ ...data, ctaText: e.target.value })}
             placeholder="QUERO APROVEITAR AGORA"
             className="text-sm"
+            aiFieldType="button"
           />
         </div>
 
@@ -167,12 +172,13 @@ const OfferSectionEditor = ({ data, onChange }: OfferSectionEditorProps) => {
         {data.showGuarantee && (
           <div className="space-y-2">
             <Label className="text-[10px] text-muted-foreground">Texto da Garantia</Label>
-            <Textarea
+            <TextareaWithAI
               value={data.guaranteeText || ''}
               onChange={(e) => onChange({ ...data, guaranteeText: e.target.value })}
               placeholder="7 dias de garantia incondicional"
               className="text-sm resize-none"
               rows={2}
+              aiFieldType="body"
             />
           </div>
         )}

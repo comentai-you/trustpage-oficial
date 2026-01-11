@@ -1,6 +1,6 @@
-import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Button } from "@/components/ui/button";
 import { FAQSection } from "@/types/section-builder";
 import { Plus, Trash2 } from "lucide-react";
@@ -35,11 +35,12 @@ const FAQSectionEditor = ({ data, onChange }: FAQSectionEditorProps) => {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título da Seção</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Perguntas Frequentes"
           className="text-sm"
+          aiFieldType="headline"
         />
       </div>
 
@@ -49,18 +50,20 @@ const FAQSectionEditor = ({ data, onChange }: FAQSectionEditorProps) => {
           <div key={item.id} className="p-3 border border-border rounded-lg space-y-2">
             <div className="flex items-start gap-2">
               <div className="flex-1 space-y-2">
-                <Input
+                <InputWithAI
                   value={item.question}
                   onChange={(e) => updateItem(index, { question: e.target.value })}
                   placeholder="Pergunta"
                   className="text-sm"
+                  aiFieldType="faq_question"
                 />
-                <Textarea
+                <TextareaWithAI
                   value={item.answer}
                   onChange={(e) => updateItem(index, { answer: e.target.value })}
                   placeholder="Resposta"
                   className="text-sm resize-none"
                   rows={2}
+                  aiFieldType="faq_answer"
                 />
               </div>
               <Button

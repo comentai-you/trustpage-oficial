@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "@/types/section-builder";
@@ -110,24 +111,26 @@ const HeroSectionEditor = ({ data, onChange }: HeroSectionEditorProps) => {
       {/* Headline */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Headline Principal</Label>
-        <Textarea
+        <TextareaWithAI
           value={data.headline || ''}
           onChange={(e) => onChange({ ...data, headline: e.target.value })}
           placeholder="Transforme sua vida hoje mesmo"
           className="text-sm resize-none"
           rows={2}
+          aiFieldType="headline"
         />
       </div>
 
       {/* Subheadline */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Subheadline</Label>
-        <Textarea
+        <TextareaWithAI
           value={data.subheadline || ''}
           onChange={(e) => onChange({ ...data, subheadline: e.target.value })}
           placeholder="Descubra o método que já ajudou milhares..."
           className="text-sm resize-none"
           rows={2}
+          aiFieldType="subheadline"
         />
       </div>
 
@@ -274,11 +277,12 @@ const HeroSectionEditor = ({ data, onChange }: HeroSectionEditorProps) => {
           <>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Texto do Botão</Label>
-              <Input
+              <InputWithAI
                 value={data.ctaText || ''}
                 onChange={(e) => onChange({ ...data, ctaText: e.target.value })}
                 placeholder="QUERO AGORA"
                 className="text-sm"
+                aiFieldType="button"
               />
             </div>
             <div className="space-y-2">
