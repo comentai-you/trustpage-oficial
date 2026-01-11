@@ -66,12 +66,8 @@ const SystemRoutes = () => (
     <Route path="/contato" element={<ContactPage />} />
     <Route path="/oferta" element={<OfertaPage />} />
     <Route path="/obrigado" element={<ThankYouPage />} />
-
-    {/* Landing pages públicas - DEVE vir depois das rotas específicas */}
-    <Route path="/p/:slug" element={<LandingPageView />} />
-    <Route path="/:slug" element={<LandingPageView />} />
     
-    {/* Protected Routes */}
+    {/* Protected Routes - DEVE vir ANTES das rotas dinâmicas /:slug */}
     <Route path="/dashboard" element={
       <ProtectedRoute>
         <TrustPageDashboard />
@@ -112,6 +108,10 @@ const SystemRoutes = () => (
         <TrustPageEditor />
       </ProtectedRoute>
     } />
+
+    {/* Landing pages públicas - DEVE vir DEPOIS das rotas específicas */}
+    <Route path="/p/:slug" element={<LandingPageView />} />
+    <Route path="/:slug" element={<LandingPageView />} />
     
     <Route path="*" element={<NotFound />} />
   </Routes>
