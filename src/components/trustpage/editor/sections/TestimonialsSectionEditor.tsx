@@ -76,7 +76,7 @@ const TestimonialsSectionEditor = ({ data, onChange }: TestimonialsSectionEditor
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="O que nossos clientes dizem"
           className="text-sm"
-          aiFieldType="headline"
+          aiFieldType="section_title"
         />
       </div>
 

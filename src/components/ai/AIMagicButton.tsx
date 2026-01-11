@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 interface AIMagicButtonProps {
-  fieldType: 'headline' | 'subheadline' | 'button' | 'body' | 'benefit' | 'testimonial' | 'faq_question' | 'faq_answer' | 'offer' | 'default';
+  fieldType: 'headline' | 'subheadline' | 'button' | 'body' | 'benefit' | 'benefit_desc' | 'testimonial' | 'faq_question' | 'faq_answer' | 'offer' | 'section_title' | 'richtext' | 'default';
   currentText?: string;
   onSelect: (text: string) => void;
   className?: string;
