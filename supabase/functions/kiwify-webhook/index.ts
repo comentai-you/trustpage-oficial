@@ -132,45 +132,53 @@ serve(async (req) => {
     // CENÁRIO: Verificar se usuário existe (busca filtrada para performance)
     console.log(`Checking if user exists with email: ${customerEmail}`);
     
-    const { data: userResult, error: listError } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1,
-    });
-    
-    if (listError) {
-      console.error('Error listing users:', listError.message);
-      throw new Error('Failed to check existing users');
-    }
-
-    // Buscar usuário específico por email usando getUserByEmail (mais eficiente)
     let existingUser = null;
-    try {
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
-        '' // Placeholder - vamos usar uma busca alternativa
-      );
-      // Fallback: buscar na lista filtrada ou usar método alternativo
-    } catch {
-      // Ignorar erro, vamos buscar de outra forma
-    }
-
-    // Método mais seguro: buscar diretamente pelo email usando inviteUserByEmail + catch
-    // Ou verificar se o email existe na tabela auth.users via profiles
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', (await supabase.rpc('get_user_id_by_email', { user_email: customerEmail }).catch(() => ({ data: null }))).data)
-      .maybeSingle();
-
-    // Busca robusta usando listUsers com filtro (suportado em versões recentes)
-    const { data: filteredUsers, error: filterError } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 50,
-    });
     
-    if (!filterError && filteredUsers?.users) {
-      existingUser = filteredUsers.users.find(
+    // Buscar usuário por email de forma paginada para evitar problemas de performance
+    // A API do Supabase Auth Admin não suporta filtro direto por email, então fazemos busca incremental
+    let page = 1;
+    const perPage = 50;
+    let foundUser = false;
+    
+    while (!foundUser) {
+      const { data: usersPage, error: pageError } = await supabase.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+      
+      if (pageError) {
+        console.error('Error listing users:', pageError.message);
+        throw new Error('Failed to check existing users');
+      }
+      
+      // Se não há mais usuários, sair do loop
+      if (!usersPage?.users || usersPage.users.length === 0) {
+        break;
+      }
+      
+      // Procurar o usuário nesta página
+      const userInPage = usersPage.users.find(
         (u) => u.email?.toLowerCase() === customerEmail
-      ) || null;
+      );
+      
+      if (userInPage) {
+        existingUser = userInPage;
+        foundUser = true;
+        break;
+      }
+      
+      // Se recebemos menos usuários que o perPage, é a última página
+      if (usersPage.users.length < perPage) {
+        break;
+      }
+      
+      page++;
+      
+      // Limite de segurança para evitar loops infinitos (max 10000 usuários)
+      if (page > 200) {
+        console.warn('Reached max pagination limit (10000 users)');
+        break;
+      }
     }
 
     if (existingUser) {
