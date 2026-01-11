@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, Sparkles } from 'lucide-react';
 import {
   Dialog,
@@ -28,8 +28,14 @@ interface AIConfigDialogProps {
 export const AIConfigDialog = ({ trigger }: AIConfigDialogProps) => {
   const { settings, updateSettings, isConfigured } = useAICopywriter();
   const [open, setOpen] = useState(false);
-  const [localNiche, setLocalNiche] = useState(settings.niche);
-  const [localPageType, setLocalPageType] = useState(settings.pageType);
+  const [localNiche, setLocalNiche] = useState('');
+  const [localPageType, setLocalPageType] = useState<'sales' | 'vsl' | 'bio'>('sales');
+
+  // Sync local state with context settings when dialog opens or settings change
+  useEffect(() => {
+    setLocalNiche(settings.niche);
+    setLocalPageType(settings.pageType);
+  }, [settings.niche, settings.pageType, open]);
 
   const handleSave = () => {
     if (!localNiche.trim()) {
