@@ -1,248 +1,276 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { TextSection } from "@/types/section-builder";
-import { 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
+import {
+  AlignCenter,
   AlignJustify,
-  Bold, 
-  Italic, 
-  Underline,
-  List,
-  ListOrdered,
+  AlignLeft,
+  AlignRight,
+  Bold,
   Heading1,
   Heading2,
   Heading3,
   Heading4,
   Highlighter,
-  PanelTop,
+  Italic,
+  List,
+  ListOrdered,
+  Palette,
   PanelBottom,
-  Palette
+  PanelTop,
+  Type,
+  Underline,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 interface TextSectionEditorProps {
-  data: TextSection['data'];
-  onChange: (data: TextSection['data']) => void;
+  data: TextSection["data"];
+  onChange: (data: TextSection["data"]) => void;
   accentColor?: string;
 }
 
-// Preset colors for quick selection
-const PRESET_COLORS = [
-  '#FFFFFF', '#F8F9FA', '#E9ECEF', '#6B7280', '#374151', '#1F2937', '#111827', '#000000',
-  '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E', '#10B981', '#14B8A6',
-  '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#D946EF', '#EC4899'
-];
-
-const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSectionEditorProps) => {
+/**
+ * Texto Livre (Rich Text) - versão simples e robusta.
+ * Principais objetivos:
+ * - Headings (H1-H4) funcionando
+ * - Negrito/itálico/sublinhado
+ * - Lista
+ * - Cor do texto do bloco (render/preview), sem "pintar" o editor
+ * - Destaque por cor no texto selecionado (inline)
+ */
+const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSectionEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [textColorOpen, setTextColorOpen] = useState(false);
-  const [accentColorOpen, setAccentColorOpen] = useState(false);
+  const savedRangeRef = useRef<Range | null>(null);
 
-  // Sync content when data changes from outside
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== data.content) {
-      editorRef.current.innerHTML = data.content || '<p>Escreva seu texto aqui...</p>';
+  const syncEditorHtml = useCallback(() => {
+    if (!editorRef.current) return;
+
+    const nextHtml = data.content || "<p></p>";
+    if (editorRef.current.innerHTML !== nextHtml) {
+      editorRef.current.innerHTML = nextHtml;
     }
+  }, [data.content]);
+
+  useEffect(() => {
+    syncEditorHtml();
+  }, [syncEditorHtml]);
+
+  const saveSelection = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    const editor = editorRef.current;
+
+    if (!editor) return;
+    if (!editor.contains(range.commonAncestorContainer)) return;
+
+    savedRangeRef.current = range.cloneRange();
   }, []);
 
-  const execCommand = useCallback((command: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, value);
-    // Update after a small delay to capture the change
-    setTimeout(() => {
-      if (editorRef.current) {
-        onChange({ ...data, content: editorRef.current.innerHTML });
-      }
-    }, 10);
-  }, [data, onChange]);
+  const restoreSelection = useCallback(() => {
+    const editor = editorRef.current;
+    const range = savedRangeRef.current;
+    const sel = window.getSelection();
+
+    if (!editor || !range || !sel) return;
+
+    editor.focus();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }, []);
 
   const updateContent = useCallback(() => {
-    if (editorRef.current) {
-      onChange({ ...data, content: editorRef.current.innerHTML });
-    }
+    if (!editorRef.current) return;
+    onChange({ ...data, content: editorRef.current.innerHTML });
   }, [data, onChange]);
 
-  const insertHeading = (level: 1 | 2 | 3 | 4) => {
-    execCommand('formatBlock', `<h${level}>`);
-  };
+  const runCommand = useCallback(
+    (command: string, value?: string) => {
+      restoreSelection();
+      // eslint-disable-next-line deprecation/deprecation
+      document.execCommand(command, false, value);
+      updateContent();
+      saveSelection();
+    },
+    [restoreSelection, saveSelection, updateContent]
+  );
 
-  const applyAccentColor = () => {
-    const color = data.accentColor || accentColor;
-    execCommand('foreColor', color);
-  };
+  const applyInlineColor = useCallback(
+    (color: string) => {
+      restoreSelection();
 
-  const applyTextColor = (color: string) => {
-    execCommand('foreColor', color);
-    setTextColorOpen(false);
-  };
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-    updateContent();
-  };
+      const range = sel.getRangeAt(0);
+      if (range.collapsed) return;
 
-  const textColor = data.textColor || '#FFFFFF';
+      const span = document.createElement("span");
+      span.style.color = color;
+
+      try {
+        range.surroundContents(span);
+      } catch {
+        const extracted = range.extractContents();
+        span.appendChild(extracted);
+        range.insertNode(span);
+      }
+
+      // Move o cursor para depois do span
+      const after = document.createRange();
+      after.setStartAfter(span);
+      after.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(after);
+      savedRangeRef.current = after.cloneRange();
+
+      updateContent();
+    },
+    [restoreSelection, updateContent]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text/plain");
+      restoreSelection();
+      // eslint-disable-next-line deprecation/deprecation
+      document.execCommand("insertText", false, text);
+      updateContent();
+      saveSelection();
+    },
+    [restoreSelection, saveSelection, updateContent]
+  );
+
+  const ToolbarButton = ({
+    title,
+    onAction,
+    children,
+  }: {
+    title: string;
+    onAction: () => void;
+    children: React.ReactNode;
+  }) => (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className="h-8 w-8 p-0"
+      title={title}
+      onMouseDown={(e) => {
+        // Critico: impede o botão de roubar foco/seleção do editor
+        e.preventDefault();
+        onAction();
+      }}
+    >
+      {children}
+    </Button>
+  );
+
+  const resolvedAccentColor = data.accentColor || accentColor;
+  const resolvedBlockTextColor = data.textColor || "#FFFFFF";
 
   return (
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Formatação</Label>
-        <div className="flex flex-wrap gap-1 p-2 bg-muted/50 rounded-lg border">
-          {/* Headings Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs gap-1"
-              >
-                <Heading1 className="w-4 h-4" />
-                Título
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="z-50">
-              <DropdownMenuItem onClick={() => insertHeading(1)} className="gap-2">
-                <Heading1 className="w-4 h-4" /> Título 1 (H1)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => insertHeading(2)} className="gap-2">
-                <Heading2 className="w-4 h-4" /> Título 2 (H2)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => insertHeading(3)} className="gap-2">
-                <Heading3 className="w-4 h-4" /> Título 3 (H3)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => insertHeading(4)} className="gap-2">
-                <Heading4 className="w-4 h-4" /> Título 4 (H4)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => execCommand('formatBlock', '<p>')} className="gap-2">
-                Parágrafo
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex flex-wrap items-center gap-1 p-2 bg-muted/50 rounded-lg border">
+          {/* Headings */}
+          <ToolbarButton title="Parágrafo" onAction={() => runCommand("formatBlock", "<p>")}
+          >
+            <Type className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton title="Título H1" onAction={() => runCommand("formatBlock", "<h1>")}
+          >
+            <Heading1 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton title="Título H2" onAction={() => runCommand("formatBlock", "<h2>")}
+          >
+            <Heading2 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton title="Título H3" onAction={() => runCommand("formatBlock", "<h3>")}
+          >
+            <Heading3 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton title="Título H4" onAction={() => runCommand("formatBlock", "<h4>")}
+          >
+            <Heading4 className="w-4 h-4" />
+          </ToolbarButton>
 
-          <div className="w-px h-6 bg-border self-center" />
+          <div className="w-px h-6 bg-border self-center mx-1" />
 
-          {/* Basic Formatting */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('bold')}
-            className="h-8 w-8 p-0"
-            title="Negrito"
+          {/* Basic formatting */}
+          <ToolbarButton title="Negrito" onAction={() => runCommand("bold")}
           >
             <Bold className="w-4 h-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('italic')}
-            className="h-8 w-8 p-0"
-            title="Itálico"
+          </ToolbarButton>
+          <ToolbarButton title="Itálico" onAction={() => runCommand("italic")}
           >
             <Italic className="w-4 h-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('underline')}
-            className="h-8 w-8 p-0"
-            title="Sublinhado"
+          </ToolbarButton>
+          <ToolbarButton title="Sublinhado" onAction={() => runCommand("underline")}
           >
             <Underline className="w-4 h-4" />
-          </Button>
+          </ToolbarButton>
 
-          <div className="w-px h-6 bg-border self-center" />
+          <div className="w-px h-6 bg-border self-center mx-1" />
 
           {/* Lists */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertUnorderedList')}
-            className="h-8 w-8 p-0"
+          <ToolbarButton
             title="Lista com marcadores"
+            onAction={() => runCommand("insertUnorderedList")}
           >
             <List className="w-4 h-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertOrderedList')}
-            className="h-8 w-8 p-0"
-            title="Lista numerada"
+          </ToolbarButton>
+          <ToolbarButton title="Lista numerada" onAction={() => runCommand("insertOrderedList")}
           >
             <ListOrdered className="w-4 h-4" />
-          </Button>
+          </ToolbarButton>
 
-          <div className="w-px h-6 bg-border self-center" />
+          <div className="w-px h-6 bg-border self-center mx-1" />
 
-          {/* Text Color */}
-          <Popover open={textColorOpen} onOpenChange={setTextColorOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 relative"
-                title="Cor do texto"
-              >
-                <Palette className="w-4 h-4" />
-                <div 
-                  className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full"
-                  style={{ backgroundColor: textColor }}
-                />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-2 z-50" align="start">
-              <div className="grid grid-cols-8 gap-1">
-                {PRESET_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    className="w-5 h-5 rounded border border-border hover:scale-110 transition-transform"
-                    style={{ backgroundColor: color }}
-                    onClick={() => applyTextColor(color)}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Accent Color */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={applyAccentColor}
-            className="h-8 w-8 p-0"
-            title="Aplicar cor de destaque"
-            style={{ color: data.accentColor || accentColor }}
+          {/* Inline highlight color */}
+          <ToolbarButton
+            title="Destacar seleção com a cor"
+            onAction={() => applyInlineColor(resolvedAccentColor)}
           >
-            <Highlighter className="w-4 h-4" />
-          </Button>
+            <Highlighter className="w-4 h-4" style={{ color: resolvedAccentColor }} />
+          </ToolbarButton>
+          <Input
+            type="color"
+            value={resolvedAccentColor}
+            onChange={(e) => onChange({ ...data, accentColor: e.target.value })}
+            className="w-10 h-8 p-1 cursor-pointer"
+            title="Cor de destaque"
+          />
+
+          <div className="w-px h-6 bg-border self-center mx-1" />
+
+          {/* Block text color (aplica na página/preview, não no editor) */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Palette className="w-4 h-4" />
+              <div
+                className="w-4 h-2 rounded"
+                style={{ backgroundColor: resolvedBlockTextColor }}
+              />
+            </div>
+            <Input
+              type="color"
+              value={resolvedBlockTextColor}
+              onChange={(e) => onChange({ ...data, textColor: e.target.value })}
+              className="w-10 h-8 p-1 cursor-pointer"
+              title="Cor do texto (bloco)"
+            />
+          </div>
         </div>
+        <p className="text-[10px] text-muted-foreground">
+          Dica: selecione um trecho e clique no marcador para aplicar a cor de destaque.
+        </p>
       </div>
 
       {/* Editor */}
@@ -251,18 +279,17 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
         <div
           ref={editorRef}
           contentEditable
-          onInput={updateContent}
+          onInput={() => {
+            updateContent();
+            saveSelection();
+          }}
+          onMouseUp={saveSelection}
+          onKeyUp={saveSelection}
           onPaste={handlePaste}
           className="min-h-[200px] max-h-[300px] overflow-y-auto p-3 border rounded-lg bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-          dangerouslySetInnerHTML={{ __html: data.content || '<p>Escreva seu texto aqui...</p>' }}
-          style={{
-            lineHeight: '1.7'
-          }}
           suppressContentEditableWarning
+          style={{ lineHeight: "1.7" }}
         />
-        <p className="text-[10px] text-muted-foreground">
-          Selecione o texto e use os botões acima para formatar
-        </p>
       </div>
 
       {/* Alignment */}
@@ -271,36 +298,36 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
         <div className="flex items-center gap-1">
           <Button
             type="button"
-            variant={data.alignment === 'left' || !data.alignment ? 'default' : 'outline'}
+            variant={data.alignment === "left" || !data.alignment ? "default" : "outline"}
             size="sm"
-            onClick={() => onChange({ ...data, alignment: 'left' })}
+            onClick={() => onChange({ ...data, alignment: "left" })}
             className="h-8 w-8 p-0"
           >
             <AlignLeft className="w-4 h-4" />
           </Button>
           <Button
             type="button"
-            variant={data.alignment === 'center' ? 'default' : 'outline'}
+            variant={data.alignment === "center" ? "default" : "outline"}
             size="sm"
-            onClick={() => onChange({ ...data, alignment: 'center' })}
+            onClick={() => onChange({ ...data, alignment: "center" })}
             className="h-8 w-8 p-0"
           >
             <AlignCenter className="w-4 h-4" />
           </Button>
           <Button
             type="button"
-            variant={data.alignment === 'right' ? 'default' : 'outline'}
+            variant={data.alignment === "right" ? "default" : "outline"}
             size="sm"
-            onClick={() => onChange({ ...data, alignment: 'right' })}
+            onClick={() => onChange({ ...data, alignment: "right" })}
             className="h-8 w-8 p-0"
           >
             <AlignRight className="w-4 h-4" />
           </Button>
           <Button
             type="button"
-            variant={data.alignment === 'justify' ? 'default' : 'outline'}
+            variant={data.alignment === "justify" ? "default" : "outline"}
             size="sm"
-            onClick={() => onChange({ ...data, alignment: 'justify' })}
+            onClick={() => onChange({ ...data, alignment: "justify" })}
             className="h-8 w-8 p-0"
           >
             <AlignJustify className="w-4 h-4" />
@@ -311,16 +338,16 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
       {/* Layout Options */}
       <div className="space-y-3 pt-2 border-t">
         <Label className="text-xs text-muted-foreground font-medium">Layout do Container</Label>
-        
+
         {/* Width */}
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Largura do Texto</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
-              variant={data.maxWidth === 'narrow' || !data.maxWidth ? 'default' : 'outline'}
+              variant={data.maxWidth === "narrow" || !data.maxWidth ? "default" : "outline"}
               size="sm"
-              onClick={() => onChange({ ...data, maxWidth: 'narrow' })}
+              onClick={() => onChange({ ...data, maxWidth: "narrow" })}
               className="h-9 text-xs gap-2"
             >
               <PanelTop className="w-4 h-4" />
@@ -328,56 +355,28 @@ const TextSectionEditor = ({ data, onChange, accentColor = '#22c55e' }: TextSect
             </Button>
             <Button
               type="button"
-              variant={data.maxWidth === 'wide' ? 'default' : 'outline'}
+              variant={data.maxWidth === "wide" ? "default" : "outline"}
               size="sm"
-              onClick={() => onChange({ ...data, maxWidth: 'wide' })}
+              onClick={() => onChange({ ...data, maxWidth: "wide" })}
               className="h-9 text-xs gap-2"
             >
               <PanelBottom className="w-4 h-4" />
               Largo
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground">
-            Estreito é melhor para leitura longa
-          </p>
         </div>
 
         {/* Background */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label className="text-xs">Fundo Destacado</Label>
-            <p className="text-[10px] text-muted-foreground">
-              Adiciona um card de fundo
-            </p>
+            <p className="text-[10px] text-muted-foreground">Adiciona um card de fundo</p>
           </div>
           <Switch
             checked={data.hasBackground || false}
             onCheckedChange={(checked) => onChange({ ...data, hasBackground: checked })}
           />
         </div>
-      </div>
-
-      {/* Accent Color */}
-      <div className="space-y-2 pt-2 border-t">
-        <Label className="text-xs text-muted-foreground">Cor de Destaque</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            type="color"
-            value={data.accentColor || accentColor}
-            onChange={(e) => onChange({ ...data, accentColor: e.target.value })}
-            className="w-12 h-8 p-1 cursor-pointer"
-          />
-          <Input
-            type="text"
-            value={data.accentColor || accentColor}
-            onChange={(e) => onChange({ ...data, accentColor: e.target.value })}
-            placeholder="#22c55e"
-            className="flex-1 text-xs h-8"
-          />
-        </div>
-        <p className="text-[10px] text-muted-foreground">
-          Use o marcador (✏️) para aplicar essa cor em palavras específicas
-        </p>
       </div>
     </div>
   );

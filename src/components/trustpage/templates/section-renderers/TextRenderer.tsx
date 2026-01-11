@@ -1,29 +1,34 @@
 import { TextSection } from "@/types/section-builder";
 
 interface TextRendererProps {
-  data: TextSection['data'];
+  data: TextSection["data"];
   textColor: string;
   bgColor?: string;
 }
 
-const TextRenderer = ({ data, textColor, bgColor }: TextRendererProps) => {
-  const maxWidthClass = data.maxWidth === 'wide' ? 'max-w-4xl' : 'max-w-2xl';
+const TextRenderer = ({ data, textColor }: TextRendererProps) => {
+  const resolvedTextColor = data.textColor || textColor;
 
-  const alignmentClass = {
-    left: 'text-left',
-    center: 'text-center',
-    right: 'text-right',
-    justify: 'text-justify'
-  }[data.alignment || 'left'];
+  const maxWidthClass = data.maxWidth === "wide" ? "max-w-4xl" : "max-w-2xl";
 
-  // Calculate a lighter/darker background for the card
+  const alignmentClass =
+    {
+      left: "text-left",
+      center: "text-center",
+      right: "text-right",
+      justify: "text-justify",
+    }[data.alignment || "left"];
+
   const getCardBackground = () => {
-    if (!data.hasBackground) return 'transparent';
-    // Use a semi-transparent white or black based on text color brightness
-    const isLightText = textColor.toLowerCase().includes('fff') || 
-                        textColor.toLowerCase().includes('white') ||
-                        (textColor.startsWith('#') && parseInt(textColor.slice(1), 16) > 0x808080);
-    return isLightText ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    if (!data.hasBackground) return "transparent";
+
+    const isLightText =
+      resolvedTextColor.toLowerCase().includes("fff") ||
+      resolvedTextColor.toLowerCase().includes("white") ||
+      (resolvedTextColor.startsWith("#") &&
+        parseInt(resolvedTextColor.slice(1), 16) > 0x808080);
+
+    return isLightText ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)";
   };
 
   // Generate unique ID for scoped styles
@@ -31,24 +36,24 @@ const TextRenderer = ({ data, textColor, bgColor }: TextRendererProps) => {
 
   return (
     <section className="w-full py-10 md:py-14 px-5 md:px-8">
-      <div 
+      <div
         className={`${maxWidthClass} mx-auto ${alignmentClass}`}
         style={{
           backgroundColor: getCardBackground(),
-          borderRadius: data.hasBackground ? '16px' : '0',
-          padding: data.hasBackground ? '32px' : '0',
-          border: data.hasBackground ? '1px solid rgba(128, 128, 128, 0.1)' : 'none'
+          borderRadius: data.hasBackground ? "16px" : "0",
+          padding: data.hasBackground ? "32px" : "0",
+          border: data.hasBackground ? "1px solid rgba(128, 128, 128, 0.1)" : "none",
         }}
       >
         <div
           id={scopeId}
           className="rich-text-content"
-          style={{ color: textColor }}
-          dangerouslySetInnerHTML={{ __html: data.content || '' }}
+          style={{ color: resolvedTextColor }}
+          dangerouslySetInnerHTML={{ __html: data.content || "" }}
         />
       </div>
 
-      {/* Scoped styles for rich text content - inherits color from parent */}
+      {/* Scoped styles for rich text content */}
       <style>{`
         #${scopeId} {
           line-height: 1.8;
@@ -124,19 +129,12 @@ const TextRenderer = ({ data, textColor, bgColor }: TextRendererProps) => {
         #${scopeId} u {
           text-decoration: underline;
         }
+        #${scopeId} a {
+          color: inherit;
+          text-decoration: underline;
+        }
         #${scopeId} *:first-child {
           margin-top: 0;
-        }
-        /* Preserve inline color styles from the editor - DO NOT override */
-        #${scopeId} [style*="color"] {
-          color: unset;
-        }
-        #${scopeId} font[color] {
-          color: attr(color) !important;
-        }
-        /* Allow span with inline color styles */
-        #${scopeId} span[style*="color"] {
-          color: unset;
         }
       `}</style>
     </section>
