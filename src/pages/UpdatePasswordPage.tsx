@@ -22,11 +22,53 @@ const UpdatePasswordPage = () => {
 
   // Detectar sessão do link de convite/recuperação
   useEffect(() => {
+    let cancelled = false;
+
+    const cleanupUrl = (opts?: { clearHash?: boolean }) => {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("code");
+        // Mantém outros params (se existirem). Remover `type` ajuda a evitar reprocessamento.
+        url.searchParams.delete("type");
+        if (opts?.clearHash) url.hash = "";
+        window.history.replaceState({}, document.title, url.toString());
+      } catch {
+        // noop
+      }
+    };
+
+    const prepareSessionFromUrl = async () => {
+      // 1) Fluxo PKCE: /auth/update-password?code=...
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(url.toString());
+        if (error) throw error;
+        cleanupUrl();
+      }
+
+      // 2) Fluxo implícito: #access_token=...&refresh_token=...
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const access_token = hashParams.get("access_token");
+      const refresh_token = hashParams.get("refresh_token");
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        if (error) throw error;
+        cleanupUrl({ clearHash: true });
+      }
+    };
+
     const checkSession = async () => {
       try {
-        // Supabase automaticamente processa o hash da URL e recupera a sessão
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        await prepareSessionFromUrl();
+
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (cancelled) return;
+
         if (error) {
           console.error("Session error:", error);
           setSessionError("Link inválido ou expirado. Solicite um novo link.");
@@ -35,32 +77,50 @@ const UpdatePasswordPage = () => {
 
         if (session) {
           setIsSessionReady(true);
-        } else {
-          // Aguardar evento de auth para links de recuperação/convite
-          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-              if (session) {
-                setIsSessionReady(true);
-              }
-            }
-          });
-
-          // Timeout para mostrar erro se não conseguir sessão
-          setTimeout(() => {
-            if (!isSessionReady) {
-              setSessionError("Não foi possível verificar sua sessão. Tente acessar novamente pelo link do email.");
-            }
-          }, 5000);
-
-          return () => subscription.unsubscribe();
+          return;
         }
-      } catch (err) {
+
+        // Aguardar evento de auth para links de recuperação/convite
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+          if (cancelled) return;
+          if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
+            setIsSessionReady(true);
+          }
+        });
+
+        const timeoutId = window.setTimeout(() => {
+          if (cancelled) return;
+          setSessionError(
+            "Não foi possível verificar sua sessão. Tente acessar novamente pelo link do email."
+          );
+        }, 8000);
+
+        return () => {
+          subscription.unsubscribe();
+          window.clearTimeout(timeoutId);
+        };
+      } catch (err: any) {
+        if (cancelled) return;
         console.error("Check session error:", err);
-        setSessionError("Erro ao verificar sessão. Tente novamente.");
+        setSessionError(
+          err?.message
+            ? `Erro ao verificar sessão: ${err.message}`
+            : "Erro ao verificar sessão. Tente novamente."
+        );
       }
     };
 
-    checkSession();
+    let unsubscribe: void | (() => void);
+    void checkSession().then((u) => {
+      unsubscribe = u;
+    });
+
+    return () => {
+      cancelled = true;
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
   }, []);
 
   const validatePassword = (): string | null => {
