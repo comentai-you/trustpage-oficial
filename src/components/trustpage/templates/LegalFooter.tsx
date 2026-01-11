@@ -1,4 +1,5 @@
 import useCustomDomain from "@/hooks/useCustomDomain";
+import { usePageOwner } from "@/contexts/PageOwnerContext";
 
 interface LegalFooterProps {
   textColor?: string;
@@ -7,6 +8,7 @@ interface LegalFooterProps {
 
 const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFooterProps) => {
   const { isCustomDomain } = useCustomDomain();
+  const { ownerId } = usePageOwner();
 
   const footerLinks = [
     { label: "Políticas de Privacidade", slug: "politica-de-privacidade" },
@@ -14,10 +16,18 @@ const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFoote
     { label: "Contato", slug: "contato" },
   ];
 
-  // Domínio customizado: usa URL limpa /slug
-  // Domínio do sistema: usa /p/slug (evita conflitos com rotas fixas como /contato)
+  // Gera o link correto para a página legal do MESMO DONO da página atual
   const getLinkHref = (slug: string) => {
+    // Domínio customizado: usa URL limpa /slug (o resolvedor já filtra pelo dono do domínio)
     if (isCustomDomain) return `/${slug}`;
+    
+    // Domínio do sistema: usa /p/slug com parâmetro owner para identificar o dono
+    // Isso garante que a página legal carregada seja a do mesmo usuário
+    if (ownerId) {
+      return `/p/${slug}?owner=${ownerId}`;
+    }
+    
+    // Fallback sem owner (preview/editor mode)
     return `/p/${slug}`;
   };
 

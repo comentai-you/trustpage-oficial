@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdsViolationBar from "@/components/AdsViolationBar";
+import { PageOwnerProvider } from "@/contexts/PageOwnerContext";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -96,16 +97,42 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
       }
 
       try {
-        const { data: page, error } = await supabase
-          .rpc('get_published_page_by_slug', { page_slug: slug })
-          .maybeSingle();
-
-        if (error) throw error;
+        // Check if this is a legal page with an owner parameter
+        const ownerParam = searchParams.get('owner');
+        const isLegalSlug = LEGAL_SLUGS.has(String(slug).toLowerCase());
+        
+        let page: any = null;
+        
+        // If legal page with owner param, use the owner-specific function
+        if (isLegalSlug && ownerParam) {
+          const { data, error } = await supabase
+            .rpc('get_legal_page_by_owner', { 
+              page_slug: slug, 
+              owner_user_id: ownerParam 
+            })
+            .maybeSingle();
+          
+          if (error) throw error;
+          page = data;
+        } else {
+          // Default: get any published page with this slug
+          const { data, error } = await supabase
+            .rpc('get_published_page_by_slug', { page_slug: slug })
+            .maybeSingle();
+          
+          if (error) throw error;
+          page = data;
+        }
 
         if (!page) {
           setNotFound(true);
           setLoading(false);
           return;
+        }
+
+        // Store the page owner ID for legal footer links
+        if (page.user_id) {
+          setPageOwnerId(page.user_id);
         }
 
         // Fetch owner's plan type
@@ -216,25 +243,31 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
 
   // Páginas legais sempre renderizam como documento (não como template Bio/VSL)
   if (isLegalPage) {
-    return <LegalPageTemplate data={pageData} />;
+    return (
+      <PageOwnerProvider ownerId={pageOwnerId}>
+        <LegalPageTemplate data={pageData} />
+      </PageOwnerProvider>
+    );
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{ backgroundColor: pageData.colors.background }}
-    >
-      {showViolationBar && <AdsViolationBar />}
-      <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
-        {pageData.template_type === 'sales' ? (
-          <SalesPageTemplate data={pageData} isMobile={isMobile} />
-        ) : pageData.template_type === 'bio' ? (
-          <BioLinkTemplate data={pageData} isMobile={isMobile} />
-        ) : (
-          <HighConversionTemplate data={pageData} isMobile={isMobile} />
-        )}
+    <PageOwnerProvider ownerId={pageOwnerId}>
+      <div 
+        className="min-h-screen"
+        style={{ backgroundColor: pageData.colors.background }}
+      >
+        {showViolationBar && <AdsViolationBar />}
+        <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
+          {pageData.template_type === 'sales' ? (
+            <SalesPageTemplate data={pageData} isMobile={isMobile} />
+          ) : pageData.template_type === 'bio' ? (
+            <BioLinkTemplate data={pageData} isMobile={isMobile} />
+          ) : (
+            <HighConversionTemplate data={pageData} isMobile={isMobile} />
+          )}
+        </div>
       </div>
-    </div>
+    </PageOwnerProvider>
   );
 };
 

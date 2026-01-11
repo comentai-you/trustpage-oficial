@@ -284,6 +284,7 @@ export type Database = {
           template_id: number
           template_type: string
           updated_at: string
+          user_id: string
           video_storage_path: string
           video_url: string
           views: number
