@@ -255,10 +255,14 @@ const AdminPage = () => {
     switch (plan) {
       case 'pro':
         return <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">PRO</Badge>;
+      case 'pro_yearly':
+        return <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">PRO ANUAL</Badge>;
       case 'elite':
         return <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">ELITE</Badge>;
       case 'essential':
         return <Badge className="bg-blue-500 text-white">BASIC</Badge>;
+      case 'essential_yearly':
+        return <Badge className="bg-blue-600 text-white">BASIC ANUAL</Badge>;
       default:
         return <Badge variant="secondary">FREE</Badge>;
     }
@@ -510,8 +514,10 @@ const AdminPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">Free (Gratuito)</SelectItem>
-                  <SelectItem value="essential">Basic (Essencial)</SelectItem>
-                  <SelectItem value="pro">PRO</SelectItem>
+                  <SelectItem value="essential">Basic Mensal</SelectItem>
+                  <SelectItem value="essential_yearly">Basic Anual (12 meses)</SelectItem>
+                  <SelectItem value="pro">PRO Mensal</SelectItem>
+                  <SelectItem value="pro_yearly">PRO Anual (12 meses)</SelectItem>
                   <SelectItem value="elite">Elite</SelectItem>
                 </SelectContent>
               </Select>
