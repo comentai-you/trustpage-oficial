@@ -111,8 +111,9 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
       const range = sel.getRangeAt(0);
       if (range.collapsed) return;
 
+      // Use data attribute instead of inline style - color only shows in preview
       const span = document.createElement("span");
-      span.style.color = color;
+      span.setAttribute("data-accent-color", color);
 
       try {
         range.surroundContents(span);
@@ -122,7 +123,7 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
         range.insertNode(span);
       }
 
-      // Move o cursor para depois do span
+      // Move cursor after span
       const after = document.createRange();
       after.setStartAfter(span);
       after.collapse(true);

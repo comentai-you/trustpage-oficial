@@ -6,6 +6,15 @@ interface TextRendererProps {
   bgColor?: string;
 }
 
+// Convert data-accent-color attributes to inline styles for rendering
+const applyAccentColors = (html: string): string => {
+  // Replace <span data-accent-color="#xxx"> with <span style="color: #xxx">
+  return html.replace(
+    /<span\s+data-accent-color="([^"]+)">/gi,
+    '<span style="color: $1">'
+  );
+};
+
 const TextRenderer = ({ data, textColor }: TextRendererProps) => {
   const resolvedTextColor = data.textColor || textColor;
 
@@ -49,7 +58,7 @@ const TextRenderer = ({ data, textColor }: TextRendererProps) => {
           id={scopeId}
           className="rich-text-content"
           style={{ color: resolvedTextColor }}
-          dangerouslySetInnerHTML={{ __html: data.content || "" }}
+          dangerouslySetInnerHTML={{ __html: applyAccentColors(data.content || "") }}
         />
       </div>
 
