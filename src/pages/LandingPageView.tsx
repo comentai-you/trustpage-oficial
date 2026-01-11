@@ -131,8 +131,12 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
         }
 
         // Store the page owner ID for legal footer links
-        if (page.user_id) {
+        if (isLegalSlug && ownerParam) {
+          setPageOwnerId(ownerParam);
+        } else if (page.user_id) {
           setPageOwnerId(page.user_id);
+        } else {
+          setPageOwnerId(null);
         }
 
         // Fetch owner's plan type
@@ -211,7 +215,7 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
     };
 
     fetchPage();
-  }, [slug, location.pathname]);
+  }, [slug, location.pathname, location.search]);
 
   if (loading) {
     return (
