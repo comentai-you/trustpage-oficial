@@ -237,6 +237,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_all_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          plan_type: string
+          subscription_status: string
+          updated_at: string
+          username: string
+        }[]
+      }
+      admin_get_stats: {
+        Args: never
+        Returns: {
+          essential_users: number
+          free_users: number
+          pro_users: number
+          total_users: number
+        }[]
+      }
+      admin_update_user_status: {
+        Args: { new_status: string; target_user_id: string }
+        Returns: boolean
+      }
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
       get_legal_page_by_owner: {
         Args: { owner_user_id: string; page_slug: string }
@@ -302,6 +329,7 @@ export type Database = {
         Args: { page_id: string; viewer_fingerprint?: string }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       is_legal_page_slug: { Args: { page_slug: string }; Returns: boolean }
       is_subscription_active: {
         Args: { check_user_id: string }
