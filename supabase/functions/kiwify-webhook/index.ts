@@ -14,7 +14,7 @@ const PRODUCTS: Record<string, { plan: string; billing: string }> = {
   'TQlihDk': { plan: 'pro', billing: 'yearly' },         // PRO_YEARLY
 };
 
-const SITE_URL = 'https://trustpage.com.br';
+const SITE_URL = 'https://trustpageapp.com';
 
 interface KiwifyPayload {
   order_id: string;
