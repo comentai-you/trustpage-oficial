@@ -127,8 +127,11 @@ serve(async (req) => {
       );
     }
 
-    const newPlan = productConfig.plan;
-    console.log(`Product mapped to plan: ${newPlan} (${productConfig.billing}) - key: ${productKey}, checkout_link: ${checkoutLink}`);
+    // Determinar o plan_type com sufixo para planos anuais
+    const newPlan = productConfig.billing === 'yearly' 
+      ? `${productConfig.plan}_yearly` 
+      : productConfig.plan;
+    console.log(`Product mapped to plan: ${newPlan} (billing: ${productConfig.billing}) - key: ${productKey}, checkout_link: ${checkoutLink}`);
 
     // Criar cliente Supabase com service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
