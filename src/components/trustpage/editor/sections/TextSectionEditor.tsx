@@ -405,8 +405,8 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
                 size="sm"
                 className="h-8 w-8 p-0 text-purple-500 hover:text-purple-700 hover:bg-purple-50"
                 title={isPro ? 'Gerar texto com IA' : 'Recurso PRO'}
-                onMouseDown={(e) => {
-                  e.preventDefault();
+                onClick={(e) => {
+                  e.stopPropagation();
                   handleAIClick();
                 }}
               >
