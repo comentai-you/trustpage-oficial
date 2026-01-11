@@ -10,6 +10,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  Eraser,
   Heading1,
   Heading2,
   Heading3,
@@ -21,8 +22,10 @@ import {
   Palette,
   PanelBottom,
   PanelTop,
+  Redo,
   Type,
   Underline,
+  Undo,
 } from "lucide-react";
 
 interface TextSectionEditorProps {
@@ -233,6 +236,24 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
 
           <div className="w-px h-6 bg-border self-center mx-1" />
 
+          {/* Undo / Redo */}
+          <ToolbarButton title="Desfazer (Ctrl+Z)" onAction={() => runCommand("undo")}>
+            <Undo className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton title="Refazer (Ctrl+Y)" onAction={() => runCommand("redo")}>
+            <Redo className="w-4 h-4" />
+          </ToolbarButton>
+
+          {/* Clear formatting */}
+          <ToolbarButton
+            title="Limpar formatação"
+            onAction={() => runCommand("removeFormat")}
+          >
+            <Eraser className="w-4 h-4" />
+          </ToolbarButton>
+
+          <div className="w-px h-6 bg-border self-center mx-1" />
+
           {/* Inline highlight color */}
           <ToolbarButton
             title="Destacar seleção com a cor"
@@ -269,7 +290,7 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Dica: selecione um trecho e clique no marcador para aplicar a cor de destaque.
+          Selecione um trecho e use o marcador para destacar com cor. A paleta define a cor do bloco todo no preview.
         </p>
       </div>
 
