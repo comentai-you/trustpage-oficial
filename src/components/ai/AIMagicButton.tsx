@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Wand2, Loader2, Crown, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Wand2, Loader2, Crown, Sparkles, RefreshCw, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -27,6 +27,8 @@ export const AIMagicButton = ({ fieldType, currentText, onSelect, className }: A
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showConfigWarning, setShowConfigWarning] = useState(false);
 
   // Check if user is PRO
   useEffect(() => {
@@ -55,33 +57,11 @@ export const AIMagicButton = ({ fieldType, currentText, onSelect, className }: A
     checkPlan();
   }, [user]);
 
-  const handleClick = async () => {
-    if (!user) {
-      toast.error('Faça login para usar a IA Copywriter');
-      return;
-    }
-
-    if (!isPro) {
-      toast.error('Recurso exclusivo para planos PRO', {
-        description: 'Faça upgrade para desbloquear a IA Copywriter.',
-        action: {
-          label: 'Ver Planos',
-          onClick: () => navigate('/oferta')
-        }
-      });
-      return;
-    }
-
-    if (!isConfigured) {
-      toast.error('Configure a IA primeiro', {
-        description: 'Clique no botão "Cérebro IA" na barra lateral para configurar.'
-      });
-      return;
-    }
-
-    setOpen(true);
+  const handleGenerate = async () => {
     setLoading(true);
     setOptions([]);
+    setShowUpgrade(false);
+    setShowConfigWarning(false);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-copy', {
@@ -105,16 +85,48 @@ export const AIMagicButton = ({ fieldType, currentText, onSelect, className }: A
       toast.error('Erro ao gerar sugestões', {
         description: 'Tente novamente em alguns segundos.'
       });
-      setOpen(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClick = () => {
+    if (!user) {
+      toast.error('Faça login para usar a IA Copywriter');
+      return;
+    }
+
+    // Open popover first
+    setOpen(true);
+    setOptions([]);
+    setShowUpgrade(false);
+    setShowConfigWarning(false);
+
+    // Check if PRO
+    if (!isPro) {
+      setShowUpgrade(true);
+      return;
+    }
+
+    // Check if configured
+    if (!isConfigured) {
+      setShowConfigWarning(true);
+      return;
+    }
+
+    // Generate
+    handleGenerate();
   };
 
   const handleSelectOption = (option: string) => {
     onSelect(option);
     setOpen(false);
     toast.success('Texto aplicado!');
+  };
+
+  const handleUpgrade = () => {
+    setOpen(false);
+    navigate('/oferta');
   };
 
   // Don't render if context is not available
@@ -138,57 +150,106 @@ export const AIMagicButton = ({ fieldType, currentText, onSelect, className }: A
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-3 border-b bg-gradient-to-r from-purple-50 to-pink-50">
-          <div className="flex items-center gap-2 text-sm font-medium text-purple-800">
-            <Sparkles className="w-4 h-4" />
-            Sugestões da IA
-          </div>
-          <p className="text-xs text-purple-600 mt-0.5">
-            Nicho: {settings.niche}
-          </p>
-        </div>
-
-        <div className="p-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
-              <span className="ml-2 text-sm text-gray-500">Gerando sugestões...</span>
+      <PopoverContent className="w-80 p-0" align="end" sideOffset={4}>
+        {/* Upgrade CTA for Free users */}
+        {showUpgrade && (
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
+              <Crown className="w-6 h-6 text-amber-500" />
             </div>
-          ) : options.length > 0 ? (
-            <div className="space-y-1.5">
-              {options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSelectOption(option)}
-                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all group"
-                >
-                  <span className="text-sm text-gray-700 group-hover:text-purple-800">
-                    {option}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="py-6 text-center text-sm text-gray-500">
-              Clique para gerar sugestões
-            </div>
-          )}
-        </div>
-
-        {options.length > 0 && (
-          <div className="p-2 border-t bg-gray-50">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClick}
-              disabled={loading}
-              className="w-full text-xs text-purple-600 hover:text-purple-800"
+            <h4 className="font-semibold text-gray-900 mb-1">
+              Funcionalidade Exclusiva PRO
+            </h4>
+            <p className="text-sm text-gray-500 mb-4">
+              Faça upgrade para desbloquear a IA Copywriter e gerar textos de alta conversão automaticamente.
+            </p>
+            <Button 
+              onClick={handleUpgrade}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
             >
-              <Wand2 className="w-3 h-3 mr-1" />
-              Gerar novas opções
+              Ver Planos
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
+        )}
+
+        {/* Config Warning */}
+        {showConfigWarning && !showUpgrade && (
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-3">
+              <Sparkles className="w-6 h-6 text-purple-500" />
+            </div>
+            <h4 className="font-semibold text-gray-900 mb-1">
+              Configure a IA primeiro
+            </h4>
+            <p className="text-sm text-gray-500 mb-4">
+              Clique no botão <strong>"Cérebro IA"</strong> na barra lateral para configurar o nicho e tipo de página.
+            </p>
+            <Button 
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="w-full"
+            >
+              Entendi
+            </Button>
+          </div>
+        )}
+
+        {/* Normal flow for PRO + Configured */}
+        {!showUpgrade && !showConfigWarning && (
+          <>
+            <div className="p-3 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+              <div className="flex items-center gap-2 text-sm font-medium text-purple-800">
+                <Sparkles className="w-4 h-4" />
+                Sugestões da IA
+              </div>
+              <p className="text-xs text-purple-600 mt-0.5">
+                Nicho: {settings.niche}
+              </p>
+            </div>
+
+            <div className="p-2">
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                  <span className="ml-2 text-sm text-gray-500">Gerando sugestões...</span>
+                </div>
+              ) : options.length > 0 ? (
+                <div className="space-y-1.5">
+                  {options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSelectOption(option)}
+                      className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all group"
+                    >
+                      <span className="text-sm text-gray-700 group-hover:text-purple-800">
+                        {option}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-6 text-center text-sm text-gray-500">
+                  Gerando opções...
+                </div>
+              )}
+            </div>
+
+            {options.length > 0 && (
+              <div className="p-2 border-t bg-gray-50">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={loading}
+                  className="w-full text-xs text-purple-600 hover:text-purple-800"
+                >
+                  <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                  Tentar Novamente
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </PopoverContent>
     </Popover>
