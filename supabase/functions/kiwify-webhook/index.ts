@@ -74,17 +74,121 @@ serve(async (req) => {
     console.log('Product ID:', payload.product_id);
     console.log('Customer Email:', payload.Customer?.email);
 
-    // Apenas processar eventos de aprovação
-    if (payload.order_status !== 'paid' && payload.order_status !== 'approved') {
+    // Status de aprovação (venda confirmada)
+    const approvalStatuses = ['paid', 'approved'];
+    const isApproved = approvalStatuses.includes(payload.order_status);
+    
+    // Status de cancelamento
+    const cancellationStatuses = ['refunded', 'chargedback', 'canceled', 'subscription_canceled'];
+    const isCancellation = cancellationStatuses.includes(payload.order_status);
+    
+    // Ignorar eventos que não são nem aprovação nem cancelamento
+    if (!isApproved && !isCancellation) {
       console.log(`Ignoring event with status: ${payload.order_status}`);
       return new Response(
-        JSON.stringify({ success: true, message: 'Event ignored - not a purchase confirmation' }),
+        JSON.stringify({ success: true, message: 'Event ignored - not a purchase or cancellation' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Validar dados obrigatórios
+    // Validar email (obrigatório para ambos os fluxos)
     const customerEmail = payload.Customer?.email?.toLowerCase().trim();
+    
+    if (!customerEmail) {
+      console.error('Missing customer email');
+      return new Response(
+        JSON.stringify({ error: 'Missing customer email' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Criar cliente Supabase com service role (necessário para ambos os fluxos)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // ========== FLUXO DE CANCELAMENTO ==========
+    if (isCancellation) {
+      console.log(`=== PROCESSING CANCELLATION for ${customerEmail} ===`);
+      
+      // Buscar usuário por email usando paginação
+      let existingUser = null;
+      let page = 1;
+      const perPage = 50;
+      
+      while (true) {
+        const { data: usersPage, error: pageError } = await supabase.auth.admin.listUsers({
+          page,
+          perPage,
+        });
+        
+        if (pageError) {
+          console.error('Error listing users:', pageError.message);
+          throw new Error('Failed to check existing users');
+        }
+        
+        if (!usersPage?.users || usersPage.users.length === 0) {
+          break;
+        }
+        
+        const userInPage = usersPage.users.find(
+          (u) => u.email?.toLowerCase() === customerEmail
+        );
+        
+        if (userInPage) {
+          existingUser = userInPage;
+          break;
+        }
+        
+        if (usersPage.users.length < perPage) {
+          break;
+        }
+        
+        page++;
+        if (page > 200) {
+          console.warn('Reached max pagination limit');
+          break;
+        }
+      }
+      
+      if (existingUser) {
+        // Desativar assinatura do usuário
+        const { error: updateError } = await supabase.rpc('update_user_plan', {
+          target_user_id: existingUser.id,
+          new_plan_type: 'free',
+          new_status: 'inactive',
+        });
+        
+        if (updateError) {
+          console.error('Error deactivating subscription:', updateError.message);
+          throw new Error('Failed to deactivate subscription');
+        }
+        
+        console.log(`✅ Subscription canceled for ${customerEmail}. Plan set to free/inactive.`);
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            action: 'canceled',
+            user_id: existingUser.id,
+            message: 'Subscription deactivated',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } else {
+        console.log(`User ${customerEmail} not found for cancellation. Ignoring.`);
+        return new Response(
+          JSON.stringify({ success: true, message: 'User not found - cancellation ignored' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // ========== FLUXO DE VENDA (APROVAÇÃO) ==========
+    // Só executa se isApproved === true
     const customerName = payload.Customer?.full_name || 'Cliente';
     
     // Extração robusta do product_id (Kiwify envia em payload.Product.product_id)
@@ -99,14 +203,6 @@ serve(async (req) => {
     // O productId pode ser um UUID, mas o PRODUCTS usa checkout_link como chave
     // Priorizar checkout_link para mapear o plano
     const productKey = checkoutLink && PRODUCTS[checkoutLink] ? checkoutLink : productId;
-
-    if (!customerEmail) {
-      console.error('Missing customer email');
-      return new Response(
-        JSON.stringify({ error: 'Missing customer email' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     // Verificar se temos uma forma de identificar o produto
     if (!productKey && !checkoutLink) {
@@ -132,14 +228,6 @@ serve(async (req) => {
       ? `${productConfig.plan}_yearly` 
       : productConfig.plan;
     console.log(`Product mapped to plan: ${newPlan} (billing: ${productConfig.billing}) - key: ${productKey}, checkout_link: ${checkoutLink}`);
-
-    // Criar cliente Supabase com service role
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
 
     // CENÁRIO: Verificar se usuário existe (busca filtrada para performance)
     console.log(`Checking if user exists with email: ${customerEmail}`);
