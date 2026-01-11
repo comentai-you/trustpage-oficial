@@ -31,6 +31,7 @@ const CustomDomainPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [resolvedSlug, setResolvedSlug] = useState<string | null>(null);
+  const [resolvedOwnerId, setResolvedOwnerId] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   const debugEnabled = new URLSearchParams(location.search).has('tp_debug');
@@ -84,13 +85,8 @@ const CustomDomainPage = () => {
         // Check for network/invoke errors
         if (response.error) {
           console.error('[CustomDomain] Edge function error:', response.error);
-          // Fallback: try direct slug lookup
-          if (pathSlug) {
-            if (debugEnabled) console.log('[CustomDomain] Fallback to direct slug:', pathSlug);
-            setResolvedSlug(pathSlug);
-          } else {
-            setNotFound(true);
-          }
+          // Segurança: sem conseguir resolver domínio -> NÃO pode tentar "achar por slug" (evita vazamento)
+          setNotFound(true);
           setLoading(false);
           return;
         }
@@ -102,12 +98,8 @@ const CustomDomainPage = () => {
 
         // Domain not found/verified
         if (!data?.found) {
-          console.log('[CustomDomain] Domain not found, trying direct slug');
-          if (pathSlug) {
-            setResolvedSlug(pathSlug);
-          } else {
-            setNotFound(true);
-          }
+          console.log('[CustomDomain] Domain not found or not verified');
+          setNotFound(true);
           setLoading(false);
           return;
         }
@@ -115,16 +107,19 @@ const CustomDomainPage = () => {
         // Handle response types
         if (data.type === 'page' && data.slug) {
           console.log('[CustomDomain] Page found, slug:', data.slug);
+          setResolvedOwnerId(data.userId || null);
           setResolvedSlug(data.slug);
         } else if (data.type === 'homepage' && data.defaultPage?.slug) {
           console.log('[CustomDomain] Homepage, default slug:', data.defaultPage.slug);
+          setResolvedOwnerId(data.userId || null);
           setResolvedSlug(data.defaultPage.slug);
         } else if (data.type === 'no_pages') {
           console.log('[CustomDomain] No published pages');
           setNotFound(true);
         } else {
-          // Unexpected response - try path slug as fallback
+          // Unexpected response - fallback seguro: tenta o slug do path, mas sempre preso ao userId do domínio
           console.log('[CustomDomain] Unexpected response, using path slug:', pathSlug);
+          setResolvedOwnerId(data.userId || null);
           if (pathSlug) {
             setResolvedSlug(pathSlug);
           } else {
@@ -133,12 +128,8 @@ const CustomDomainPage = () => {
         }
       } catch (err) {
         console.error('[CustomDomain] Exception:', err);
-        // Final fallback
-        if (pathSlug) {
-          setResolvedSlug(pathSlug);
-        } else {
-          setNotFound(true);
-        }
+        // Segurança: sem conseguir resolver domínio -> não renderiza nada
+        setNotFound(true);
       } finally {
         setLoading(false);
       }
@@ -184,7 +175,7 @@ const CustomDomainPage = () => {
           <pre className="whitespace-pre-wrap break-words">{JSON.stringify({ ...debugInfo, resolvedSlug, notFound }, null, 2)}</pre>
         </div>
       )}
-      <LandingPageView slugOverride={resolvedSlug} />
+      <LandingPageView slugOverride={resolvedSlug} ownerIdOverride={resolvedOwnerId} />
     </>
   );
 };

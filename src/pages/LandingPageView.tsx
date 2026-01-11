@@ -15,6 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LandingPageViewProps {
   slugOverride?: string;
+  ownerIdOverride?: string | null;
 }
 
 const LEGAL_SLUGS = new Set(["politica-de-privacidade", "termos-de-uso", "contato"]);
@@ -60,7 +61,7 @@ const injectFacebookPixel = (pixelId: string) => {
   document.body.appendChild(noscript);
 };
 
-const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
+const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps = {}) => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const slug = slugOverride || paramSlug;
   const [searchParams] = useSearchParams();
@@ -97,29 +98,59 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
       }
 
       try {
-        // Check if this is a legal page with an owner parameter
         const ownerParam = searchParams.get('owner');
         const isLegalSlug = LEGAL_SLUGS.has(String(slug).toLowerCase());
-        
+
         let page: any = null;
-        
-        // If legal page with owner param, use the owner-specific function
-        if (isLegalSlug && ownerParam) {
+        let legalOwnerId: string | null = null;
+
+        // PÁGINAS LEGAIS: sempre precisam de owner (NUNCA pode cair em "qualquer página publicada")
+        if (isLegalSlug) {
+          legalOwnerId = ownerParam || ownerIdOverride || null;
+
+          // Se não veio owner (visitante), mas o usuário está logado, usa o próprio auth.uid()
+          if (!legalOwnerId) {
+            const { data: userData } = await supabase.auth.getUser();
+            legalOwnerId = userData.user?.id ?? null;
+          }
+
+          // Sem owner = não existe contexto para a página legal -> 404 (evita vazamento entre usuários)
+          if (!legalOwnerId) {
+            page = null;
+          } else {
+            const { data, error } = await supabase
+              .from('landing_pages')
+              .select('*')
+              .eq('user_id', legalOwnerId)
+              .eq('slug', String(slug))
+              .eq('is_published', true)
+              .order('updated_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (error) throw error;
+            page = data;
+          }
+        } else if (ownerIdOverride) {
+          // DOMÍNIO CUSTOMIZADO: o slug só faz sentido dentro do dono do domínio
           const { data, error } = await supabase
-            .rpc('get_legal_page_by_owner', { 
-              page_slug: slug, 
-              owner_user_id: ownerParam 
-            })
+            .from('landing_pages')
+            .select('*')
+            .eq('user_id', ownerIdOverride)
+            .eq('slug', String(slug))
+            .eq('is_published', true)
+            .order('updated_at', { ascending: false })
+            .limit(1)
             .maybeSingle();
-          
+
           if (error) throw error;
           page = data;
         } else {
-          // Default: get any published page with this slug
+          // Páginas normais: slug público (assumido único) via RPC
           const { data, error } = await supabase
             .rpc('get_published_page_by_slug', { page_slug: slug })
             .maybeSingle();
-          
+
           if (error) throw error;
           page = data;
         }
@@ -131,8 +162,8 @@ const LandingPageView = ({ slugOverride }: LandingPageViewProps = {}) => {
         }
 
         // Store the page owner ID for legal footer links
-        if (isLegalSlug && ownerParam) {
-          setPageOwnerId(ownerParam);
+        if (isLegalSlug) {
+          setPageOwnerId(legalOwnerId);
         } else if (page.user_id) {
           setPageOwnerId(page.user_id);
         } else {
