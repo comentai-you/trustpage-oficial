@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { VideoGridSection } from "@/types/section-builder";
@@ -54,11 +55,12 @@ const VideoGridSectionEditor = ({ data, onChange }: VideoGridSectionEditorProps)
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título da Seção</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Veja o que nossos clientes dizem"
           className="text-sm"
+          aiFieldType="headline"
         />
       </div>
 

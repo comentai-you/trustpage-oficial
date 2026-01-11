@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Button } from "@/components/ui/button";
 import { TestimonialsSection } from "@/types/section-builder";
 import { Plus, Trash2, Upload, Loader2, X } from "lucide-react";
@@ -70,11 +71,12 @@ const TestimonialsSectionEditor = ({ data, onChange }: TestimonialsSectionEditor
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Título da Seção</Label>
-        <Input
+        <InputWithAI
           value={data.title || ''}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="O que nossos clientes dizem"
           className="text-sm"
+          aiFieldType="headline"
         />
       </div>
 
@@ -109,12 +111,13 @@ const TestimonialsSectionEditor = ({ data, onChange }: TestimonialsSectionEditor
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
-            <Textarea
+            <TextareaWithAI
               value={item.text}
               onChange={(e) => updateItem(index, { text: e.target.value })}
               placeholder="Depoimento"
               className="text-sm resize-none"
               rows={2}
+              aiFieldType="testimonial"
             />
           </div>
         ))}
