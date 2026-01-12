@@ -62,9 +62,9 @@ const VERCEL_IP = "216.198.79.1";
 // --- TUTORIAIS ---
 const tutorials: Tutorial[] = [
   {
-    id: "godaddy-dns",
-    title: "Domínio na GoDaddy",
-    description: "Guia passo a passo com prints para GoDaddy.",
+    id: "hostinger-dns",
+    title: "Domínio na Hostinger",
+    description: "Guia passo a passo com vídeo para Hostinger.",
     icon: <Globe className="h-6 w-6" />,
     badge: "Essencial",
     featured: true,
@@ -266,7 +266,7 @@ const HelpPage = () => {
 
   const handleTutorialClick = (tutorialId: string) => {
     switch (tutorialId) {
-      case "godaddy-dns":
+      case "hostinger-dns":
         setGodaddyModalOpen(true);
         break;
       case "other-dns":
@@ -481,7 +481,7 @@ const HelpPage = () => {
         </div>
       </div>
 
-      {/* --- MODAL GODADDY OTIMIZADO --- */}
+      {/* --- MODAL HOSTINGER DNS --- */}
       <Dialog open={godaddyModalOpen} onOpenChange={setGodaddyModalOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
           <div className="bg-slate-50 p-6 border-b border-slate-200">
@@ -490,15 +490,27 @@ const HelpPage = () => {
                 <div className="bg-black p-2 rounded-lg text-white">
                   <Globe className="h-6 w-6" />
                 </div>
-                Configurando DNS na GoDaddy
+                Configurando DNS na Hostinger
               </DialogTitle>
               <DialogDescription className="text-base mt-2">
-                Não se assuste, é apenas copiar e colar. Siga os 3 passos abaixo.
+                Assista ao vídeo tutorial ou siga os passos abaixo para configurar seu domínio.
               </DialogDescription>
             </DialogHeader>
           </div>
 
           <div className="p-6 space-y-8">
+            {/* Video Tutorial */}
+            <div className="aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+              <iframe
+                src="https://player.vimeo.com/video/1153607914?h=0&title=0&byline=0&portrait=0"
+                className="w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Tutorial de configuração de domínio na Hostinger"
+              />
+            </div>
+
             {/* Passo 1 */}
             <div className="flex gap-4 relative">
               <div className="absolute left-4 top-10 bottom-[-2rem] w-0.5 bg-slate-200 last:hidden"></div>
@@ -508,13 +520,13 @@ const HelpPage = () => {
               <div className="flex-1 pt-1">
                 <h4 className="text-lg font-bold text-slate-900 mb-2">Acesse a Zona de DNS</h4>
                 <p className="text-slate-600 mb-4">
-                  Faça login na GoDaddy, vá em <strong>Meus Produtos</strong>, encontre seu domínio e clique em{" "}
-                  <strong>DNS</strong>.
+                  Faça login na Hostinger, vá em <strong>Domínios</strong>, clique no seu domínio e depois em{" "}
+                  <strong>Zona DNS</strong> ou <strong>Editor de Zona DNS</strong>.
                 </p>
                 <Button variant="outline" size="sm" asChild className="gap-2 border-slate-300">
-                  <a href="https://dcc.godaddy.com/manage-dns" target="_blank">
+                  <a href="https://www.hostinger.com.br/tutoriais/como-editar-zona-dns-na-hostinger" target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
-                    Abrir GoDaddy em nova aba
+                    Ver tutorial da Hostinger
                   </a>
                 </Button>
               </div>
@@ -626,41 +638,35 @@ const HelpPage = () => {
                   <strong>Meus Produtos &gt; Domínio &gt; Gerenciar DNS &gt; Nameservers</strong> e altere para:
                 </p>
                 <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200 font-mono text-sm space-y-2">
-                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
-                    <div className="col-span-3 text-slate-500 font-sans font-medium">NS 1</div>
-                    <div className="col-span-7 font-bold text-indigo-700">ns1.vercel-dns.com</div>
-                    <div className="col-span-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-indigo-100"
-                        onClick={() => handleCopy("ns1.vercel-dns.com", "ns1")}
-                      >
-                        {copiedField === "ns1" ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4 text-indigo-500" />
-                        )}
-                      </Button>
-                    </div>
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
+                    <div className="font-bold text-indigo-700">ns1.vercel-dns.com</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 hover:bg-indigo-100"
+                      onClick={() => handleCopy("ns1.vercel-dns.com", "ns1")}
+                    >
+                      {copiedField === "ns1" ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-indigo-500" />
+                      )}
+                    </Button>
                   </div>
-                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
-                    <div className="col-span-3 text-slate-500 font-sans font-medium">NS 2</div>
-                    <div className="col-span-7 font-bold text-indigo-700">ns2.vercel-dns.com</div>
-                    <div className="col-span-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-indigo-100"
-                        onClick={() => handleCopy("ns2.vercel-dns.com", "ns2")}
-                      >
-                        {copiedField === "ns2" ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4 text-indigo-500" />
-                        )}
-                      </Button>
-                    </div>
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
+                    <div className="font-bold text-indigo-700">ns2.vercel-dns.com</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 hover:bg-indigo-100"
+                      onClick={() => handleCopy("ns2.vercel-dns.com", "ns2")}
+                    >
+                      {copiedField === "ns2" ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-indigo-500" />
+                      )}
+                    </Button>
                   </div>
                 </div>
                 <p className="text-sm text-slate-500 mt-3">
@@ -674,7 +680,7 @@ const HelpPage = () => {
               <div>
                 <h5 className="font-bold text-amber-800 text-sm">Importante: TTL</h5>
                 <p className="text-amber-700 text-sm mt-1 leading-relaxed">
-                  Se a GoDaddy perguntar o <strong>TTL</strong>, selecione <strong>600 segundos</strong> ou{" "}
+                  Se o seu provedor perguntar o <strong>TTL</strong>, selecione <strong>600 segundos</strong> ou{" "}
                   <strong>1/2 Hora</strong>. <br />
                   Depois de salvar, aguarde até 2 horas para propagar.
                 </p>
