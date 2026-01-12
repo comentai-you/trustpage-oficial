@@ -1,34 +1,47 @@
 import { useState, useMemo } from "react";
-import { Search, Send, Mail, Rocket, CreditCard, Palette, Wrench, Globe, Copy, Check, ExternalLink, BookOpen, MessageCircle } from "lucide-react";
+import {
+  Search,
+  Send,
+  Mail,
+  Rocket,
+  CreditCard,
+  Palette,
+  Wrench,
+  Globe,
+  Copy,
+  Check,
+  ExternalLink,
+  BookOpen,
+  MessageCircle,
+  AlertTriangle,
+  ShieldCheck,
+  PlayCircle,
+  BarChart3,
+  HelpCircle,
+  Activity,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { toast } from "sonner";
 
+// --- DADOS E CONSTANTES ---
+
 interface FAQ {
   question: string;
-  answer: string;
+  answer: string | React.ReactNode;
 }
 
 interface Category {
   id: string;
   label: string;
+  description?: string;
   icon: React.ReactNode;
   faqs: FAQ[];
 }
@@ -43,142 +56,210 @@ interface Tutorial {
 }
 
 const WHATSAPP_NUMBER = "5561999686641";
-const VERCEL_IP = "216.198.79.1";
+const VERCEL_IP = "76.76.21.21"; // IP Oficial para Custom Domains na Vercel
 
+// --- TUTORIAIS ---
 const tutorials: Tutorial[] = [
   {
     id: "godaddy-dns",
-    title: "Configurando DNS na GoDaddy",
-    description: "Aprenda a apontar seu domínio GoDaddy para sua página",
+    title: "Domínio na GoDaddy",
+    description: "Guia passo a passo com prints para GoDaddy.",
     icon: <Globe className="h-6 w-6" />,
-    badge: "Popular",
+    badge: "Essencial",
     featured: true,
   },
   {
-    id: "other-dns",
-    title: "Configurando DNS em outros provedores",
-    description: "Registro.br, Hostgator, Cloudflare e outros",
-    icon: <Globe className="h-6 w-6" />,
+    id: "pixel-setup",
+    title: "Instalando Pixel e API",
+    description: "Rastreamento avançado para Facebook Ads.",
+    icon: <Activity className="h-6 w-6" />,
+    badge: "Ads",
+    featured: true,
   },
   {
-    id: "first-page",
-    title: "Criando sua primeira página",
-    description: "Guia completo para criar e publicar",
-    icon: <Rocket className="h-6 w-6" />,
+    id: "video-setup",
+    title: "Hospedagem de Vídeo (VSL)",
+    description: "Por que usar Vimeo/Panda em vez do YouTube?",
+    icon: <PlayCircle className="h-6 w-6" />,
+    featured: true,
   },
   {
-    id: "templates",
-    title: "Escolhendo o template ideal",
-    description: "VSL, Página de Vendas ou Bio Link?",
-    icon: <Palette className="h-6 w-6" />,
+    id: "troubleshooting",
+    title: "Resolvendo Erros (404)",
+    description: "Minha página não abre, o que fazer?",
+    icon: <Wrench className="h-6 w-6" />,
   },
 ];
 
+// --- CATEGORIAS DE FAQ (EXPANDIDAS E DETALHADAS) ---
 const categories: Category[] = [
   {
-    id: "dominio",
-    label: "Domínio Próprio",
-    icon: <Globe className="h-4 w-4" />,
-    faqs: [
-      {
-        question: "Como configurar meu domínio próprio?",
-        answer: "Acesse as configurações da sua página, vá em 'Domínio Personalizado' e siga as instruções para apontar seu domínio. Você precisará adicionar registros DNS no seu provedor de domínio."
-      },
-      {
-        question: "Qual IP devo apontar meu domínio?",
-        answer: `Configure um registro tipo 'A' apontando para ${VERCEL_IP}. A propagação pode levar até 2 horas.`
-      },
-      {
-        question: "Por que meu domínio ainda não funciona?",
-        answer: "A propagação DNS pode levar de alguns minutos até 2 horas. Verifique se os registros estão corretos e aguarde. Se persistir, entre em contato com nosso suporte."
-      },
-      {
-        question: "Posso usar subdomínio (ex: lp.meusite.com)?",
-        answer: "Sim! Para subdomínios, use um registro CNAME ao invés de A. O processo é similar ao domínio principal."
-      }
-    ]
-  },
-  {
     id: "primeiros-passos",
-    label: "Primeiros Passos",
+    label: "Começando",
+    description: "O básico para colocar sua estrutura no ar hoje",
     icon: <Rocket className="h-4 w-4" />,
     faqs: [
       {
         question: "Como criar minha primeira página?",
-        answer: "Clique no botão azul 'Nova Página' na Dashboard, escolha um template (VSL, Vendas ou Bio) e dê um nome para seu link."
+        answer:
+          "Clique no botão azul 'Nova Página' na Dashboard. Escolha o tipo (VSL para vídeo de vendas, Página de Vendas para texto longo ou Bio Link para agregador) e defina um nome interno para sua organização.",
       },
       {
-        question: "Funciona no celular?",
-        answer: "Sim! Tanto o editor quanto as páginas publicadas são 100% otimizados para mobile."
-      }
-    ]
+        question: "Preciso pagar hospedagem extra (Hostgator/Hostinger)?",
+        answer:
+          "Não! A hospedagem de alta velocidade (servidores Vercel Global CDN) já está inclusa em todos os planos da TrustPage. Você só precisa do domínio (o nome do site).",
+      },
+      {
+        question: "Funciona bem em Android e iPhone?",
+        answer:
+          "Sim! Nosso editor é 'Mobile First'. Isso significa que as páginas são criadas pensando primeiro na experiência do celular, onde acontece 90% das vendas hoje.",
+      },
+    ],
   },
   {
-    id: "financeiro",
-    label: "Financeiro e Planos",
-    icon: <CreditCard className="h-4 w-4" />,
+    id: "dominio",
+    label: "Domínios & DNS",
+    description: "Configuração técnica do seu endereço .com ou .com.br",
+    icon: <Globe className="h-4 w-4" />,
     faqs: [
       {
-        question: "Quais as formas de pagamento?",
-        answer: "Aceitamos PIX, Boleto e Cartão de Crédito através da nossa integração segura com a Kiwify."
+        question: "Qual a diferença entre Registro A e CNAME?",
+        answer: (
+          <div>
+            <p className="mb-2">São as 'placas de trânsito' da internet:</p>
+            <ul className="list-disc pl-4 space-y-2">
+              <li>
+                <strong>Registro A (@):</strong> É usado para o domínio principal (ex: seusite.com). Ele deve apontar
+                para o nosso IP numérico: <code className="bg-slate-100 px-1 rounded">{VERCEL_IP}</code>.
+              </li>
+              <li>
+                <strong>CNAME (www):</strong> É usado para subdomínios (ex: <b>lp</b>.seusite.com) ou para o 'www'. Ele
+                aponta para o endereço <code className="bg-slate-100 px-1 rounded">cname.vercel-dns.com</code>.
+              </li>
+            </ul>
+          </div>
+        ),
       },
       {
-        question: "Como faço upgrade?",
-        answer: "Na sua Dashboard, clique no botão 'Fazer Upgrade' no topo ou acesse as configurações. A liberação é automática após o pagamento."
+        question: "Quanto tempo demora para o site entrar no ar?",
+        answer:
+          "Após configurar o DNS, existe o tempo de 'Propagação'. Geralmente leva entre 30 minutos e 2 horas. Em casos raros (como Registro.br antigo), pode levar até 24h. Se passar disso, revise os números do IP.",
       },
       {
-        question: "Tem fidelidade?",
-        answer: "Não. Você pode cancelar sua assinatura a qualquer momento entrando em contato com o suporte."
-      }
-    ]
+        question: "Erro 'Invalid Configuration' ao acessar o site",
+        answer:
+          "Isso significa que o DNS está apontando para nós (o caminho está certo), mas você esqueceu de cadastrar o domínio dentro da Dashboard da TrustPage. Vá em Configurações > Domínio e adicione a URL lá.",
+      },
+    ],
   },
   {
-    id: "templates",
-    label: "Templates e Edição",
+    id: "ads-bloqueios",
+    label: "Ads & Contingência",
+    description: "Evite bloqueios no Facebook e Google",
+    icon: <ShieldCheck className="h-4 w-4" />,
+    faqs: [
+      {
+        question: "Minha página evita bloqueios no Facebook?",
+        answer:
+          "A TrustPage tem código limpo e carregamento rápido, o que aumenta sua nota de qualidade no Facebook. Porém, o bloqueio geralmente acontece por causa da sua COPY (texto) ou do VÍDEO. Recomendamos usar a VSL sem promessas agressivas no texto da página para evitar o robô do Facebook.",
+      },
+      {
+        question: "Como configuro o Pixel do Facebook?",
+        answer:
+          "Não precisa mexer em código! Vá nas configurações da página > Aba 'Rastreamento'. Cole apenas o ID do Pixel (ex: 123456789). Nós disparamos automaticamente o evento 'PageView' quando alguém visita.",
+      },
+      {
+        question: "Onde coloco a Tag do Google Ads?",
+        answer:
+          "Na aba 'Rastreamento' ou 'Scripts', há um campo específico para 'Head Code'. Cole a tag global do Google (gtag.js) ali. Para marcar conversão no botão, use a classe do botão ou a url de obrigado.",
+      },
+    ],
+  },
+  {
+    id: "templates-editor",
+    label: "Editor & Design",
+    description: "Dúvidas visuais e de conteúdo",
     icon: <Palette className="h-4 w-4" />,
     faqs: [
       {
-        question: "Qual a diferença entre VSL e Página de Vendas?",
-        answer: "A VSL é focada em vídeo com um botão que aparece depois (delay). A Página de Vendas é completa, com depoimentos, benefícios e mais detalhes para convencer o cliente."
+        question: "Posso usar vídeo do YouTube?",
+        answer:
+          "Pode, mas não recomendamos para Vendas Profissionais. O YouTube mostra anúncios de concorrentes e vídeos relacionados que distraem seu cliente. Use VIMEO (versão paga) ou PANDA VIDEO para remover controles e manter o foco na sua oferta.",
       },
       {
-        question: "Como funciona o Bio Link?",
-        answer: "É um agregador de links estilo Linktree, mas com opção de colocar fotos nos botões e destacar ofertas importantes."
+        question: "Minha imagem de fundo ficou cortada no celular",
+        answer:
+          "Imagens de fundo se comportam diferente no PC e no Mobile. Recomendamos usar uma imagem vertical (1080x1920px) para o fundo mobile para garantir que o rosto ou produto principal apareça.",
       },
       {
-        question: "O que é o Delay do Botão?",
-        answer: "É uma função da VSL onde o botão de compra só aparece no momento que você escolher (ex: quando o narrador fala o preço no vídeo)."
-      }
-    ]
+        question: "Como funciona o Delay do Botão (Botão Fantasma)?",
+        answer:
+          "No editor da VSL, você define o tempo exato (ex: 12 minutos). O botão de compra ficará invisível até esse tempo bater. Isso aumenta muito a conversão, pois força o cliente a assistir a explicação antes de ver o preço.",
+      },
+    ],
   },
   {
-    id: "problemas",
-    label: "Solução de Problemas",
+    id: "financeiro",
+    label: "Planos & Cobrança",
+    description: "Tudo sobre sua assinatura",
+    icon: <CreditCard className="h-4 w-4" />,
+    faqs: [
+      {
+        question: "Como faço upgrade para liberar mais páginas?",
+        answer:
+          "Na Dashboard, clique no botão 'Fazer Upgrade' ou vá em Assinatura. O pagamento é processado pela Kiwify e a liberação das novas funções (como IA e Domínios Ilimitados) é imediata.",
+      },
+      {
+        question: "Tenho garantia de reembolso?",
+        answer:
+          "Sim! Você tem 7 dias de garantia incondicional pela lei e pela nossa política. Se não se adaptar, pode pedir reembolso direto na plataforma da Kiwify ou com nosso suporte.",
+      },
+      {
+        question: "O que acontece com meus sites se eu cancelar?",
+        answer:
+          "Suas páginas continuam no ar até o último dia do período pago. Após isso, elas são desativadas e quem acessar verá uma tela de 'Página Indisponível'.",
+      },
+    ],
+  },
+  {
+    id: "troubleshooting",
+    label: "Solução de Erros",
+    description: "Resolvendo problemas técnicos sozinho",
     icon: <Wrench className="h-4 w-4" />,
     faqs: [
       {
-        question: "Minha imagem não carrega",
-        answer: "Verifique se o arquivo tem menos de 5MB e está nos formatos JPG ou PNG."
+        question: "Erro 404 (Página não encontrada)",
+        answer:
+          "Verifique 3 coisas: 1) Você clicou em 'Publicar' no editor? (Botão verde). 2) O endereço (slug) está correto? 3) Se for domínio próprio, o DNS já propagou?",
       },
       {
-        question: "Esqueci minha senha",
-        answer: "Na tela de login, clique em 'Esqueci minha senha' para receber um link de redefinição no seu e-mail."
-      }
-    ]
-  }
+        question: "O editor não salva minhas alterações",
+        answer:
+          "Geralmente é instabilidade na internet momentânea. Tente atualizar a página. Se persistir, desative bloqueadores de anúncio (AdBlock) pois eles podem bloquear nossos scripts de salvamento.",
+      },
+      {
+        question: "A página demora para carregar imagens",
+        answer:
+          "Isso acontece quando você sobe fotos direto da câmera (muito pesadas, > 5MB). Use sites gratuitos como TinyPNG.com para comprimir suas imagens antes de subir. O ideal é manter abaixo de 500KB.",
+      },
+    ],
+  },
 ];
 
 const HelpPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("dominio");
+  const [activeTab, setActiveTab] = useState("primeiros-passos");
+
+  // Modais
   const [godaddyModalOpen, setGodaddyModalOpen] = useState(false);
   const [otherDnsModalOpen, setOtherDnsModalOpen] = useState(false);
+
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast.success("Copiado!");
+    toast.success("Copiado para a área de transferência!");
     setTimeout(() => setCopiedField(null), 2000);
   };
 
@@ -190,11 +271,13 @@ const HelpPage = () => {
       case "other-dns":
         setOtherDnsModalOpen(true);
         break;
-      case "first-page":
-        setActiveTab("primeiros-passos");
+      case "troubleshooting":
+        setActiveTab("troubleshooting");
+        const element = document.getElementById("troubleshooting-tab");
+        element?.scrollIntoView({ behavior: "smooth" });
         break;
-      case "templates":
-        setActiveTab("templates");
+      default:
+        toast.info("Tutorial detalhado em vídeo em breve na área de membros!");
         break;
     }
   };
@@ -203,14 +286,16 @@ const HelpPage = () => {
     if (!searchQuery.trim()) return categories;
 
     const query = searchQuery.toLowerCase();
-    return categories.map(category => ({
-      ...category,
-      faqs: category.faqs.filter(
-        faq =>
-          faq.question.toLowerCase().includes(query) ||
-          faq.answer.toLowerCase().includes(query)
-      )
-    })).filter(category => category.faqs.length > 0);
+    return categories
+      .map((category) => ({
+        ...category,
+        faqs: category.faqs.filter(
+          (faq) =>
+            faq.question.toLowerCase().includes(query) ||
+            (typeof faq.answer === "string" && faq.answer.toLowerCase().includes(query)),
+        ),
+      }))
+      .filter((category) => category.faqs.length > 0);
   }, [searchQuery]);
 
   const totalResults = useMemo(() => {
@@ -219,534 +304,361 @@ const HelpPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <BookOpen className="h-8 w-8" />
-              <h1 className="text-3xl md:text-4xl font-bold">
-                Ajuda & Tutoriais
-              </h1>
-            </div>
-            <p className="text-blue-100 mb-8">
-              Aprenda a configurar sua página e tire todas as suas dúvidas
+      <div className="min-h-screen bg-slate-50/50">
+        {/* Header Hero */}
+        <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white pb-24 pt-16 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge className="bg-blue-500/20 text-blue-100 hover:bg-blue-500/30 mb-4 border-0 backdrop-blur-md">
+              Central de Ajuda TrustPage
+            </Badge>
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Como podemos ajudar você hoje?</h1>
+            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Encontre respostas rápidas, tutoriais passo a passo e resolva problemas técnicos sem esperar pelo suporte.
             </p>
-            
+
             {/* Search Bar */}
-            <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Buscar por palavra-chave..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-lg bg-white text-foreground border-0 shadow-xl rounded-xl"
-              />
+            <div className="relative max-w-2xl mx-auto group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+              <div className="relative">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Ex: configurar pixel, domínio godaddy, erro 404..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-14 pr-4 py-7 text-lg bg-white text-slate-900 border-0 shadow-2xl rounded-xl w-full focus-visible:ring-offset-2 focus-visible:ring-blue-500 placeholder:text-slate-400"
+                />
+              </div>
             </div>
-            
+
             {searchQuery && (
-              <p className="mt-4 text-blue-100">
-                {totalResults} resultado{totalResults !== 1 ? 's' : ''} encontrado{totalResults !== 1 ? 's' : ''}
+              <p className="mt-4 text-sm text-blue-200 font-medium animate-in fade-in slide-in-from-bottom-2">
+                Encontramos {totalResults} resultado{totalResults !== 1 ? "s" : ""} para sua busca
               </p>
             )}
           </div>
         </div>
 
-        {/* Tutorials Section */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-            <Rocket className="h-5 w-5 text-primary" />
-            Tutoriais em Destaque
-          </h2>
-
-          {/* Featured Tutorial - GoDaddy */}
-          {tutorials.filter(t => t.featured).map(tutorial => (
-            <Card 
-              key={tutorial.id}
-              className="mb-6 cursor-pointer hover:shadow-xl transition-all duration-300 border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-purple-50"
-              onClick={() => handleTutorialClick(tutorial.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                    {tutorial.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-foreground">{tutorial.title}</h3>
-                      {tutorial.badge && (
-                        <Badge className="bg-primary/10 text-primary border-0">
-                          {tutorial.badge}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground">{tutorial.description}</p>
-                    <Button variant="link" className="p-0 h-auto mt-2 text-primary">
-                      Ver tutorial completo →
-                    </Button>
-                  </div>
+        {/* Conteúdo Principal */}
+        <div className="max-w-6xl mx-auto px-4 -mt-16 pb-20">
+          <div className="grid lg:grid-cols-12 gap-8">
+            {/* Coluna Esquerda: Tutoriais */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                  <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                    <Rocket className="h-5 w-5 text-blue-600" />
+                    Guias Rápidos
+                  </h2>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="p-2 space-y-1">
+                  {tutorials.map((tutorial) => (
+                    <div
+                      key={tutorial.id}
+                      onClick={() => handleTutorialClick(tutorial.id)}
+                      className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 hover:bg-slate-50 border border-transparent hover:border-slate-200 flex items-start gap-3 ${tutorial.featured ? "bg-blue-50/30" : ""}`}
+                    >
+                      <div
+                        className={`mt-1 p-2 rounded-lg shrink-0 ${tutorial.featured ? "bg-blue-100 text-blue-700 group-hover:bg-blue-200" : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"} transition-colors`}
+                      >
+                        {tutorial.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors truncate">
+                            {tutorial.title}
+                          </h3>
+                          {tutorial.badge && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-white uppercase shrink-0">
+                              {tutorial.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                          {tutorial.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          {/* Other Tutorials Grid */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {tutorials.filter(t => !t.featured).map(tutorial => (
-              <Card 
-                key={tutorial.id}
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-primary/30"
-                onClick={() => handleTutorialClick(tutorial.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-muted text-muted-foreground">
-                      {tutorial.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground text-sm">{tutorial.title}</h3>
-                      <p className="text-xs text-muted-foreground">{tutorial.description}</p>
-                    </div>
+              {/* Card de Suporte VIP */}
+              <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group border border-slate-800">
+                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all"></div>
+
+                <h3 className="text-lg font-bold mb-2 flex items-center gap-2 relative z-10">
+                  <MessageCircle className="h-5 w-5 text-green-400" />
+                  Precisa de um humano?
+                </h3>
+                <p className="text-slate-400 text-sm mb-6 relative z-10 leading-relaxed">
+                  Se não encontrou a resposta aqui, nosso time de suporte está online no WhatsApp.
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-[#25D366] hover:bg-[#1da851] text-white border-0 font-bold shadow-lg shadow-green-900/20 relative z-10 h-12"
+                >
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Preciso de ajuda com a TrustPage`} target="_blank">
+                    Falar no WhatsApp
+                  </a>
+                </Button>
+              </div>
+            </div>
+
+            {/* Coluna Direita: Categorias e FAQs */}
+            <div className="lg:col-span-8">
+              {filteredCategories.length === 0 ? (
+                <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+                  <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-8 w-8 text-slate-400" />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">Nenhum resultado encontrado</h3>
+                  <p className="text-slate-500 max-w-xs mx-auto">
+                    Não encontramos nada para "{searchQuery}". Tente palavras mais gerais.
+                  </p>
+                  <Button variant="link" onClick={() => setSearchQuery("")} className="mt-4 text-blue-600">
+                    Limpar filtros
+                  </Button>
+                </div>
+              ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <ScrollArea className="w-full pb-2 mb-2">
+                    <TabsList className="flex w-max h-auto p-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
+                      {filteredCategories.map((category) => (
+                        <TabsTrigger
+                          key={category.id}
+                          value={category.id}
+                          id={`${category.id}-tab`}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:font-semibold data-[state=active]:shadow-none transition-all text-slate-600"
+                        >
+                          {category.icon}
+                          <span>{category.label}</span>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </ScrollArea>
+
+                  {filteredCategories.map((category) => (
+                    <TabsContent
+                      key={category.id}
+                      value={category.id}
+                      className="mt-4 focus-visible:outline-none animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    >
+                      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/30">
+                          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            {category.icon}
+                            {category.label}
+                          </h2>
+                          {category.description && (
+                            <p className="text-slate-500 text-sm mt-1 ml-6">{category.description}</p>
+                          )}
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                          <Accordion type="single" collapsible className="w-full">
+                            {category.faqs.map((faq, index) => (
+                              <AccordionItem key={index} value={`item-${index}`} className="border-0">
+                                <AccordionTrigger className="px-6 py-4 hover:bg-slate-50 transition-colors hover:no-underline group">
+                                  <span className="font-medium text-slate-700 group-hover:text-blue-700 transition-colors text-left text-base">
+                                    {faq.question}
+                                  </span>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 text-slate-600 leading-relaxed text-base bg-slate-50/50">
+                                  {faq.answer}
+                                </AccordionContent>
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto px-4 pb-12">
-          <h2 className="text-xl font-bold text-foreground mb-6">Perguntas Frequentes</h2>
-          
-          {filteredCategories.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <p className="text-muted-foreground text-lg">
-                  Nenhum resultado encontrado para "{searchQuery}"
-                </p>
-                <Button
-                  variant="link"
-                  onClick={() => setSearchQuery("")}
-                  className="mt-2"
-                >
-                  Limpar busca
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-8">
-                {filteredCategories.map((category) => (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-white data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-600 shadow-sm transition-all"
-                  >
-                    {category.icon}
-                    <span className="hidden sm:inline">{category.label}</span>
-                    {searchQuery && (
-                      <span className="ml-1 text-xs bg-blue-100 text-blue-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white px-2 py-0.5 rounded-full">
-                        {category.faqs.length}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {filteredCategories.map((category) => (
-                <TabsContent key={category.id} value={category.id} className="mt-0">
-                  <Card className="shadow-lg border-0">
-                    <CardContent className="p-0">
-                      <Accordion type="single" collapsible className="w-full">
-                        {category.faqs.map((faq, index) => (
-                          <AccordionItem
-                            key={index}
-                            value={`item-${index}`}
-                            className="border-b last:border-0"
-                          >
-                            <AccordionTrigger className="px-6 py-4 text-left hover:no-underline hover:bg-muted/50 transition-colors">
-                              <span className="font-medium text-foreground">
-                                {faq.question}
-                              </span>
-                            </AccordionTrigger>
-                            <AccordionContent className="px-6 pb-4 text-muted-foreground leading-relaxed">
-                              {faq.answer}
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              ))}
-            </Tabs>
-          )}
-
-          {/* Support Footer */}
-          <Card className="mt-12 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg">
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Ainda precisa de ajuda?
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Nossa equipe está pronta para te atender
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  asChild
-                  className="bg-[#25D366] hover:bg-[#1da851] text-white gap-2"
-                >
-                  <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=Olá! Preciso de ajuda com minha TrustPage.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                    Chamar no WhatsApp
-                  </a>
-                </Button>
-                
-                <Button
-                  asChild
-                  variant="outline"
-                  className="gap-2 border-green-300 text-green-700 hover:bg-green-100"
-                >
-                  <a href="mailto:suporte@trustpage.com">
-                    <Mail className="h-5 w-5" />
-                    Enviar E-mail
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Floating WhatsApp Button */}
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=Olá! Preciso de ajuda com minha TrustPage.`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#1da851] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </a>
       </div>
 
-      {/* GoDaddy Tutorial Modal */}
+      {/* --- MODAL GODADDY OTIMIZADO --- */}
       <Dialog open={godaddyModalOpen} onOpenChange={setGodaddyModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Globe className="h-6 w-6 text-primary" />
-              Configurando DNS na GoDaddy
-            </DialogTitle>
-            <DialogDescription>
-              Siga o passo a passo para apontar seu domínio GoDaddy para sua TrustPage
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+          <div className="bg-slate-50 p-6 border-b border-slate-200">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-2xl">
+                <div className="bg-black p-2 rounded-lg text-white">
+                  <Globe className="h-6 w-6" />
+                </div>
+                Configurando DNS na GoDaddy
+              </DialogTitle>
+              <DialogDescription className="text-base mt-2">
+                Não se assuste, é apenas copiar e colar. Siga os 3 passos abaixo.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <div className="space-y-6 py-4">
-            {/* Step 1 */}
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+          <div className="p-6 space-y-8">
+            {/* Passo 1 */}
+            <div className="flex gap-4 relative">
+              <div className="absolute left-4 top-10 bottom-[-2rem] w-0.5 bg-slate-200 last:hidden"></div>
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold shadow-lg z-10">
                 1
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-foreground mb-2">Acesse sua conta GoDaddy</h4>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Faça login em <a href="https://godaddy.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">godaddy.com</a> e 
-                  vá em <strong>"Meus Produtos"</strong> → <strong>"DNS"</strong> do seu domínio.
+              <div className="flex-1 pt-1">
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Acesse a Zona de DNS</h4>
+                <p className="text-slate-600 mb-4">
+                  Faça login na GoDaddy, vá em <strong>Meus Produtos</strong>, encontre seu domínio e clique em{" "}
+                  <strong>DNS</strong>.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="gap-2"
-                >
-                  <a href="https://dcc.godaddy.com/manage-dns" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" asChild className="gap-2 border-slate-300">
+                  <a href="https://dcc.godaddy.com/manage-dns" target="_blank">
                     <ExternalLink className="h-4 w-4" />
-                    Abrir GoDaddy DNS
+                    Abrir GoDaddy em nova aba
                   </a>
                 </Button>
               </div>
             </div>
 
-            {/* Step 2 */}
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+            {/* Passo 2 - Principal */}
+            <div className="flex gap-4 relative">
+              <div className="absolute left-4 top-10 bottom-[-2rem] w-0.5 bg-slate-200"></div>
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-200 z-10">
                 2
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-foreground mb-2">Adicione o Registro A</h4>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Clique em <strong>"Adicionar"</strong> e crie um registro tipo <strong>"A"</strong> com:
-                </p>
-                <div className="bg-muted rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-muted-foreground block">Nome</span>
-                      <span className="font-mono font-semibold">@</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy("@", "name")}
-                    >
-                      {copiedField === "name" ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                    </Button>
+              <div className="flex-1 pt-1">
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Configure o Registro A (Principal)</h4>
+                <p className="text-slate-600 mb-4">Clique em "Adicionar" e preencha exatamente assim:</p>
+
+                <div className="bg-slate-100 rounded-xl p-4 border border-slate-200 space-y-3 font-mono text-sm">
+                  {/* Tabela Fake */}
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">Tipo</div>
+                    <div className="col-span-9 font-bold text-slate-900">A</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-muted-foreground block">Valor (IP)</span>
-                      <span className="font-mono font-semibold text-primary">{VERCEL_IP}</span>
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">Nome</div>
+                    <div className="col-span-7 font-bold text-slate-900">@</div>
+                    <div className="col-span-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:bg-slate-100"
+                        onClick={() => handleCopy("@", "name")}
+                      >
+                        {copiedField === "name" ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4 text-slate-400" />
+                        )}
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy(VERCEL_IP, "ip")}
-                    >
-                      {copiedField === "ip" ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                    </Button>
                   </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground block">TTL</span>
-                    <span className="font-mono">600 (ou "Automático")</span>
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm ring-1 ring-blue-500/20">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">Valor</div>
+                    <div className="col-span-7 font-bold text-blue-600">{VERCEL_IP}</div>
+                    <div className="col-span-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:bg-blue-50"
+                        onClick={() => handleCopy(VERCEL_IP, "ip")}
+                      >
+                        {copiedField === "ip" ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4 text-blue-500" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Step 3 */}
+            {/* Passo 3 - CNAME */}
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold shadow-lg z-10">
                 3
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-foreground mb-2">Configure o registro WWW</h4>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Adicione também um registro A para <strong>www.seudominio.com</strong>:
+              <div className="flex-1 pt-1">
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Configure o CNAME (Para www)</h4>
+                <p className="text-slate-600 mb-4">
+                  Adicione mais um registro para garantir que <strong>www.seusite.com</strong> funcione.
                 </p>
-                <div className="bg-muted rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-muted-foreground block">Nome</span>
-                      <span className="font-mono font-semibold">www</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy("www", "www")}
-                    >
-                      {copiedField === "www" ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                    </Button>
+                <div className="bg-slate-100 rounded-xl p-4 border border-slate-200 font-mono text-sm">
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">Nome</div>
+                    <div className="col-span-9 font-bold text-slate-900">www</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-muted-foreground block">Valor (IP)</span>
-                      <span className="font-mono font-semibold text-primary">{VERCEL_IP}</span>
+                  <div className="mt-2 grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">Valor</div>
+                    <div className="col-span-7 font-bold text-slate-900">cname.vercel-dns.com</div>
+                    <div className="col-span-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleCopy("cname.vercel-dns.com", "cname")}
+                      >
+                        {copiedField === "cname" ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy(VERCEL_IP, "ip-www")}
-                    >
-                      {copiedField === "ip-www" ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                    </Button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Warning */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-amber-800 text-sm flex items-start gap-2">
-                <span className="text-lg">⏱️</span>
-                <span>
-                  <strong>Importante:</strong> A propagação DNS pode levar até <strong>2 horas</strong>. 
-                  Após configurar, aguarde e verifique se seu domínio está funcionando.
-                </span>
-              </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
+              <AlertTriangle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h5 className="font-bold text-amber-800 text-sm">Importante: TTL</h5>
+                <p className="text-amber-700 text-sm mt-1 leading-relaxed">
+                  Se a GoDaddy perguntar o <strong>TTL</strong>, selecione <strong>600 segundos</strong> ou{" "}
+                  <strong>1/2 Hora</strong>. <br />
+                  Depois de salvar, aguarde até 2 horas para propagar.
+                </p>
+              </div>
             </div>
+          </div>
 
-            {/* Final Actions */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                className="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white gap-2"
-                asChild
-              >
-                <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=Olá! Preciso de ajuda para configurar meu domínio GoDaddy.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Preciso de ajuda
-                </a>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setGodaddyModalOpen(false)}
-              >
-                Entendi
-              </Button>
-            </div>
+          <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end">
+            <Button size="lg" onClick={() => setGodaddyModalOpen(false)}>
+              Entendi, vou configurar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Other DNS Providers Modal */}
+      {/* Modal Outros DNS (Simplificado) */}
       <Dialog open={otherDnsModalOpen} onOpenChange={setOtherDnsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Globe className="h-6 w-6 text-primary" />
-              Configurando DNS em Outros Provedores
-            </DialogTitle>
+            <DialogTitle>Outros Provedores (Registro.br, Hostgator)</DialogTitle>
             <DialogDescription>
-              Instruções gerais para Registro.br, Hostgator, Cloudflare e outros
+              A lógica é sempre a mesma: Você precisa criar um Registro A apontando para nosso IP.
             </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <h4 className="font-semibold text-foreground mb-2">Configuração Universal</h4>
-              <p className="text-muted-foreground text-sm mb-4">
-                Independente do provedor, você precisa criar os seguintes registros:
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-slate-100 rounded-lg">
+              <p className="font-bold text-slate-900 mb-1">Onde ir:</p>
+              <p className="text-sm text-slate-600">
+                Procure por "Zona de DNS", "Editor de Zona" ou "Configuração de DNS" no painel da sua hospedagem.
               </p>
-              
-              <div className="space-y-4">
-                <div className="bg-background rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">Registro A (domínio principal)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Nome:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono bg-muted px-2 py-1 rounded">@</span>
-                        <Button variant="ghost" size="sm" onClick={() => handleCopy("@", "other-name")}>
-                          {copiedField === "other-name" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Valor:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono bg-muted px-2 py-1 rounded text-primary">{VERCEL_IP}</span>
-                        <Button variant="ghost" size="sm" onClick={() => handleCopy(VERCEL_IP, "other-ip")}>
-                          {copiedField === "other-ip" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border p-3 rounded-lg">
+                <div>
+                  <p className="text-xs text-slate-500 uppercase font-bold">Registro A (Raiz)</p>
+                  <p className="font-mono text-lg text-blue-600 font-bold">{VERCEL_IP}</p>
                 </div>
-
-                <div className="bg-background rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">Registro A (www)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Nome:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono bg-muted px-2 py-1 rounded">www</span>
-                        <Button variant="ghost" size="sm" onClick={() => handleCopy("www", "other-www")}>
-                          {copiedField === "other-www" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Valor:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono bg-muted px-2 py-1 rounded text-primary">{VERCEL_IP}</span>
-                        <Button variant="ghost" size="sm" onClick={() => handleCopy(VERCEL_IP, "other-ip2")}>
-                          {copiedField === "other-ip2" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <Button variant="ghost" onClick={() => handleCopy(VERCEL_IP, "ip-other")}>
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
-            </div>
-
-            {/* Provider-specific tips */}
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="registro-br">
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="font-semibold">Registro.br</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-2">
-                    <li>Acesse registro.br e faça login</li>
-                    <li>Clique no domínio desejado</li>
-                    <li>Vá em "DNS" → "Configurar zona"</li>
-                    <li>Adicione os registros A conforme acima</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="hostgator">
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="font-semibold">Hostgator</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-2">
-                    <li>Acesse o Portal do Cliente Hostgator</li>
-                    <li>Vá em "Domínios" → "Zona DNS"</li>
-                    <li>Edite ou crie os registros A</li>
-                    <li>Salve as alterações</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="cloudflare">
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="font-semibold">Cloudflare</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-2">
-                    <li>Acesse dash.cloudflare.com</li>
-                    <li>Selecione seu domínio</li>
-                    <li>Vá em "DNS" → "Records"</li>
-                    <li>Adicione registros A (desative o proxy/nuvem laranja)</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            {/* Warning */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-amber-800 text-sm flex items-start gap-2">
-                <span className="text-lg">⏱️</span>
-                <span>
-                  A propagação DNS pode levar até <strong>2 horas</strong>. Aguarde antes de testar.
-                </span>
-              </p>
-            </div>
-
-            {/* Final Actions */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                className="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white gap-2"
-                asChild
-              >
-                <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=Olá! Preciso de ajuda para configurar meu domínio.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Preciso de ajuda
-                </a>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setOtherDnsModalOpen(false)}
-              >
-                Entendi
-              </Button>
             </div>
           </div>
         </DialogContent>
