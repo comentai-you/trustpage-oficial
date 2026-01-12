@@ -375,7 +375,7 @@ const OfertaPage = () => {
                 <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
                 <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included={false}>IA de Copywriting</FeatureItem>
-                <FeatureItem included={false} warning>⚠️ Proibido anunciar no Ads sem domínio</FeatureItem>
+                <FeatureItem included={false}>Anunciar no Ads sem domínio</FeatureItem>
               </ul>
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">

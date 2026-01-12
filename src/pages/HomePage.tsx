@@ -405,8 +405,8 @@ const HomePage = () => {
                       <span className="text-foreground text-sm sm:text-base text-muted-foreground">Marca d'água no rodapé</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
-                      <X className="w-4 sm:w-5 h-4 sm:h-5 text-destructive mt-0.5 flex-shrink-0" />
-                      <span className="text-destructive text-sm sm:text-base font-medium">Proibido anunciar no Ads sem domínio</span>
+                      <X className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground/60 text-sm sm:text-base line-through">Anunciar no Ads sem domínio</span>
                     </li>
                   </ul>
                   
