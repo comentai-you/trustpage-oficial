@@ -372,10 +372,10 @@ const OfertaPage = () => {
                 <FeatureItem included>Delay no Botão CTA</FeatureItem>
                 <FeatureItem included>Página de Vendas completa</FeatureItem>
                 <FeatureItem included muted>Marca d'água no rodapé</FeatureItem>
+                <FeatureItem included muted>Anunciar no Ads sem domínio</FeatureItem>
                 <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
                 <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included={false}>IA de Copywriting</FeatureItem>
-                <FeatureItem included={false} noStrike>Anunciar no Ads sem domínio</FeatureItem>
               </ul>
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
