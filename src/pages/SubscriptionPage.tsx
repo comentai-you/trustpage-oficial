@@ -83,8 +83,8 @@ const SubscriptionPage = () => {
       case 'pro':
         return {
           name: 'PRO',
-          price: 'R$ 79,90/mês',
-          pages: 8,
+          price: 'R$ 97,00/mês',
+          pages: 10,
           domains: 3,
           icon: Crown,
           color: 'text-primary',
@@ -95,7 +95,7 @@ const SubscriptionPage = () => {
           name: 'Essencial',
           price: 'R$ 39,90/mês',
           pages: 2,
-          domains: 1,
+          domains: 0,
           icon: Sparkles,
           color: 'text-primary',
           bgColor: 'bg-primary/10',
@@ -216,10 +216,12 @@ const SubscriptionPage = () => {
                   <Check className="w-5 h-5 text-success" />
                   <span>Proteção contra bloqueios</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-success" />
-                  <span>Pixel do Facebook/Google ADS</span>
-                </li>
+                {(profile?.plan_type === 'pro' || profile?.plan_type === 'pro_yearly') && (
+                  <li className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-success" />
+                    <span>Pixel do Facebook/Google ADS</span>
+                  </li>
+                )}
                 {plan.domains > 0 && (
                   <li className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-success" />
@@ -282,9 +284,9 @@ const SubscriptionPage = () => {
                       <Crown className="w-5 h-5 text-primary" />
                       <h4 className="font-semibold">PRO</h4>
                     </div>
-                    <p className="text-2xl font-bold">R$ 79,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
+                    <p className="text-2xl font-bold">R$ 97,00<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
                     <ul className="text-sm space-y-1 text-muted-foreground">
-                      <li>• 8 páginas ativas</li>
+                      <li>• 10 páginas ativas</li>
                       <li>• 3 domínios personalizados</li>
                       <li>• Zero marca d'água</li>
                       <li>• Suporte prioritário</li>

@@ -87,8 +87,8 @@ const UpgradeModal = ({ open, onOpenChange, feature }: UpgradeModalProps) => {
               <Crown className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-sm">Plano Essencial</p>
-              <p className="text-xs text-muted-foreground">A partir de R$ 39,90/mês</p>
+              <p className="font-semibold text-foreground text-sm">Plano PRO</p>
+              <p className="text-xs text-muted-foreground">A partir de R$ 97,00/mês</p>
             </div>
           </div>
         </div>

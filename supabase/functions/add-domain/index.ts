@@ -67,16 +67,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (profile.subscription_status === 'free' || profile.plan_type === 'free') {
+    // Domínio só disponível para planos PRO
+    const proPlanTypes = ['pro', 'pro_yearly', 'elite'];
+    if (!proPlanTypes.includes(profile.plan_type)) {
       return new Response(
-        JSON.stringify({ error: 'Domínios personalizados não estão disponíveis no plano Gratuito. Faça upgrade para um plano pago.' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (profile.subscription_status === 'trial') {
-      return new Response(
-        JSON.stringify({ error: 'Domínios personalizados não estão disponíveis no plano Trial. Faça upgrade para um plano pago.' }),
+        JSON.stringify({ error: 'Domínios personalizados estão disponíveis apenas no plano PRO. Faça upgrade para conectar seu domínio.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

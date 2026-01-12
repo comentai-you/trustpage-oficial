@@ -50,8 +50,9 @@ const isLegalPage = (slug: string) => LEGAL_PAGE_SLUGS.includes(slug);
 const getMaxPages = (planType: string) => {
   switch (planType) {
     case 'pro':
+    case 'pro_yearly':
     case 'elite':
-      return 8;
+      return 10;
     case 'essential':
       return 2;
     default:

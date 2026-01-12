@@ -426,7 +426,7 @@ const HomePage = () => {
                 <div className="pt-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Pro</h3>
                   <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
-                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 79,90</span>
+                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 97,00</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
                   
@@ -434,7 +434,7 @@ const HomePage = () => {
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">
-                        Crie até <span className="font-bold">8 Páginas</span> Ativas
+                        Crie até <span className="font-bold">10 Páginas</span> Ativas
                       </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
