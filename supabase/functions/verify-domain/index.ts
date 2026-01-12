@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface VerifyDomainRequest {
   domain?: string;
+  domainId?: string;
 }
 
 type VercelVerificationRecord = {
@@ -84,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('subscription_status, plan_type, custom_domain')
+      .select('subscription_status, plan_type')
       .eq('id', user.id)
       .single();
 
@@ -113,21 +114,53 @@ Deno.serve(async (req) => {
     }
 
     let requestedDomain: string | undefined;
+    let requestedDomainId: string | undefined;
     try {
       const body: VerifyDomainRequest = await req.json();
       requestedDomain = body?.domain;
+      requestedDomainId = body?.domainId;
     } catch {
       // body optional
     }
 
-    const domain = (requestedDomain || profile.custom_domain || '').trim().toLowerCase();
+    // Get domain from user_domains table
+    let domainRecord: { id: string; domain: string; is_primary: boolean } | null = null;
 
-    if (!domain) {
+    if (requestedDomainId) {
+      const { data } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('id', requestedDomainId)
+        .eq('user_id', user.id)
+        .single();
+      domainRecord = data;
+    } else if (requestedDomain) {
+      const { data } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('domain', requestedDomain.toLowerCase())
+        .eq('user_id', user.id)
+        .single();
+      domainRecord = data;
+    } else {
+      // Get primary domain
+      const { data } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .single();
+      domainRecord = data;
+    }
+
+    if (!domainRecord) {
       return new Response(JSON.stringify({ error: 'Nenhum domínio para verificar' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const domain = domainRecord.domain;
 
     const vercelToken = Deno.env.get('VERCEL_API_TOKEN');
     const projectId = Deno.env.get('VERCEL_PROJECT_ID');
@@ -227,13 +260,22 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { error: updateError } = await supabaseAdmin
-      .from('profiles')
-      .update({ domain_verified: verified })
-      .eq('id', user.id);
+    // Update user_domains table
+    const { error: updateDomainError } = await supabaseAdmin
+      .from('user_domains')
+      .update({ verified })
+      .eq('id', domainRecord.id);
 
-    if (updateError) {
-      console.error('Error updating domain_verified:', updateError);
+    if (updateDomainError) {
+      console.error('Error updating user_domains verified status:', updateDomainError);
+    }
+
+    // Also update profiles for backwards compatibility (if this is the primary domain)
+    if (domainRecord.is_primary) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ domain_verified: verified })
+        .eq('id', user.id);
     }
 
     // Determine if this is a subdomain
@@ -260,6 +302,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         domain,
+        domainId: domainRecord.id,
         verified,
         misconfigured: vercelData.misconfigured ?? null,
         verification: vercelData.verification ?? null,

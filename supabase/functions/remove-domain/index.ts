@@ -5,6 +5,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface RemoveDomainRequest {
+  domain?: string;
+  domainId?: string;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -35,29 +40,67 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get user's current domain
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('custom_domain')
-      .eq('id', user.id)
-      .single();
+    // Parse request body to get domain or domainId
+    let domainToRemove: string | null = null;
+    let domainId: string | null = null;
 
-    if (profileError || !profile) {
-      console.error('Profile error:', profileError);
-      return new Response(
-        JSON.stringify({ error: 'Perfil não encontrado' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    try {
+      const body: RemoveDomainRequest = await req.json();
+      domainToRemove = body?.domain || null;
+      domainId = body?.domainId || null;
+    } catch {
+      // If no body, we'll look for the primary domain
     }
 
-    const domain = profile.custom_domain;
+    // Get domain from user_domains table
+    let domainRecord: { id: string; domain: string; is_primary: boolean } | null = null;
 
-    if (!domain) {
+    if (domainId) {
+      // Get by ID
+      const { data, error } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('id', domainId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && data) {
+        domainRecord = data;
+      }
+    } else if (domainToRemove) {
+      // Get by domain name
+      const { data, error } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('domain', domainToRemove.toLowerCase())
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && data) {
+        domainRecord = data;
+      }
+    } else {
+      // Get primary domain (for backwards compatibility)
+      const { data, error } = await supabase
+        .from('user_domains')
+        .select('id, domain, is_primary')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .single();
+      
+      if (!error && data) {
+        domainRecord = data;
+      }
+    }
+
+    if (!domainRecord) {
       return new Response(
-        JSON.stringify({ error: 'Nenhum domínio configurado' }),
+        JSON.stringify({ error: 'Nenhum domínio encontrado para remover' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const domain = domainRecord.domain;
 
     // Get Vercel credentials
     const vercelToken = Deno.env.get('VERCEL_API_TOKEN');
@@ -94,29 +137,61 @@ Deno.serve(async (req) => {
       const vercelData = await vercelResponse.json().catch(() => ({}));
       console.error('Vercel remove error:', vercelData);
       
-      // Even if Vercel fails (e.g., domain not found), we still clear the profile
-      // so the user can add a new domain
-      console.log('Proceeding to clear profile despite Vercel error');
+      // Even if Vercel fails (e.g., domain not found), we still delete from our DB
+      console.log('Proceeding to delete from database despite Vercel error');
     }
 
-    // Clear domain from user's profile using service role
+    // Delete from user_domains table using service role
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { error: updateError } = await supabaseAdmin
-      .from('profiles')
-      .update({ 
-        custom_domain: null,
-        domain_verified: false 
-      })
-      .eq('id', user.id);
+    const { error: deleteError } = await supabaseAdmin
+      .from('user_domains')
+      .delete()
+      .eq('id', domainRecord.id);
 
-    if (updateError) {
-      console.error('Error clearing domain from profile:', updateError);
+    if (deleteError) {
+      console.error('Error deleting domain from user_domains:', deleteError);
       return new Response(
-        JSON.stringify({ error: 'Erro ao limpar domínio do perfil' }),
+        JSON.stringify({ error: 'Erro ao remover domínio do banco de dados' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // If this was the primary domain, update the next domain as primary or clear profiles
+    if (domainRecord.is_primary) {
+      // Check if there are other domains
+      const { data: remainingDomains } = await supabaseAdmin
+        .from('user_domains')
+        .select('id, domain')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (remainingDomains && remainingDomains.length > 0) {
+        // Make the next domain primary
+        await supabaseAdmin
+          .from('user_domains')
+          .update({ is_primary: true })
+          .eq('id', remainingDomains[0].id);
+
+        // Update profiles with new primary domain
+        await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            custom_domain: remainingDomains[0].domain,
+            domain_verified: false 
+          })
+          .eq('id', user.id);
+      } else {
+        // No domains left, clear profiles
+        await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            custom_domain: null,
+            domain_verified: false 
+          })
+          .eq('id', user.id);
+      }
     }
 
     console.log(`Domain ${domain} removed successfully for user ${user.id}`);

@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check user's plan - only Essential and Pro can add domains (not Trial)
+    // Check user's plan - only PRO can add domains
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('subscription_status, plan_type')
@@ -76,6 +76,30 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Check domain limits using the new user_domains table
+    const { data: existingDomains, error: domainsError } = await supabase
+      .from('user_domains')
+      .select('id')
+      .eq('user_id', user.id);
+
+    if (domainsError) {
+      console.error('Error checking existing domains:', domainsError);
+    }
+
+    const domainCount = existingDomains?.length || 0;
+    const maxDomains = profile.plan_type === 'elite' ? 10 : 3; // PRO = 3, Elite = 10
+
+    if (domainCount >= maxDomains) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Você atingiu o limite de ${maxDomains} domínios para o seu plano. Remova um domínio existente para adicionar outro.`,
+          currentCount: domainCount,
+          maxDomains: maxDomains
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Parse request body
     const { domain }: AddDomainRequest = await req.json();
 
@@ -86,9 +110,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    const normalizedDomain = domain.trim().toLowerCase();
+
     // Validate domain format
     const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(domain)) {
+    if (!domainRegex.test(normalizedDomain)) {
       return new Response(
         JSON.stringify({ error: 'Formato de domínio inválido' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -108,7 +134,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Adding domain ${domain} to Vercel project ${projectId}`);
+    console.log(`Adding domain ${normalizedDomain} to Vercel project ${projectId}`);
 
     // Build Vercel API URL
     let vercelUrl = `https://api.vercel.com/v9/projects/${projectId}/domains`;
@@ -123,7 +149,7 @@ Deno.serve(async (req) => {
         'Authorization': `Bearer ${vercelToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: domain }),
+      body: JSON.stringify({ name: normalizedDomain }),
     });
 
     const vercelData: VercelDomainResponse = await vercelResponse.json();
@@ -158,31 +184,53 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Success! Save domain to user's profile using service role
+    // Success! Save domain to user_domains table using service role
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { error: updateError } = await supabaseAdmin
-      .from('profiles')
-      .update({ 
-        custom_domain: domain,
-        domain_verified: false 
-      })
-      .eq('id', user.id);
+    // Check if this is the first domain (make it primary)
+    const isPrimary = domainCount === 0;
 
-    if (updateError) {
-      console.error('Error saving domain to profile:', updateError);
-      // Domain was added to Vercel but we couldn't save it - still return success
-      // but log the error for debugging
+    const { error: insertError } = await supabaseAdmin
+      .from('user_domains')
+      .insert({ 
+        user_id: user.id,
+        domain: normalizedDomain,
+        verified: false,
+        is_primary: isPrimary
+      });
+
+    if (insertError) {
+      console.error('Error saving domain to user_domains:', insertError);
+      // Check if it's a unique constraint violation
+      if (insertError.code === '23505') {
+        return new Response(
+          JSON.stringify({ error: 'Este domínio já está cadastrado.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
-    console.log(`Domain ${domain} added successfully for user ${user.id}`);
+    // Also update the profiles table for backwards compatibility (primary domain)
+    if (isPrimary) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ 
+          custom_domain: normalizedDomain,
+          domain_verified: false 
+        })
+        .eq('id', user.id);
+    }
+
+    console.log(`Domain ${normalizedDomain} added successfully for user ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        domain: domain,
+        domain: normalizedDomain,
         message: 'Domínio adicionado com sucesso! Configure seu DNS conforme as instruções.',
+        currentCount: domainCount + 1,
+        maxDomains: maxDomains,
         dnsInstructions: {
           type: 'CNAME',
           name: 'www',
