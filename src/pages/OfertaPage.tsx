@@ -375,6 +375,7 @@ const OfertaPage = () => {
                 <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
                 <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included={false}>IA de Copywriting</FeatureItem>
+                <FeatureItem included={false} warning>⚠️ Proibido anunciar no Ads sem domínio</FeatureItem>
               </ul>
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
@@ -569,21 +570,24 @@ interface FeatureItemProps {
   included: boolean;
   icon?: React.ReactNode;
   muted?: boolean;
+  warning?: boolean;
 }
 
-const FeatureItem = ({ children, included, icon, muted }: FeatureItemProps) => (
+const FeatureItem = ({ children, included, icon, muted, warning }: FeatureItemProps) => (
   <li className="flex items-center gap-3 text-sm">
     {included ? (
       icon || <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
     ) : (
-      <X className="w-5 h-5 text-muted-foreground/50 flex-shrink-0" />
+      <X className={`w-5 h-5 flex-shrink-0 ${warning ? "text-destructive" : "text-muted-foreground/50"}`} />
     )}
     <span className={
-      !included 
-        ? "text-muted-foreground/60 line-through" 
-        : muted 
-          ? "text-muted-foreground" 
-          : "text-foreground"
+      warning
+        ? "text-destructive font-medium"
+        : !included 
+          ? "text-muted-foreground/60 line-through" 
+          : muted 
+            ? "text-muted-foreground" 
+            : "text-foreground"
     }>
       {children}
     </span>
