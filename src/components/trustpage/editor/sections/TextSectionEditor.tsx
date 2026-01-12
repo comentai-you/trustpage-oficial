@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import DOMPurify from "isomorphic-dompurify";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,10 +190,20 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
     sel.addRange(range);
   }, []);
 
+  // Sanitize HTML to prevent XSS attacks
+  const sanitizeHtml = useCallback((html: string): string => {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'a', 'span', 'br', 'b', 'i'],
+      ALLOWED_ATTR: ['href', 'data-accent-color', 'style', 'target', 'rel'],
+      ALLOW_DATA_ATTR: true,
+    });
+  }, []);
+
   const updateContent = useCallback(() => {
     if (!editorRef.current) return;
-    onChange({ ...data, content: editorRef.current.innerHTML });
-  }, [data, onChange]);
+    const sanitizedContent = sanitizeHtml(editorRef.current.innerHTML);
+    onChange({ ...data, content: sanitizedContent });
+  }, [data, onChange, sanitizeHtml]);
 
   const runCommand = useCallback(
     (command: string, value?: string) => {
