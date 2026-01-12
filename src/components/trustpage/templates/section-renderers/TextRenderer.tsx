@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import { TextSection } from "@/types/section-builder";
 
 interface TextRendererProps {
@@ -13,6 +14,14 @@ const applyAccentColors = (html: string): string => {
     /<span\s+data-accent-color="([^"]+)">/gi,
     '<span style="color: $1">'
   );
+};
+
+// Sanitize HTML to prevent XSS attacks on public pages
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'a', 'span', 'br', 'b', 'i'],
+    ALLOWED_ATTR: ['href', 'style', 'target', 'rel'],
+  });
 };
 
 const TextRenderer = ({ data, textColor }: TextRendererProps) => {
@@ -58,7 +67,7 @@ const TextRenderer = ({ data, textColor }: TextRendererProps) => {
           id={scopeId}
           className="rich-text-content"
           style={{ color: resolvedTextColor }}
-          dangerouslySetInnerHTML={{ __html: applyAccentColors(data.content || "") }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(applyAccentColors(data.content || "")) }}
         />
       </div>
 
