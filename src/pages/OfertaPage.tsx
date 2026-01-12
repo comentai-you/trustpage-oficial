@@ -404,8 +404,8 @@ const OfertaPage = () => {
                     <div className="flex items-baseline gap-1 mt-1">
                       <span className="text-5xl font-black text-primary">12x R$ 73,32</span>
                     </div>
-                    <p className="text-base text-muted-foreground mt-1">
-                      ou <span className="font-bold text-foreground">R$ 879,90</span> à vista
+                    <p className="text-base text-green-600 font-semibold mt-1">
+                      Desconto De R$ 285,00
                     </p>
                     <p className="text-sm text-green-600 font-bold mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg inline-block">
                       ✨ Equivale a 3 meses GRÁTIS!
