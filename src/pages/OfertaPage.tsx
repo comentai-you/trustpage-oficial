@@ -169,15 +169,13 @@ const OfertaPage = () => {
 
           {/* Headline */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
-            Crie Páginas de Vendas Profissionais pelo Celular em{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Minutos</span>
+            Transforme seu Conhecimento em{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Vendas Reais</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-            A única ferramenta com <strong className="text-foreground">Hospedagem Vercel</strong>,{" "}
-            <strong className="text-foreground">Anti-Bloqueio</strong> e{" "}
-            <strong className="text-foreground">Inteligência Artificial</strong> inclusas.
+            Infraestrutura de elite para quem vende online. Simples, rápida e 100% focada em conversão.
           </p>
 
           {/* Urgency */}
