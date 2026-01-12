@@ -138,11 +138,11 @@ const OfertaPage = () => {
   };
 
   const basicPrice = isYearly ? "37,49" : "39,90";
-  const proPrice = isYearly ? "73,33" : "79,90";
+  const proPrice = isYearly ? "89,08" : "97,00";
   const basicCheckout = isYearly ? CHECKOUT_URLS.basic_yearly : CHECKOUT_URLS.basic_monthly;
   const proCheckout = isYearly ? CHECKOUT_URLS.pro_yearly : CHECKOUT_URLS.pro_monthly;
   const basicYearlyTotal = "449,90";
-  const proYearlyTotal = "879,90";
+  const proYearlyTotal = "1.069,00";
 
   return (
     <div className="min-h-screen bg-background">
@@ -371,9 +371,9 @@ const OfertaPage = () => {
                 <FeatureItem included>Página VSL com Vídeo</FeatureItem>
                 <FeatureItem included>Delay no Botão CTA</FeatureItem>
                 <FeatureItem included>Página de Vendas completa</FeatureItem>
-                <FeatureItem included>1 Domínio Personalizado</FeatureItem>
-                <FeatureItem included>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included muted>Marca d'água no rodapé</FeatureItem>
+                <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
+                <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included={false}>IA de Copywriting</FeatureItem>
               </ul>
 
@@ -413,7 +413,7 @@ const OfertaPage = () => {
 
               <ul className="space-y-3 mb-8">
                 <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
-                  8 Páginas Ativas
+                  10 Páginas Ativas
                 </FeatureItem>
                 <FeatureItem included>TUDO do Basic +</FeatureItem>
                 <FeatureItem included icon={<Sparkles className="w-4 h-4 text-purple-500" />}>
@@ -423,6 +423,7 @@ const OfertaPage = () => {
                   🛡️ Anti-Bloqueio Avançado
                 </FeatureItem>
                 <FeatureItem included>Conecte até 3 Domínios</FeatureItem>
+                <FeatureItem included>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included icon={<HeadphonesIcon className="w-4 h-4 text-green-500" />}>
                   🚀 Suporte VIP Prioritário
                 </FeatureItem>

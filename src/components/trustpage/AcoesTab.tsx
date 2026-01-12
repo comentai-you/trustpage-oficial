@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 interface AcoesTabProps {
   formData: LandingPageFormData;
   onChange: (data: Partial<LandingPageFormData>) => void;
-  userPlan?: 'essential' | 'elite';
+  userPlan?: 'free' | 'essential' | 'pro' | 'pro_yearly' | 'elite';
 }
 
 const AcoesTab = ({ formData, onChange, userPlan = 'essential' }: AcoesTabProps) => {
-  const isElite = userPlan === 'elite';
+  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly' || userPlan === 'elite';
 
   const handleColorChange = (colorKey: keyof typeof formData.colors, value: string) => {
     onChange({
@@ -148,13 +148,13 @@ const AcoesTab = ({ formData, onChange, userPlan = 'essential' }: AcoesTabProps)
         <div className="space-y-2">
           <Label 
             htmlFor="pix_pixel_id" 
-            className={`flex items-center gap-2 ${!isElite ? 'text-muted-foreground' : ''}`}
+            className={`flex items-center gap-2 ${!isPro ? 'text-muted-foreground' : ''}`}
           >
             <Lock className="w-4 h-4" />
             Pixel de Rastreio
-            {!isElite && (
+            {!isPro && (
               <Badge variant="secondary" className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20">
-                Recurso Elite
+                Recurso PRO
               </Badge>
             )}
           </Label>
@@ -163,12 +163,12 @@ const AcoesTab = ({ formData, onChange, userPlan = 'essential' }: AcoesTabProps)
             placeholder="ID do seu pixel"
             value={formData.pix_pixel_id}
             onChange={(e) => onChange({ pix_pixel_id: e.target.value })}
-            disabled={!isElite}
-            className={!isElite ? 'opacity-50 cursor-not-allowed' : ''}
+            disabled={!isPro}
+            className={!isPro ? 'opacity-50 cursor-not-allowed' : ''}
           />
-          {!isElite && (
+          {!isPro && (
             <p className="text-xs text-amber-600">
-              Faça upgrade para o plano Elite para rastrear conversões
+              Faça upgrade para o plano PRO para rastrear conversões
             </p>
           )}
         </div>

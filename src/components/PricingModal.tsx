@@ -173,7 +173,7 @@ const PricingModal = ({ open, onOpenChange }: PricingModalProps) => {
               </div>
 
               <div className="mb-4">
-                <span className="text-3xl font-bold text-foreground">R$ 79,90</span>
+                <span className="text-3xl font-bold text-foreground">R$ 97,00</span>
                 <span className="text-muted-foreground text-sm">/mês</span>
               </div>
 
