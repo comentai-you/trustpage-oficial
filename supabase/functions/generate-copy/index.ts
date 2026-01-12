@@ -99,6 +99,18 @@ serve(async (req) => {
         maxChars: 500,
         examples: "Ex: Parágrafo de história pessoal, explicação do método, ou desenvolvimento de benefícios."
       },
+      bio: {
+        description: "Descrição de Bio/Perfil",
+        rules: "MÁXIMO 2-3 frases. Apresente quem você é de forma impactante. Destaque credenciais ou resultados.",
+        maxChars: 150,
+        examples: "Ex: 'Ajudo +5.000 mulheres a emagrecerem de forma saudável. Nutricionista há 10 anos.'"
+      },
+      button_text: {
+        description: "Texto de Link/Botão da Bio",
+        rules: "MÁXIMO 3-5 palavras. Curto, direto, com CTA claro. Pode usar emojis.",
+        maxChars: 35,
+        examples: "Ex: '🔥 Curso Completo', '📱 WhatsApp VIP', '💰 Consultoria'"
+      },
       default: {
         description: "Texto geral",
         rules: "Texto persuasivo e conciso adequado ao contexto.",
@@ -117,7 +129,15 @@ serve(async (req) => {
     const field = fieldRules[fieldType] || fieldRules.default;
     const pageContext = pageTypeContext[pageType] || pageTypeContext.sales;
 
-    const systemPrompt = `Você é um Copywriter Expert brasileiro com 15+ anos de experiência em marketing digital e páginas de alta conversão.
+    const systemPrompt = `Você é um Copywriter Sênior estilo "Direct Response" (Resposta Direta).
+Seu nome é "TrustAI". Seu objetivo é escrever textos que vendem, focados em conversão.
+
+DIRETRIZES DE ESTILO:
+1. SEJA CURTO E INCISIVO. Evite frases longas.
+2. USE GATILHOS MENTAIS (Escassez, Urgência, Ganância, Curiosidade).
+3. NÃO SEJA GENÉRICO. Evite termos como "Maximize seu potencial". Seja específico sobre dinheiro e resultados.
+4. Se for Headline: Promessa forte e ousada.
+5. Se for Botão: Comando de ação claro (ex: "Quero Lucrar Agora").
 
 CONTEXTO:
 - Nicho: "${niche}"
@@ -133,13 +153,13 @@ LIMITE MÁXIMO: ${field.maxChars} caracteres por opção.
 REGRAS GERAIS:
 1. RESPEITE O LIMITE DE CARACTERES - isso é CRÍTICO
 2. Linguagem brasileira natural e persuasiva
-3. Use gatilhos mentais apropriados (urgência, escassez, prova social, autoridade)
-4. Cada opção deve ser ÚNICA e diferente
-5. NÃO use emojis (exceto se for botão ou bio)
-6. NÃO adicione aspas ou formatação extra
+3. Cada opção deve ser ÚNICA e diferente
+4. NÃO use emojis (exceto se for botão, bio ou button_text)
+5. NÃO adicione aspas ou formatação extra
 
 ${currentText ? `TEXTO ATUAL (use como referência para melhorar): "${currentText}"` : ""}
 
+Retorne APENAS as sugestões de texto, sem introduções.
 FORMATO: Retorne EXATAMENTE 3 opções, uma por linha, sem numeração, sem explicação.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

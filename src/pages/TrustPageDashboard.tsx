@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -253,6 +253,21 @@ const TrustPageDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Ads Compliance Alert */}
+      <div className="container mx-auto px-4 pt-6">
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-amber-800 dark:text-amber-500">
+              Atenção: Regra Obrigatória para Anúncios (Ads)
+            </h4>
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+              É estritamente <strong>PROIBIDO</strong> rodar tráfego pago (Facebook/Google Ads) direto para URLs terminadas em 'trustpageapp.com'. Isso gera bloqueio imediato. Para anunciar, configure seu <strong>Domínio Próprio</strong> (Disponível no Plano PRO).
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6 sm:py-8">

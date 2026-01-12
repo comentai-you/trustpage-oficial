@@ -138,11 +138,11 @@ const OfertaPage = () => {
   };
 
   const basicPrice = isYearly ? "37,49" : "39,90";
-  const proPrice = isYearly ? "89,08" : "97,00";
+  const proPrice = isYearly ? "73,33" : "97,00";
   const basicCheckout = isYearly ? CHECKOUT_URLS.basic_yearly : CHECKOUT_URLS.basic_monthly;
   const proCheckout = isYearly ? CHECKOUT_URLS.pro_yearly : CHECKOUT_URLS.pro_monthly;
   const basicYearlyTotal = "449,90";
-  const proYearlyTotal = "1.069,00";
+  const proYearlyTotal = "879,90";
 
   return (
     <div className="min-h-screen bg-background">
@@ -405,8 +405,8 @@ const OfertaPage = () => {
                   <span className="text-muted-foreground">/mês</span>
                 </div>
                 {isYearly && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Cobrado anualmente (R$ {proYearlyTotal}/ano)
+                  <p className="text-sm text-green-600 font-semibold mt-1">
+                    💰 Economize R$ 285,00 no plano anual!
                   </p>
                 )}
               </div>
