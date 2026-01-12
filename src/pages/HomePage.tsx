@@ -18,7 +18,7 @@ const HomePage = () => {
             </div>
             <span className="text-lg sm:text-xl font-bold text-foreground">TrustPage</span>
           </Link>
-          
+
           {/* Desktop Menu */}
           <div className="hidden sm:flex items-center gap-3">
             <Link to="/auth?mode=login">
@@ -27,17 +27,12 @@ const HomePage = () => {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button className="gradient-button font-semibold px-4 sm:px-6">
-                Começar Grátis
-              </Button>
+              <Button className="gradient-button font-semibold px-4 sm:px-6">Começar Grátis</Button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <button 
-            className="sm:hidden p-2 text-foreground"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
+          <button className="sm:hidden p-2 text-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -51,9 +46,7 @@ const HomePage = () => {
               </Button>
             </Link>
             <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full gradient-button font-semibold">
-                Começar Grátis
-              </Button>
+              <Button className="w-full gradient-button font-semibold">Começar Grátis</Button>
             </Link>
           </div>
         )}
@@ -64,31 +57,31 @@ const HomePage = () => {
         {/* Decorative elements - smaller on mobile */}
         <div className="absolute top-20 left-0 sm:left-10 w-48 sm:w-72 h-48 sm:h-72 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-0 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-accent/10 rounded-full blur-3xl" />
-        
+
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Text Content */}
             <div className="space-y-6 sm:space-y-8 animate-fade-in text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
                 <Zap className="w-4 h-4 text-primary" />
-                <span className="text-xs sm:text-sm font-medium text-primary">
-                  A evolução do link na bio
-                </span>
+                <span className="text-xs sm:text-sm font-medium text-primary">A evolução do link na bio</span>
               </div>
-              
+
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight text-foreground">
-                Transforme seguidores em{" "}
-                <span className="gradient-text">clientes</span> com uma única página.
+                Transforme seguidores em <span className="gradient-text">clientes</span> com uma única página.
               </h1>
-              
+
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Comece com seu Bio Link Profissional de Graça.{" "}
                 <span className="text-foreground font-medium">Escale com VSLs quando estiver pronto.</span>
               </p>
-              
+
               <div className="flex justify-center lg:justify-start">
                 <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="xl" className="w-full sm:w-auto gradient-button text-lg sm:text-xl px-10 sm:px-14 py-6 sm:py-7 font-bold group shadow-lg">
+                  <Button
+                    size="xl"
+                    className="w-full sm:w-auto gradient-button text-lg sm:text-xl px-10 sm:px-14 py-6 sm:py-7 font-bold group shadow-lg"
+                  >
                     Criar Minha Página Grátis
                     <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -115,7 +108,7 @@ const HomePage = () => {
                 <div className="w-[280px] xl:w-[340px] bg-foreground rounded-[50px] p-3">
                   {/* Dynamic Island */}
                   <div className="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-7 bg-foreground rounded-full z-10" />
-                  
+
                   {/* Screen */}
                   <div className="w-full aspect-[9/19] bg-gradient-to-b from-slate-900 to-slate-800 rounded-[42px] overflow-hidden relative">
                     {/* Mock Content */}
@@ -127,12 +120,12 @@ const HomePage = () => {
                         </div>
                         <p className="mt-2 text-white/70 text-xs xl:text-sm">Método Elite</p>
                       </div>
-                      
+
                       {/* Headline */}
                       <h3 className="text-white text-sm xl:text-lg font-bold text-center leading-tight">
                         Descubra Como Emagrecer 10kg em 30 Dias
                       </h3>
-                      
+
                       {/* Video Placeholder */}
                       <div className="aspect-video bg-slate-700 rounded-xl flex items-center justify-center relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -140,7 +133,7 @@ const HomePage = () => {
                           <Play className="w-5 xl:w-7 h-5 xl:h-7 text-white ml-1" fill="white" />
                         </div>
                       </div>
-                      
+
                       {/* CTA Button */}
                       <button className="w-full py-3 xl:py-4 rounded-xl bg-emerald-500 text-white font-bold text-xs xl:text-sm animate-pulse">
                         QUERO AGORA
@@ -149,9 +142,12 @@ const HomePage = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Floating badges - hidden on smaller screens */}
-              <div className="absolute -left-4 top-1/4 bg-card rounded-xl p-3 shadow-3d border border-border/50 animate-fade-in hidden xl:block" style={{ animationDelay: '0.3s' }}>
+              <div
+                className="absolute -left-4 top-1/4 bg-card rounded-xl p-3 shadow-3d border border-border/50 animate-fade-in hidden xl:block"
+                style={{ animationDelay: "0.3s" }}
+              >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
                     <Zap className="w-4 h-4 text-emerald-600" />
@@ -159,8 +155,11 @@ const HomePage = () => {
                   <span className="text-sm font-semibold text-foreground">Rápido</span>
                 </div>
               </div>
-              
-              <div className="absolute -right-4 bottom-1/3 bg-card rounded-xl p-3 shadow-3d border border-border/50 animate-fade-in hidden xl:block" style={{ animationDelay: '0.5s' }}>
+
+              <div
+                className="absolute -right-4 bottom-1/3 bg-card rounded-xl p-3 shadow-3d border border-border/50 animate-fade-in hidden xl:block"
+                style={{ animationDelay: "0.5s" }}
+              >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                     <Video className="w-4 h-4 text-blue-600" />
@@ -209,8 +208,7 @@ const HomePage = () => {
               Por que TrustPage?
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4">
-              Tudo que você precisa para{" "}
-              <span className="gradient-text">vender mais</span>
+              Tudo que você precisa para <span className="gradient-text">vender mais</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Recursos poderosos projetados para maximizar suas conversões
@@ -279,7 +277,7 @@ const HomePage = () => {
                 </div>
                 <span className="font-semibold text-foreground text-sm sm:text-base">Pix</span>
               </div>
-              
+
               {/* Card */}
               <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-card rounded-lg border border-border">
                 <div className="w-7 sm:w-8 h-7 sm:h-8 rounded bg-blue-600 flex items-center justify-center">
@@ -287,7 +285,7 @@ const HomePage = () => {
                 </div>
                 <span className="font-semibold text-foreground text-sm sm:text-base">Cartão</span>
               </div>
-              
+
               {/* Boleto */}
               <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-card rounded-lg border border-border">
                 <div className="w-7 sm:w-8 h-7 sm:h-8 rounded bg-orange-500 flex items-center justify-center">
@@ -303,15 +301,14 @@ const HomePage = () => {
       {/* Pricing Section */}
       <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-primary/5 rounded-full blur-3xl" />
-        
+
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-10 sm:mb-16">
             <span className="inline-block px-3 sm:px-4 py-2 bg-primary/10 rounded-full text-primary font-semibold text-xs sm:text-sm mb-4">
               Preços simples
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4 px-4">
-              Escolha o plano ideal para{" "}
-              <span className="gradient-text">seu negócio</span>
+              Escolha o plano ideal para <span className="gradient-text">seu negócio</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Comece grátis e faça upgrade quando precisar de mais páginas
@@ -328,7 +325,7 @@ const HomePage = () => {
                     <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 0</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
-                  
+
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -349,9 +346,12 @@ const HomePage = () => {
                       <span className="text-foreground text-sm sm:text-base">Hospedagem Inclusa</span>
                     </li>
                   </ul>
-                  
+
                   <Link to="/auth">
-                    <Button variant="outline" className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2">
+                    <Button
+                      variant="outline"
+                      className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2"
+                    >
                       Começar Grátis
                     </Button>
                   </Link>
@@ -369,14 +369,14 @@ const HomePage = () => {
                     Mais Popular
                   </span>
                 </div>
-                
+
                 <div className="pt-4">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Essencial</h3>
                   <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
                     <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 39,90</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
-                  
+
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -402,14 +402,18 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base text-muted-foreground">Marca d'água no rodapé</span>
+                      <span className="text-foreground text-sm sm:text-base text-muted-foreground">
+                        Marca d'água no rodapé
+                      </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground text-sm sm:text-base">Anunciar no Ads sem domínio</span>
+                      <span className="text-foreground text-sm sm:text-base">
+                        Não Pode Anunciar No Trafego Pago Sem Domínio
+                      </span>
                     </li>
                   </ul>
-                  
+
                   <a href="https://pay.kiwify.com.br/P7MaOJK" target="_blank" rel="noopener noreferrer">
                     <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold">
                       Assinar Essencial
@@ -429,7 +433,7 @@ const HomePage = () => {
                     <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 97,00</span>
                     <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                   </div>
-                  
+
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -447,7 +451,9 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">🛡️ Anti-Bloqueio Avançado</span>
+                      <span className="text-foreground text-sm sm:text-base font-semibold">
+                        🛡️ Anti-Bloqueio Avançado
+                      </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
@@ -459,16 +465,21 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">🚀 Suporte VIP Prioritário</span>
+                      <span className="text-foreground text-sm sm:text-base font-semibold">
+                        🚀 Suporte VIP Prioritário
+                      </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base font-semibold">Zero Marca d'água</span>
                     </li>
                   </ul>
-                  
+
                   <a href="https://pay.kiwify.com.br/ODBfbnA" target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2">
+                    <Button
+                      variant="outline"
+                      className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2"
+                    >
                       Assinar Pro
                     </Button>
                   </a>
@@ -486,19 +497,20 @@ const HomePage = () => {
       <section className="py-16 sm:py-24 mesh-gradient relative overflow-hidden">
         <div className="absolute top-0 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-48 sm:w-72 h-48 sm:h-72 bg-accent/10 rounded-full blur-3xl" />
-        
+
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground px-4">
-              Pronto para{" "}
-              <span className="gradient-text">multiplicar suas vendas?</span>
+              Pronto para <span className="gradient-text">multiplicar suas vendas?</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground px-4">
-              Crie sua primeira página de alta conversão em menos de 2 minutos. 
-              Sem conhecimento técnico necessário.
+              Crie sua primeira página de alta conversão em menos de 2 minutos. Sem conhecimento técnico necessário.
             </p>
             <Link to="/auth">
-              <Button size="lg" className="gradient-button text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 font-bold group">
+              <Button
+                size="lg"
+                className="gradient-button text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 font-bold group"
+              >
                 Criar Minha Página Agora
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -517,13 +529,19 @@ const HomePage = () => {
               </div>
               <span className="text-lg sm:text-xl font-bold">TrustPage</span>
             </div>
-            
+
             <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-primary-foreground/70">
-              <Link to="/termos" className="hover:text-primary-foreground transition-colors">Termos</Link>
-              <Link to="/privacidade" className="hover:text-primary-foreground transition-colors">Privacidade</Link>
-              <Link to="/contato" className="hover:text-primary-foreground transition-colors">Contato</Link>
+              <Link to="/termos" className="hover:text-primary-foreground transition-colors">
+                Termos
+              </Link>
+              <Link to="/privacidade" className="hover:text-primary-foreground transition-colors">
+                Privacidade
+              </Link>
+              <Link to="/contato" className="hover:text-primary-foreground transition-colors">
+                Contato
+              </Link>
             </div>
-            
+
             <p className="text-xs sm:text-sm text-primary-foreground/50">
               © 2025 TrustPage. Todos os direitos reservados.
             </p>

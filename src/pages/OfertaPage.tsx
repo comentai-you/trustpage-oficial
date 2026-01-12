@@ -365,10 +365,8 @@ const OfertaPage = () => {
                 <FeatureItem included>Página VSL com Vídeo</FeatureItem>
                 <FeatureItem included>Delay no Botão CTA</FeatureItem>
                 <FeatureItem included>Página de Vendas completa</FeatureItem>
-                <FeatureItem included muted>
-                  Marca d'água no rodapé
-                </FeatureItem>
-                <FeatureItem included>Anunciar no Ads sem domínio</FeatureItem>
+                <FeatureItem included>Marca d'água no rodapé</FeatureItem>
+                <FeatureItem included>Não Pode Anunciar no Ads sem domínio</FeatureItem>
                 <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
                 <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
                 <FeatureItem included={false}>IA de Copywriting</FeatureItem>
