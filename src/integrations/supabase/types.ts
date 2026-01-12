@@ -211,6 +211,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_primary: boolean
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_primary?: boolean
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_primary?: boolean
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -264,6 +294,7 @@ export type Database = {
         Args: { new_status: string; target_user_id: string }
         Returns: boolean
       }
+      can_add_domain: { Args: { check_user_id: string }; Returns: boolean }
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
       get_legal_page_by_owner: {
         Args: { owner_user_id: string; page_slug: string }
@@ -278,6 +309,10 @@ export type Database = {
           slug: string
           template_type: string
         }[]
+      }
+      get_max_domains_for_plan: {
+        Args: { check_user_id: string }
+        Returns: number
       }
       get_page_owner_plan: {
         Args: { page_id: string }
@@ -317,6 +352,10 @@ export type Database = {
           views: number
           whatsapp_number: string
         }[]
+      }
+      get_user_domain_count: {
+        Args: { check_user_id: string }
+        Returns: number
       }
       has_role: {
         Args: {

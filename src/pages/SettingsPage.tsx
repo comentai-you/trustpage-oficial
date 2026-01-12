@@ -31,6 +31,14 @@ interface UserProfile {
   document_id: string | null;
 }
 
+interface UserDomain {
+  id: string;
+  domain: string;
+  verified: boolean;
+  is_primary: boolean;
+  created_at: string;
+}
+
 type VercelVerificationRecord = {
   type: string;
   domain: string;
@@ -51,6 +59,12 @@ type SslStatus = {
 };
 
 const TRIAL_DAYS = 14;
+
+const getMaxDomainsForPlan = (planType: string): number => {
+  if (planType === 'elite') return 10;
+  if (['pro', 'pro_yearly'].includes(planType)) return 3;
+  return 0;
+};
 
 const SettingsPage = () => {
   const { user, resetPassword } = useAuth();
@@ -86,6 +100,9 @@ const SettingsPage = () => {
   const [dnsInstructions, setDnsInstructions] = useState<DnsInstruction | null>(null);
   const [sslStatus, setSslStatus] = useState<SslStatus | null>(null);
   const [isSubdomain, setIsSubdomain] = useState<boolean>(false);
+  const [userDomains, setUserDomains] = useState<UserDomain[]>([]);
+  const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
+  const [loadingDomains, setLoadingDomains] = useState(false);
 
   const handleVerifyDomain = useCallback(
     async ({
@@ -183,8 +200,37 @@ const SettingsPage = () => {
     if (user) {
       fetchProfile();
       checkLegalPages();
+      fetchUserDomains();
     }
   }, [user]);
+
+  const fetchUserDomains = async () => {
+    if (!user) return;
+    setLoadingDomains(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_domains')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_primary', { ascending: false })
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setUserDomains(data || []);
+      
+      // Set selected domain to primary or first
+      const primary = data?.find(d => d.is_primary);
+      if (primary) {
+        setSelectedDomainId(primary.id);
+      } else if (data && data.length > 0) {
+        setSelectedDomainId(data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching user domains:', error);
+    } finally {
+      setLoadingDomains(false);
+    }
+  };
 
   const checkLegalPages = async () => {
     if (!user) return;
@@ -547,6 +593,13 @@ const SettingsPage = () => {
       return;
     }
 
+    // Check domain limits
+    const maxDomains = getMaxDomainsForPlan(profile?.plan_type || 'free');
+    if (userDomains.length >= maxDomains) {
+      toast.error(`Você atingiu o limite de ${maxDomains} domínios para o seu plano.`);
+      return;
+    }
+
     setAddingDomain(true);
     try {
       const { data, error } = await supabase.functions.invoke('add-domain', {
@@ -561,14 +614,95 @@ const SettingsPage = () => {
       }
 
       toast.success("Domínio adicionado com sucesso!");
-      setProfile(prev => prev ? { ...prev, custom_domain: domainInput.trim().toLowerCase(), domain_verified: false } : null);
-      setShowDnsInstructions(true);
       setDomainInput("");
+      // Refresh domains list
+      await fetchUserDomains();
+      setShowDnsInstructions(true);
     } catch (error: any) {
       console.error("Error adding domain:", error);
       toast.error(error.message || "Erro ao adicionar domínio");
     } finally {
       setAddingDomain(false);
+    }
+  };
+
+  const handleRemoveDomainById = async (domainId: string, domainName: string) => {
+    setRemovingDomain(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('remove-domain', {
+        body: { domainId }
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      toast.success(`Domínio ${domainName} removido com sucesso!`);
+      // Refresh domains list
+      await fetchUserDomains();
+      // Refresh profile to update custom_domain
+      await fetchProfile();
+      
+      if (userDomains.length <= 1) {
+        setShowDnsInstructions(false);
+        setVercelVerification(null);
+        setDomainMisconfigured(null);
+        setDnsInstructions(null);
+        setSslStatus(null);
+      }
+    } catch (err: any) {
+      console.error('Error removing domain:', err);
+      toast.error(err?.message || 'Erro ao remover domínio');
+    } finally {
+      setRemovingDomain(false);
+      setShowRemoveConfirm(false);
+    }
+  };
+
+  const handleVerifyDomainById = async (domainId: string) => {
+    setVerifyingDomain(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-domain', {
+        body: { domainId }
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      const verified = !!data?.verified;
+      toast.success(
+        verified
+          ? 'Domínio verificado com sucesso!'
+          : 'Ainda aguardando DNS. Veja os registros necessários abaixo.',
+      );
+
+      // Update local state
+      setUserDomains(prev => prev.map(d => 
+        d.id === domainId ? { ...d, verified } : d
+      ));
+      setVercelVerification(Array.isArray(data?.verification) ? data.verification : null);
+      setDomainMisconfigured(typeof data?.misconfigured === 'boolean' ? data.misconfigured : null);
+      setIsSubdomain(!!data?.isSubdomain);
+      
+      if (data?.dnsInstructions) {
+        setDnsInstructions(data.dnsInstructions);
+      }
+      
+      if (data?.ssl) {
+        setSslStatus(data.ssl);
+      }
+      
+      setLastDomainCheckAt(new Date().toISOString());
+    } catch (err: any) {
+      console.error('Error verifying domain:', err);
+      toast.error(err?.message || 'Erro ao verificar domínio');
+    } finally {
+      setVerifyingDomain(false);
     }
   };
 
@@ -955,7 +1089,8 @@ const SettingsPage = () => {
 
           {/* Domains Tab */}
           <TabsContent value="domains" className="space-y-6 animate-fade-in">
-            {(profile?.subscription_status === 'free' || profile?.plan_type === 'free') ? (
+            {/* Check for PRO plan access */}
+            {!['pro', 'pro_yearly', 'elite'].includes(profile?.plan_type || '') ? (
               <Card className="border-warning/30 bg-warning/5">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -964,16 +1099,16 @@ const SettingsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-foreground mb-1">
-                        Recurso não disponível no Plano Gratuito
+                        Recurso exclusivo do Plano PRO
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Domínios personalizados estão disponíveis nos planos Essencial e Pro.
+                        Domínios personalizados estão disponíveis apenas no plano PRO (até 3 domínios).
                       </p>
                       <Button 
                         className="gradient-button text-primary-foreground border-0"
                         onClick={() => setShowPricingModal(true)}
                       >
-                        Fazer Upgrade
+                        Fazer Upgrade para PRO
                       </Button>
                     </div>
                   </div>
@@ -981,98 +1116,101 @@ const SettingsPage = () => {
               </Card>
             ) : (
               <>
-                {/* Current Domain */}
-                {profile?.custom_domain && (
-                  <Card className={profile.domain_verified ? "border-success/30 bg-success/5" : "border-warning/30 bg-warning/5"}>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-4">
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${profile.domain_verified ? 'bg-success/20' : 'bg-warning/20'}`}>
-                            <Globe className={`w-6 h-6 ${profile.domain_verified ? 'text-success' : 'text-warning'}`} />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-foreground">
-                              Domínio Configurado
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-2 mt-1">
-                              <span className="font-mono bg-muted px-2 py-1 rounded">{profile.custom_domain}</span>
-                              {isSubdomain && (
-                                <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">subdomínio</span>
-                              )}
-
-                              {profile.domain_verified ? (
-                                <span className="text-success flex items-center gap-1 text-sm">
-                                  <Check className="w-4 h-4" /> Verificado
-                                </span>
-                              ) : (
-                                <span className="text-warning flex items-center gap-1 text-sm">
-                                  <AlertCircle className="w-4 h-4" /> Aguardando DNS
-                                </span>
-                              )}
-                            </div>
-
-                            {/* SSL Status */}
-                            {profile.domain_verified && (
-                              <div className="flex items-center gap-2 mt-2">
-                                {sslStatus?.status === 'active' ? (
-                                  <span className="text-success flex items-center gap-1 text-sm">
-                                    <Lock className="w-4 h-4" /> HTTPS ativo
-                                    {sslStatus.expiresAt && (
-                                      <span className="text-muted-foreground text-xs ml-1">
-                                        (expira em {new Date(sslStatus.expiresAt).toLocaleDateString('pt-BR')})
-                                      </span>
-                                    )}
-                                  </span>
-                                ) : sslStatus?.status === 'pending' ? (
-                                  <span className="text-warning flex items-center gap-1 text-sm">
-                                    <ShieldCheck className="w-4 h-4" /> SSL em provisionamento...
-                                  </span>
-                                ) : null}
-                              </div>
-                            )}
-
-                            {lastDomainCheckAt && (
-                              <p className="mt-2 text-xs text-muted-foreground">
-                                Última verificação: {new Date(lastDomainCheckAt).toLocaleString('pt-BR')}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="flex flex-wrap gap-2 pl-16">
-                          {!profile.domain_verified && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleVerifyDomain()}
-                              disabled={verifyingDomain}
-                            >
-                              {verifyingDomain ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              ) : (
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                              )}
-                              Verificar agora
-                            </Button>
-                          )}
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowRemoveConfirm(true)}
-                            disabled={removingDomain}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            {removingDomain ? (
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4 mr-2" />
-                            )}
-                            Remover domínio
-                          </Button>
-                        </div>
+                {/* Domain Usage Stats */}
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Globe className="w-5 h-5 text-primary" />
+                        <span className="font-medium">Domínios</span>
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">{userDomains.length}</span>
+                        {' / '}
+                        <span>{getMaxDomainsForPlan(profile?.plan_type || 'free')}</span>
+                        {' utilizados'}
+                      </div>
+                    </div>
+                    <Progress 
+                      value={(userDomains.length / getMaxDomainsForPlan(profile?.plan_type || 'free')) * 100} 
+                      className="mt-2 h-2"
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Domains List */}
+                {userDomains.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="w-5 h-5" />
+                        Seus Domínios
+                      </CardTitle>
+                      <CardDescription>
+                        Gerencie seus domínios personalizados
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {userDomains.map((domain) => (
+                        <div 
+                          key={domain.id} 
+                          className={`p-4 rounded-lg border ${domain.verified ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${domain.verified ? 'bg-success/20' : 'bg-warning/20'}`}>
+                                <Globe className={`w-4 h-4 ${domain.verified ? 'text-success' : 'text-warning'}`} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-mono text-sm truncate">{domain.domain}</span>
+                                  {domain.is_primary && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">Principal</span>
+                                  )}
+                                  {domain.verified ? (
+                                    <span className="text-success flex items-center gap-1 text-xs">
+                                      <Check className="w-3 h-3" /> Verificado
+                                    </span>
+                                  ) : (
+                                    <span className="text-warning flex items-center gap-1 text-xs">
+                                      <AlertCircle className="w-3 h-3" /> Aguardando DNS
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {!domain.verified && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleVerifyDomainById(domain.id)}
+                                  disabled={verifyingDomain}
+                                >
+                                  {verifyingDomain ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRemoveDomainById(domain.id, domain.domain)}
+                                disabled={removingDomain}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                {removingDomain ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                 )}
@@ -1082,61 +1220,58 @@ const SettingsPage = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Globe className="w-5 h-5" />
-                      Conectar Domínio Personalizado
+                      Adicionar Novo Domínio
                     </CardTitle>
                     <CardDescription>
-                      Use seu próprio domínio para suas páginas
+                      Conecte um domínio personalizado às suas páginas
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <Alert className="border-amber-500/50 bg-amber-500/10">
                       <AlertCircle className="h-4 w-4 text-amber-500" />
                       <AlertDescription className="text-sm text-amber-700 dark:text-amber-300">
-                        <strong>Atenção:</strong> O domínio personalizado funcionará <strong>exclusivamente</strong> para suas páginas do TrustPage. 
-                        Ele não funcionará para e-mails, outros sites ou serviços externos.
+                        <strong>Atenção:</strong> O domínio personalizado funcionará <strong>exclusivamente</strong> para suas páginas do TrustPage.
                       </AlertDescription>
                     </Alert>
-                    <div className="space-y-2">
-                      <Label htmlFor="domain">Seu Domínio ou Subdomínio</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="domain"
-                          value={domainInput}
-                          onChange={(e) => setDomainInput(e.target.value)}
-                          placeholder="meusite.com.br ou app.meusite.com.br"
-                          disabled={addingDomain || !!profile?.custom_domain}
-                        />
-                        <Button 
-                          onClick={handleAddDomain} 
-                          disabled={addingDomain || !domainInput.trim() || !!profile?.custom_domain}
-                        >
-                          {addingDomain ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Conectando...
-                            </>
-                          ) : (
-                            "Conectar"
-                          )}
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Exemplos: <code className="bg-muted px-1 rounded">meusite.com.br</code> ou <code className="bg-muted px-1 rounded">app.meusite.com.br</code>
-                      </p>
-                      {profile?.custom_domain && (
-                        <Alert className="mt-2">
-                          <Info className="h-4 w-4" />
-                          <AlertDescription className="text-sm">
-                            Você já tem um domínio configurado. Para adicionar outro, primeiro remova o atual acima.
-                            {(profile.plan_type === 'pro' || profile.plan_type === 'pro_yearly' || profile.plan_type === 'elite') && (
-                              <span className="block mt-1 text-muted-foreground">
-                                💡 Seu plano PRO permite até 3 domínios. Cada domínio adicional precisa ser configurado separadamente.
-                              </span>
+                    
+                    {userDomains.length >= getMaxDomainsForPlan(profile?.plan_type || 'free') ? (
+                      <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          Você atingiu o limite de {getMaxDomainsForPlan(profile?.plan_type || 'free')} domínios para o seu plano. 
+                          Remova um domínio existente para adicionar outro.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="domain">Seu Domínio ou Subdomínio</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="domain"
+                            value={domainInput}
+                            onChange={(e) => setDomainInput(e.target.value)}
+                            placeholder="meusite.com.br ou app.meusite.com.br"
+                            disabled={addingDomain}
+                          />
+                          <Button 
+                            onClick={handleAddDomain} 
+                            disabled={addingDomain || !domainInput.trim()}
+                          >
+                            {addingDomain ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Conectando...
+                              </>
+                            ) : (
+                              "Conectar"
                             )}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Exemplos: <code className="bg-muted px-1 rounded">meusite.com.br</code> ou <code className="bg-muted px-1 rounded">app.meusite.com.br</code>
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
