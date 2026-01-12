@@ -1253,6 +1253,50 @@ const SettingsPage = () => {
                                 </Button>
                               </div>
                             </div>
+                            
+                            {/* Nameservers Section */}
+                            <div className="border-t border-border pt-3 mt-3">
+                              <p className="text-xs text-foreground font-medium mb-2">
+                                <strong>Etapa Final:</strong> Altere os nameservers do seu domínio para o Vercel DNS:
+                              </p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">NS</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm">ns1</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">ns1.vercel-dns.com</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-7 w-7 p-0 flex-shrink-0"
+                                  onClick={() => copyToClipboard('ns1.vercel-dns.com')}
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">NS</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm">ns2</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">ns2.vercel-dns.com</span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-7 w-7 p-0 flex-shrink-0"
+                                  onClick={() => copyToClipboard('ns2.vercel-dns.com')}
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              💡 A alteração dos nameservers pode levar algumas horas para propagar.
+                            </p>
                           </>
                         )}
                       </div>
