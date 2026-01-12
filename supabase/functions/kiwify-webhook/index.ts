@@ -51,19 +51,35 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const webhookToken = Deno.env.get('KIWIFY_WEBHOOK_TOKEN');
 
-    // Validar token do webhook (opcional mas recomendado)
+    // SECURITY: Validate webhook token (REQUIRED)
+    // Reject all requests if token is not configured
+    if (!webhookToken) {
+      console.error('KIWIFY_WEBHOOK_TOKEN not configured - rejecting all requests');
+      return new Response(
+        JSON.stringify({ error: 'Webhook not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const signature = req.headers.get('x-kiwify-signature') || req.headers.get('authorization');
     
-    if (webhookToken && signature) {
-      // Se o token foi configurado, validar
-      const providedToken = signature.replace('Bearer ', '');
-      if (providedToken !== webhookToken) {
-        console.error('Invalid webhook signature');
-        return new Response(
-          JSON.stringify({ error: 'Invalid signature' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // SECURITY: Reject requests without signature header
+    if (!signature) {
+      console.error('Missing webhook signature header');
+      return new Response(
+        JSON.stringify({ error: 'Missing signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate the token matches
+    const providedToken = signature.replace('Bearer ', '');
+    if (providedToken !== webhookToken) {
+      console.error('Invalid webhook signature');
+      return new Response(
+        JSON.stringify({ error: 'Invalid signature' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const payload: KiwifyPayload = await req.json();
