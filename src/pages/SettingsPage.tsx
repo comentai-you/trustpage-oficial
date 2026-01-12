@@ -1127,7 +1127,12 @@ const SettingsPage = () => {
                         <Alert className="mt-2">
                           <Info className="h-4 w-4" />
                           <AlertDescription className="text-sm">
-                            Para conectar outro domínio, primeiro remova o atual acima.
+                            Você já tem um domínio configurado. Para adicionar outro, primeiro remova o atual acima.
+                            {(profile.plan_type === 'pro' || profile.plan_type === 'pro_yearly' || profile.plan_type === 'elite') && (
+                              <span className="block mt-1 text-muted-foreground">
+                                💡 Seu plano PRO permite até 3 domínios. Cada domínio adicional precisa ser configurado separadamente.
+                              </span>
+                            )}
                           </AlertDescription>
                         </Alert>
                       )}
@@ -1260,13 +1265,9 @@ const SettingsPage = () => {
                                 <strong>Etapa Final:</strong> Altere os nameservers do seu domínio para o Vercel DNS:
                               </p>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 items-center">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">NS</span>
-                              <div className="flex items-center gap-1">
-                                <span className="font-mono bg-background px-2 py-1 rounded text-sm">ns1</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">ns1.vercel-dns.com</span>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 justify-between p-2 bg-background rounded-lg">
+                                <span className="font-mono text-sm break-all">ns1.vercel-dns.com</span>
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
@@ -1276,14 +1277,8 @@ const SettingsPage = () => {
                                   <Copy className="w-3 h-3" />
                                 </Button>
                               </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 items-center">
-                              <span className="font-mono bg-background px-2 py-1 rounded text-sm">NS</span>
-                              <div className="flex items-center gap-1">
-                                <span className="font-mono bg-background px-2 py-1 rounded text-sm">ns2</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className="font-mono bg-background px-2 py-1 rounded text-sm break-all">ns2.vercel-dns.com</span>
+                              <div className="flex items-center gap-2 justify-between p-2 bg-background rounded-lg">
+                                <span className="font-mono text-sm break-all">ns2.vercel-dns.com</span>
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
@@ -1376,16 +1371,21 @@ const SettingsPage = () => {
                         </p>
                       </div>
 
-                      <Button variant="outline" className="w-full" asChild>
-                        <a 
-                          href="https://docs.lovable.dev/features/custom-domain" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Ver documentação completa
-                        </a>
+                      {/* Video Tutorial */}
+                      <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                        <iframe
+                          src="https://player.vimeo.com/video/1153607914?h=0&title=0&byline=0&portrait=0"
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          title="Tutorial de configuração de domínio"
+                        />
+                      </div>
+
+                      <Button variant="outline" className="w-full" onClick={() => navigate('/help')}>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Ver documentação completa
                       </Button>
                     </CardContent>
                   </Card>
