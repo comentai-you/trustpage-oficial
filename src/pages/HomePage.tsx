@@ -473,7 +473,7 @@ const HomePage = () => {
                     </li>
                   </ul>
 
-                  <a href="https://pay.kiwify.com.br/ODBfbnA" target="_blank" rel="noopener noreferrer">
+                  <a href="https://pay.kiwify.com.br/f0lsmRn" target="_blank" rel="noopener noreferrer">
                     <Button
                       variant="outline"
                       className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2"

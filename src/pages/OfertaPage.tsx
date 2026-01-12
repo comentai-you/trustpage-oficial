@@ -24,7 +24,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 const CHECKOUT_URLS = {
   basic_monthly: "https://pay.kiwify.com.br/P7MaOJK",
   basic_yearly: "https://pay.kiwify.com.br/f8Tg6DT",
-  pro_monthly: "https://pay.kiwify.com.br/ODBfbnA",
+  pro_monthly: "https://pay.kiwify.com.br/f0lsmRn",
   pro_yearly: "https://pay.kiwify.com.br/TQlihDk",
 };
 
