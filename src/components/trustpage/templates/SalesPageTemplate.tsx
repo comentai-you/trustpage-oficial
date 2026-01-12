@@ -45,12 +45,14 @@ interface SalesPageTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
   fullHeight?: boolean;
+  ownerPlan?: string | null;
 }
 
 const SalesPageTemplate = ({
   data,
   isMobile = false,
   fullHeight = true,
+  ownerPlan,
 }: SalesPageTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -747,7 +749,7 @@ const SalesPageTemplate = ({
       )}
 
       {/* Legal Footer */}
-      <LegalFooter textColor={textColor} showWatermark={true} />
+      <LegalFooter textColor={textColor} showWatermark={true} ownerPlan={ownerPlan} />
     </main>
   );
 };

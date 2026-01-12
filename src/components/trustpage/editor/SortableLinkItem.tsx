@@ -1,5 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +13,7 @@ interface SortableLinkItemProps {
   onRemove: (id: string) => void;
   onThumbnailUpload: (e: React.ChangeEvent<HTMLInputElement>, linkId: string) => void;
   uploadingThumbnail: string | null;
+  isPro?: boolean;
 }
 
 const SortableLinkItem = ({ 
@@ -19,7 +21,8 @@ const SortableLinkItem = ({
   onUpdate, 
   onRemove, 
   onThumbnailUpload, 
-  uploadingThumbnail 
+  uploadingThumbnail,
+  isPro = false
 }: SortableLinkItemProps) => {
   const {
     attributes,
@@ -56,11 +59,13 @@ const SortableLinkItem = ({
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
-      <Input 
+      <InputWithAI 
         value={link.text} 
         onChange={(e) => onUpdate(link.id, { text: e.target.value })} 
         placeholder="Texto do botão" 
-        className="text-sm" 
+        className="text-sm"
+        aiFieldType="button"
+        showAI={isPro}
       />
       <Input 
         value={link.url} 

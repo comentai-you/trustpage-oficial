@@ -14,12 +14,14 @@ interface HighConversionTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
   fullHeight?: boolean;
+  ownerPlan?: string | null;
 }
 
 const HighConversionTemplate = ({
   data,
   isMobile = false,
   fullHeight = true,
+  ownerPlan,
 }: HighConversionTemplateProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ minutes: 14, seconds: 59 });
@@ -402,7 +404,7 @@ const HighConversionTemplate = ({
       </section>
 
       {/* Legal Footer */}
-      <LegalFooter textColor={data.colors.text} showWatermark={true} />
+      <LegalFooter textColor={data.colors.text} showWatermark={true} ownerPlan={ownerPlan} />
     </main>
   );
 };

@@ -1,10 +1,12 @@
 import { LandingPageFormData, BioLinkContent, defaultBioContent } from "@/types/landing-page";
-import { Instagram, MessageCircle, Youtube, Linkedin, ExternalLink } from "lucide-react";
+import { Instagram, MessageCircle, Youtube, Linkedin } from "lucide-react";
 import LegalFooter from "./LegalFooter";
+
 interface BioLinkTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
   fullHeight?: boolean;
+  ownerPlan?: string | null;
 }
 
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -13,7 +15,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
+const BioLinkTemplate = ({ data, fullHeight = true, ownerPlan }: BioLinkTemplateProps) => {
   const primaryColor = data.primary_color || '#22c55e';
   const backgroundColor = data.colors.background || '#09090b';
   const textColor = data.colors.text || '#ffffff';
@@ -84,8 +86,7 @@ const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
               {link.thumbnailUrl && (
                 <img src={link.thumbnailUrl} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
               )}
-              <span className={`flex-1 font-medium ${link.thumbnailUrl ? 'text-left' : 'text-center'}`}>{link.text}</span>
-              {!link.thumbnailUrl && <ExternalLink className="w-4 h-4 opacity-50" />}
+              <span className="flex-1 font-medium text-center">{link.text}</span>
             </div>
           </a>
         ))}
@@ -93,7 +94,7 @@ const BioLinkTemplate = ({ data, fullHeight = true }: BioLinkTemplateProps) => {
 
       {/* Legal Footer */}
       <div className="mt-auto pt-10">
-        <LegalFooter textColor={textColor} showWatermark={true} />
+        <LegalFooter textColor={textColor} showWatermark={true} ownerPlan={ownerPlan} />
       </div>
     </main>
   );

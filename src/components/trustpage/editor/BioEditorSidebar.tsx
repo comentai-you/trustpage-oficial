@@ -36,12 +36,16 @@ import SortableLinkItem from "./SortableLinkItem";
 interface BioEditorSidebarProps {
   formData: LandingPageFormData;
   onChange: (data: Partial<LandingPageFormData>) => void;
+  userPlan?: string;
 }
 
-const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
+const BioEditorSidebar = ({ formData, onChange, userPlan = 'free' }: BioEditorSidebarProps) => {
   const { user } = useAuth();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null);
+
+  // Check if user has PRO plan for AI features
+  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly' || userPlan === 'elite';
 
   const content: BioLinkContent = {
     ...defaultBioContent,
@@ -185,11 +189,26 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">Nome do Perfil</Label>
-              <Input value={content.profileName} onChange={(e) => updateContent({ profileName: e.target.value })} placeholder="@seuperfil" className="text-sm" />
+              <InputWithAI 
+                value={content.profileName} 
+                onChange={(e) => updateContent({ profileName: e.target.value })} 
+                placeholder="@seuperfil" 
+                className="text-sm"
+                aiFieldType="headline"
+                showAI={isPro}
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">Bio</Label>
-              <Textarea value={content.bio} onChange={(e) => updateContent({ bio: e.target.value })} placeholder="Sua descrição..." rows={3} className="text-sm resize-none" />
+              <TextareaWithAI 
+                value={content.bio} 
+                onChange={(e) => updateContent({ bio: e.target.value })} 
+                placeholder="Sua descrição..." 
+                rows={3} 
+                className="text-sm resize-none"
+                aiFieldType="body"
+                showAI={isPro}
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -277,6 +296,7 @@ const BioEditorSidebar = ({ formData, onChange }: BioEditorSidebarProps) => {
                     onRemove={removeLink}
                     onThumbnailUpload={handleThumbnailUpload}
                     uploadingThumbnail={uploadingThumbnail}
+                    isPro={isPro}
                   />
                 ))}
               </SortableContext>
