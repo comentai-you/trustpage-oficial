@@ -107,6 +107,11 @@ const TrustPageEditor = () => {
         const content = (page.content as unknown as SalesPageContent) || defaultSalesContent;
         const templateType = (page.template_type as TemplateType) || "vsl";
 
+        // Extract headline sizes from content JSON (where they are persisted)
+        const contentAny = page.content as any;
+        const headlineSizeMobile = contentAny?.headline_size_mobile ?? 1.2;
+        const headlineSizeDesktop = contentAny?.headline_size_desktop ?? 2.5;
+
         setFormData({
           slug: page.slug,
           template_id: page.template_id,
@@ -115,8 +120,8 @@ const TrustPageEditor = () => {
           profile_image_url: page.profile_image_url || "",
           headline: page.headline || "",
           headline_size: 2,
-          headline_size_mobile: 1.2,
-          headline_size_desktop: 2.5,
+          headline_size_mobile: headlineSizeMobile,
+          headline_size_desktop: headlineSizeDesktop,
           subheadline: page.subheadline || "",
           video_url: page.video_url || "",
           video_storage_path: page.video_storage_path || "",
@@ -217,6 +222,13 @@ const TrustPageEditor = () => {
         return;
       }
 
+      // Include headline sizes in the content JSON for persistence
+      const contentWithSizes = {
+        ...(formData.content as any),
+        headline_size_mobile: formData.headline_size_mobile,
+        headline_size_desktop: formData.headline_size_desktop,
+      };
+
       const pageData = {
         user_id: user.id,
         slug,
@@ -240,7 +252,7 @@ const TrustPageEditor = () => {
         facebook_pixel_id: formData.facebook_pixel_id || null,
         colors: formData.colors as unknown as Json,
         primary_color: formData.primary_color,
-        content: formData.content as unknown as Json,
+        content: contentWithSizes as unknown as Json,
         is_published: true,
       };
 
@@ -333,6 +345,13 @@ const TrustPageEditor = () => {
 
       // Check availability logic omitted for brevity, keeping existing save logic...
       // (Mantive a lógica original de salvamento para focar no layout)
+      // Include headline sizes in the content JSON for persistence
+      const contentWithSizes = {
+        ...(formData.content as any),
+        headline_size_mobile: formData.headline_size_mobile,
+        headline_size_desktop: formData.headline_size_desktop,
+      };
+
       const pageData = {
         user_id: user.id,
         slug,
@@ -356,7 +375,7 @@ const TrustPageEditor = () => {
         facebook_pixel_id: formData.facebook_pixel_id || null,
         colors: formData.colors as unknown as Json,
         primary_color: formData.primary_color,
-        content: formData.content as unknown as Json,
+        content: contentWithSizes as unknown as Json,
         is_published: true,
       };
 

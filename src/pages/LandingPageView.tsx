@@ -204,6 +204,10 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         const content = (page.content ?? defaultSalesContent) as any;
         const templateType = (page.template_type as TemplateType) || 'vsl';
 
+        // Extract headline sizes from content JSON (where they are persisted)
+        const headlineSizeMobile = content?.headline_size_mobile ?? 1.2;
+        const headlineSizeDesktop = content?.headline_size_desktop ?? 2.5;
+
         const headline = page.headline || '';
         const pageTitle = headline || page.page_name || page.slug;
         if (pageTitle) document.title = `${pageTitle} | TrustPage`;
@@ -216,8 +220,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           profile_image_url: page.profile_image_url || '',
           headline: page.headline || '',
           headline_size: 2,
-          headline_size_mobile: 1.2,
-          headline_size_desktop: 2.5,
+          headline_size_mobile: headlineSizeMobile,
+          headline_size_desktop: headlineSizeDesktop,
           subheadline: page.subheadline || '',
           video_url: page.video_url || '',
           video_storage_path: page.video_storage_path || '',
