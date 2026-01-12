@@ -386,6 +386,10 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Hospedagem Vercel Inclusa</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base font-semibold">Página VSL com Vídeo</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
@@ -398,24 +402,16 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">1 Domínio Personalizado</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Pixel do Facebook/Google ADS</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Marca d'água no rodapé</span>
+                      <span className="text-foreground text-sm sm:text-base text-muted-foreground">Marca d'água no rodapé</span>
                     </li>
                   </ul>
                   
-                  <Link to="/auth">
+                  <a href="https://pay.kiwify.com.br/P7MaOJK" target="_blank" rel="noopener noreferrer">
                     <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold">
                       Assinar Essencial
                       <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
@@ -439,27 +435,39 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">Conecte até 3 Domínios</span>
+                      <span className="text-foreground text-sm sm:text-base">TUDO do Essencial +</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base font-semibold">🧠 IA de Copywriting</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base font-semibold">🛡️ Anti-Bloqueio Avançado</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Conecte até 3 Domínios</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base">Pixel Facebook/Google</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground text-sm sm:text-base font-semibold">🚀 Suporte VIP Prioritário</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base font-semibold">Zero Marca d'água</span>
                     </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Pixel do Facebook/Google ADS</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Suporte Prioritário</span>
-                    </li>
                   </ul>
                   
-                  <Link to="/auth">
+                  <a href="https://pay.kiwify.com.br/ODBfbnA" target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2">
                       Assinar Pro
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>

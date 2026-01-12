@@ -350,12 +350,12 @@ const OfertaPage = () => {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Basic Card */}
-            <div className="bg-card rounded-2xl border border-border p-8 shadow-lg hover:shadow-xl transition-shadow">
+            {/* Basic Card - Neutro */}
+            <div className="bg-card rounded-2xl border border-border p-8 shadow-md hover:shadow-lg transition-shadow opacity-90">
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-foreground mb-2">Basic</h3>
+                <h3 className="text-xl font-bold text-muted-foreground mb-2">Essencial</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-foreground">R$ {basicPrice}</span>
+                  <span className="text-3xl font-bold text-muted-foreground">R$ {basicPrice}</span>
                   <span className="text-muted-foreground">/mês</span>
                 </div>
                 {isYearly && (
@@ -379,7 +379,7 @@ const OfertaPage = () => {
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
                 <Button variant="outline" size="lg" className="w-full text-base font-semibold">
-                  Começar com Basic
+                  Começar com Essencial
                 </Button>
               </a>
 
@@ -388,26 +388,45 @@ const OfertaPage = () => {
               </p>
             </div>
 
-            {/* Pro Card - Highlighted */}
-            <div className="relative bg-card rounded-2xl border-2 border-primary p-8 shadow-2xl hover:shadow-3xl transition-shadow">
-              {/* Badge */}
+            {/* Pro Card - DESTAQUE MÁXIMO */}
+            <div className="relative bg-card rounded-2xl border-2 border-primary p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20">
+              {/* Badge Principal */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  MAIS VENDIDO
+                <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
+                  🔥 MAIOR DESCONTO (ECONOMIZE R$ 284)
                 </span>
               </div>
 
-              <div className="mb-6 pt-2">
-                <h3 className="text-xl font-bold text-foreground mb-2">Pro</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-primary">R$ {proPrice}</span>
-                  <span className="text-muted-foreground">/mês</span>
+              <div className="mb-6 pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl font-bold text-foreground">Pro</h3>
+                  <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
+                    MAIS VENDIDO
+                  </span>
                 </div>
-                {isYearly && (
-                  <p className="text-sm text-green-600 font-semibold mt-1">
-                    💰 Economize R$ 285,00 no plano anual!
-                  </p>
+                
+                {isYearly ? (
+                  <div>
+                    {/* Preço âncora riscado */}
+                    <p className="text-lg text-muted-foreground line-through">
+                      De R$ 1.164,00/ano
+                    </p>
+                    {/* Preço destaque */}
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-5xl font-black text-primary">12x R$ 73,32</span>
+                    </div>
+                    <p className="text-base text-muted-foreground mt-1">
+                      ou <span className="font-bold text-foreground">R$ 879,90</span> à vista
+                    </p>
+                    <p className="text-sm text-green-600 font-bold mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg inline-block">
+                      ✨ Equivale a 3 meses GRÁTIS!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold text-primary">R$ {proPrice}</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
                 )}
               </div>
 
@@ -415,29 +434,29 @@ const OfertaPage = () => {
                 <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
                   10 Páginas Ativas
                 </FeatureItem>
-                <FeatureItem included>TUDO do Basic +</FeatureItem>
+                <FeatureItem included>TUDO do Essencial +</FeatureItem>
                 <FeatureItem included icon={<Sparkles className="w-4 h-4 text-purple-500" />}>
                   🧠 IA de Copywriting
                 </FeatureItem>
                 <FeatureItem included icon={<Shield className="w-4 h-4 text-blue-500" />}>
                   🛡️ Anti-Bloqueio Avançado
                 </FeatureItem>
-                <FeatureItem included>Conecte até 3 Domínios</FeatureItem>
-                <FeatureItem included>Pixel Facebook/Google</FeatureItem>
+                <FeatureItem included>✅ Domínio Personalizado Grátis</FeatureItem>
+                <FeatureItem included>✅ Tracking Avançado (Pixel)</FeatureItem>
                 <FeatureItem included icon={<HeadphonesIcon className="w-4 h-4 text-green-500" />}>
                   🚀 Suporte VIP Prioritário
                 </FeatureItem>
-                <FeatureItem included>Zero Marca d'água</FeatureItem>
+                <FeatureItem included>✅ Sem Marca D'água</FeatureItem>
               </ul>
 
               <a href={proCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="gradient" size="lg" className="w-full text-base font-bold shadow-lg">
+                <Button variant="gradient" size="lg" className="w-full text-lg font-bold shadow-lg py-6">
                   QUERO O PLANO PRO
                 </Button>
               </a>
 
               <p className="text-xs text-center text-muted-foreground mt-3">
-                Para quem quer escalar resultados
+                Para quem quer escalar resultados 🚀
               </p>
             </div>
           </div>
