@@ -577,7 +577,8 @@ const HelpPage = () => {
             </div>
 
             {/* Passo 3 - CNAME */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 relative">
+              <div className="absolute left-4 top-10 bottom-[-2rem] w-0.5 bg-slate-200"></div>
               <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold shadow-lg z-10">
                 3
               </div>
@@ -610,6 +611,61 @@ const HelpPage = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Passo 4 - Nameservers */}
+            <div className="flex gap-4">
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-200 z-10">
+                4
+              </div>
+              <div className="flex-1 pt-1">
+                <h4 className="text-lg font-bold text-slate-900 mb-2">Atualize os Nameservers (Servidores DNS)</h4>
+                <p className="text-slate-600 mb-4">
+                  Esta etapa é <strong>essencial</strong> para que o Vercel DNS funcione corretamente. Vá em{" "}
+                  <strong>Meus Produtos &gt; Domínio &gt; Gerenciar DNS &gt; Nameservers</strong> e altere para:
+                </p>
+                <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200 font-mono text-sm space-y-2">
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">NS 1</div>
+                    <div className="col-span-7 font-bold text-indigo-700">ns1.vercel-dns.com</div>
+                    <div className="col-span-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:bg-indigo-100"
+                        onClick={() => handleCopy("ns1.vercel-dns.com", "ns1")}
+                      >
+                        {copiedField === "ns1" ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4 text-indigo-500" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-12 gap-2 items-center p-3 bg-white rounded-lg border border-indigo-200 shadow-sm">
+                    <div className="col-span-3 text-slate-500 font-sans font-medium">NS 2</div>
+                    <div className="col-span-7 font-bold text-indigo-700">ns2.vercel-dns.com</div>
+                    <div className="col-span-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:bg-indigo-100"
+                        onClick={() => handleCopy("ns2.vercel-dns.com", "ns2")}
+                      >
+                        {copiedField === "ns2" ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4 text-indigo-500" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 mt-3">
+                  💡 A alteração dos nameservers pode levar algumas horas para propagar totalmente.
+                </p>
               </div>
             </div>
 
