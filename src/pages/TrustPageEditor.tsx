@@ -57,6 +57,7 @@ const TrustPageEditor = () => {
   const [isLoading, setIsLoading] = useState(!!id);
   const [existingPageId, setExistingPageId] = useState<string | null>(null);
   const [showMobileControls, setShowMobileControls] = useState(false);
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -70,6 +71,17 @@ const TrustPageEditor = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
+
+      // Fetch user profile to get plan
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan_type")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (profile?.plan_type) {
+        setUserPlan(profile.plan_type);
+      }
 
       // If editing, fetch page data
       if (id) {
@@ -500,11 +512,11 @@ const TrustPageEditor = () => {
           {/* Desktop Sidebar - Now scrolls independently */}
           <div className="hidden lg:block h-full overflow-hidden">
             {formData.template_type === "sales" ? (
-              <SectionBuilderSidebar formData={formData} onChange={handleChange} />
+              <SectionBuilderSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             ) : formData.template_type === "bio" ? (
-              <BioEditorSidebar formData={formData} onChange={handleChange} />
+              <BioEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             ) : (
-              <EditorSidebar formData={formData} onChange={handleChange} />
+              <EditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             )}
           </div>
 
@@ -533,11 +545,11 @@ const TrustPageEditor = () => {
             {/* Mobile Form View */}
             <div className={`lg:hidden flex-1 overflow-y-auto bg-white ${activeTab === "form" ? "block" : "hidden"}`}>
               {formData.template_type === "sales" ? (
-                <SectionBuilderSidebar formData={formData} onChange={handleChange} />
+                <SectionBuilderSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               ) : formData.template_type === "bio" ? (
-                <BioEditorSidebar formData={formData} onChange={handleChange} />
+                <BioEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               ) : (
-                <EditorSidebar formData={formData} onChange={handleChange} />
+                <EditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               )}
             </div>
 

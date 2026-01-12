@@ -4,11 +4,16 @@ import { usePageOwner } from "@/contexts/PageOwnerContext";
 interface LegalFooterProps {
   textColor?: string;
   showWatermark?: boolean;
+  ownerPlan?: string | null;
 }
 
-const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFooterProps) => {
+const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true, ownerPlan }: LegalFooterProps) => {
   const { isCustomDomain } = useCustomDomain();
   const { ownerId } = usePageOwner();
+
+  // PRO plans don't show watermark
+  const isPro = ownerPlan === 'pro' || ownerPlan === 'pro_yearly' || ownerPlan === 'elite';
+  const shouldShowWatermark = showWatermark && !isPro;
 
   const footerLinks = [
     { label: "Políticas de Privacidade", slug: "politica-de-privacidade" },
@@ -49,7 +54,7 @@ const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true }: LegalFoote
       </div>
 
       {/* Watermark */}
-      {showWatermark && (
+      {shouldShowWatermark && (
         <p className="text-xs font-medium tracking-wide" style={{ opacity: 0.4, color: textColor }}>
           ✨ Criado com <span className="font-bold">TrustPage</span>
         </p>

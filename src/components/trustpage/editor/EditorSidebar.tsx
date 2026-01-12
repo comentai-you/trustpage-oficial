@@ -19,9 +19,10 @@ import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 interface EditorSidebarProps {
   formData: LandingPageFormData;
   onChange: (data: Partial<LandingPageFormData>) => void;
+  userPlan?: string;
 }
 
-const EditorSidebar = ({ formData, onChange }: EditorSidebarProps) => {
+const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarProps) => {
   const handleThemeChange = (theme: PageTheme) => {
     const themeColors = pageThemes[theme].colors;
     onChange({ 

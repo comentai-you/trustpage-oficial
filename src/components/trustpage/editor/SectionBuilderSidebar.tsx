@@ -53,9 +53,10 @@ import OfferSectionEditor from "./sections/OfferSectionEditor";
 interface SectionBuilderSidebarProps {
   formData: LandingPageFormData;
   onChange: (data: Partial<LandingPageFormData>) => void;
+  userPlan?: string;
 }
 
-const SectionBuilderSidebar = ({ formData, onChange }: SectionBuilderSidebarProps) => {
+const SectionBuilderSidebar = ({ formData, onChange, userPlan = 'free' }: SectionBuilderSidebarProps) => {
   const [showAddModal, setShowAddModal] = useState(false);
   
   // Check if content is legacy format or new SectionBuilder format

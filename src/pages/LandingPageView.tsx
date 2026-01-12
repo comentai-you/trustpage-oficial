@@ -294,11 +294,11 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         {showViolationBar && <AdsViolationBar />}
         <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
           {pageData.template_type === 'sales' ? (
-            <SalesPageTemplate data={pageData} isMobile={isMobile} />
+            <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           ) : pageData.template_type === 'bio' ? (
-            <BioLinkTemplate data={pageData} isMobile={isMobile} />
+            <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           ) : (
-            <HighConversionTemplate data={pageData} isMobile={isMobile} />
+            <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           )}
         </div>
       </div>
