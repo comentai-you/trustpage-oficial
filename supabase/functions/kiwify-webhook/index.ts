@@ -9,7 +9,7 @@ const corsHeaders = {
 // Mapeamento de produtos Kiwify para planos
 const PRODUCTS: Record<string, { plan: string; billing: string }> = {
   'P7MaOJK': { plan: 'essential', billing: 'monthly' },  // ESSENTIAL_MONTHLY
-  'ODBfbnA': { plan: 'pro', billing: 'monthly' },        // PRO_MONTHLY
+  'f0lsmRn': { plan: 'pro', billing: 'monthly' },        // PRO_MONTHLY
   'f8Tg6DT': { plan: 'essential', billing: 'yearly' },   // ESSENTIAL_YEARLY
   'TQlihDk': { plan: 'pro', billing: 'yearly' },         // PRO_YEARLY
 };
