@@ -56,7 +56,8 @@ interface Tutorial {
 }
 
 const WHATSAPP_NUMBER = "5561999686641";
-const VERCEL_IP = "76.76.21.21"; // IP Oficial para Custom Domains na Vercel
+// CORRIGIDO: Voltando para o IP específico do seu projeto
+const VERCEL_IP = "216.198.79.1";
 
 // --- TUTORIAIS ---
 const tutorials: Tutorial[] = [
