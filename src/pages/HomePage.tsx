@@ -1,11 +1,49 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon } from "lucide-react";
 import { useState } from "react";
 import FAQSection from "@/components/FAQSection";
 
+// Links reais do Kiwify
+const CHECKOUT_URLS = {
+  basic_monthly: "https://pay.kiwify.com.br/P7MaOJK",
+  basic_yearly: "https://pay.kiwify.com.br/f8Tg6DT",
+  pro_monthly: "https://pay.kiwify.com.br/f0lsmRn",
+  pro_yearly: "https://pay.kiwify.com.br/TQlihDk",
+};
+
+// Feature Item Component
+interface FeatureItemProps {
+  children: React.ReactNode;
+  included: boolean;
+  icon?: React.ReactNode;
+}
+
+const FeatureItem = ({ children, included, icon }: FeatureItemProps) => (
+  <li className="flex items-center gap-3 text-sm">
+    {included ? (
+      icon || <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+    ) : (
+      <X className="w-5 h-5 flex-shrink-0 text-muted-foreground/50" />
+    )}
+    <span className={!included ? "text-muted-foreground/60 line-through" : "text-foreground"}>
+      {children}
+    </span>
+  </li>
+);
+
 const HomePage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isYearly, setIsYearly] = useState(false);
+
+  // Pricing logic
+  const basicPrice = isYearly ? "37,49" : "39,90";
+  const proPrice = isYearly ? "73,33" : "97,00";
+  const basicCheckout = isYearly ? CHECKOUT_URLS.basic_yearly : CHECKOUT_URLS.basic_monthly;
+  const proCheckout = isYearly ? CHECKOUT_URLS.pro_yearly : CHECKOUT_URLS.pro_monthly;
+  const basicYearlyTotal = "449,90";
+  const proYearlyTotal = "879,90";
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -315,8 +353,30 @@ const HomePage = () => {
             </p>
           </div>
 
+          {/* Guarantee Badge */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 bg-green-500/10 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
+              <Shield className="w-4 h-4" />
+              <span>7 dias de garantia incondicional — Risco zero</span>
+            </div>
+          </div>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-10 sm:mb-12">
+            <span className={`text-sm font-medium transition-colors ${!isYearly ? "text-foreground" : "text-muted-foreground"}`}>
+              Mensal
+            </span>
+            <Switch checked={isYearly} onCheckedChange={setIsYearly} className="data-[state=checked]:bg-primary" />
+            <span className={`text-sm font-medium transition-colors ${isYearly ? "text-foreground" : "text-muted-foreground"}`}>
+              Anual
+              <span className="ml-2 text-xs bg-green-500/20 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                Economize 2 meses
+              </span>
+            </span>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            {/* FREE Card */}
+            {/* FREE Card - Mantido igual */}
             <div className="relative">
               <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border shadow-elevated h-full">
                 <div className="pt-2">
@@ -359,130 +419,117 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Essencial Card */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary rounded-2xl sm:rounded-3xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
-              <div className="relative bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-primary shadow-3d h-full">
-                {/* Badge */}
-                <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2">
-                  <span className="px-3 sm:px-4 py-1 sm:py-1.5 bg-primary text-primary-foreground text-xs sm:text-sm font-bold rounded-full shadow-glow whitespace-nowrap">
-                    Mais Popular
+            {/* Essencial Card - Estilo OfertaPage */}
+            <div className="bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow opacity-90 h-full">
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-muted-foreground mb-2">Essencial</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">R$ {basicPrice}</span>
+                  <span className="text-muted-foreground">/mês</span>
+                </div>
+                {isYearly && (
+                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {basicYearlyTotal}/ano)</p>
+                )}
+              </div>
+
+              <ul className="space-y-3 mb-6 sm:mb-8">
+                <FeatureItem included>2 Páginas Ativas</FeatureItem>
+                <FeatureItem included>Hospedagem Vercel Inclusa</FeatureItem>
+                <FeatureItem included>Página VSL com Vídeo</FeatureItem>
+                <FeatureItem included>Delay no Botão CTA</FeatureItem>
+                <FeatureItem included>Página de Vendas completa</FeatureItem>
+                <FeatureItem included>Marca d'água no rodapé</FeatureItem>
+                <FeatureItem included>Não Pode Anunciar no Ads sem domínio</FeatureItem>
+                <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
+                <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
+                <FeatureItem included={false}>IA de Copywriting</FeatureItem>
+              </ul>
+
+              <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
+                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
+                  Começar com Essencial
+                </Button>
+              </a>
+
+              <p className="text-xs text-center text-muted-foreground mt-3">Ideal para quem está começando</p>
+            </div>
+
+            {/* Pro Card - DESTAQUE MÁXIMO */}
+            <div className="relative bg-card rounded-xl sm:rounded-2xl border-2 border-primary p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20 h-full">
+              {/* Badge Principal */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse whitespace-nowrap">
+                  🔥 MAIOR DESCONTO (ECONOMIZE R$ 284)
+                </span>
+              </div>
+
+              <div className="mb-6 pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">Pro</h3>
+                  <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
+                    MAIS VENDIDO
                   </span>
                 </div>
 
-                <div className="pt-4">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Essencial</h3>
-                  <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
-                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 39,90</span>
-                    <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
+                {isYearly ? (
+                  <div>
+                    {/* Preço âncora riscado */}
+                    <p className="text-lg text-muted-foreground line-through">De R$ 1.164,00/ano</p>
+                    {/* Preço destaque */}
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-4xl sm:text-5xl font-black text-primary">12x R$ 73,32</span>
+                    </div>
+                    <p className="text-base text-green-600 font-semibold mt-1">
+                      Desconto De R$ 285,00
+                    </p>
+                    <p className="text-sm text-green-600 font-bold mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg inline-block">
+                      ✨ Equivale a 3 meses GRÁTIS!
+                    </p>
                   </div>
-
-                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">
-                        Crie até <span className="font-bold text-primary">2 Páginas</span> Ativas
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Hospedagem Vercel Inclusa</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">Página VSL com Vídeo</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">Delay no Botão CTA</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Página de Vendas completa</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Marca d'água no rodapé</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">
-                        Não Pode Anunciar No Trafego Pago Sem Domínio
-                      </span>
-                    </li>
-                  </ul>
-
-                  <a href="https://pay.kiwify.com.br/P7MaOJK" target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold">
-                      Assinar Essencial
-                      <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
-                    </Button>
-                  </a>
-                </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {proPrice}</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
+                )}
               </div>
+
+              <ul className="space-y-3 mb-6 sm:mb-8">
+                <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
+                  10 Páginas Ativas
+                </FeatureItem>
+                <FeatureItem included>TUDO do Essencial +</FeatureItem>
+                <FeatureItem included icon={<Sparkles className="w-4 h-4 text-purple-500" />}>
+                  🧠 IA de Copywriting
+                </FeatureItem>
+                <FeatureItem included icon={<Shield className="w-4 h-4 text-blue-500" />}>
+                  🛡️ Anti-Bloqueio Avançado
+                </FeatureItem>
+                <FeatureItem included>✅ Domínio Personalizado Grátis</FeatureItem>
+                <FeatureItem included>✅ Tracking Avançado (Pixel)</FeatureItem>
+                <FeatureItem included icon={<HeadphonesIcon className="w-4 h-4 text-green-500" />}>
+                  🚀 Suporte VIP Prioritário
+                </FeatureItem>
+                <FeatureItem included>✅ Sem Marca D'água</FeatureItem>
+              </ul>
+
+              <a href={proCheckout} target="_blank" rel="noopener noreferrer" className="block">
+                <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold shadow-lg">
+                  QUERO O PLANO PRO
+                </Button>
+              </a>
+
+              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer escalar resultados 🚀</p>
             </div>
+          </div>
 
-            {/* Pro Card */}
-            <div className="relative">
-              <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border shadow-elevated h-full">
-                <div className="pt-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Pro</h3>
-                  <div className="flex items-baseline gap-1 mb-5 sm:mb-6">
-                    <span className="text-3xl sm:text-4xl font-black text-foreground">R$ 97,00</span>
-                    <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
-                  </div>
-
-                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">
-                        Crie até <span className="font-bold">10 Páginas</span> Ativas
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">TUDO do Essencial +</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">🧠 IA de Copywriting</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">
-                        🛡️ Anti-Bloqueio Avançado
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Conecte até 3 Domínios</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Pixel Facebook/Google</span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">
-                        🚀 Suporte VIP Prioritário
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base font-semibold">Zero Marca d'água</span>
-                    </li>
-                  </ul>
-
-                  <a href="https://pay.kiwify.com.br/f0lsmRn" target="_blank" rel="noopener noreferrer">
-                    <Button
-                      variant="outline"
-                      className="w-full text-base sm:text-lg py-5 sm:py-6 font-semibold border-2"
-                    >
-                      Assinar Pro
-                    </Button>
-                  </a>
-                </div>
-              </div>
+          {/* Payment Methods */}
+          <div className="text-center mt-8">
+            <p className="text-sm text-muted-foreground mb-2">Formas de pagamento aceitas:</p>
+            <div className="flex items-center justify-center gap-4 text-muted-foreground">
+              <span className="text-xs bg-muted px-3 py-1 rounded-full">💳 Cartão de Crédito</span>
+              <span className="text-xs bg-muted px-3 py-1 rounded-full">📱 PIX</span>
+              <span className="text-xs bg-muted px-3 py-1 rounded-full">🏦 Boleto</span>
             </div>
           </div>
         </div>
