@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Trash2, BarChart3, Edit3, Play, Image as ImageIcon, Globe, ChevronDown } from "lucide-react";
+import { ExternalLink, Copy, Trash2, BarChart3, Edit3, Play, Image as ImageIcon, Globe, PieChart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ interface PageCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
   onCopyLink: (slug: string, useCustomDomain?: boolean) => void;
+  onShowAnalytics?: (id: string, name: string) => void;
 }
 
 // Extract YouTube video ID and generate thumbnail
@@ -79,6 +80,7 @@ const PageCard = ({
   onEdit,
   onDelete,
   onCopyLink,
+  onShowAnalytics,
 }: PageCardProps) => {
   const thumbnail = getThumbnail(coverImageUrl, videoUrl, imageUrl);
   const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
@@ -150,10 +152,14 @@ const PageCard = ({
                 {customDomain ? `${customDomain}/p/${slug}` : `trustpageapp.com/p/${slug}`}
               </p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => onShowAnalytics?.(id, pageName || 'Página')}
+                  className="flex items-center gap-1 hover:text-primary transition-colors"
+                  title="Ver analytics detalhado"
+                >
                   <BarChart3 className="w-3.5 h-3.5" />
                   <span className="font-medium">{views || 0} views</span>
-                </div>
+                </button>
                 <span>•</span>
                 <span>{formattedDate}</span>
               </div>
@@ -178,6 +184,23 @@ const PageCard = ({
             </TooltipTrigger>
             <TooltipContent>Editar página</TooltipContent>
           </Tooltip>
+
+          {/* Analytics Button */}
+          {onShowAnalytics && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => onShowAnalytics(id, pageName || 'Página')}
+                >
+                  <PieChart className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Ver Analytics</TooltipContent>
+            </Tooltip>
+          )}
 
           {customDomain ? (
             <DropdownMenu>

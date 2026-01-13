@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdsViolationBar from "@/components/AdsViolationBar";
 import { PageOwnerProvider } from "@/contexts/PageOwnerContext";
+import { useTrackPageVisit } from "@/hooks/useTrackPageVisit";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -71,7 +72,11 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
   const [notFound, setNotFound] = useState(false);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
+  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const isMobile = useIsMobile();
+
+  // Track page visit with detailed analytics
+  useTrackPageVisit({ pageId: currentPageId || '' });
 
   const isLegalPage = useMemo(() => {
     if (!slug) return false;
@@ -160,6 +165,9 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           setLoading(false);
           return;
         }
+
+        // Store the page ID for analytics tracking
+        setCurrentPageId(page.id);
 
         // Store the page owner ID for legal footer links
         if (isLegalSlug) {

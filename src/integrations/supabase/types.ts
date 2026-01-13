@@ -136,6 +136,47 @@ export type Database = {
           },
         ]
       }
+      page_visits: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_hash: string | null
+          page_id: string
+          referrer: string | null
+          user_agent: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_hash?: string | null
+          page_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_hash?: string | null
+          page_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_visits_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "landing_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
