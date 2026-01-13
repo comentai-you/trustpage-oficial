@@ -524,7 +524,11 @@ const HelpPage = () => {
                   <strong>Zona DNS</strong> ou <strong>Editor de Zona DNS</strong>.
                 </p>
                 <Button variant="outline" size="sm" asChild className="gap-2 border-slate-300">
-                  <a href="https://www.hostinger.com.br/tutoriais/como-editar-zona-dns-na-hostinger" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://www.hostinger.com/br/tutoriais/como-usar-editor-de-zona-dns-hostinger"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-4 w-4" />
                     Ver tutorial da Hostinger
                   </a>
