@@ -42,7 +42,7 @@ const hashString = (str: string): string => {
 // For production, consider using Supabase table or KV store
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 contact form submissions per IP per hour
+const MAX_REQUESTS_PER_WINDOW = 3; // REDUCED: Max 3 contact form submissions per IP per hour
 
 const checkRateLimit = (ipHash: string): { allowed: boolean; remaining: number } => {
   const now = Date.now();
@@ -69,6 +69,27 @@ const suspiciousEmailPatterns = [
   /^no-?reply@/i,
   /@(tempmail|guerrillamail|10minutemail|mailinator|throwaway)\./i,
 ];
+
+// Phishing/spam keyword patterns in message content
+const suspiciousContentPatterns = [
+  /\b(verify your account|conta suspensa|suspended account)\b/i,
+  /\b(click here to claim|clique aqui para receber)\b/i,
+  /\b(you have won|você ganhou|congratulations winner)\b/i,
+  /\b(urgent action required|ação urgente necessária)\b/i,
+  /\b(password expired|senha expirada)\b/i,
+  /\b(account will be closed|conta será encerrada)\b/i,
+  /\b(confirm your identity|confirme sua identidade)\b/i,
+  /\b(bitcoin|crypto wallet|transferência pix urgente)\b/i,
+];
+
+// Check for excessive URLs in content
+const countUrls = (text: string): number => {
+  const urlPattern = /https?:\/\/[^\s]+/gi;
+  const matches = text.match(urlPattern);
+  return matches ? matches.length : 0;
+};
+
+const MAX_URLS_IN_MESSAGE = 3;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -140,6 +161,26 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Check for phishing/spam content patterns
+    const combinedContent = `${subject} ${message}`;
+    if (suspiciousContentPatterns.some(pattern => pattern.test(combinedContent))) {
+      console.log(`Suspicious content pattern detected from IP hash: ${ipHash}`);
+      return new Response(
+        JSON.stringify({ error: "Conteúdo da mensagem não permitido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check for excessive URLs
+    const urlCount = countUrls(message);
+    if (urlCount > MAX_URLS_IN_MESSAGE) {
+      console.log(`Excessive URLs (${urlCount}) detected from IP hash: ${ipHash}`);
+      return new Response(
+        JSON.stringify({ error: "Número excessivo de links na mensagem" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("Received contact form submission:", { 
       name, 
       email: email.substring(0, 5) + "***", 
@@ -148,6 +189,8 @@ const handler = async (req: Request): Promise<Response> => {
       remaining 
     });
 
+    // SECURITY FIX: Removed reply_to header to prevent email spoofing
+    // The sender's email is now embedded in the message body only (unverified)
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -158,14 +201,14 @@ const handler = async (req: Request): Promise<Response> => {
         from: "TrustPage <onboarding@resend.dev>",
         to: ["atendimento@trustpageapp.com"],
         subject: `[Contato TrustPage] ${escapeHtml(subject)}`,
-        reply_to: email,
+        // NOTE: reply_to removed to prevent email spoofing
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #8B5CF6;">Nova mensagem de contato - TrustPage</h2>
             <hr style="border: 1px solid #e5e7eb;" />
             
             <p><strong>Nome:</strong> ${escapeHtml(name)}</p>
-            <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+            <p><strong>Email do remetente (não verificado):</strong> ${escapeHtml(email)}</p>
             <p><strong>Assunto:</strong> ${escapeHtml(subject)}</p>
             
             <h3 style="color: #374151;">Mensagem:</h3>
@@ -175,7 +218,8 @@ const handler = async (req: Request): Promise<Response> => {
             
             <hr style="border: 1px solid #e5e7eb; margin-top: 24px;" />
             <p style="color: #6b7280; font-size: 12px;">
-              Esta mensagem foi enviada através do formulário de contato do TrustPage.
+              Esta mensagem foi enviada através do formulário de contato do TrustPage.<br/>
+              <strong>Atenção:</strong> O email do remetente não foi verificado. Não responda diretamente sem confirmar a identidade.
             </p>
           </div>
         `,
