@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,8 +14,10 @@ import StatsBar from "@/components/dashboard/StatsBar";
 import PageCard from "@/components/dashboard/PageCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
 import OnboardingModal from "@/components/OnboardingModal";
+import TrafficSourcesChart from "@/components/dashboard/TrafficSourcesChart";
 import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface LandingPage {
   id: string;
@@ -70,6 +72,7 @@ const TrustPageDashboard = () => {
   const [upgradeFeature, setUpgradeFeature] = useState<'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit'>('limit');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+  const [analyticsDialog, setAnalyticsDialog] = useState<{ open: boolean; pageId: string; pageName: string }>({ open: false, pageId: '', pageName: '' });
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -194,6 +197,10 @@ const TrustPageDashboard = () => {
 
   const handleViewPage = (slug: string) => {
     window.open(`${window.location.origin}/p/${slug}`, '_blank');
+  };
+
+  const handleShowAnalytics = (pageId: string, pageName: string) => {
+    setAnalyticsDialog({ open: true, pageId, pageName });
   };
 
   const getLegalPageIcon = (slug: string) => {
@@ -383,6 +390,7 @@ const TrustPageDashboard = () => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCopyLink={handleCopyLink}
+                onShowAnalytics={handleShowAnalytics}
               />
             ))}
           </div>
@@ -499,6 +507,27 @@ const TrustPageDashboard = () => {
         onConfirm={confirmDelete}
         variant="destructive"
       />
+
+      {/* Analytics Dialog */}
+      <Dialog 
+        open={analyticsDialog.open} 
+        onOpenChange={(open) => setAnalyticsDialog({ ...analyticsDialog, open })}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              Analytics: {analyticsDialog.pageName}
+            </DialogTitle>
+          </DialogHeader>
+          {analyticsDialog.open && (
+            <TrafficSourcesChart 
+              pageId={analyticsDialog.pageId} 
+              pageName={analyticsDialog.pageName} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {user && (
         <OnboardingModal
