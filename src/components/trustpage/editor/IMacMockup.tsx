@@ -2,6 +2,7 @@ import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "../templates/HighConversionTemplate";
 import SalesPageTemplate from "../templates/SalesPageTemplate";
 import BioLinkTemplate from "../templates/BioLinkTemplate";
+import HeroCaptureTemplate from "../templates/HeroCaptureTemplate";
 import ScaledViewport from "./ScaledViewport";
 
 interface IMacMockupProps {
@@ -11,6 +12,7 @@ interface IMacMockupProps {
 const IMacMockup = ({ formData }: IMacMockupProps) => {
   const isSalesPage = formData.template_type === 'sales';
   const isBioPage = formData.template_type === 'bio';
+  const isCaptureHero = formData.template_type === 'capture-hero';
   
   // Mockup screen dimensions
   const screenWidth = 512;
@@ -70,6 +72,8 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   <SalesPageTemplate data={formData} isMobile={false} fullHeight={false} />
                 ) : isBioPage ? (
                   <BioLinkTemplate data={formData} isMobile={false} fullHeight={false} />
+                ) : isCaptureHero ? (
+                  <HeroCaptureTemplate data={formData} isMobile={false} fullHeight={false} />
                 ) : (
                   <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
                 )}
