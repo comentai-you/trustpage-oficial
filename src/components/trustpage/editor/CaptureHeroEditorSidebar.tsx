@@ -23,7 +23,7 @@ interface CaptureHeroEditorSidebarProps {
   userPlan?: string;
 }
 
-// Preset glow themes - Dark + Light themes
+// Preset glow themes - Dark + Mid-tone + Light themes
 const glowPresets = [
   // Dark themes
   { id: 'blue-neon', name: 'Neon Azul', accent: '#3b82f6', bg: '#0f172a', bgSecondary: '#1e3a5f', text: '#ffffff' },
@@ -32,6 +32,15 @@ const glowPresets = [
   { id: 'orange-fire', name: 'Laranja Fogo', accent: '#f97316', bg: '#1c1008', bgSecondary: '#2d1a0d', text: '#ffffff' },
   { id: 'pink-cyber', name: 'Rosa Cyber', accent: '#ec4899', bg: '#1a0a14', bgSecondary: '#2d1225', text: '#ffffff' },
   { id: 'cyan-tech', name: 'Ciano Tech', accent: '#06b6d4', bg: '#0a1a1f', bgSecondary: '#0d2833', text: '#ffffff' },
+  // Mid-tone themes (between dark and light)
+  { id: 'slate-pro', name: 'Slate Pro', accent: '#6366f1', bg: '#475569', bgSecondary: '#64748b', text: '#f8fafc' },
+  { id: 'navy-corp', name: 'Navy Corp', accent: '#38bdf8', bg: '#334155', bgSecondary: '#475569', text: '#f1f5f9' },
+  { id: 'storm-cloud', name: 'Storm Cloud', accent: '#a78bfa', bg: '#4b5563', bgSecondary: '#6b7280', text: '#f9fafb' },
+  { id: 'olive-earth', name: 'Olive Terra', accent: '#84cc16', bg: '#3f3f46', bgSecondary: '#52525b', text: '#fafaf9' },
+  { id: 'bronze-warm', name: 'Bronze Warm', accent: '#fb923c', bg: '#44403c', bgSecondary: '#57534e', text: '#fafaf9' },
+  { id: 'wine-elegant', name: 'Vinho Elegante', accent: '#f472b6', bg: '#4c1d4c', bgSecondary: '#6b2c6b', text: '#fdf4ff' },
+  { id: 'forest-mist', name: 'Névoa Floresta', accent: '#34d399', bg: '#374151', bgSecondary: '#4b5563', text: '#f0fdf4' },
+  { id: 'dusk-purple', name: 'Crepúsculo', accent: '#c084fc', bg: '#3b3754', bgSecondary: '#4c4669', text: '#faf5ff' },
   // Light themes
   { id: 'clean-white', name: 'Branco Clean', accent: '#2563eb', bg: '#ffffff', bgSecondary: '#f1f5f9', text: '#1f2937' },
   { id: 'soft-gray', name: 'Cinza Suave', accent: '#6366f1', bg: '#f8fafc', bgSecondary: '#e2e8f0', text: '#334155' },
