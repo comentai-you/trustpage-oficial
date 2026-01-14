@@ -24,6 +24,7 @@ import {
 import EditorSidebar from "@/components/trustpage/editor/EditorSidebar";
 import SalesEditorSidebar from "@/components/trustpage/editor/SalesEditorSidebar";
 import BioEditorSidebar from "@/components/trustpage/editor/BioEditorSidebar";
+import CaptureHeroEditorSidebar from "@/components/trustpage/editor/CaptureHeroEditorSidebar";
 import SectionBuilderSidebar from "@/components/trustpage/editor/SectionBuilderSidebar";
 import IMacMockup from "@/components/trustpage/editor/IMacMockup";
 import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
@@ -534,6 +535,8 @@ const TrustPageEditor = () => {
               <SectionBuilderSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             ) : formData.template_type === "bio" ? (
               <BioEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
+            ) : formData.template_type === "capture-hero" ? (
+              <CaptureHeroEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             ) : (
               <EditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
             )}
@@ -567,6 +570,8 @@ const TrustPageEditor = () => {
                 <SectionBuilderSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               ) : formData.template_type === "bio" ? (
                 <BioEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
+              ) : formData.template_type === "capture-hero" ? (
+                <CaptureHeroEditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               ) : (
                 <EditorSidebar formData={formData} onChange={handleChange} userPlan={userPlan} />
               )}
