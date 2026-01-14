@@ -69,7 +69,13 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                 `}
               </style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                <div className="w-full" style={{ backgroundColor: formData.colors.background }}>
+                <div 
+                  className="w-full relative" 
+                  style={{ 
+                    backgroundColor: formData.colors.background,
+                    minHeight: isCaptureHero ? `${Math.ceil(screenHeight / scale)}px` : 'auto',
+                  }}
+                >
                   {isSalesPage ? (
                     <SalesPageTemplate data={formData} isMobile={false} fullHeight={false} />
                   ) : isBioPage ? (
