@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       landing_pages: {
         Row: {
           colors: Json | null
@@ -414,6 +441,10 @@ export type Database = {
       is_subscription_active: {
         Args: { check_user_id: string }
         Returns: boolean
+      }
+      log_admin_action: {
+        Args: { action_details?: Json; action_name: string; target_id?: string }
+        Returns: undefined
       }
       update_user_plan: {
         Args: {
