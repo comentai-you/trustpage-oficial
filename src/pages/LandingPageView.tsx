@@ -245,6 +245,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           whatsapp_number: page.whatsapp_number || '',
           pix_pixel_id: page.pix_pixel_id || '',
           facebook_pixel_id: (page as any).facebook_pixel_id || '',
+          google_tag_id: content?.google_tag_id || '',
           colors,
           primary_color: page.primary_color || '#8B5CF6',
           content,

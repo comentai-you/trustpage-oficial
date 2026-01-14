@@ -137,6 +137,7 @@ const TrustPageEditor = () => {
           whatsapp_number: page.whatsapp_number || "",
           pix_pixel_id: page.pix_pixel_id || "",
           facebook_pixel_id: (page as any).facebook_pixel_id || "",
+          google_tag_id: contentAny?.google_tag_id || "",
           colors: (page.colors as unknown as LandingPageFormData["colors"]) || defaultFormData.colors,
           primary_color: page.primary_color || "#8B5CF6",
           content,
@@ -228,6 +229,7 @@ const TrustPageEditor = () => {
         ...(formData.content as any),
         headline_size_mobile: formData.headline_size_mobile,
         headline_size_desktop: formData.headline_size_desktop,
+        google_tag_id: formData.google_tag_id,
       };
 
       const pageData = {

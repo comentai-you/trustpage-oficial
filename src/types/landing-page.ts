@@ -208,6 +208,7 @@ export interface LandingPageFormData {
   whatsapp_number: string;
   pix_pixel_id: string;
   facebook_pixel_id: string;
+  google_tag_id: string;
   colors: LandingPageColors;
   primary_color: string;
   content: SalesPageContent | BioLinkContent;
@@ -239,6 +240,7 @@ export const defaultFormData: LandingPageFormData = {
   whatsapp_number: '',
   pix_pixel_id: '',
   facebook_pixel_id: '',
+  google_tag_id: '',
   colors: {
     primary: '#22c55e',
     background: '#09090b',
