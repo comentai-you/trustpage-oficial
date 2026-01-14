@@ -49,9 +49,9 @@ const LeadMagnetUpload = ({ value, onChange }: LeadMagnetUploadProps) => {
         return;
       }
 
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Sanitize original filename (remove special chars, keep extension)
+      const originalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const fileName = `${user.id}/${Date.now()}_${originalName}`;
 
       // Simulate progress (Supabase doesn't provide real progress)
       const progressInterval = setInterval(() => {
@@ -116,10 +116,11 @@ const LeadMagnetUpload = ({ value, onChange }: LeadMagnetUploadProps) => {
   const getFileName = (url: string) => {
     try {
       const urlObj = new URL(url);
-      const path = urlObj.pathname;
-      const fileName = path.split('/').pop() || 'arquivo';
-      // Remove the random prefix
-      return fileName.replace(/^\d+-[a-z0-9]+-/, '');
+      const path = decodeURIComponent(urlObj.pathname);
+      const fullName = path.split('/').pop() || 'arquivo';
+      // Remove the timestamp prefix (e.g., "1234567890_filename.pdf" -> "filename.pdf")
+      const cleanName = fullName.replace(/^\d+_/, '');
+      return cleanName.replace(/_/g, ' ');
     } catch {
       return 'arquivo';
     }

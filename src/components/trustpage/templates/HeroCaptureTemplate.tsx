@@ -121,13 +121,13 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
       // Convert to blob
       const blob = await response.blob();
 
-      // Extract filename from URL or use default
+      // Extract original filename from URL
       const urlParts = magnetConfig.fileUrl.split('/');
       const rawFilename = urlParts[urlParts.length - 1] || 'download';
-      // Clean filename: remove query params, decode URI, replace underscores
-      const cleanFilename = decodeURIComponent(rawFilename.split('?')[0])
-        .replace(/_/g, ' ')
-        .replace(/\s+/g, '_');
+      // Clean filename: remove query params, decode URI, remove timestamp prefix
+      const decodedFilename = decodeURIComponent(rawFilename.split('?')[0]);
+      // Remove timestamp prefix (e.g., "1234567890_filename.pdf" -> "filename.pdf")
+      const cleanFilename = decodedFilename.replace(/^\d+_/, '').replace(/_/g, ' ');
       
       // Create temporary URL and trigger download
       const blobUrl = window.URL.createObjectURL(blob);
