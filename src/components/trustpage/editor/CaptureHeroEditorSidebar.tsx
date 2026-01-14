@@ -21,14 +21,22 @@ interface CaptureHeroEditorSidebarProps {
   userPlan?: string;
 }
 
-// Preset glow themes
+// Preset glow themes - Dark + Light themes
 const glowPresets = [
-  { id: 'blue-neon', name: 'Neon Azul', accent: '#3b82f6', bg: '#0f172a', bgSecondary: '#1e3a5f' },
-  { id: 'purple-magic', name: 'Roxo Mágico', accent: '#8b5cf6', bg: '#1a1025', bgSecondary: '#2d1b4e' },
-  { id: 'green-matrix', name: 'Verde Matrix', accent: '#22c55e', bg: '#0a1f0a', bgSecondary: '#143314' },
-  { id: 'orange-fire', name: 'Laranja Fogo', accent: '#f97316', bg: '#1c1008', bgSecondary: '#2d1a0d' },
-  { id: 'pink-cyber', name: 'Rosa Cyber', accent: '#ec4899', bg: '#1a0a14', bgSecondary: '#2d1225' },
-  { id: 'cyan-tech', name: 'Ciano Tech', accent: '#06b6d4', bg: '#0a1a1f', bgSecondary: '#0d2833' },
+  // Dark themes
+  { id: 'blue-neon', name: 'Neon Azul', accent: '#3b82f6', bg: '#0f172a', bgSecondary: '#1e3a5f', text: '#ffffff' },
+  { id: 'purple-magic', name: 'Roxo Mágico', accent: '#8b5cf6', bg: '#1a1025', bgSecondary: '#2d1b4e', text: '#ffffff' },
+  { id: 'green-matrix', name: 'Verde Matrix', accent: '#22c55e', bg: '#0a1f0a', bgSecondary: '#143314', text: '#ffffff' },
+  { id: 'orange-fire', name: 'Laranja Fogo', accent: '#f97316', bg: '#1c1008', bgSecondary: '#2d1a0d', text: '#ffffff' },
+  { id: 'pink-cyber', name: 'Rosa Cyber', accent: '#ec4899', bg: '#1a0a14', bgSecondary: '#2d1225', text: '#ffffff' },
+  { id: 'cyan-tech', name: 'Ciano Tech', accent: '#06b6d4', bg: '#0a1a1f', bgSecondary: '#0d2833', text: '#ffffff' },
+  // Light themes
+  { id: 'clean-white', name: 'Branco Clean', accent: '#2563eb', bg: '#ffffff', bgSecondary: '#f1f5f9', text: '#1f2937' },
+  { id: 'soft-gray', name: 'Cinza Suave', accent: '#6366f1', bg: '#f8fafc', bgSecondary: '#e2e8f0', text: '#334155' },
+  { id: 'warm-cream', name: 'Creme Quente', accent: '#d97706', bg: '#fffbeb', bgSecondary: '#fef3c7', text: '#78350f' },
+  { id: 'mint-fresh', name: 'Menta Fresh', accent: '#059669', bg: '#ecfdf5', bgSecondary: '#d1fae5', text: '#064e3b' },
+  { id: 'rose-blush', name: 'Rosa Blush', accent: '#db2777', bg: '#fdf2f8', bgSecondary: '#fce7f3', text: '#831843' },
+  { id: 'sky-light', name: 'Céu Claro', accent: '#0284c7', bg: '#f0f9ff', bgSecondary: '#e0f2fe', text: '#0c4a6e' },
 ];
 
 // Convert rem to percentage - different ranges for mobile and desktop
@@ -66,7 +74,7 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
         ...formData.colors,
         background: preset.bg,
         primary: preset.bgSecondary,
-        text: '#ffffff',
+        text: preset.text,
       }
     });
   };
@@ -80,8 +88,8 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-semibold text-gray-900">Editor Capture Hero</h2>
-            <p className="text-sm text-gray-500">Página de captura de leads</p>
+            <h2 className="font-semibold text-gray-900">Página de Captura</h2>
+            <p className="text-sm text-gray-500">Editor de lead capture</p>
           </div>
           <AIConfigDialog />
         </div>
@@ -374,6 +382,28 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
                       colors: { ...formData.colors, primary: e.target.value } 
                     })}
                     placeholder="#1e293b"
+                    className="text-sm font-mono flex-1"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-500">Cor do Texto</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={formData.colors.text || '#ffffff'}
+                    onChange={(e) => onChange({ 
+                      colors: { ...formData.colors, text: e.target.value } 
+                    })}
+                    className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
+                  />
+                  <Input
+                    value={formData.colors.text || '#ffffff'}
+                    onChange={(e) => onChange({ 
+                      colors: { ...formData.colors, text: e.target.value } 
+                    })}
+                    placeholder="#ffffff"
                     className="text-sm font-mono flex-1"
                   />
                 </div>

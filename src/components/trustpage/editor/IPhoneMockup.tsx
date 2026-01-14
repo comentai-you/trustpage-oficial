@@ -106,7 +106,13 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
               `}
             </style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              <div className="w-full min-h-full" style={{ backgroundColor: formData.colors.background }}>
+              <div 
+                className="w-full relative" 
+                style={{ 
+                  backgroundColor: formData.colors.background,
+                  minHeight: isCaptureHero ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
+                }}
+              >
                 {isSalesPage ? (
                   <SalesPageTemplate data={formData} isMobile={true} fullHeight={false} />
                 ) : isBioPage ? (
