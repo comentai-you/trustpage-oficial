@@ -312,7 +312,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           ) : pageData.template_type === 'bio' ? (
             <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           ) : pageData.template_type === 'capture-hero' ? (
-            <HeroCaptureTemplate data={pageData} isMobile={isMobile} />
+            <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight />
           ) : (
             <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           )}

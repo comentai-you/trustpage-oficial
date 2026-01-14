@@ -9,11 +9,13 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
 import { 
-  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput
+  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown
 } from "lucide-react";
 import CoverImageUpload from "./CoverImageUpload";
 import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 import ImageUpload from "@/components/trustpage/ImageUpload";
+import LeadMagnetUpload from "./LeadMagnetUpload";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface CaptureHeroEditorSidebarProps {
   formData: LandingPageFormData;
@@ -58,11 +60,27 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
     showWhatsapp: false,
   };
 
+  // Lead magnet configuration from content
+  const magnetConfig = (formData.content as any)?.magnetConfig || {
+    type: 'link', // 'link' or 'file'
+    link: '',
+    fileUrl: '',
+  };
+
   const updateFormFields = (updates: Partial<typeof formFields>) => {
     onChange({
       content: {
         ...(formData.content as any),
         formFields: { ...formFields, ...updates }
+      }
+    });
+  };
+
+  const updateMagnetConfig = (updates: Partial<typeof magnetConfig>) => {
+    onChange({
+      content: {
+        ...(formData.content as any),
+        magnetConfig: { ...magnetConfig, ...updates }
       }
     });
   };
@@ -95,7 +113,7 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["config", "content", "glow", "image", "cta", "form"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["config", "content", "glow", "image", "magnet", "form"]} className="w-full">
         
         {/* Page Configuration Section */}
         <AccordionItem value="config">
@@ -437,26 +455,103 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
           </AccordionContent>
         </AccordionItem>
 
-        {/* CTA Section */}
-        <AccordionItem value="cta">
+        {/* Lead Magnet / CTA Section */}
+        <AccordionItem value="magnet">
           <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <MousePointerClick className="w-4 h-4 text-primary" />
-              Call to Action
+              <Gift className="w-4 h-4 text-primary" />
+              Isca Digital / CTA
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
+            <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+              <p className="text-xs text-purple-800 font-medium mb-1">🎁 Isca Digital</p>
+              <p className="text-xs text-purple-600">
+                Configure o que acontece quando o lead preencher o formulário.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">Texto do Botão</Label>
               <InputWithAI 
                 value={formData.cta_text || ''} 
                 onChange={(e) => onChange({ cta_text: e.target.value })} 
-                placeholder="GARANTIR MEU LUGAR AGORA!" 
+                placeholder="BAIXAR EBOOK GRÁTIS!" 
                 className="text-sm"
                 aiFieldType="button"
                 showAI={isPro}
               />
             </div>
+
+            <div className="space-y-3">
+              <Label className="text-xs text-gray-600 font-medium">Tipo de Entrega</Label>
+              <RadioGroup
+                value={magnetConfig.type}
+                onValueChange={(value) => updateMagnetConfig({ type: value as 'link' | 'file' })}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <RadioGroupItem value="link" id="magnet-link" />
+                  <Label htmlFor="magnet-link" className="flex items-center gap-2 text-sm cursor-pointer flex-1">
+                    <Link className="w-4 h-4 text-blue-500" />
+                    <div>
+                      <span className="font-medium">Link Externo</span>
+                      <p className="text-[10px] text-gray-500">Redireciona para URL (checkout, grupo, etc)</p>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <RadioGroupItem value="file" id="magnet-file" />
+                  <Label htmlFor="magnet-file" className="flex items-center gap-2 text-sm cursor-pointer flex-1">
+                    <FileDown className="w-4 h-4 text-green-500" />
+                    <div>
+                      <span className="font-medium">Upload de Arquivo</span>
+                      <p className="text-[10px] text-gray-500">PDF, Ebook - Mostra tela de download</p>
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {magnetConfig.type === 'link' && (
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600">URL de Destino</Label>
+                <Input 
+                  value={magnetConfig.link || ''} 
+                  onChange={(e) => updateMagnetConfig({ link: e.target.value })} 
+                  placeholder="https://seulink.com/checkout" 
+                  className="text-sm" 
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  O lead será redirecionado para esta URL após preencher o formulário.
+                </p>
+              </div>
+            )}
+
+            {magnetConfig.type === 'file' && (
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600">Arquivo para Download</Label>
+                <LeadMagnetUpload
+                  value={magnetConfig.fileUrl || ''}
+                  onChange={(url) => updateMagnetConfig({ fileUrl: url })}
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  O lead verá uma tela de sucesso com botão para baixar o arquivo.
+                </p>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* CTA Section - Legacy (hidden, keeping for backwards compatibility) */}
+        <AccordionItem value="cta" className="hidden">
+          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <MousePointerClick className="w-4 h-4 text-primary" />
+              Call to Action (Legacy)
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">URL de Destino</Label>
               <Input 
