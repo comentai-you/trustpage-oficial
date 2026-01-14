@@ -431,23 +431,95 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
             </div>
           </div>
 
-          {/* Right Column: Hero Image (Ebook or Person) */}
-          <div className={`relative flex items-center justify-center ${isMobile ? 'order-first' : ''}`}>
-            {/* Light Circle behind image */}
-            <div
-              className={`absolute ${isMobile ? 'w-48 h-48' : 'w-72 h-72 lg:w-96 lg:h-96'} rounded-full blur-3xl`}
-              style={{ backgroundColor: `${accentColor}30` }}
-            />
-
+          {/* Right Column: Hero Image (Ebook or Person) - Premium Studio Effect */}
+          <div className={`relative flex flex-col items-center justify-end ${isMobile ? 'order-first pb-4' : 'pb-8'}`}>
+            
             {data.image_url ? (
-              <img
-                src={data.image_url}
-                alt="Hero"
-                className={`relative z-10 max-w-full ${isMobile ? 'max-h-48' : 'max-h-80 lg:max-h-[500px]'} object-contain`}
-                style={{
-                  filter: `drop-shadow(0 25px 50px ${accentColor}40)`,
-                }}
-              />
+              <>
+                {/* Layered Backlight System */}
+                {/* Layer 1: Large ambient glow - creates atmosphere */}
+                <div
+                  className={`absolute ${isMobile ? 'w-64 h-64' : 'w-[400px] h-[400px] lg:w-[550px] lg:h-[550px]'} rounded-full blur-[100px] opacity-25`}
+                  style={{ 
+                    backgroundColor: accentColor,
+                    top: '15%',
+                  }}
+                />
+                
+                {/* Layer 2: Medium focused glow - highlights silhouette */}
+                <div
+                  className={`absolute ${isMobile ? 'w-40 h-40' : 'w-64 h-64 lg:w-80 lg:h-80'} rounded-full blur-[60px] opacity-40`}
+                  style={{ 
+                    backgroundColor: accentColor,
+                    top: '25%',
+                  }}
+                />
+                
+                {/* Layer 3: Tight intense core glow - rim light effect */}
+                <div
+                  className={`absolute ${isMobile ? 'w-24 h-32' : 'w-40 h-52 lg:w-48 lg:h-64'} rounded-full blur-[40px] opacity-50`}
+                  style={{ 
+                    background: `radial-gradient(ellipse, ${accentColor} 0%, transparent 70%)`,
+                    top: '20%',
+                  }}
+                />
+
+                {/* Main Image Container with Mask */}
+                <div 
+                  className="relative z-10"
+                  style={{
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                  }}
+                >
+                  <img
+                    src={data.image_url}
+                    alt="Hero"
+                    className={`relative max-w-full ${isMobile ? 'max-h-56' : 'max-h-96 lg:max-h-[520px]'} object-contain`}
+                    style={{
+                      filter: `drop-shadow(0 0 60px ${accentColor}50) drop-shadow(0 25px 40px rgba(0,0,0,0.4))`,
+                    }}
+                  />
+                </div>
+
+                {/* Reflection Layer - Mirrored Image */}
+                <div 
+                  className="absolute z-[5] w-full flex justify-center"
+                  style={{
+                    bottom: isMobile ? '-15%' : '-12%',
+                    transform: 'scaleY(-1)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 50%)',
+                    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 50%)',
+                    filter: 'blur(3px)',
+                    opacity: 0.4,
+                  }}
+                >
+                  <img
+                    src={data.image_url}
+                    alt=""
+                    aria-hidden="true"
+                    className={`max-w-full ${isMobile ? 'max-h-56' : 'max-h-96 lg:max-h-[520px]'} object-contain`}
+                  />
+                </div>
+
+                {/* Ground Shadow - Elliptical for realism */}
+                <div
+                  className={`absolute z-[4] ${isMobile ? 'w-32 h-4' : 'w-48 h-6 lg:w-64 lg:h-8'} rounded-[100%] blur-xl`}
+                  style={{
+                    background: `radial-gradient(ellipse, ${accentColor}40 0%, transparent 70%)`,
+                    bottom: isMobile ? '8%' : '12%',
+                  }}
+                />
+                
+                {/* Secondary dark ground shadow for depth */}
+                <div
+                  className={`absolute z-[3] ${isMobile ? 'w-24 h-3' : 'w-40 h-5 lg:w-56 lg:h-6'} rounded-[100%] blur-lg`}
+                  style={{
+                    background: 'radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%)',
+                    bottom: isMobile ? '6%' : '10%',
+                  }}
+                />
+              </>
             ) : (
               // Visual placeholder if no image
               <div
