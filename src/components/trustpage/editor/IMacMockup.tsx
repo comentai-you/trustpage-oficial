@@ -54,10 +54,11 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
             
             {/* Content - scaled to fit properly */}
             <div 
-              className="h-[calc(100%-24px)] overflow-y-auto overflow-x-hidden imac-scroll"
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden imac-scroll"
               style={{
                 scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
+                msOverflowStyle: 'none',
+                backgroundColor: formData.colors.background
               }}
             >
               <style>
@@ -68,15 +69,17 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                 `}
               </style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                {isSalesPage ? (
-                  <SalesPageTemplate data={formData} isMobile={false} fullHeight={false} />
-                ) : isBioPage ? (
-                  <BioLinkTemplate data={formData} isMobile={false} fullHeight={false} />
-                ) : isCaptureHero ? (
-                  <HeroCaptureTemplate data={formData} isMobile={false} fullHeight={false} />
-                ) : (
-                  <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
-                )}
+                <div className="w-full" style={{ backgroundColor: formData.colors.background }}>
+                  {isSalesPage ? (
+                    <SalesPageTemplate data={formData} isMobile={false} fullHeight={false} />
+                  ) : isBioPage ? (
+                    <BioLinkTemplate data={formData} isMobile={false} fullHeight={false} />
+                  ) : isCaptureHero ? (
+                    <HeroCaptureTemplate data={formData} isMobile={false} fullHeight={false} />
+                  ) : (
+                    <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
+                  )}
+                </div>
               </ScaledViewport>
             </div>
           </div>
