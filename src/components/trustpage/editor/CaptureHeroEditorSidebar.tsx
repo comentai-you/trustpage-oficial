@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
@@ -10,12 +9,11 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
 import { 
-  Type, Image, MousePointerClick, Sparkles, Upload, X, Loader2, BarChart3, Globe, Settings, FormInput
+  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import CoverImageUpload from "./CoverImageUpload";
 import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
+import ImageUpload from "@/components/trustpage/ImageUpload";
 
 interface CaptureHeroEditorSidebarProps {
   formData: LandingPageFormData;
@@ -41,9 +39,6 @@ const desktopSizeToPercent = (size: number) => Math.round(((size - 1.5) / 2.5) *
 const desktopPercentToSize = (percent: number) => 1.5 + (percent / 100) * 2.5;
 
 const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: CaptureHeroEditorSidebarProps) => {
-  const { user } = useAuth();
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
 
   const isPro = userPlan === 'pro' || userPlan === 'pro_yearly' || userPlan === 'elite';
 
@@ -62,66 +57,6 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
         formFields: { ...formFields, ...updates }
       }
     });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith('image/')) { 
-      toast.error("Selecione uma imagem"); 
-      return; 
-    }
-    if (file.size > 5 * 1024 * 1024) { 
-      toast.error("Máximo 5MB"); 
-      return; 
-    }
-
-    setUploadingImage(true);
-    try {
-      const filePath = `${user.id}/capture-hero/hero_${Date.now()}.${file.name.split('.').pop()}`;
-      const { error } = await supabase.storage.from('uploads').upload(filePath, file);
-      if (error) throw error;
-      const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
-      if (data?.publicUrl) {
-        onChange({ image_url: data.publicUrl });
-      }
-      toast.success("Imagem enviada!");
-    } catch { 
-      toast.error("Erro no upload"); 
-    } finally { 
-      setUploadingImage(false); 
-      e.target.value = ''; 
-    }
-  };
-
-  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith('image/')) { 
-      toast.error("Selecione uma imagem"); 
-      return; 
-    }
-    if (file.size > 2 * 1024 * 1024) { 
-      toast.error("Máximo 2MB"); 
-      return; 
-    }
-
-    setUploadingProfileImage(true);
-    try {
-      const filePath = `${user.id}/capture-hero/profile_${Date.now()}.${file.name.split('.').pop()}`;
-      const { error } = await supabase.storage.from('uploads').upload(filePath, file);
-      if (error) throw error;
-      const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
-      if (data?.publicUrl) {
-        onChange({ profile_image_url: data.publicUrl });
-      }
-      toast.success("Imagem enviada!");
-    } catch { 
-      toast.error("Erro no upload"); 
-    } finally { 
-      setUploadingProfileImage(false); 
-      e.target.value = ''; 
-    }
   };
 
   const handlePresetSelect = (preset: typeof glowPresets[0]) => {
@@ -184,41 +119,11 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
                 Sua página será acessível em: trustpage.com/{formData.slug || 'minha-pagina'}
               </p>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-gray-600">Imagem da Página (OG Image)</Label>
-              {formData.profile_image_url ? (
-                <div className="relative">
-                  <img 
-                    src={formData.profile_image_url} 
-                    alt="OG Image" 
-                    className="w-full h-24 object-cover rounded-lg border"
-                  />
-                  <button 
-                    onClick={() => onChange({ profile_image_url: '' })} 
-                    className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors bg-gray-50">
-                  {uploadingProfileImage ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                      <span className="text-xs text-gray-500">Clique para enviar</span>
-                    </>
-                  )}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleProfileImageUpload} 
-                    className="hidden" 
-                  />
-                </label>
-              )}
-            </div>
+            {/* Cover Image Upload - same as other templates */}
+            <CoverImageUpload 
+              coverImageUrl={formData.cover_image_url || ''} 
+              onChange={(url) => onChange({ cover_image_url: url })} 
+            />
           </AccordionContent>
         </AccordionItem>
 
@@ -486,53 +391,15 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-gray-600">Imagem Principal</Label>
-              <p className="text-xs text-gray-400">
-                Use uma imagem PNG sem fundo para o efeito flutuante ideal.
-              </p>
-              {formData.image_url ? (
-                <div className="relative">
-                  <div 
-                    className="rounded-lg p-4 flex items-center justify-center"
-                    style={{ backgroundColor: formData.colors.background || '#0f172a' }}
-                  >
-                    <img 
-                      src={formData.image_url} 
-                      alt="Hero preview" 
-                      className="max-h-40 object-contain"
-                      style={{
-                        filter: `drop-shadow(0 10px 30px ${formData.primary_color || '#3b82f6'}40)`,
-                      }}
-                    />
-                  </div>
-                  <button 
-                    onClick={() => onChange({ image_url: '' })} 
-                    className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition-colors bg-gray-50">
-                  {uploadingImage ? (
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  ) : (
-                    <>
-                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">Clique para enviar</span>
-                      <span className="text-xs text-gray-400 mt-1">PNG ou JPG até 5MB</span>
-                    </>
-                  )}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageUpload} 
-                    className="hidden" 
-                  />
-                </label>
-              )}
-            </div>
+            <p className="text-xs text-gray-400">
+              Use uma imagem PNG sem fundo para o efeito flutuante ideal.
+            </p>
+            <ImageUpload
+              value={formData.image_url || ''}
+              onChange={(url) => onChange({ image_url: url })}
+              label="Imagem Principal"
+              hint="PNG ou JPG até 5MB - recomendado com fundo transparente"
+            />
           </AccordionContent>
         </AccordionItem>
 
