@@ -94,7 +94,8 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
             className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto iphone-scroll"
             style={{
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              msOverflowStyle: 'none',
+              backgroundColor: formData.colors.background
             }}
           >
             <style>
@@ -105,15 +106,17 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
               `}
             </style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              {isSalesPage ? (
-                <SalesPageTemplate data={formData} isMobile={true} fullHeight={false} />
-              ) : isBioPage ? (
-                <BioLinkTemplate data={formData} isMobile={true} fullHeight={false} />
-              ) : isCaptureHero ? (
-                <HeroCaptureTemplate data={formData} isMobile={true} fullHeight={false} />
-              ) : (
-                <HighConversionTemplate data={formData} isMobile={true} fullHeight={false} />
-              )}
+              <div className="w-full min-h-full" style={{ backgroundColor: formData.colors.background }}>
+                {isSalesPage ? (
+                  <SalesPageTemplate data={formData} isMobile={true} fullHeight={false} />
+                ) : isBioPage ? (
+                  <BioLinkTemplate data={formData} isMobile={true} fullHeight={false} />
+                ) : isCaptureHero ? (
+                  <HeroCaptureTemplate data={formData} isMobile={true} fullHeight={false} />
+                ) : (
+                  <HighConversionTemplate data={formData} isMobile={true} fullHeight={false} />
+                )}
+              </div>
             </ScaledViewport>
           </div>
         </div>
