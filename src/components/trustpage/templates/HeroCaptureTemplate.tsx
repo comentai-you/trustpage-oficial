@@ -436,87 +436,181 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
             
             {data.image_url ? (
               <>
-                {/* Layered Backlight System */}
+                {/* Floating Particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
+                  {[...Array(isMobile ? 8 : 15)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        width: `${Math.random() * 6 + 2}px`,
+                        height: `${Math.random() * 6 + 2}px`,
+                        backgroundColor: accentColor,
+                        opacity: Math.random() * 0.5 + 0.2,
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 80 + 10}%`,
+                        boxShadow: `0 0 ${Math.random() * 10 + 5}px ${accentColor}`,
+                        animation: `float-particle-${i % 3} ${Math.random() * 4 + 3}s ease-in-out infinite`,
+                        animationDelay: `${Math.random() * 2}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* CSS Animations for Particles and Breathing */}
+                <style>{`
+                  @keyframes float-particle-0 {
+                    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+                    50% { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
+                  }
+                  @keyframes float-particle-1 {
+                    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+                    50% { transform: translateY(-15px) translateX(-8px); opacity: 0.6; }
+                  }
+                  @keyframes float-particle-2 {
+                    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.2; }
+                    50% { transform: translateY(-25px) translateX(5px); opacity: 0.5; }
+                  }
+                  @keyframes breathe-slow {
+                    0%, 100% { transform: scale(1); opacity: 0.2; }
+                    50% { transform: scale(1.15); opacity: 0.35; }
+                  }
+                  @keyframes breathe-medium {
+                    0%, 100% { transform: scale(1); opacity: 0.35; }
+                    50% { transform: scale(1.1); opacity: 0.5; }
+                  }
+                  @keyframes breathe-fast {
+                    0%, 100% { transform: scale(1); opacity: 0.45; }
+                    50% { transform: scale(1.08); opacity: 0.6; }
+                  }
+                `}</style>
+
+                {/* Layered Backlight System with Breathing Animation */}
                 {/* Layer 1: Large ambient glow - creates atmosphere */}
                 <div
-                  className={`absolute ${isMobile ? 'w-64 h-64' : 'w-[400px] h-[400px] lg:w-[550px] lg:h-[550px]'} rounded-full blur-[100px] opacity-25`}
+                  className={`absolute ${isMobile ? 'w-72 h-72' : 'w-[450px] h-[450px] lg:w-[600px] lg:h-[600px]'} rounded-full blur-[120px]`}
                   style={{ 
                     backgroundColor: accentColor,
-                    top: '15%',
+                    top: '10%',
+                    animation: 'breathe-slow 6s ease-in-out infinite',
                   }}
                 />
                 
                 {/* Layer 2: Medium focused glow - highlights silhouette */}
                 <div
-                  className={`absolute ${isMobile ? 'w-40 h-40' : 'w-64 h-64 lg:w-80 lg:h-80'} rounded-full blur-[60px] opacity-40`}
+                  className={`absolute ${isMobile ? 'w-48 h-48' : 'w-72 h-72 lg:w-96 lg:h-96'} rounded-full blur-[80px]`}
                   style={{ 
                     backgroundColor: accentColor,
-                    top: '25%',
+                    top: '20%',
+                    animation: 'breathe-medium 4s ease-in-out infinite',
+                    animationDelay: '0.5s',
                   }}
                 />
                 
                 {/* Layer 3: Tight intense core glow - rim light effect */}
                 <div
-                  className={`absolute ${isMobile ? 'w-24 h-32' : 'w-40 h-52 lg:w-48 lg:h-64'} rounded-full blur-[40px] opacity-50`}
+                  className={`absolute ${isMobile ? 'w-32 h-40' : 'w-48 h-60 lg:w-56 lg:h-72'} rounded-full blur-[50px]`}
                   style={{ 
                     background: `radial-gradient(ellipse, ${accentColor} 0%, transparent 70%)`,
-                    top: '20%',
+                    top: '15%',
+                    animation: 'breathe-fast 3s ease-in-out infinite',
+                    animationDelay: '1s',
                   }}
                 />
 
-                {/* Main Image Container with Mask */}
+                {/* Side Integration Glows - Left */}
+                <div
+                  className={`absolute ${isMobile ? 'w-24 h-48' : 'w-40 h-80 lg:w-48 lg:h-96'} blur-[60px] opacity-30`}
+                  style={{ 
+                    background: `radial-gradient(ellipse at center, ${accentColor} 0%, transparent 70%)`,
+                    left: isMobile ? '-10%' : '-5%',
+                    top: '20%',
+                    animation: 'breathe-slow 5s ease-in-out infinite',
+                    animationDelay: '0.3s',
+                  }}
+                />
+
+                {/* Side Integration Glows - Right */}
+                <div
+                  className={`absolute ${isMobile ? 'w-24 h-48' : 'w-40 h-80 lg:w-48 lg:h-96'} blur-[60px] opacity-30`}
+                  style={{ 
+                    background: `radial-gradient(ellipse at center, ${accentColor} 0%, transparent 70%)`,
+                    right: isMobile ? '-10%' : '-5%',
+                    top: '20%',
+                    animation: 'breathe-slow 5s ease-in-out infinite',
+                    animationDelay: '0.8s',
+                  }}
+                />
+
+                {/* Main Image Container with Enhanced Multi-Directional Mask */}
                 <div 
                   className="relative z-10"
                   style={{
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                    WebkitMaskImage: `
+                      linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
+                      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                    `,
+                    WebkitMaskComposite: 'source-in',
+                    maskImage: `
+                      linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
+                      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                    `,
+                    maskComposite: 'intersect',
                   }}
                 >
                   <img
                     src={data.image_url}
                     alt="Hero"
-                    className={`relative max-w-full ${isMobile ? 'max-h-56' : 'max-h-96 lg:max-h-[520px]'} object-contain`}
+                    className={`relative max-w-full ${isMobile ? 'max-h-60' : 'max-h-[420px] lg:max-h-[540px]'} object-contain`}
                     style={{
-                      filter: `drop-shadow(0 0 60px ${accentColor}50) drop-shadow(0 25px 40px rgba(0,0,0,0.4))`,
+                      filter: `drop-shadow(0 0 80px ${accentColor}60) drop-shadow(0 30px 50px rgba(0,0,0,0.5))`,
                     }}
                   />
                 </div>
+
+                {/* Soft Vignette Overlay for Edge Blending */}
+                <div 
+                  className="absolute inset-0 z-[11] pointer-events-none"
+                  style={{
+                    background: `radial-gradient(ellipse 70% 60% at center 40%, transparent 40%, ${isGradientBg ? 'rgba(0,0,0,0.3)' : bgStart}90 100%)`,
+                  }}
+                />
 
                 {/* Reflection Layer - Mirrored Image */}
                 <div 
                   className="absolute z-[5] w-full flex justify-center"
                   style={{
-                    bottom: isMobile ? '-15%' : '-12%',
+                    bottom: isMobile ? '-18%' : '-15%',
                     transform: 'scaleY(-1)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 50%)',
-                    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 50%)',
-                    filter: 'blur(3px)',
-                    opacity: 0.4,
+                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
+                    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
+                    filter: 'blur(4px)',
+                    opacity: 0.35,
                   }}
                 >
                   <img
                     src={data.image_url}
                     alt=""
                     aria-hidden="true"
-                    className={`max-w-full ${isMobile ? 'max-h-56' : 'max-h-96 lg:max-h-[520px]'} object-contain`}
+                    className={`max-w-full ${isMobile ? 'max-h-60' : 'max-h-[420px] lg:max-h-[540px]'} object-contain`}
                   />
                 </div>
 
                 {/* Ground Shadow - Elliptical for realism */}
                 <div
-                  className={`absolute z-[4] ${isMobile ? 'w-32 h-4' : 'w-48 h-6 lg:w-64 lg:h-8'} rounded-[100%] blur-xl`}
+                  className={`absolute z-[4] ${isMobile ? 'w-40 h-5' : 'w-56 h-8 lg:w-72 lg:h-10'} rounded-[100%] blur-2xl`}
                   style={{
-                    background: `radial-gradient(ellipse, ${accentColor}40 0%, transparent 70%)`,
-                    bottom: isMobile ? '8%' : '12%',
+                    background: `radial-gradient(ellipse, ${accentColor}50 0%, transparent 70%)`,
+                    bottom: isMobile ? '5%' : '8%',
                   }}
                 />
                 
                 {/* Secondary dark ground shadow for depth */}
                 <div
-                  className={`absolute z-[3] ${isMobile ? 'w-24 h-3' : 'w-40 h-5 lg:w-56 lg:h-6'} rounded-[100%] blur-lg`}
+                  className={`absolute z-[3] ${isMobile ? 'w-32 h-4' : 'w-48 h-6 lg:w-64 lg:h-8'} rounded-[100%] blur-xl`}
                   style={{
-                    background: 'radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%)',
-                    bottom: isMobile ? '6%' : '10%',
+                    background: 'radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%)',
+                    bottom: isMobile ? '3%' : '6%',
                   }}
                 />
               </>
