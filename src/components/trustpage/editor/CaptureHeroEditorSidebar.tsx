@@ -474,6 +474,48 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
               label="Imagem Principal (Hero)"
               hint="PNG transparente recomendado - até 5MB"
             />
+
+            {/* Hero Image Size Mobile */}
+            <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
+                  Tamanho Mobile
+                </Label>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                  {formData.hero_image_size_mobile || 100}%
+                </span>
+              </div>
+              <Slider
+                value={[formData.hero_image_size_mobile || 100]}
+                onValueChange={(value) => onChange({ hero_image_size_mobile: value[0] })}
+                min={50}
+                max={150}
+                step={5}
+                className="w-full"
+              />
+            </div>
+
+            {/* Hero Image Size Desktop */}
+            <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
+                  Tamanho Desktop
+                </Label>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                  {formData.hero_image_size_desktop || 100}%
+                </span>
+              </div>
+              <Slider
+                value={[formData.hero_image_size_desktop || 100]}
+                onValueChange={(value) => onChange({ hero_image_size_desktop: value[0] })}
+                min={50}
+                max={150}
+                step={5}
+                className="w-full"
+              />
+            </div>
           </AccordionContent>
         </AccordionItem>
 

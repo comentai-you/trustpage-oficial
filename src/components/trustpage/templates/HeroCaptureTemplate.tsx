@@ -26,6 +26,10 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
   const headlineSizeMobile = data.headline_size_mobile || 1.5;
   const headlineSizeDesktop = data.headline_size_desktop || 2.5;
 
+  // Hero image sizes (percentage)
+  const heroImageSizeMobile = data.hero_image_size_mobile || 100;
+  const heroImageSizeDesktop = data.hero_image_size_desktop || 100;
+
   // Form fields configuration
   const formFields = (data.content as any)?.formFields || {
     showName: true,
@@ -546,6 +550,8 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
                 <div 
                   className="relative z-10"
                   style={{
+                    transform: `scale(${isMobile ? heroImageSizeMobile / 100 : heroImageSizeDesktop / 100})`,
+                    transformOrigin: 'center bottom',
                     WebkitMaskImage: `
                       linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
                       linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
