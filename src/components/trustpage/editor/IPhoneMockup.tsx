@@ -2,6 +2,7 @@ import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "../templates/HighConversionTemplate";
 import SalesPageTemplate from "../templates/SalesPageTemplate";
 import BioLinkTemplate from "../templates/BioLinkTemplate";
+import HeroCaptureTemplate from "../templates/HeroCaptureTemplate";
 import ScaledViewport from "./ScaledViewport";
 
 interface IPhoneMockupProps {
@@ -37,6 +38,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
 
   const isSalesPage = formData.template_type === 'sales';
   const isBioPage = formData.template_type === 'bio';
+  const isCaptureHero = formData.template_type === 'capture-hero';
 
   return (
     <div className="relative">
@@ -107,6 +109,8 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
                 <SalesPageTemplate data={formData} isMobile={true} fullHeight={false} />
               ) : isBioPage ? (
                 <BioLinkTemplate data={formData} isMobile={true} fullHeight={false} />
+              ) : isCaptureHero ? (
+                <HeroCaptureTemplate data={formData} isMobile={true} fullHeight={false} />
               ) : (
                 <HighConversionTemplate data={formData} isMobile={true} fullHeight={false} />
               )}

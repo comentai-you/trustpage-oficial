@@ -4,6 +4,7 @@ import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesCo
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
+import HeroCaptureTemplate from "@/components/trustpage/templates/HeroCaptureTemplate";
 import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -309,6 +310,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
             <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           ) : pageData.template_type === 'bio' ? (
             <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+          ) : pageData.template_type === 'capture-hero' ? (
+            <HeroCaptureTemplate data={pageData} isMobile={isMobile} />
           ) : (
             <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
           )}
