@@ -5,7 +5,7 @@ import { InputWithAI } from "@/components/ui/input-with-ai";
 import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon } from "lucide-react";
+import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -398,6 +398,42 @@ const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarP
                     </button>
                   );
                 })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Seção 6: Rastreamento */}
+          <AccordionItem value="tracking" className="border-b border-gray-200">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-primary" />
+                Rastreamento
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Facebook Pixel ID</Label>
+                <Input 
+                  value={formData.facebook_pixel_id || ''} 
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                    onChange({ facebook_pixel_id: value });
+                  }} 
+                  placeholder="Ex: 123456789012345" 
+                  className="text-sm font-mono bg-gray-50" 
+                  maxLength={16}
+                />
+                <p className="text-xs text-gray-500">Cole o ID do seu Pixel (15-16 dígitos).</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Google Tag (GTM/GA4)</Label>
+                <Input 
+                  value={formData.google_tag_id || ''} 
+                  onChange={(e) => onChange({ google_tag_id: e.target.value })} 
+                  placeholder="Ex: GTM-XXXXXXX ou G-XXXXXXXXXX" 
+                  className="text-sm font-mono bg-gray-50" 
+                />
+                <p className="text-xs text-gray-500">Cole seu ID do Google Tag Manager ou GA4.</p>
               </div>
             </AccordionContent>
           </AccordionItem>

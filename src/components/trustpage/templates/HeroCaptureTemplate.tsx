@@ -1,7 +1,7 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, User, ArrowRight, ImageIcon } from "lucide-react";
+import { Mail, User, ArrowRight, ImageIcon, Phone, MessageCircle } from "lucide-react";
 
 interface HeroCaptureTemplateProps {
   data: LandingPageFormData;
@@ -14,6 +14,18 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
   const bgEnd = data.colors.primary || "#1e293b";
   const accentColor = data.primary_color || "#3b82f6";
   const textColor = data.colors.text || "#ffffff";
+
+  // Headline sizes
+  const headlineSizeMobile = data.headline_size_mobile || 1.5;
+  const headlineSizeDesktop = data.headline_size_desktop || 2.5;
+
+  // Form fields configuration
+  const formFields = (data.content as any)?.formFields || {
+    showName: true,
+    showEmail: true,
+    showPhone: false,
+    showWhatsapp: false,
+  };
 
   return (
     <div
@@ -74,8 +86,14 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
                   </span>
                 )}
                 <h1
-                  className={`font-extrabold leading-tight ${isMobile ? 'text-2xl' : 'text-3xl lg:text-4xl'}`}
-                  style={{ color: textColor }}
+                  className="font-extrabold leading-tight"
+                  style={{ 
+                    color: textColor,
+                    fontSize: isMobile
+                      ? `${headlineSizeMobile}rem`
+                      : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
+                    lineHeight: 1.15,
+                  }}
                 >
                   {data.headline || "Sua Headline Impactante Vai Aqui"}
                 </h1>
@@ -97,37 +115,77 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
                   }
                 }}
               >
-                <div className="relative">
-                  <User
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                    style={{ color: `${textColor}60` }}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Seu nome"
-                    className="pl-10 h-12 border-0 text-base"
-                    style={{
-                      backgroundColor: `${textColor}10`,
-                      color: textColor,
-                    }}
-                  />
-                </div>
+                {formFields.showName && (
+                  <div className="relative">
+                    <User
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                      style={{ color: `${textColor}60` }}
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Seu nome"
+                      className="pl-10 h-12 border-0 text-base"
+                      style={{
+                        backgroundColor: `${textColor}10`,
+                        color: textColor,
+                      }}
+                    />
+                  </div>
+                )}
 
-                <div className="relative">
-                  <Mail
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                    style={{ color: `${textColor}60` }}
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Seu melhor e-mail"
-                    className="pl-10 h-12 border-0 text-base"
-                    style={{
-                      backgroundColor: `${textColor}10`,
-                      color: textColor,
-                    }}
-                  />
-                </div>
+                {formFields.showEmail && (
+                  <div className="relative">
+                    <Mail
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                      style={{ color: `${textColor}60` }}
+                    />
+                    <Input
+                      type="email"
+                      placeholder="Seu melhor e-mail"
+                      className="pl-10 h-12 border-0 text-base"
+                      style={{
+                        backgroundColor: `${textColor}10`,
+                        color: textColor,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {formFields.showPhone && (
+                  <div className="relative">
+                    <Phone
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                      style={{ color: `${textColor}60` }}
+                    />
+                    <Input
+                      type="tel"
+                      placeholder="Seu telefone"
+                      className="pl-10 h-12 border-0 text-base"
+                      style={{
+                        backgroundColor: `${textColor}10`,
+                        color: textColor,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {formFields.showWhatsapp && (
+                  <div className="relative">
+                    <MessageCircle
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                      style={{ color: `${textColor}60` }}
+                    />
+                    <Input
+                      type="tel"
+                      placeholder="Seu WhatsApp"
+                      className="pl-10 h-12 border-0 text-base"
+                      style={{
+                        backgroundColor: `${textColor}10`,
+                        color: textColor,
+                      }}
+                    />
+                  </div>
+                )}
 
                 <Button
                   type="submit"

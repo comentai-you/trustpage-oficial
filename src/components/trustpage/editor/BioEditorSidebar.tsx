@@ -250,6 +250,19 @@ const BioEditorSidebar = ({ formData, onChange, userPlan = 'free' }: BioEditorSi
                 Cole o ID do seu Pixel (15-16 dígitos) para rastrear PageViews.
               </p>
             </div>
+            
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600">Google Tag (GTM/GA4)</Label>
+              <Input 
+                value={formData.google_tag_id || ''} 
+                onChange={(e) => onChange({ google_tag_id: e.target.value })} 
+                placeholder="Ex: GTM-XXXXXXX ou G-XXXXXXXXXX" 
+                className="text-sm font-mono" 
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Cole seu ID do Google Tag Manager (GTM-) ou Google Analytics 4 (G-).
+              </p>
+            </div>
           </AccordionContent>
         </AccordionItem>
 
