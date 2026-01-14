@@ -6,14 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kiwify-signature, x-webhook-token',
 };
 
-// Mapeamento de produtos Kiwify para planos
-// IMPORTANTE: A chave deve ser o checkout_link ou product_id que a Kiwify envia
+// Mapeamento de produtos Kiwify para planos - ATUALIZADO
 const PRODUCTS: Record<string, { plan: string; billing: string }> = {
-  // Checkout Links (identificador curto da Kiwify)
   'P7MaOJK': { plan: 'essential', billing: 'monthly' },
   'f0lsmRn': { plan: 'pro', billing: 'monthly' },
   'f8Tg6DT': { plan: 'essential', billing: 'yearly' },
   'TQlihDk': { plan: 'pro', billing: 'yearly' },
+  // Fallback ID
+  'b2e6a470-ed03-11f0-b1ef-038a6e106bac': { plan: 'pro', billing: 'monthly' }
 };
 
 const SITE_URL = 'https://trustpageapp.com';
@@ -23,6 +23,9 @@ interface KiwifyPayload {
   order_status: string;
   product_id: string;
   product_name: string;
+  signature?: string;
+  webhook_token?: string;
+  checkout_link?: string;
   Customer: {
     email: string;
     full_name: string;
@@ -34,13 +37,146 @@ interface KiwifyPayload {
   };
 }
 
+/**
+ * Extrai e normaliza a assinatura de múltiplas fontes
+ * Ordem de prioridade: Query Params > Headers > Body
+ */
+function extractSignature(req: Request, payload: any): string | null {
+  // 1. Tentar Query Params
+  const url = new URL(req.url);
+  const signatureFromQuery = url.searchParams.get('signature') || 
+                              url.searchParams.get('token') ||
+                              url.searchParams.get('webhook_token');
+  
+  if (signatureFromQuery) {
+    console.log('📍 Signature found in query params');
+    return signatureFromQuery.replace(/^Bearer\s+/i, '').trim();
+  }
+
+  // 2. Tentar Headers
+  const signatureFromHeader = req.headers.get('x-kiwify-signature') || 
+                               req.headers.get('authorization') ||
+                               req.headers.get('x-webhook-token') ||
+                               req.headers.get('x-signature');
+  
+  if (signatureFromHeader) {
+    console.log('📍 Signature found in headers');
+    return signatureFromHeader.replace(/^Bearer\s+/i, '').trim();
+  }
+
+  // 3. Tentar Body (payload JSON)
+  const signatureFromBody = payload?.signature || 
+                             payload?.webhook_token ||
+                             payload?.token;
+  
+  if (signatureFromBody) {
+    console.log('📍 Signature found in body');
+    return String(signatureFromBody).replace(/^Bearer\s+/i, '').trim();
+  }
+
+  return null;
+}
+
+/**
+ * Valida a assinatura do webhook
+ */
+function validateSignature(providedSignature: string | null, expectedToken: string | null): { valid: boolean; reason: string } {
+  // Se não há token configurado, aceitar (mas logar warning)
+  if (!expectedToken) {
+    return { valid: true, reason: 'No token configured - accepting all requests' };
+  }
+
+  // Se token configurado mas nenhuma assinatura fornecida
+  if (!providedSignature) {
+    return { valid: false, reason: 'No signature provided but token is configured' };
+  }
+
+  // Comparar assinaturas (case-sensitive)
+  if (providedSignature === expectedToken) {
+    return { valid: true, reason: 'Signature validated successfully' };
+  }
+
+  return { valid: false, reason: 'Signature mismatch' };
+}
+
+/**
+ * Busca usuário por email com paginação
+ */
+async function findUserByEmail(supabase: any, email: string): Promise<any | null> {
+  const normalizedEmail = email.toLowerCase().trim();
+  let page = 1;
+  const perPage = 50;
+  const maxPages = 200;
+
+  while (page <= maxPages) {
+    const { data: usersPage, error } = await supabase.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (error) {
+      console.error(`Error listing users (page ${page}):`, error.message);
+      throw new Error('Failed to search users');
+    }
+
+    if (!usersPage?.users || usersPage.users.length === 0) {
+      break;
+    }
+
+    const foundUser = usersPage.users.find(
+      (u: any) => u.email?.toLowerCase() === normalizedEmail
+    );
+
+    if (foundUser) {
+      console.log(`✅ User found on page ${page}: ${foundUser.id}`);
+      return foundUser;
+    }
+
+    if (usersPage.users.length < perPage) {
+      break;
+    }
+
+    page++;
+  }
+
+  console.log(`User not found after searching ${page} page(s)`);
+  return null;
+}
+
+/**
+ * Identifica o produto no payload
+ */
+function identifyProduct(payload: any): { key: string; config: { plan: string; billing: string } } | null {
+  // Possíveis fontes do identificador do produto
+  const possibleKeys = [
+    payload.checkout_link,
+    payload.product_id,
+    payload.Product_ID,
+    payload.Product?.product_id,
+    payload.product?.id,
+    payload.Product?.id,
+  ].filter(Boolean);
+
+  console.log('🔍 Checking product keys:', possibleKeys);
+
+  for (const key of possibleKeys) {
+    if (PRODUCTS[key]) {
+      console.log(`✅ Product matched: ${key} -> ${JSON.stringify(PRODUCTS[key])}`);
+      return { key, config: PRODUCTS[key] };
+    }
+  }
+
+  console.log('❌ No matching product found');
+  return null;
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Only accept POST
+  // Only POST allowed
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
@@ -49,81 +185,103 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    // Environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const webhookToken = Deno.env.get('KIWIFY_WEBHOOK_TOKEN');
 
-    console.log('=== WEBHOOK REQUEST RECEIVED ===');
-    console.log('Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
-
-    // Parse payload first to get signature from body if needed
-    const payload: KiwifyPayload = await req.json();
-    console.log('Full Payload:', JSON.stringify(payload, null, 2));
-
-    // Tentar obter token de várias fontes (Kiwify pode enviar de formas diferentes)
-    const signatureFromHeader = req.headers.get('x-kiwify-signature') || 
-                                 req.headers.get('authorization') ||
-                                 req.headers.get('x-webhook-token');
-    const signatureFromBody = (payload as any).signature || (payload as any).webhook_token;
-    const signature = signatureFromHeader || signatureFromBody;
-
-    // SECURITY: Validar token se configurado
-    if (webhookToken) {
-      if (!signature) {
-        console.warn('⚠️ No signature provided, but KIWIFY_WEBHOOK_TOKEN is configured');
-        console.warn('Proceeding anyway - configure token validation in Kiwify dashboard');
-        // Continuar mesmo sem assinatura para não bloquear vendas
-        // A Kiwify pode não estar enviando o header corretamente
-      } else {
-        const providedToken = signature.replace('Bearer ', '');
-        if (providedToken !== webhookToken) {
-          console.error('❌ Invalid webhook signature provided');
-          return new Response(
-            JSON.stringify({ error: 'Invalid signature' }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        console.log('✅ Webhook signature validated');
-      }
-    } else {
-      console.warn('⚠️ KIWIFY_WEBHOOK_TOKEN not configured - accepting all requests');
-    }
-    
-    console.log('=== KIWIFY WEBHOOK RECEIVED ===');
-    console.log('Order ID:', payload.order_id);
-    console.log('Order Status:', payload.order_status);
-    console.log('Product ID:', payload.product_id);
-    console.log('Customer Email:', payload.Customer?.email);
-
-    // Status de aprovação (venda confirmada)
-    const approvalStatuses = ['paid', 'approved'];
-    const isApproved = approvalStatuses.includes(payload.order_status);
-    
-    // Status de cancelamento
-    const cancellationStatuses = ['refunded', 'chargedback', 'canceled', 'subscription_canceled'];
-    const isCancellation = cancellationStatuses.includes(payload.order_status);
-    
-    // Ignorar eventos que não são nem aprovação nem cancelamento
-    if (!isApproved && !isCancellation) {
-      console.log(`Ignoring event with status: ${payload.order_status}`);
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Missing Supabase environment variables');
       return new Response(
-        JSON.stringify({ success: true, message: 'Event ignored - not a purchase or cancellation' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Validar email (obrigatório para ambos os fluxos)
-    const customerEmail = payload.Customer?.email?.toLowerCase().trim();
+    console.log('═══════════════════════════════════════════');
+    console.log('🔔 KIWIFY WEBHOOK RECEIVED');
+    console.log('═══════════════════════════════════════════');
+    console.log('📅 Timestamp:', new Date().toISOString());
+    console.log('📍 URL:', req.url);
+
+    // Log headers (sem expor valores sensíveis)
+    const headers = Object.fromEntries(req.headers.entries());
+    console.log('📋 Headers:', JSON.stringify({
+      'content-type': headers['content-type'],
+      'x-kiwify-signature': headers['x-kiwify-signature'] ? '[PRESENT]' : '[MISSING]',
+      'authorization': headers['authorization'] ? '[PRESENT]' : '[MISSING]',
+      'x-webhook-token': headers['x-webhook-token'] ? '[PRESENT]' : '[MISSING]',
+    }));
+
+    // Parse payload
+    let payload: KiwifyPayload;
+    try {
+      payload = await req.json();
+    } catch (parseError) {
+      console.error('❌ Failed to parse JSON body');
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+
+    // ═══════════════════════════════════════════
+    // VALIDAÇÃO DE ASSINATURA (BLINDADA)
+    // ═══════════════════════════════════════════
+    const providedSignature = extractSignature(req, payload);
+    const validation = validateSignature(providedSignature, webhookToken ?? null);
+
+    console.log('🔐 Signature validation:', validation.reason);
+
+    if (!validation.valid) {
+      console.error('❌ SECURITY: Signature validation failed');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', reason: validation.reason }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('✅ Signature validated');
+
+    // ═══════════════════════════════════════════
+    // PROCESSAMENTO DO EVENTO
+    // ═══════════════════════════════════════════
     
+    // Extrair dados essenciais
+    const orderStatus = payload.order_status?.toLowerCase();
+    const customerEmail = payload.Customer?.email?.toLowerCase().trim();
+    const customerName = payload.Customer?.full_name || 'Cliente';
+
+    console.log('📊 Order Status:', orderStatus);
+    console.log('📧 Customer Email:', customerEmail);
+
+    // Validar email
     if (!customerEmail) {
-      console.error('Missing customer email');
+      console.error('❌ Missing customer email');
       return new Response(
         JSON.stringify({ error: 'Missing customer email' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Criar cliente Supabase com service role (necessário para ambos os fluxos)
+    // Classificar tipo de evento
+    const approvalStatuses = ['paid', 'approved'];
+    const cancellationStatuses = ['refunded', 'chargedback', 'canceled', 'subscription_canceled'];
+    
+    const isApproval = approvalStatuses.includes(orderStatus);
+    const isCancellation = cancellationStatuses.includes(orderStatus);
+
+    if (!isApproval && !isCancellation) {
+      console.log(`ℹ️ Ignoring event with status: ${orderStatus}`);
+      return new Response(
+        JSON.stringify({ success: true, message: `Event ignored - status: ${orderStatus}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Criar cliente Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
@@ -131,194 +289,95 @@ serve(async (req) => {
       },
     });
 
-    // ========== FLUXO DE CANCELAMENTO ==========
+    // ═══════════════════════════════════════════
+    // FLUXO DE CANCELAMENTO
+    // ═══════════════════════════════════════════
     if (isCancellation) {
-      console.log(`=== PROCESSING CANCELLATION for ${customerEmail} ===`);
+      console.log('🚫 Processing CANCELLATION');
       
-      // Buscar usuário por email usando paginação
-      let existingUser = null;
-      let page = 1;
-      const perPage = 50;
-      
-      while (true) {
-        const { data: usersPage, error: pageError } = await supabase.auth.admin.listUsers({
-          page,
-          perPage,
-        });
-        
-        if (pageError) {
-          console.error('Error listing users:', pageError.message);
-          throw new Error('Failed to check existing users');
-        }
-        
-        if (!usersPage?.users || usersPage.users.length === 0) {
-          break;
-        }
-        
-        const userInPage = usersPage.users.find(
-          (u) => u.email?.toLowerCase() === customerEmail
-        );
-        
-        if (userInPage) {
-          existingUser = userInPage;
-          break;
-        }
-        
-        if (usersPage.users.length < perPage) {
-          break;
-        }
-        
-        page++;
-        if (page > 200) {
-          console.warn('Reached max pagination limit');
-          break;
-        }
-      }
-      
+      const existingUser = await findUserByEmail(supabase, customerEmail);
+
       if (existingUser) {
-        // Desativar assinatura do usuário
         const { error: updateError } = await supabase.rpc('update_user_plan', {
           target_user_id: existingUser.id,
           new_plan_type: 'free',
           new_status: 'inactive',
         });
-        
+
         if (updateError) {
-          console.error('Error deactivating subscription:', updateError.message);
+          console.error('❌ Error deactivating subscription:', updateError.message);
           throw new Error('Failed to deactivate subscription');
         }
-        
-        console.log(`✅ Subscription canceled for ${customerEmail}. Plan set to free/inactive.`);
+
+        console.log(`✅ Subscription canceled for ${customerEmail}`);
         
         return new Response(
           JSON.stringify({
             success: true,
             action: 'canceled',
             user_id: existingUser.id,
-            message: 'Subscription deactivated',
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
-      } else {
-        console.log(`User ${customerEmail} not found for cancellation. Ignoring.`);
-        return new Response(
-          JSON.stringify({ success: true, message: 'User not found - cancellation ignored' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
       }
+
+      console.log(`ℹ️ User ${customerEmail} not found - ignoring cancellation`);
+      return new Response(
+        JSON.stringify({ success: true, message: 'User not found - cancellation ignored' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // ========== FLUXO DE VENDA (APROVAÇÃO) ==========
-    // Só executa se isApproved === true
-    const customerName = payload.Customer?.full_name || 'Cliente';
-    
-    // Extração robusta do product_id (Kiwify envia em payload.Product.product_id)
-    const productId = (payload as any).product_id || 
-                      (payload as any).Product_ID || 
-                      ((payload as any).Product && (payload as any).Product.product_id) ||
-                      ((payload as any).product && (payload as any).product.id);
-    
-    // Fallback: usar checkout_link como identificador do produto (mapeado em PRODUCTS)
-    const checkoutLink = (payload as any).checkout_link;
-    
-    // O productId pode ser um UUID, mas o PRODUCTS usa checkout_link como chave
-    // Priorizar checkout_link para mapear o plano
-    const productKey = checkoutLink && PRODUCTS[checkoutLink] ? checkoutLink : productId;
+    // ═══════════════════════════════════════════
+    // FLUXO DE APROVAÇÃO (COMPRA)
+    // ═══════════════════════════════════════════
+    console.log('💰 Processing PURCHASE');
 
-    // Verificar se temos uma forma de identificar o produto
-    if (!productKey && !checkoutLink) {
-      console.error('Missing product identification in payload:', JSON.stringify(payload));
+    // Identificar produto
+    const product = identifyProduct(payload);
+
+    if (!product) {
+      console.error('❌ Unknown product in payload');
       return new Response(
-        JSON.stringify({ error: 'Missing product_id or checkout_link' }),
+        JSON.stringify({ 
+          error: 'Unknown product',
+          debug: {
+            checkout_link: payload.checkout_link || null,
+            product_id: payload.product_id || null,
+          }
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Mapear produto para plano usando productKey (checkout_link tem prioridade)
-    const productConfig = PRODUCTS[productKey] || PRODUCTS[checkoutLink];
-    if (!productConfig) {
-      console.error(`Unknown product key: ${productKey}, checkout_link: ${checkoutLink}`);
-      return new Response(
-        JSON.stringify({ error: `Unknown product: ${productKey || checkoutLink}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Determinar plano final
+    const newPlan = product.config.billing === 'yearly' 
+      ? `${product.config.plan}_yearly` 
+      : product.config.plan;
 
-    // Determinar o plan_type com sufixo para planos anuais
-    const newPlan = productConfig.billing === 'yearly' 
-      ? `${productConfig.plan}_yearly` 
-      : productConfig.plan;
-    console.log(`Product mapped to plan: ${newPlan} (billing: ${productConfig.billing}) - key: ${productKey}, checkout_link: ${checkoutLink}`);
+    console.log(`📋 Plan determined: ${newPlan} (from product: ${product.key})`);
 
-    // CENÁRIO: Verificar se usuário existe (busca filtrada para performance)
-    console.log(`Checking if user exists with email: ${customerEmail}`);
-    
-    let existingUser = null;
-    
-    // Buscar usuário por email de forma paginada para evitar problemas de performance
-    // A API do Supabase Auth Admin não suporta filtro direto por email, então fazemos busca incremental
-    let page = 1;
-    const perPage = 50;
-    let foundUser = false;
-    
-    while (!foundUser) {
-      const { data: usersPage, error: pageError } = await supabase.auth.admin.listUsers({
-        page,
-        perPage,
-      });
-      
-      if (pageError) {
-        console.error('Error listing users:', pageError.message);
-        throw new Error('Failed to check existing users');
-      }
-      
-      // Se não há mais usuários, sair do loop
-      if (!usersPage?.users || usersPage.users.length === 0) {
-        break;
-      }
-      
-      // Procurar o usuário nesta página
-      const userInPage = usersPage.users.find(
-        (u) => u.email?.toLowerCase() === customerEmail
-      );
-      
-      if (userInPage) {
-        existingUser = userInPage;
-        foundUser = true;
-        break;
-      }
-      
-      // Se recebemos menos usuários que o perPage, é a última página
-      if (usersPage.users.length < perPage) {
-        break;
-      }
-      
-      page++;
-      
-      // Limite de segurança para evitar loops infinitos (max 10000 usuários)
-      if (page > 200) {
-        console.warn('Reached max pagination limit (10000 users)');
-        break;
-      }
-    }
+    // Buscar usuário
+    const existingUser = await findUserByEmail(supabase, customerEmail);
 
     if (existingUser) {
-      // CENÁRIO 1: Usuário EXISTE - Upgrade/Renovação
-      console.log(`User found: ${existingUser.id}. Upgrading to plan: ${newPlan}`);
+      // ═══════════════════════════════════════
+      // CENÁRIO 1: Upgrade de usuário existente
+      // ═══════════════════════════════════════
+      console.log(`🔄 Upgrading existing user: ${existingUser.id}`);
 
-      // Atualizar profile usando a função de segurança
-      const { data: updateResult, error: updateError } = await supabase.rpc('update_user_plan', {
+      const { error: updateError } = await supabase.rpc('update_user_plan', {
         target_user_id: existingUser.id,
         new_plan_type: newPlan,
         new_status: 'active',
       });
 
       if (updateError) {
-        console.error('Error updating plan:', updateError.message);
+        console.error('❌ Error updating plan:', updateError.message);
         throw new Error('Failed to update user plan');
       }
 
-      // Atualizar kiwify_customer_id se tivermos subscription ID
+      // Atualizar kiwify_customer_id se disponível
       if (payload.Subscription?.id) {
         await supabase
           .from('profiles')
@@ -326,7 +385,7 @@ serve(async (req) => {
           .eq('id', existingUser.id);
       }
 
-      console.log(`✅ User ${customerEmail} upgraded to ${newPlan} successfully`);
+      console.log(`✅ User ${customerEmail} upgraded to ${newPlan}`);
 
       return new Response(
         JSON.stringify({
@@ -339,10 +398,11 @@ serve(async (req) => {
       );
 
     } else {
-      // CENÁRIO 2: Usuário NÃO EXISTE - Checkout First
-      console.log(`User not found. Creating new user with email: ${customerEmail}`);
+      // ═══════════════════════════════════════
+      // CENÁRIO 2: Novo usuário (checkout first)
+      // ═══════════════════════════════════════
+      console.log(`📝 Creating new user: ${customerEmail}`);
 
-      // Criar usuário via invite (envia email com link para definir senha)
       const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
         customerEmail,
         {
@@ -356,19 +416,18 @@ serve(async (req) => {
       );
 
       if (inviteError) {
-        console.error('Error inviting user:', inviteError.message);
+        console.error('❌ Error inviting user:', inviteError.message);
         throw new Error(`Failed to invite user: ${inviteError.message}`);
       }
 
       const newUserId = inviteData.user?.id;
-      console.log(`📧 Invitation sent to ${customerEmail}. New user ID: ${newUserId}`);
+      console.log(`📧 Invitation sent. New user ID: ${newUserId}`);
 
-      // Aguardar um momento para o trigger criar o profile, depois atualizar o plano
       if (newUserId) {
-        // Pequeno delay para garantir que o trigger handle_new_user executou
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Aguardar trigger handle_new_user
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Atualizar o plano do novo usuário
+        // Atualizar plano
         const { error: planError } = await supabase.rpc('update_user_plan', {
           target_user_id: newUserId,
           new_plan_type: newPlan,
@@ -376,13 +435,13 @@ serve(async (req) => {
         });
 
         if (planError) {
-          console.error('Error setting plan for new user:', planError.message);
-          // Não falhar aqui, o usuário foi criado
+          console.error('⚠️ Error setting plan for new user:', planError.message);
+          // Não falhar - usuário foi criado
         } else {
-          console.log(`✅ New user ${customerEmail} created with plan ${newPlan}`);
+          console.log(`✅ New user created with plan ${newPlan}`);
         }
 
-        // Salvar kiwify_customer_id se disponível
+        // Salvar kiwify_customer_id
         if (payload.Subscription?.id) {
           await supabase
             .from('profiles')
@@ -397,7 +456,7 @@ serve(async (req) => {
           action: 'invited',
           user_id: newUserId,
           plan: newPlan,
-          message: 'Invitation email sent to customer',
+          message: 'Invitation email sent',
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -405,7 +464,9 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('❌ Webhook error:', errorMessage);
+    console.error('═══════════════════════════════════════════');
+    console.error('❌ WEBHOOK ERROR:', errorMessage);
+    console.error('═══════════════════════════════════════════');
 
     return new Response(
       JSON.stringify({ 
