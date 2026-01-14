@@ -18,6 +18,9 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
   const bgEnd = data.colors.primary || "#1e293b";
   const accentColor = data.primary_color || "#3b82f6";
   const textColor = data.colors.text || "#ffffff";
+  
+  // Check if background is a gradient
+  const isGradientBg = bgStart.includes('linear-gradient') || bgStart.includes('radial-gradient');
 
   // Headline sizes
   const headlineSizeMobile = data.headline_size_mobile || 1.5;
@@ -218,8 +221,8 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
     <div
       className="relative overflow-hidden"
       style={{
-        background: `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd}20 100%)`,
-        backgroundColor: bgStart,
+        background: isGradientBg ? bgStart : `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd}20 100%)`,
+        backgroundColor: isGradientBg ? undefined : bgStart,
         width: '100%',
         minWidth: '100%',
         minHeight: fullHeight ? '100vh' : '100%',
