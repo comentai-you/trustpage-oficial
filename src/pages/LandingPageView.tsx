@@ -231,6 +231,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           headline_size: 2,
           headline_size_mobile: headlineSizeMobile,
           headline_size_desktop: headlineSizeDesktop,
+          hero_image_size_mobile: content?.hero_image_size_mobile ?? 100,
+          hero_image_size_desktop: content?.hero_image_size_desktop ?? 100,
           subheadline: page.subheadline || '',
           video_url: page.video_url || '',
           video_storage_path: page.video_storage_path || '',

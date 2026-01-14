@@ -194,6 +194,8 @@ export interface LandingPageFormData {
   headline_size: number;
   headline_size_mobile: number;
   headline_size_desktop: number;
+  hero_image_size_mobile: number;
+  hero_image_size_desktop: number;
   subheadline: string;
   video_url: string;
   video_storage_path: string;
@@ -226,6 +228,8 @@ export const defaultFormData: LandingPageFormData = {
   headline_size: 2,
   headline_size_mobile: 1.2,
   headline_size_desktop: 2.5,
+  hero_image_size_mobile: 100,
+  hero_image_size_desktop: 100,
   subheadline: '',
   video_url: '',
   video_storage_path: '',

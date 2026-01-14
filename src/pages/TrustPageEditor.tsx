@@ -123,6 +123,8 @@ const TrustPageEditor = () => {
           headline_size: 2,
           headline_size_mobile: headlineSizeMobile,
           headline_size_desktop: headlineSizeDesktop,
+          hero_image_size_mobile: contentAny?.hero_image_size_mobile ?? 100,
+          hero_image_size_desktop: contentAny?.hero_image_size_desktop ?? 100,
           subheadline: page.subheadline || "",
           video_url: page.video_url || "",
           video_storage_path: page.video_storage_path || "",
@@ -348,11 +350,13 @@ const TrustPageEditor = () => {
 
       // Check availability logic omitted for brevity, keeping existing save logic...
       // (Mantive a lógica original de salvamento para focar no layout)
-      // Include headline sizes in the content JSON for persistence
+      // Include headline sizes and hero image sizes in the content JSON for persistence
       const contentWithSizes = {
         ...(formData.content as any),
         headline_size_mobile: formData.headline_size_mobile,
         headline_size_desktop: formData.headline_size_desktop,
+        hero_image_size_mobile: formData.hero_image_size_mobile,
+        hero_image_size_desktop: formData.hero_image_size_desktop,
       };
 
       const pageData = {
