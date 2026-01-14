@@ -29,9 +29,10 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
 
   return (
     <div
-      className={`relative overflow-hidden ${fullHeight ? 'min-h-screen' : 'min-h-[600px]'}`}
+      className={`relative overflow-hidden w-full ${fullHeight ? 'min-h-screen' : 'min-h-[600px]'}`}
       style={{
         background: `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd}20 100%)`,
+        minWidth: '100%',
       }}
     >
       {/* Background Glow Effects */}
