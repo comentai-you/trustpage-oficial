@@ -391,14 +391,18 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 space-y-4">
-            <p className="text-xs text-gray-400">
-              Use uma imagem PNG sem fundo para o efeito flutuante ideal.
-            </p>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800 font-medium mb-1">📐 Tamanho recomendado:</p>
+              <p className="text-xs text-blue-600">
+                • Desktop: <span className="font-mono font-semibold">800x600px</span> ou maior<br/>
+                • Use imagem <span className="font-semibold">PNG sem fundo</span> para efeito flutuante
+              </p>
+            </div>
             <ImageUpload
               value={formData.image_url || ''}
               onChange={(url) => onChange({ image_url: url })}
-              label="Imagem Principal"
-              hint="PNG ou JPG até 5MB - recomendado com fundo transparente"
+              label="Imagem Principal (Hero)"
+              hint="PNG transparente recomendado - até 5MB"
             />
           </AccordionContent>
         </AccordionItem>
