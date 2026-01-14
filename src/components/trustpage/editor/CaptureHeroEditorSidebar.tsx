@@ -49,6 +49,11 @@ const glowPresets = [
   { id: 'terracotta', name: 'Terracota', accent: '#ef4444', bg: '#7c5a4e', bgSecondary: '#9c7a6e', text: '#fef2f2' },
   { id: 'lavender-mist', name: 'Lavanda Mist', accent: '#e879f9', bg: '#5b4b6f', bgSecondary: '#7c6b8f', text: '#fae8ff' },
   { id: 'charcoal-gold', name: 'Carvão Dourado', accent: '#fbbf24', bg: '#3d3d3d', bgSecondary: '#525252', text: '#fef9c3' },
+  // Gradient themes
+  { id: 'aurora-borealis', name: 'Aurora Boreal', accent: '#22d3ee', bg: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #134e4a 100%)', bgSecondary: '#134e4a', text: '#f0fdfa', isGradient: true },
+  { id: 'sunset-dream', name: 'Pôr do Sol', accent: '#fbbf24', bg: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 50%, #c2410c 100%)', bgSecondary: '#c2410c', text: '#fff7ed', isGradient: true },
+  { id: 'galaxy-nebula', name: 'Nebulosa', accent: '#e879f9', bg: 'linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #6b21a8 100%)', bgSecondary: '#6b21a8', text: '#faf5ff', isGradient: true },
+  { id: 'midnight-ocean', name: 'Oceano Meia-Noite', accent: '#38bdf8', bg: 'linear-gradient(135deg, #0c4a6e 0%, #0369a1 50%, #0284c7 100%)', bgSecondary: '#0284c7', text: '#e0f2fe', isGradient: true },
   // Light themes
   { id: 'clean-white', name: 'Branco Clean', accent: '#2563eb', bg: '#ffffff', bgSecondary: '#f1f5f9', text: '#1f2937' },
   { id: 'soft-gray', name: 'Cinza Suave', accent: '#6366f1', bg: '#f8fafc', bgSecondary: '#e2e8f0', text: '#334155' },
