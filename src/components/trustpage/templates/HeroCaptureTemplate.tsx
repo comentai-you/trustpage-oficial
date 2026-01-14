@@ -47,6 +47,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -104,9 +105,52 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
     }
   };
 
-  const handleDownload = () => {
-    if (magnetConfig.fileUrl) {
+  const handleDownload = async () => {
+    if (!magnetConfig.fileUrl) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Fetch the file
+      const response = await fetch(magnetConfig.fileUrl);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch file');
+      }
+
+      // Convert to blob
+      const blob = await response.blob();
+
+      // Extract filename from URL or use default
+      const urlParts = magnetConfig.fileUrl.split('/');
+      const rawFilename = urlParts[urlParts.length - 1] || 'download';
+      // Clean filename: remove query params, decode URI, replace underscores
+      const cleanFilename = decodeURIComponent(rawFilename.split('?')[0])
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, '_');
+      
+      // Create temporary URL and trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = cleanFilename || 'Ebook_TrustPage.pdf';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success("Download iniciado! Verifique sua pasta de downloads.");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Erro ao baixar. Tentando abrir em nova aba...");
+      
+      // Fallback: open in new tab
       window.open(magnetConfig.fileUrl, '_blank');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -140,15 +184,25 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
 
       <Button
         onClick={handleDownload}
-        className="w-full h-16 text-lg font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02]"
+        disabled={isDownloading}
+        className="w-full h-16 text-lg font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] disabled:opacity-80"
         style={{
           background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
           color: '#ffffff',
           boxShadow: `0 10px 30px -10px ${accentColor}80`,
         }}
       >
-        <Download className="w-6 h-6 mr-3" />
-        BAIXAR AGORA
+        {isDownloading ? (
+          <>
+            <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+            Baixando...
+          </>
+        ) : (
+          <>
+            <Download className="w-6 h-6 mr-3" />
+            BAIXAR AGORA
+          </>
+        )}
       </Button>
 
       <p
