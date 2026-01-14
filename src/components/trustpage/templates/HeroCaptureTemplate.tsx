@@ -568,13 +568,6 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
                   />
                 </div>
 
-                {/* Soft Vignette Overlay for Edge Blending */}
-                <div 
-                  className="absolute inset-0 z-[11] pointer-events-none"
-                  style={{
-                    background: `radial-gradient(ellipse 70% 60% at center 40%, transparent 40%, ${isGradientBg ? 'rgba(0,0,0,0.3)' : bgStart}90 100%)`,
-                  }}
-                />
 
                 {/* Reflection Layer - Mirrored Image */}
                 <div 
