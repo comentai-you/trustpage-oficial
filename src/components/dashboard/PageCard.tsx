@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
+interface UserDomain {
+  domain: string;
+  verified: boolean;
+  is_primary: boolean;
+}
+
 interface PageCardProps {
   id: string;
   pageName: string | null;
@@ -25,10 +31,10 @@ interface PageCardProps {
   videoUrl?: string | null;
   coverImageUrl?: string | null;
   isTrialExpired: boolean;
-  customDomain?: string | null;
+  customDomains?: UserDomain[];
   onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
-  onCopyLink: (slug: string, useCustomDomain?: boolean) => void;
+  onCopyLink: (slug: string, customDomain?: string | null) => void;
   onShowAnalytics?: (id: string, name: string) => void;
 }
 
@@ -76,7 +82,7 @@ const PageCard = ({
   videoUrl,
   coverImageUrl,
   isTrialExpired,
-  customDomain,
+  customDomains = [],
   onEdit,
   onDelete,
   onCopyLink,
@@ -88,15 +94,19 @@ const PageCard = ({
     month: 'short',
   });
 
-  const handleViewPage = (useCustomDomain?: boolean) => {
+  // Filter only verified domains
+  const verifiedDomains = customDomains.filter(d => d.verified);
+  const primaryDomain = verifiedDomains.find(d => d.is_primary)?.domain || verifiedDomains[0]?.domain;
+  const hasCustomDomains = verifiedDomains.length > 0;
+
+  const handleViewPage = (domain?: string | null) => {
     if (!isPublished) {
       toast.error("Publique a página para abrir o link público.");
       return;
     }
 
-    // Segurança: sempre usar /p/:slug no domínio customizado (funciona em todas as configs)
-    if (useCustomDomain && customDomain) {
-      const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (domain) {
+      const normalizedDomain = domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
       window.open(`https://${normalizedDomain}/p/${slug}`, "_blank");
     } else {
       window.open(`${window.location.origin}/p/${slug}`, "_blank");
@@ -149,7 +159,7 @@ const PageCard = ({
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground truncate mb-2">
-                {customDomain ? `${customDomain}/p/${slug}` : `trustpageapp.com/p/${slug}`}
+                {primaryDomain ? `${primaryDomain}/p/${slug}` : `trustpageapp.com/p/${slug}`}
               </p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <button 
@@ -202,7 +212,7 @@ const PageCard = ({
             </Tooltip>
           )}
 
-          {customDomain ? (
+          {hasCustomDomains ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-9 w-9">
@@ -210,14 +220,16 @@ const PageCard = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleViewPage(false)}>
+                <DropdownMenuItem onClick={() => handleViewPage(null)}>
                   <Globe className="w-4 h-4 mr-2" />
                   Abrir em trustpageapp.com
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleViewPage(true)}>
-                  <Globe className="w-4 h-4 mr-2" />
-                  Abrir em {customDomain}
-                </DropdownMenuItem>
+                {verifiedDomains.map((d) => (
+                  <DropdownMenuItem key={d.domain} onClick={() => handleViewPage(d.domain)}>
+                    <Globe className="w-4 h-4 mr-2" />
+                    Abrir em {d.domain}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -227,7 +239,7 @@ const PageCard = ({
                   variant="outline"
                   size="icon"
                   className="h-9 w-9"
-                  onClick={() => handleViewPage(false)}
+                  onClick={() => handleViewPage(null)}
                 >
                   <ExternalLink className="w-4 h-4" />
                 </Button>
@@ -236,7 +248,7 @@ const PageCard = ({
             </Tooltip>
           )}
 
-          {customDomain ? (
+          {hasCustomDomains ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-9 w-9">
@@ -244,14 +256,16 @@ const PageCard = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onCopyLink(slug, false)}>
+                <DropdownMenuItem onClick={() => onCopyLink(slug, null)}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copiar trustpageapp.com/p/{slug}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onCopyLink(slug, true)}>
-                  <Globe className="w-4 h-4 mr-2" />
-                  Copiar {customDomain}/p/{slug}
-                </DropdownMenuItem>
+                {verifiedDomains.map((d) => (
+                  <DropdownMenuItem key={d.domain} onClick={() => onCopyLink(slug, d.domain)}>
+                    <Globe className="w-4 h-4 mr-2" />
+                    Copiar {d.domain}/p/{slug}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -261,7 +275,7 @@ const PageCard = ({
                   variant="outline" 
                   size="icon" 
                   className="h-9 w-9"
-                  onClick={() => onCopyLink(slug, false)}
+                  onClick={() => onCopyLink(slug, null)}
                 >
                   <Copy className="w-4 h-4" />
                 </Button>

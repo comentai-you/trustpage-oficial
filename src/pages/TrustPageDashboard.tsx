@@ -44,6 +44,12 @@ interface UserProfile {
   support_email: string | null;
 }
 
+interface UserDomain {
+  domain: string;
+  verified: boolean;
+  is_primary: boolean;
+}
+
 // Legal page slugs - these don't count towards plan limits
 const LEGAL_PAGE_SLUGS = ['politica-de-privacidade', 'termos-de-uso', 'contato'];
 
@@ -71,6 +77,7 @@ const TrustPageDashboard = () => {
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit'>('limit');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userDomains, setUserDomains] = useState<UserDomain[]>([]);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
   const [analyticsDialog, setAnalyticsDialog] = useState<{ open: boolean; pageId: string; pageName: string }>({ open: false, pageId: '', pageName: '' });
   const { user } = useAuth();
@@ -92,6 +99,7 @@ const TrustPageDashboard = () => {
     if (user) {
       fetchProfile();
       fetchPages();
+      fetchUserDomains();
     }
   }, [user]);
 
@@ -112,6 +120,21 @@ const TrustPageDashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchUserDomains = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_domains")
+        .select("domain, verified, is_primary")
+        .eq("user_id", user!.id)
+        .order("is_primary", { ascending: false });
+
+      if (error) throw error;
+      setUserDomains(data || []);
+    } catch (error) {
+      console.error("Error fetching user domains:", error);
     }
   };
 
@@ -157,10 +180,10 @@ const TrustPageDashboard = () => {
     }
   };
 
-  const handleCopyLink = (slug: string, useCustomDomain?: boolean) => {
+  const handleCopyLink = (slug: string, customDomain?: string | null) => {
     let url: string;
-    if (useCustomDomain && profile?.custom_domain && profile?.domain_verified) {
-      const normalizedDomain = profile.custom_domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (customDomain) {
+      const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
       url = `https://${normalizedDomain}/p/${slug}`;
     } else {
       url = `${window.location.origin}/p/${slug}`;
@@ -168,8 +191,6 @@ const TrustPageDashboard = () => {
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
-
-  const customDomain = profile?.domain_verified ? profile.custom_domain : null;
 
   const handleNewPage = () => {
     if (hasReachedLimit) {
@@ -386,7 +407,7 @@ const TrustPageDashboard = () => {
                 videoUrl={page.video_url}
                 coverImageUrl={page.cover_image_url}
                 isTrialExpired={false}
-                customDomain={customDomain}
+                customDomains={userDomains}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCopyLink={handleCopyLink}
