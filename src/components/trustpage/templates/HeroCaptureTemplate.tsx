@@ -1,15 +1,19 @@
+import { useState } from "react";
 import { LandingPageFormData } from "@/types/landing-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, User, ArrowRight, ImageIcon, Phone, MessageCircle } from "lucide-react";
+import { Mail, User, ArrowRight, ImageIcon, Phone, MessageCircle, CheckCircle, Download, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface HeroCaptureTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
   fullHeight?: boolean;
+  pageId?: string; // ID da landing page para salvar leads
 }
 
-const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplateProps) => {
+const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCaptureTemplateProps) => {
   const bgStart = data.colors.background || "#0f172a";
   const bgEnd = data.colors.primary || "#1e293b";
   const accentColor = data.primary_color || "#3b82f6";
@@ -26,6 +30,135 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
     showPhone: false,
     showWhatsapp: false,
   };
+
+  // Lead magnet configuration
+  const magnetConfig = (data.content as any)?.magnetConfig || {
+    type: 'link',
+    link: '',
+    fileUrl: '',
+  };
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    whatsapp: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (formFields.showEmail && !formData.email) {
+      toast.error("Por favor, preencha seu e-mail.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Save lead to database if we have a pageId
+      if (pageId) {
+        const { error } = await supabase
+          .from('leads')
+          .insert({
+            landing_page_id: pageId,
+            name: formData.name || null,
+            email: formData.email || null,
+            phone: formData.phone || null,
+            whatsapp: formData.whatsapp || null,
+          });
+
+        if (error) {
+          console.error("Error saving lead:", error);
+          // Don't block the user, continue with the flow
+        }
+      }
+
+      // Handle magnet type
+      if (magnetConfig.type === 'link' && magnetConfig.link) {
+        // Redirect to external link
+        window.location.href = magnetConfig.link;
+      } else if (magnetConfig.type === 'file' && magnetConfig.fileUrl) {
+        // Show success screen with download
+        setIsSuccess(true);
+      } else if (data.cta_url) {
+        // Fallback to legacy cta_url
+        window.location.href = data.cta_url;
+      } else {
+        // No destination configured - show success anyway
+        setIsSuccess(true);
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("Ocorreu um erro. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (magnetConfig.fileUrl) {
+      window.open(magnetConfig.fileUrl, '_blank');
+    }
+  };
+
+  // Success Screen Component
+  const SuccessScreen = () => (
+    <div className="text-center space-y-6">
+      <div
+        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center"
+        style={{
+          backgroundColor: `${accentColor}20`,
+          boxShadow: `0 0 30px ${accentColor}40`,
+        }}
+      >
+        <CheckCircle className="w-10 h-10" style={{ color: accentColor }} />
+      </div>
+
+      <div className="space-y-2">
+        <h2
+          className="text-2xl font-bold"
+          style={{ color: textColor }}
+        >
+          Quase lá! 🎉
+        </h2>
+        <p
+          className="text-base"
+          style={{ color: `${textColor}cc` }}
+        >
+          Seu download está pronto. Clique no botão abaixo para baixar.
+        </p>
+      </div>
+
+      <Button
+        onClick={handleDownload}
+        className="w-full h-16 text-lg font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02]"
+        style={{
+          background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
+          color: '#ffffff',
+          boxShadow: `0 10px 30px -10px ${accentColor}80`,
+        }}
+      >
+        <Download className="w-6 h-6 mr-3" />
+        BAIXAR AGORA
+      </Button>
+
+      <p
+        className="text-xs"
+        style={{ color: `${textColor}60` }}
+      >
+        💡 O download iniciará automaticamente. Verifique sua pasta de downloads.
+      </p>
+    </div>
+  );
 
   return (
     <div
@@ -82,142 +215,162 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight }: HeroCaptureTemplate
                 backgroundColor: `${bgStart}cc`,
               }}
             >
-              {/* Headline */}
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-4'}`}>
-                {data.subheadline && (
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider`}
-                    style={{
-                      backgroundColor: `${accentColor}20`,
-                      color: accentColor,
-                      border: `1px solid ${accentColor}40`,
-                    }}
+              {isSuccess ? (
+                <SuccessScreen />
+              ) : (
+                <>
+                  {/* Headline */}
+                  <div className={`${isMobile ? 'space-y-3' : 'space-y-4'}`}>
+                    {data.subheadline && (
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider`}
+                        style={{
+                          backgroundColor: `${accentColor}20`,
+                          color: accentColor,
+                          border: `1px solid ${accentColor}40`,
+                        }}
+                      >
+                        {data.subheadline}
+                      </span>
+                    )}
+                    <h1
+                      className="font-extrabold leading-tight"
+                      style={{ 
+                        color: textColor,
+                        fontSize: isMobile
+                          ? `${headlineSizeMobile}rem`
+                          : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
+                        lineHeight: 1.15,
+                      }}
+                    >
+                      {data.headline || "Sua Headline Impactante Vai Aqui"}
+                    </h1>
+                    <p
+                      className={`leading-relaxed ${isMobile ? 'text-sm' : 'text-base lg:text-lg'}`}
+                      style={{ color: `${textColor}cc` }}
+                    >
+                      {data.description || "Descrição persuasiva sobre o que a pessoa vai ganhar ao se cadastrar agora."}
+                    </p>
+                  </div>
+
+                  {/* Capture Form */}
+                  <form
+                    className={`${isMobile ? 'mt-6 space-y-3' : 'mt-8 space-y-4'}`}
+                    onSubmit={handleSubmit}
                   >
-                    {data.subheadline}
-                  </span>
-                )}
-                <h1
-                  className="font-extrabold leading-tight"
-                  style={{ 
-                    color: textColor,
-                    fontSize: isMobile
-                      ? `${headlineSizeMobile}rem`
-                      : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
-                    lineHeight: 1.15,
-                  }}
-                >
-                  {data.headline || "Sua Headline Impactante Vai Aqui"}
-                </h1>
-                <p
-                  className={`leading-relaxed ${isMobile ? 'text-sm' : 'text-base lg:text-lg'}`}
-                  style={{ color: `${textColor}cc` }}
-                >
-                  {data.description || "Descrição persuasiva sobre o que a pessoa vai ganhar ao se cadastrar agora."}
-                </p>
-              </div>
+                    {formFields.showName && (
+                      <div className="relative">
+                        <User
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                          style={{ color: `${textColor}60` }}
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Seu nome"
+                          value={formData.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          className="pl-10 h-12 border-0 text-base"
+                          style={{
+                            backgroundColor: `${textColor}10`,
+                            color: textColor,
+                          }}
+                        />
+                      </div>
+                    )}
 
-              {/* Capture Form */}
-              <form
-                className={`${isMobile ? 'mt-6 space-y-3' : 'mt-8 space-y-4'}`}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (data.cta_url) {
-                    window.open(data.cta_url, '_blank');
-                  }
-                }}
-              >
-                {formFields.showName && (
-                  <div className="relative">
-                    <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                      style={{ color: `${textColor}60` }}
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Seu nome"
-                      className="pl-10 h-12 border-0 text-base"
+                    {formFields.showEmail && (
+                      <div className="relative">
+                        <Mail
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                          style={{ color: `${textColor}60` }}
+                        />
+                        <Input
+                          type="email"
+                          placeholder="Seu melhor e-mail"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          required={formFields.showEmail}
+                          className="pl-10 h-12 border-0 text-base"
+                          style={{
+                            backgroundColor: `${textColor}10`,
+                            color: textColor,
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {formFields.showPhone && (
+                      <div className="relative">
+                        <Phone
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                          style={{ color: `${textColor}60` }}
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="Seu telefone"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          className="pl-10 h-12 border-0 text-base"
+                          style={{
+                            backgroundColor: `${textColor}10`,
+                            color: textColor,
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {formFields.showWhatsapp && (
+                      <div className="relative">
+                        <MessageCircle
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                          style={{ color: `${textColor}60` }}
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="Seu WhatsApp"
+                          value={formData.whatsapp}
+                          onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                          className="pl-10 h-12 border-0 text-base"
+                          style={{
+                            backgroundColor: `${textColor}10`,
+                            color: textColor,
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-14 text-base font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
                       style={{
-                        backgroundColor: `${textColor}10`,
-                        color: textColor,
+                        background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
+                        color: '#ffffff',
+                        boxShadow: `0 10px 30px -10px ${accentColor}80`,
                       }}
-                    />
-                  </div>
-                )}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          {data.cta_text || "GARANTIR MEU LUGAR AGORA!"}
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
 
-                {formFields.showEmail && (
-                  <div className="relative">
-                    <Mail
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
+                    <p
+                      className="text-center text-xs"
                       style={{ color: `${textColor}60` }}
-                    />
-                    <Input
-                      type="email"
-                      placeholder="Seu melhor e-mail"
-                      className="pl-10 h-12 border-0 text-base"
-                      style={{
-                        backgroundColor: `${textColor}10`,
-                        color: textColor,
-                      }}
-                    />
-                  </div>
-                )}
-
-                {formFields.showPhone && (
-                  <div className="relative">
-                    <Phone
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                      style={{ color: `${textColor}60` }}
-                    />
-                    <Input
-                      type="tel"
-                      placeholder="Seu telefone"
-                      className="pl-10 h-12 border-0 text-base"
-                      style={{
-                        backgroundColor: `${textColor}10`,
-                        color: textColor,
-                      }}
-                    />
-                  </div>
-                )}
-
-                {formFields.showWhatsapp && (
-                  <div className="relative">
-                    <MessageCircle
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5"
-                      style={{ color: `${textColor}60` }}
-                    />
-                    <Input
-                      type="tel"
-                      placeholder="Seu WhatsApp"
-                      className="pl-10 h-12 border-0 text-base"
-                      style={{
-                        backgroundColor: `${textColor}10`,
-                        color: textColor,
-                      }}
-                    />
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  className="w-full h-14 text-base font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02]"
-                  style={{
-                    background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
-                    color: '#ffffff',
-                    boxShadow: `0 10px 30px -10px ${accentColor}80`,
-                  }}
-                >
-                  {data.cta_text || "GARANTIR MEU LUGAR AGORA!"}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-
-                <p
-                  className="text-center text-xs"
-                  style={{ color: `${textColor}60` }}
-                >
-                  🔒 Seus dados estão 100% seguros
-                </p>
-              </form>
+                    >
+                      🔒 Seus dados estão 100% seguros
+                    </p>
+                  </form>
+                </>
+              )}
             </div>
           </div>
 
