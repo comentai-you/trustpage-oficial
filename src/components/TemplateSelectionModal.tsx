@@ -1,19 +1,7 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Lock } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Lock, Magnet } from "lucide-react"; // Adicionei Magnet
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { TemplateType } from "@/types/landing-page";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,12 +13,7 @@ interface TemplateSelectionModalProps {
   isFreePlan?: boolean;
 }
 
-const TemplateSelectionModal = ({
-  open,
-  onOpenChange,
-  onSelect,
-  isFreePlan = false,
-}: TemplateSelectionModalProps) => {
+const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = false }: TemplateSelectionModalProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
   const isMobile = useIsMobile();
 
@@ -47,30 +30,30 @@ const TemplateSelectionModal = ({
       <div className="grid grid-cols-1 gap-3">
         {/* Bio Link Template - Always available */}
         <button
-          onClick={() => setSelectedTemplate('bio')}
+          onClick={() => setSelectedTemplate("bio")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
-            selectedTemplate === 'bio'
-              ? 'border-primary bg-primary/5 shadow-lg'
-              : 'border-border hover:border-primary/50'
+            selectedTemplate === "bio"
+              ? "border-primary bg-primary/5 shadow-lg"
+              : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
-              selectedTemplate === 'bio' 
-                ? 'bg-primary text-white' 
-                : 'bg-primary/10 text-primary group-hover:bg-primary/20'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                selectedTemplate === "bio"
+                  ? "bg-primary text-white"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
               <LinkIcon className="w-5 h-5" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                Bio Link Pro
-              </h3>
+              <h3 className="text-base font-semibold text-foreground mb-1">Bio Link Pro</h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Reúna todos os seus links em uma única página profissional.
               </p>
-              
+
               <div className="flex flex-wrap gap-1.5 mt-2">
                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full font-medium">
                   Gratuito
@@ -82,7 +65,7 @@ const TemplateSelectionModal = ({
             </div>
           </div>
 
-          {selectedTemplate === 'bio' && (
+          {selectedTemplate === "bio" && (
             <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -91,37 +74,94 @@ const TemplateSelectionModal = ({
           )}
         </button>
 
-        {/* VSL Template - Locked for FREE */}
+        {/* --- NOVO: Capture Hero Template --- */}
         <button
-          onClick={() => setSelectedTemplate('vsl')}
+          onClick={() => setSelectedTemplate("capture-hero")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
-            selectedTemplate === 'vsl'
-              ? 'border-primary bg-primary/5 shadow-lg'
-              : isFreePlan 
-                ? 'border-border/50 opacity-75 hover:border-primary/30' 
-                : 'border-border hover:border-primary/50'
+            selectedTemplate === "capture-hero"
+              ? "border-primary bg-primary/5 shadow-lg"
+              : isFreePlan
+                ? "border-border/50 opacity-75 hover:border-primary/30"
+                : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
-              selectedTemplate === 'vsl' 
-                ? 'bg-primary text-white' 
-                : 'bg-primary/10 text-primary group-hover:bg-primary/20'
-            }`}>
-              <Play className="w-5 h-5" fill={selectedTemplate === 'vsl' ? 'white' : 'currentColor'} />
+            <div
+              className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                selectedTemplate === "capture-hero"
+                  ? "bg-primary text-white"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
+              <Magnet className="w-5 h-5" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-foreground mb-1">
-                  VSL Focada
-                </h3>
+                <h3 className="text-base font-semibold text-foreground mb-1">Página de Captura Hero</h3>
+                {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
+              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                Visual premium com destaque para E-books, Iscas e Lançamentos.
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {isFreePlan && (
+                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
+                    Essencial
+                  </span>
+                )}
+                <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                  Alta Conversão
+                </span>
+                <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                  Lead Magnet
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {selectedTemplate === "capture-hero" && (
+            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          )}
+        </button>
+        {/* ----------------------------------- */}
+
+        {/* VSL Template - Locked for FREE */}
+        <button
+          onClick={() => setSelectedTemplate("vsl")}
+          className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
+            selectedTemplate === "vsl"
+              ? "border-primary bg-primary/5 shadow-lg"
+              : isFreePlan
+                ? "border-border/50 opacity-75 hover:border-primary/30"
+                : "border-border hover:border-primary/50"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                selectedTemplate === "vsl"
+                  ? "bg-primary text-white"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
+              <Play className="w-5 h-5" fill={selectedTemplate === "vsl" ? "white" : "currentColor"} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-foreground mb-1">VSL Focada</h3>
                 {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
               </div>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Ideal para PLR e Infoprodutos. Foco total no vídeo de vendas.
               </p>
-              
+
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {isFreePlan && (
                   <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
@@ -138,7 +178,7 @@ const TemplateSelectionModal = ({
             </div>
           </div>
 
-          {selectedTemplate === 'vsl' && (
+          {selectedTemplate === "vsl" && (
             <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -149,35 +189,35 @@ const TemplateSelectionModal = ({
 
         {/* Sales Page Template - Locked for FREE */}
         <button
-          onClick={() => setSelectedTemplate('sales')}
+          onClick={() => setSelectedTemplate("sales")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
-            selectedTemplate === 'sales'
-              ? 'border-primary bg-primary/5 shadow-lg'
-              : isFreePlan 
-                ? 'border-border/50 opacity-75 hover:border-primary/30' 
-                : 'border-border hover:border-primary/50'
+            selectedTemplate === "sales"
+              ? "border-primary bg-primary/5 shadow-lg"
+              : isFreePlan
+                ? "border-border/50 opacity-75 hover:border-primary/30"
+                : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
-              selectedTemplate === 'sales' 
-                ? 'bg-primary text-white' 
-                : 'bg-primary/10 text-primary group-hover:bg-primary/20'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                selectedTemplate === "sales"
+                  ? "bg-primary text-white"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
               <ShoppingBag className="w-5 h-5" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-foreground mb-1">
-                  Página de Vendas
-                </h3>
+                <h3 className="text-base font-semibold text-foreground mb-1">Página de Vendas</h3>
                 {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
               </div>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Layout completo com vídeo, carrossel e múltiplos CTAs.
               </p>
-              
+
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {isFreePlan && (
                   <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
@@ -194,7 +234,7 @@ const TemplateSelectionModal = ({
             </div>
           </div>
 
-          {selectedTemplate === 'sales' && (
+          {selectedTemplate === "sales" && (
             <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -215,12 +255,8 @@ const TemplateSelectionModal = ({
         >
           Cancelar
         </Button>
-        <Button
-          className="flex-1"
-          onClick={handleSelect}
-          disabled={!selectedTemplate}
-        >
-          {isFreePlan && selectedTemplate && selectedTemplate !== 'bio' ? 'Ver Upgrade' : 'Continuar'}
+        <Button className="flex-1" onClick={handleSelect} disabled={!selectedTemplate}>
+          {isFreePlan && selectedTemplate && selectedTemplate !== "bio" ? "Ver Upgrade" : "Continuar"}
         </Button>
       </div>
     </>
@@ -236,7 +272,9 @@ const TemplateSelectionModal = ({
               Escolha o Tipo de Página
             </DrawerTitle>
             <DrawerDescription className="text-sm">
-              {isFreePlan ? 'Bio Link é gratuito. Faça upgrade para VSL e Vendas.' : 'Selecione o template ideal para seu produto'}
+              {isFreePlan
+                ? "Bio Link é gratuito. Faça upgrade para VSL, Captura e Vendas."
+                : "Selecione o template ideal para seu produto"}
             </DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto">
@@ -256,7 +294,9 @@ const TemplateSelectionModal = ({
             Escolha o Tipo de Página
           </DialogTitle>
           <DialogDescription>
-            {isFreePlan ? 'Bio Link é gratuito. Faça upgrade para VSL e Vendas.' : 'Selecione o template ideal para o seu produto ou serviço'}
+            {isFreePlan
+              ? "Bio Link é gratuito. Faça upgrade para VSL, Captura e Vendas."
+              : "Selecione o template ideal para o seu produto ou serviço"}
           </DialogDescription>
         </DialogHeader>
         <TemplateContent />
