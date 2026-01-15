@@ -24,6 +24,7 @@ import OfertaPage from "./pages/OfertaPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import AdminPage from "./pages/AdminPage";
+import LeadsPage from "./pages/LeadsPage";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,11 @@ const SystemRoutes = () => (
         <AdminPage />
       </ProtectedRoute>
     } />
+    <Route path="/leads" element={
+      <ProtectedRoute>
+        <LeadsPage />
+      </ProtectedRoute>
+    } />
     <Route path="/new" element={
       <ProtectedRoute>
         <TrustPageEditor />
@@ -128,6 +134,7 @@ const App = () => {
     "/admin",
     "/auth",
     "/dashboard",
+    "/leads",
     "/settings",
     "/subscription",
     "/payment-success",

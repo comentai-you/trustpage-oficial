@@ -70,6 +70,7 @@ const getMaxPages = (planType: string) => {
 
 const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
+  const [totalLeads, setTotalLeads] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
@@ -100,6 +101,7 @@ const TrustPageDashboard = () => {
       fetchProfile();
       fetchPages();
       fetchUserDomains();
+      fetchLeadsCount();
     }
   }, [user]);
 
@@ -153,6 +155,20 @@ const TrustPageDashboard = () => {
       toast.error("Erro ao carregar suas páginas");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLeadsCount = async () => {
+    try {
+      // Get leads count from user's pages
+      const { count, error } = await supabase
+        .from("leads")
+        .select("id", { count: "exact", head: true });
+
+      if (error) throw error;
+      setTotalLeads(count || 0);
+    } catch (error) {
+      console.error("Error fetching leads count:", error);
     }
   };
 
@@ -314,6 +330,7 @@ const TrustPageDashboard = () => {
           <StatsBar
             totalViews={totalViews}
             totalPages={regularPages.length}
+            totalLeads={totalLeads}
             planType={profile?.plan_type || 'free'}
             subscriptionStatus={profile?.subscription_status || 'free'}
           />
