@@ -159,6 +159,27 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
 
           if (error) throw error;
           page = data;
+          
+          // Fetch sensitive data through secure functions if page was found
+          if (page) {
+            // Fetch tracking pixels
+            const { data: pixelsData } = await supabase
+              .rpc('get_page_tracking_pixels', { page_id: page.id })
+              .maybeSingle();
+            
+            if (pixelsData) {
+              page.facebook_pixel_id = pixelsData.facebook_pixel_id;
+              page.pix_pixel_id = pixelsData.pix_pixel_id;
+            }
+            
+            // Fetch WhatsApp number
+            const { data: whatsappData } = await supabase
+              .rpc('get_page_whatsapp', { page_id: page.id });
+            
+            if (whatsappData) {
+              page.whatsapp_number = whatsappData;
+            }
+          }
         }
 
         if (!page) {
@@ -171,11 +192,15 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         setCurrentPageId(page.id);
 
         // Store the page owner ID for legal footer links
+        // For legal pages and custom domain pages, we have the owner ID
+        // For public pages via RPC, user_id is not exposed for security
         if (isLegalSlug) {
           setPageOwnerId(legalOwnerId);
-        } else if (page.user_id) {
-          setPageOwnerId(page.user_id);
+        } else if (ownerIdOverride) {
+          // Custom domain scenario - we know the owner
+          setPageOwnerId(ownerIdOverride);
         } else {
+          // Public pages via RPC - owner not exposed (security fix)
           setPageOwnerId(null);
         }
 

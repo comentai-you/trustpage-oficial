@@ -427,6 +427,14 @@ export type Database = {
           plan_type: string
         }[]
       }
+      get_page_tracking_pixels: {
+        Args: { page_id: string }
+        Returns: {
+          facebook_pixel_id: string
+          pix_pixel_id: string
+        }[]
+      }
+      get_page_whatsapp: { Args: { page_id: string }; Returns: string }
       get_published_page_by_slug: {
         Args: { page_slug: string }
         Returns: {
@@ -444,7 +452,6 @@ export type Database = {
           image_url: string
           is_published: boolean
           page_name: string
-          pix_pixel_id: string
           primary_color: string
           profile_image_url: string
           slug: string
@@ -452,11 +459,8 @@ export type Database = {
           template_id: number
           template_type: string
           updated_at: string
-          user_id: string
           video_storage_path: string
           video_url: string
-          views: number
-          whatsapp_number: string
         }[]
       }
       get_user_domain_count: {
