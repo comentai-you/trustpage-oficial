@@ -323,11 +323,22 @@ const HighConversionTemplate = ({
           )}
 
           {/* Video Section */}
-          <div className="w-full mb-4 md:mb-6">
+          <div className={`w-full mb-4 md:mb-6 ${
+            data.video_orientation === 'vertical' 
+              ? 'flex justify-center' 
+              : ''
+          }`}>
             {isVideoPlaying && embedUrl ? (
               <div 
                 id="video-container"
-                className="relative w-full rounded-lg overflow-hidden shadow-xl aspect-video group"
+                className={`relative overflow-hidden group ${
+                  data.video_orientation === 'vertical'
+                    ? 'w-full md:w-auto md:max-w-[400px] aspect-[9/16] rounded-xl shadow-2xl'
+                    : 'w-full aspect-video rounded-lg shadow-xl'
+                }`}
+                style={data.video_orientation === 'vertical' ? {
+                  boxShadow: `0 20px 50px -10px ${data.colors.buttonBg}30, 0 10px 30px -5px rgba(0,0,0,0.3)`
+                } : undefined}
               >
                 {/* Video iframe */}
                 <iframe
@@ -358,9 +369,18 @@ const HighConversionTemplate = ({
               </div>
             ) : (
               <div
-                className="aspect-video w-full relative cursor-pointer group rounded-lg overflow-hidden shadow-lg"
+                className={`relative cursor-pointer group overflow-hidden ${
+                  data.video_orientation === 'vertical'
+                    ? 'w-full md:w-auto md:max-w-[400px] aspect-[9/16] rounded-xl shadow-2xl'
+                    : 'w-full aspect-video rounded-lg shadow-lg'
+                }`}
                 onClick={handlePlayClick}
-                style={{ backgroundColor: `${data.colors.text}10` }}
+                style={{ 
+                  backgroundColor: `${data.colors.text}10`,
+                  ...(data.video_orientation === 'vertical' ? {
+                    boxShadow: `0 20px 50px -10px ${data.colors.buttonBg}30, 0 10px 30px -5px rgba(0,0,0,0.3)`
+                  } : {})
+                }}
               >
                 {/* Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center">

@@ -184,6 +184,8 @@ export interface LandingPage {
   updated_at: string;
 }
 
+export type VideoOrientation = 'horizontal' | 'vertical';
+
 export interface LandingPageFormData {
   slug: string;
   template_id: number;
@@ -200,6 +202,7 @@ export interface LandingPageFormData {
   video_url: string;
   video_storage_path: string;
   video_thumbnail_url: string;
+  video_orientation: VideoOrientation;
   description: string;
   image_url: string;
   cover_image_url: string;
@@ -234,6 +237,7 @@ export const defaultFormData: LandingPageFormData = {
   video_url: '',
   video_storage_path: '',
   video_thumbnail_url: '',
+  video_orientation: 'horizontal',
   description: '',
   image_url: '',
   cover_image_url: '',

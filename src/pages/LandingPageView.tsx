@@ -262,6 +262,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           video_url: page.video_url || '',
           video_storage_path: page.video_storage_path || '',
           video_thumbnail_url: '',
+          video_orientation: content?.video_orientation || 'horizontal',
           description: page.description || '',
           image_url: page.image_url || '',
           cover_image_url: page.cover_image_url || '',
