@@ -333,10 +333,12 @@ const HighConversionTemplate = ({
                 id="video-container"
                 className={`relative overflow-hidden group ${
                   data.video_orientation === 'vertical'
-                    ? 'w-full md:w-auto md:max-w-[400px] aspect-[9/16] rounded-xl shadow-2xl'
+                    ? 'aspect-[9/16] rounded-xl'
                     : 'w-full aspect-video rounded-lg shadow-xl'
                 }`}
                 style={data.video_orientation === 'vertical' ? {
+                  width: isMobile ? '100%' : '400px',
+                  maxWidth: '100%',
                   boxShadow: `0 20px 50px -10px ${data.colors.buttonBg}30, 0 10px 30px -5px rgba(0,0,0,0.3)`
                 } : undefined}
               >
@@ -371,13 +373,15 @@ const HighConversionTemplate = ({
               <div
                 className={`relative cursor-pointer group overflow-hidden ${
                   data.video_orientation === 'vertical'
-                    ? 'w-full md:w-auto md:max-w-[400px] aspect-[9/16] rounded-xl shadow-2xl'
+                    ? 'aspect-[9/16] rounded-xl'
                     : 'w-full aspect-video rounded-lg shadow-lg'
                 }`}
                 onClick={handlePlayClick}
                 style={{ 
                   backgroundColor: `${data.colors.text}10`,
                   ...(data.video_orientation === 'vertical' ? {
+                    width: isMobile ? '100%' : '400px',
+                    maxWidth: '100%',
                     boxShadow: `0 20px 50px -10px ${data.colors.buttonBg}30, 0 10px 30px -5px rgba(0,0,0,0.3)`
                   } : {})
                 }}
