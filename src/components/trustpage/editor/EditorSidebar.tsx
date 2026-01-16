@@ -1,11 +1,11 @@
-import { LandingPageFormData, PageTheme, pageThemes } from "@/types/landing-page";
+import { LandingPageFormData, PageTheme, pageThemes, VideoOrientation } from "@/types/landing-page";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { InputWithAI } from "@/components/ui/input-with-ai";
 import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3 } from "lucide-react";
+import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3, Smartphone, MonitorPlay } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -244,6 +244,46 @@ const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarP
                     profissional e sem anúncios concorrentes.
                   </p>
                 </div>
+              </div>
+
+              {/* Video Orientation */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">
+                  Orientação do Vídeo
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onChange({ video_orientation: 'horizontal' })}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      (formData.video_orientation || 'horizontal') === 'horizontal'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                    }`}
+                  >
+                    <MonitorPlay className="w-6 h-6 text-gray-700" />
+                    <span className="text-xs font-medium text-gray-700">Horizontal</span>
+                    <span className="text-[10px] text-gray-500">16:9</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onChange({ video_orientation: 'vertical' })}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      formData.video_orientation === 'vertical'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                    }`}
+                  >
+                    <Smartphone className="w-6 h-6 text-gray-700" />
+                    <span className="text-xs font-medium text-gray-700">Vertical</span>
+                    <span className="text-[10px] text-gray-500">9:16</span>
+                  </button>
+                </div>
+                {formData.video_orientation === 'vertical' && (
+                  <p className="text-xs text-gray-500 bg-gray-100 p-2 rounded-md">
+                    📱 Otimizado para TikTok, Reels e Shorts. No mobile, ocupa a tela toda.
+                  </p>
+                )}
               </div>
             </AccordionContent>
           </AccordionItem>
