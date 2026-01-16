@@ -28,14 +28,42 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Validate user session using getClaims
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    // Validate user session
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Sessão inválida' }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Server-side plan verification - AI features require PRO or Elite plan
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('plan_type, subscription_status')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return new Response(
+        JSON.stringify({ error: 'Perfil não encontrado' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const proPlanTypes = ['pro', 'pro_yearly', 'elite'];
+    if (!proPlanTypes.includes(profile.plan_type)) {
+      return new Response(
+        JSON.stringify({ error: 'Recurso de IA requer plano PRO ou Elite' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (profile.subscription_status !== 'active') {
+      return new Response(
+        JSON.stringify({ error: 'Assinatura inativa. Renove para usar recursos de IA.' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
