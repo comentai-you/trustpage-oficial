@@ -25,6 +25,9 @@ import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import AdminPage from "./pages/AdminPage";
 import LeadsPage from "./pages/LeadsPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import AdminBlogPage from "./pages/AdminBlogPage";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +71,10 @@ const SystemRoutes = () => (
     <Route path="/oferta" element={<OfertaPage />} />
     <Route path="/obrigado" element={<ThankYouPage />} />
     
+    {/* Blog Routes - Public */}
+    <Route path="/blog" element={<BlogPage />} />
+    <Route path="/blog/:slug" element={<BlogPostPage />} />
+    
     {/* Protected Routes - DEVE vir ANTES das rotas dinâmicas /:slug */}
     <Route path="/dashboard" element={
       <ProtectedRoute>
@@ -104,6 +111,11 @@ const SystemRoutes = () => (
         <LeadsPage />
       </ProtectedRoute>
     } />
+    <Route path="/admin/blog" element={
+      <ProtectedRoute>
+        <AdminBlogPage />
+      </ProtectedRoute>
+    } />
     <Route path="/new" element={
       <ProtectedRoute>
         <TrustPageEditor />
@@ -133,6 +145,7 @@ const App = () => {
   const FORCE_SYSTEM_PREFIXES = [
     "/admin",
     "/auth",
+    "/blog",
     "/dashboard",
     "/leads",
     "/settings",
