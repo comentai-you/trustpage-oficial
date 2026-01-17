@@ -1,24 +1,8 @@
 {
-  "headers": [
-    {
-      "source": "/sitemap.xml",
-      "headers": [
-        { "key": "Content-Type", "value": "application/xml" },
-        { "key": "Cache-Control", "value": "s-maxage=3600, stale-while-revalidate" }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0" },
-        { "key": "Pragma", "value": "no-cache" }
-      ]
-    }
-  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap"
+      "destination": "/api/sitemap"
     },
     {
       "source": "/(.*)",
@@ -26,4 +10,3 @@
     }
   ]
 }
-
