@@ -36,22 +36,60 @@ Deno.serve(async (req) => {
     // Normalize hostname (remove www. prefix if present)
     const normalizedHostname = hostname.toLowerCase().replace(/^www\./, '');
 
-    // Find user profile with this custom domain (verified)
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, custom_domain, domain_verified, plan_type, subscription_status')
-      .or(`custom_domain.eq.${normalizedHostname},custom_domain.eq.www.${normalizedHostname}`)
-      .eq('domain_verified', true)
+    // STEP 1: Search in user_domains table first (supports multiple domains per user)
+    let profile: { id: string; plan_type: string; subscription_status: string } | null = null;
+
+    const { data: userDomain, error: domainError } = await supabase
+      .from('user_domains')
+      .select('user_id')
+      .or(`domain.eq.${normalizedHostname},domain.eq.www.${normalizedHostname}`)
+      .eq('verified', true)
       .maybeSingle();
 
-    if (profileError) {
-      console.error('Error finding profile:', profileError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao buscar domínio' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (domainError) {
+      console.error('Error finding user_domain:', domainError);
     }
 
+    // STEP 2: If found in user_domains, load profile by user_id
+    if (userDomain?.user_id) {
+      console.log(`Found domain in user_domains for user: ${userDomain.user_id}`);
+      
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, plan_type, subscription_status')
+        .eq('id', userDomain.user_id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error finding profile by user_id:', profileError);
+      } else {
+        profile = profileData;
+      }
+    }
+
+    // STEP 3: Fallback - check profiles.custom_domain for backwards compatibility
+    if (!profile) {
+      console.log(`Domain not found in user_domains, trying profiles.custom_domain fallback...`);
+      
+      const { data: legacyProfile, error: legacyError } = await supabase
+        .from('profiles')
+        .select('id, plan_type, subscription_status')
+        .or(`custom_domain.eq.${normalizedHostname},custom_domain.eq.www.${normalizedHostname}`)
+        .eq('domain_verified', true)
+        .maybeSingle();
+
+      if (legacyError) {
+        console.error('Error in legacy profile lookup:', legacyError);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao buscar domínio' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      profile = legacyProfile;
+    }
+
+    // No domain found in either table
     if (!profile) {
       console.log(`No verified domain found for: ${normalizedHostname}`);
       return new Response(
@@ -62,6 +100,8 @@ Deno.serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log(`Found profile ${profile.id} for domain ${normalizedHostname}`);
 
     console.log(`Found profile ${profile.id} for domain ${normalizedHostname}`);
 
