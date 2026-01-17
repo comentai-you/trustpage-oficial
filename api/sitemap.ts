@@ -3,35 +3,27 @@ export const config = {
 };
 
 export default async function handler(request: Request) {
+  // URL da sua função no Supabase
   const SUPABASE_URL = "https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap";
 
   try {
-    console.log("Iniciando fetch do sitemap...");
-
+    // Busca o XML no Supabase
     const response = await fetch(SUPABASE_URL, {
       method: "GET",
       headers: {
-        // Dizemos explicitamente ao Supabase que aceitamos XML ou texto
         Accept: "application/xml, text/xml, text/plain, */*",
-        // Identificamos o User-Agent para evitar bloqueios de bot
-        "User-Agent": "TrustPage-Proxy/1.0",
+        "User-Agent": "TrustPage-Sitemap-Proxy",
       },
     });
 
-    // Se o Supabase rejeitar (ex: 406, 404, 500), pegamos o erro
     if (!response.ok) {
-      console.error(`Erro do Supabase: ${response.status} ${response.statusText}`);
-      // Tentamos ler o corpo do erro para entender (geralmente é um JSON com o motivo)
-      const errorText = await response.text();
-      return new Response(`Erro na origem (Supabase): ${response.status} - ${errorText}`, {
-        status: response.status,
-      });
+      console.error(`Erro Supabase: ${response.status}`);
+      return new Response(`Erro na origem: ${response.status}`, { status: 500 });
     }
 
     const xmlData = await response.text();
 
-    console.log("Sitemap recebido com sucesso. Tamanho:", xmlData.length);
-
+    // Retorna para o navegador como XML válido
     return new Response(xmlData, {
       status: 200,
       headers: {
@@ -39,8 +31,8 @@ export default async function handler(request: Request) {
         "Cache-Control": "s-maxage=3600, stale-while-revalidate",
       },
     });
-  } catch (e) {
-    console.error("Erro fatal no proxy:", e);
-    return new Response("Erro interno ao gerar sitemap", { status: 500 });
+  } catch (error) {
+    console.error("Erro interno:", error);
+    return new Response("Erro ao gerar sitemap", { status: 500 });
   }
 }
