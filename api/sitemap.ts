@@ -1,15 +1,22 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+export const config = {
+  runtime: 'edge',
+};
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(request: Request) {
+  const supabaseFunctionUrl = 'https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap';
+  
   try {
-    const response = await fetch('https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap');
+    const response = await fetch(supabaseFunctionUrl);
     const xml = await response.text();
-
-    res.setHeader('Content-Type', 'application/xml');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-    res.status(200).send(xml);
+    
+    return new Response(xml, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 's-maxage=3600, stale-while-revalidate'
+      },
+    });
   } catch (error) {
-    console.error('Error fetching sitemap:', error);
-    res.status(500).send('Error generating sitemap');
+    return new Response('Error loading sitemap', { status: 500 });
   }
 }
