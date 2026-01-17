@@ -3,27 +3,44 @@ export const config = {
 };
 
 export default async function handler(request: Request) {
-  try {
-    // Busca o XML gerado pela sua Edge Function no Supabase
-    const response = await fetch("https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap");
+  const SUPABASE_URL = "https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/sitemap";
 
-    // Se der erro no Supabase, lança exceção
+  try {
+    console.log("Iniciando fetch do sitemap...");
+
+    const response = await fetch(SUPABASE_URL, {
+      method: "GET",
+      headers: {
+        // Dizemos explicitamente ao Supabase que aceitamos XML ou texto
+        Accept: "application/xml, text/xml, text/plain, */*",
+        // Identificamos o User-Agent para evitar bloqueios de bot
+        "User-Agent": "TrustPage-Proxy/1.0",
+      },
+    });
+
+    // Se o Supabase rejeitar (ex: 406, 404, 500), pegamos o erro
     if (!response.ok) {
-      throw new Error(`Erro no Supabase: ${response.status}`);
+      console.error(`Erro do Supabase: ${response.status} ${response.statusText}`);
+      // Tentamos ler o corpo do erro para entender (geralmente é um JSON com o motivo)
+      const errorText = await response.text();
+      return new Response(`Erro na origem (Supabase): ${response.status} - ${errorText}`, {
+        status: response.status,
+      });
     }
 
-    const xml = await response.text();
+    const xmlData = await response.text();
 
-    // Retorna a resposta formatada como XML
-    return new Response(xml, {
+    console.log("Sitemap recebido com sucesso. Tamanho:", xmlData.length);
+
+    return new Response(xmlData, {
       status: 200,
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "s-maxage=3600, stale-while-revalidate",
       },
     });
-  } catch (error) {
-    console.error("Erro ao buscar sitemap:", error);
-    return new Response("Erro ao gerar sitemap", { status: 500 });
+  } catch (e) {
+    console.error("Erro fatal no proxy:", e);
+    return new Response("Erro interno ao gerar sitemap", { status: 500 });
   }
 }
