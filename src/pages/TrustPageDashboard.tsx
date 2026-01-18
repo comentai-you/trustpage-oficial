@@ -296,16 +296,16 @@ const TrustPageDashboard = () => {
         </div>
       )}
 
-      {/* Ads Compliance Alert */}
+      {/* Ads Good News Alert */}
       <div className="container mx-auto px-4 pt-6">
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-start gap-3">
+          <Sparkles className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-amber-800 dark:text-amber-500">
-              Atenção: Regra Obrigatória para Anúncios (Ads)
+            <h4 className="font-semibold text-green-800 dark:text-green-500">
+              🎉 Novidade: Tráfego Pago Liberado!
             </h4>
-            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-              É estritamente <strong>PROIBIDO</strong> rodar tráfego pago (Facebook/Google Ads) direto para URLs terminadas em '{PUBLIC_PAGES_DOMAIN}'. Isso gera bloqueio imediato. Para anunciar, configure seu <strong>Domínio Próprio</strong> (Disponível no Plano PRO).
+            <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+              Agora você pode rodar anúncios (Facebook/Google Ads) diretamente com o domínio gratuito <strong>tpage.com.br</strong>! Para mais controle e branding, considere conectar seu <strong>Domínio Próprio</strong> (a partir do Plano Essencial).
             </p>
           </div>
         </div>
