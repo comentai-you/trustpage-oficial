@@ -67,8 +67,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Domínio disponível para planos pagos (Essential, Pro, Elite)
-    const paidPlanTypes = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'];
+    // Domínio disponível para planos pagos (Essential, Pro)
+    const paidPlanTypes = ['essential', 'essential_yearly', 'pro', 'pro_yearly'];
     if (!paidPlanTypes.includes(profile.plan_type)) {
       return new Response(
         JSON.stringify({ error: 'Domínios personalizados estão disponíveis a partir do plano Essencial. Faça upgrade para conectar seu domínio.' }),
@@ -87,9 +87,8 @@ Deno.serve(async (req) => {
     }
 
     const domainCount = existingDomains?.length || 0;
-    // Essential: 1, Pro: 5, Elite: 10
+    // Essential: 1, Pro: 5
     const getMaxDomains = (planType: string): number => {
-      if (planType === 'elite') return 10;
       if (['pro', 'pro_yearly'].includes(planType)) return 5;
       if (['essential', 'essential_yearly'].includes(planType)) return 1;
       return 0;
