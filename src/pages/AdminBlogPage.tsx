@@ -25,7 +25,8 @@ import {
   Settings,
   Calendar,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -69,6 +70,7 @@ const AdminBlogPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
+  const [isRebuildingSitemap, setIsRebuildingSitemap] = useState(false);
 
   // Check admin status
   useEffect(() => {
@@ -215,6 +217,41 @@ const AdminBlogPage = () => {
 
   const handleFieldChange = (field: keyof BlogPost, value: string | boolean) => {
     setSelectedPost(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  // Rebuild sitemap via Vercel Deploy Hook
+  const handleRebuildSitemap = async () => {
+    const deployHookUrl = localStorage.getItem("vercel_deploy_hook");
+    
+    if (!deployHookUrl) {
+      const url = prompt(
+        "Cole a URL do Deploy Hook do Vercel.\n\n" +
+        "Para criar: Vercel Dashboard → Seu Projeto → Settings → Git → Deploy Hooks\n" +
+        "Crie um hook chamado 'Rebuild Sitemap' para a branch 'main'"
+      );
+      
+      if (!url) return;
+      localStorage.setItem("vercel_deploy_hook", url);
+    }
+
+    const hookUrl = localStorage.getItem("vercel_deploy_hook");
+    if (!hookUrl) return;
+
+    setIsRebuildingSitemap(true);
+    try {
+      const response = await fetch(hookUrl, { method: "POST" });
+      
+      if (response.ok) {
+        toast.success("Deploy iniciado! O sitemap será atualizado em alguns minutos.");
+      } else {
+        throw new Error("Falha ao disparar deploy");
+      }
+    } catch (error) {
+      toast.error("Erro ao disparar rebuild. Verifique a URL do Deploy Hook.");
+      localStorage.removeItem("vercel_deploy_hook");
+    } finally {
+      setIsRebuildingSitemap(false);
+    }
   };
 
   if (authLoading || isAdmin === null) {
@@ -424,10 +461,24 @@ const AdminBlogPage = () => {
             <h1 className="text-3xl font-bold text-foreground">Blog Admin</h1>
             <p className="text-muted-foreground">Gerencie os artigos do blog</p>
           </div>
-          <Button onClick={handleNewPost}>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Artigo
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={handleRebuildSitemap}
+              disabled={isRebuildingSitemap}
+            >
+              {isRebuildingSitemap ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              Atualizar Sitemap
+            </Button>
+            <Button onClick={handleNewPost}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Artigo
+            </Button>
+          </div>
         </div>
 
         {postsLoading ? (
