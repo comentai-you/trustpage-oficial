@@ -33,11 +33,13 @@ const queryClient = new QueryClient();
 
 // ALLOWLIST ESTRITA: Domínios que pertencem ao SISTEMA (dashboard, auth, etc)
 // Qualquer domínio fora desta lista = domínio de CLIENTE
+// tpage.com.br é usado para servir landing pages públicas (Plano Free)
 const KNOWN_APP_DOMAINS = [
   'localhost',
   '127.0.0.1',
   'trustpage.app',
   'trustpageapp.com',
+  'tpage.com.br',
   'lovable.app',
   'lovableproject.com',
   'trustpage-one.vercel.app',

@@ -6,6 +6,7 @@ import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3, Smartphone, MonitorPlay } from "lucide-react";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -122,7 +123,7 @@ const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarP
                 />
                 <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-md">
                   <span className="font-medium">Preview:</span>
-                  <span className="text-primary font-mono">trustpage.com/p/{formData.slug || 'seu-link'}</span>
+                  <span className="text-primary font-mono">{PUBLIC_PAGES_DOMAIN}/p/{formData.slug || 'seu-link'}</span>
                 </div>
               </div>
 

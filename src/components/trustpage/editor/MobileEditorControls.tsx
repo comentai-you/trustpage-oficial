@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Globe, FileText, Video, MousePointer, Palette, Lightbulb } from "lucide-react";
 import ImageUpload from "@/components/trustpage/ImageUpload";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 import {
   Sheet,
   SheetContent,
@@ -73,7 +74,7 @@ const MobileEditorControls = ({ formData, onChange, open, onOpenChange }: Mobile
                     className="bg-gray-50 border-gray-300"
                   />
                   <p className="text-xs text-gray-500">
-                    trustpage.com/p/{formData.slug || 'seu-link'}
+                    {PUBLIC_PAGES_DOMAIN}/p/{formData.slug || 'seu-link'}
                   </p>
                 </div>
                 <ImageUpload
