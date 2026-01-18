@@ -60,9 +60,10 @@ const getMaxPages = (planType: string) => {
     case 'pro':
     case 'pro_yearly':
     case 'elite':
-      return 10;
+      return 20;
     case 'essential':
-      return 2;
+    case 'essential_yearly':
+      return 5;
     default:
       return 1; // FREE plan
   }

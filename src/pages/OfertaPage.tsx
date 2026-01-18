@@ -55,8 +55,8 @@ const WHY_TRUSTPAGE = [
   },
   {
     icon: <Globe className="w-8 h-8" />,
-    title: "Domínio Próprio Incluso",
-    description: "Conecte seu domínio personalizado sem custo extra. Sua marca, sua identidade.",
+    title: "Domínio Próprio",
+    description: "Conecte seu domínio personalizado para transmitir profissionalismo. Disponível a partir do plano Essencial.",
     highlight: "SSL gratuito incluído",
   },
   {
@@ -112,9 +112,9 @@ const FAQ_ITEMS = [
       "Sim! Todos os planos incluem a conexão de domínio próprio. É só apontar o DNS e sua página estará online com sua marca em minutos.",
   },
   {
-    question: "Qual a diferença entre Basic e Pro?",
+    question: "Qual a diferença entre Essencial e Pro?",
     answer:
-      "O plano Basic é ideal para quem está começando, com 2 páginas e 1 domínio. O Pro é para quem quer escalar: 8 páginas, múltiplos domínios, IA de copywriting e suporte VIP para ajudar você a converter mais.",
+      "O plano Essencial é ideal para quem quer crescer: 5 páginas, 1 domínio próprio e zero marca d'água. O Pro é para profissionais que precisam escalar: 20 páginas, 5 domínios, IA de copywriting e suporte VIP.",
   },
   {
     question: "Como funciona a IA de Copywriting?",
@@ -344,76 +344,36 @@ const OfertaPage = () => {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Basic Card - Neutro */}
-            <div className="bg-card rounded-2xl border border-border p-8 shadow-md hover:shadow-lg transition-shadow opacity-90">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-muted-foreground mb-2">Essencial</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-muted-foreground">R$ {basicPrice}</span>
-                  <span className="text-muted-foreground">/mês</span>
-                </div>
-                {isYearly && (
-                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {basicYearlyTotal}/ano)</p>
-                )}
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                <FeatureItem included>2 Páginas Ativas</FeatureItem>
-                <FeatureItem included>Hospedagem Vercel Inclusa</FeatureItem>
-                <FeatureItem included>Página VSL com Vídeo</FeatureItem>
-                <FeatureItem included>Delay no Botão CTA</FeatureItem>
-                <FeatureItem included>Página de Vendas completa</FeatureItem>
-                <FeatureItem included>Marca d'água no rodapé</FeatureItem>
-                <FeatureItem included>Não Pode Anunciar no Ads sem domínio</FeatureItem>
-                <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
-                <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
-                <FeatureItem included={false}>IA de Copywriting</FeatureItem>
-              </ul>
-
-              <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
-                  Começar com Essencial
-                </Button>
-              </a>
-
-              <p className="text-xs text-center text-muted-foreground mt-3">Ideal para quem está começando</p>
-            </div>
-
-            {/* Pro Card - DESTAQUE MÁXIMO */}
+            {/* Essencial Card - DESTAQUE MÁXIMO */}
             <div className="relative bg-card rounded-2xl border-2 border-primary p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20">
               {/* Badge Principal */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
-                  🔥 MAIOR DESCONTO (ECONOMIZE R$ 284)
+                <span className="bg-gradient-to-r from-primary to-accent text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
+                  ⭐ MAIS POPULAR
                 </span>
               </div>
 
               <div className="mb-6 pt-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xl font-bold text-foreground">Pro</h3>
+                  <h3 className="text-xl font-bold text-foreground">Essencial</h3>
                   <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
-                    MAIS VENDIDO
+                    MELHOR CUSTO-BENEFÍCIO
                   </span>
                 </div>
 
                 {isYearly ? (
                   <div>
-                    {/* Preço âncora riscado */}
-                    <p className="text-lg text-muted-foreground line-through">De R$ 1.164,00/ano</p>
-                    {/* Preço destaque */}
+                    <p className="text-lg text-muted-foreground line-through">De R$ 478,80/ano</p>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-5xl font-black text-primary">12x R$ 73,32</span>
+                      <span className="text-5xl font-black text-primary">12x R$ 37,49</span>
                     </div>
                     <p className="text-base text-green-600 font-semibold mt-1">
-                      Desconto De R$ 285,00
-                    </p>
-                    <p className="text-sm text-green-600 font-bold mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg inline-block">
-                      ✨ Equivale a 3 meses GRÁTIS!
+                      Economize R$ 28,80/ano
                     </p>
                   </div>
                 ) : (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-primary">R$ {proPrice}</span>
+                    <span className="text-4xl font-extrabold text-primary">R$ {basicPrice}</span>
                     <span className="text-muted-foreground">/mês</span>
                   </div>
                 )}
@@ -421,8 +381,41 @@ const OfertaPage = () => {
 
               <ul className="space-y-3 mb-8">
                 <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
-                  10 Páginas Ativas
+                  5 Páginas Ativas
                 </FeatureItem>
+                <FeatureItem included>✅ 1 Domínio Personalizado</FeatureItem>
+                <FeatureItem included>✅ Zero Marca d'água</FeatureItem>
+                <FeatureItem included>✅ Visualizações Ilimitadas</FeatureItem>
+                <FeatureItem included>Todos os Templates (VSL, Vendas, Bio)</FeatureItem>
+                <FeatureItem included>Pixel Facebook/Google ADS</FeatureItem>
+                <FeatureItem included={false}>IA de Copywriting</FeatureItem>
+              </ul>
+
+              <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
+                <Button variant="gradient" size="lg" className="w-full text-lg font-bold shadow-lg py-6">
+                  QUERO O ESSENCIAL
+                </Button>
+              </a>
+
+              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer resultados ⚡</p>
+            </div>
+
+            {/* Pro Card */}
+            <div className="bg-card rounded-2xl border border-border p-8 shadow-md hover:shadow-lg transition-shadow">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-muted-foreground mb-2">Pro</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-muted-foreground">R$ {proPrice}</span>
+                  <span className="text-muted-foreground">/mês</span>
+                </div>
+                {isYearly && (
+                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {proYearlyTotal}/ano)</p>
+                )}
+              </div>
+
+              <ul className="space-y-3 mb-8">
+                <FeatureItem included>20 Páginas Ativas</FeatureItem>
+                <FeatureItem included>5 Domínios Personalizados</FeatureItem>
                 <FeatureItem included>TUDO do Essencial +</FeatureItem>
                 <FeatureItem included icon={<Sparkles className="w-4 h-4 text-purple-500" />}>
                   🧠 IA de Copywriting
@@ -430,21 +423,18 @@ const OfertaPage = () => {
                 <FeatureItem included icon={<Shield className="w-4 h-4 text-blue-500" />}>
                   🛡️ Anti-Bloqueio Avançado
                 </FeatureItem>
-                <FeatureItem included>✅ Domínio Personalizado Grátis</FeatureItem>
-                <FeatureItem included>✅ Tracking Avançado (Pixel)</FeatureItem>
                 <FeatureItem included icon={<HeadphonesIcon className="w-4 h-4 text-green-500" />}>
                   🚀 Suporte VIP Prioritário
                 </FeatureItem>
-                <FeatureItem included>✅ Sem Marca D'água</FeatureItem>
               </ul>
 
               <a href={proCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="gradient" size="lg" className="w-full text-lg font-bold shadow-lg py-6">
-                  QUERO O PLANO PRO
+                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
+                  Assinar Pro
                 </Button>
               </a>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer escalar resultados 🚀</p>
+              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer escalar 🚀</p>
             </div>
           </div>
 

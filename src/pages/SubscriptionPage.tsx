@@ -81,21 +81,23 @@ const SubscriptionPage = () => {
   const getPlanDetails = (planType: string) => {
     switch (planType) {
       case 'pro':
+      case 'pro_yearly':
         return {
           name: 'PRO',
           price: 'R$ 97,00/mês',
-          pages: 10,
-          domains: 3,
+          pages: 20,
+          domains: 5,
           icon: Crown,
           color: 'text-primary',
           bgColor: 'bg-primary/10',
         };
       case 'essential':
+      case 'essential_yearly':
         return {
           name: 'Essencial',
           price: 'R$ 39,90/mês',
-          pages: 2,
-          domains: 0,
+          pages: 5,
+          domains: 1,
           icon: Sparkles,
           color: 'text-primary',
           bgColor: 'bg-primary/10',
@@ -210,25 +212,19 @@ const SubscriptionPage = () => {
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-success" />
-                  <span>Templates VSL, Vendas e Bio Link</span>
+                  <span>Todos os Templates (VSL, Vendas, Bio, Captura)</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-success" />
                   <span>Proteção contra bloqueios</span>
                 </li>
-                {(profile?.plan_type === 'pro' || profile?.plan_type === 'pro_yearly') && (
-                  <li className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-success" />
-                    <span>Pixel do Facebook/Google ADS</span>
-                  </li>
-                )}
                 {plan.domains > 0 && (
                   <li className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-success" />
                     <span>Até {plan.domains} domínio{plan.domains > 1 ? 's' : ''} personalizado{plan.domains > 1 ? 's' : ''}</span>
                   </li>
                 )}
-                {profile?.plan_type === 'pro' ? (
+                {(profile?.plan_type === 'essential' || profile?.plan_type === 'essential_yearly' || profile?.plan_type === 'pro' || profile?.plan_type === 'pro_yearly') && (
                   <>
                     <li className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-success" />
@@ -236,15 +232,28 @@ const SubscriptionPage = () => {
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-success" />
+                      <span>Visualizações ilimitadas</span>
+                    </li>
+                  </>
+                )}
+                {(profile?.plan_type === 'pro' || profile?.plan_type === 'pro_yearly') && (
+                  <>
+                    <li className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-success" />
+                      <span>IA de Copywriting</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-success" />
                       <span>Suporte prioritário</span>
                     </li>
                   </>
-                ) : profile?.plan_type === 'essential' ? (
+                )}
+                {profile?.plan_type === 'free' && (
                   <li className="flex items-center gap-3 text-muted-foreground">
                     <Check className="w-5 h-5 text-muted-foreground" />
-                    <span>Marca d'água no rodapé</span>
+                    <span>1.000 visualizações/mês</span>
                   </li>
-                ) : null}
+                )}
               </ul>
             </CardContent>
           </Card>
@@ -259,39 +268,40 @@ const SubscriptionPage = () => {
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {/* Essential */}
-                  {profile?.plan_type !== 'essential' && (
-                    <div className="border rounded-lg p-4 space-y-3">
+                  {profile?.plan_type !== 'essential' && profile?.plan_type !== 'essential_yearly' && (
+                    <div className="border-2 border-primary/50 rounded-lg p-4 space-y-3 relative bg-primary/5">
+                      <Badge className="absolute -top-2 right-2 bg-primary">Mais Popular</Badge>
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-primary" />
                         <h4 className="font-semibold">Essencial</h4>
                       </div>
                       <p className="text-2xl font-bold">R$ 39,90<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
                       <ul className="text-sm space-y-1 text-muted-foreground">
-                        <li>• 2 páginas ativas</li>
+                        <li>• 5 páginas ativas</li>
                         <li>• 1 domínio personalizado</li>
-                        <li>• Página VSL e Vendas</li>
+                        <li>• Zero marca d'água</li>
+                        <li>• Visualizações ilimitadas</li>
                       </ul>
-                      <Button className="w-full" onClick={() => handleUpgrade('essential_monthly')}>
+                      <Button variant="gradient" className="w-full" onClick={() => handleUpgrade('essential_monthly')}>
                         Assinar Essencial
                       </Button>
                     </div>
                   )}
                   
                   {/* PRO */}
-                  <div className="border-2 border-primary rounded-lg p-4 space-y-3 relative">
-                    <Badge className="absolute -top-2 right-2 bg-primary">Recomendado</Badge>
+                  <div className="border rounded-lg p-4 space-y-3 relative">
                     <div className="flex items-center gap-2">
                       <Crown className="w-5 h-5 text-primary" />
                       <h4 className="font-semibold">PRO</h4>
                     </div>
                     <p className="text-2xl font-bold">R$ 97,00<span className="text-sm font-normal text-muted-foreground">/mês</span></p>
                     <ul className="text-sm space-y-1 text-muted-foreground">
-                      <li>• 10 páginas ativas</li>
-                      <li>• 3 domínios personalizados</li>
-                      <li>• Zero marca d'água</li>
+                      <li>• 20 páginas ativas</li>
+                      <li>• 5 domínios personalizados</li>
+                      <li>• IA de Copywriting</li>
                       <li>• Suporte prioritário</li>
                     </ul>
-                    <Button variant="gradient" className="w-full" onClick={() => handleUpgrade('pro_monthly')}>
+                    <Button className="w-full" onClick={() => handleUpgrade('pro_monthly')}>
                       Assinar PRO
                     </Button>
                   </div>
