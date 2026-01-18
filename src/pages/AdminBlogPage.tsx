@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +36,23 @@ import {
   Upload,
   X,
   Tag,
-  Link as LinkIcon
+  Link as LinkIcon,
+  FolderOpen,
+  Palette
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface BlogPost {
   id: string;
@@ -54,6 +67,7 @@ interface BlogPost {
   meta_title: string | null;
   meta_description: string | null;
   tags: string[];
+  category_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -69,7 +83,28 @@ const emptyPost: Partial<BlogPost> = {
   meta_title: "",
   meta_description: "",
   tags: [],
+  category_id: null,
 };
+
+const emptyCategory: Partial<BlogCategory> = {
+  name: "",
+  slug: "",
+  description: "",
+  color: "#8B5CF6",
+};
+
+const COLOR_OPTIONS = [
+  { value: "#8B5CF6", label: "Roxo" },
+  { value: "#3B82F6", label: "Azul" },
+  { value: "#10B981", label: "Verde" },
+  { value: "#F59E0B", label: "Amarelo" },
+  { value: "#EF4444", label: "Vermelho" },
+  { value: "#EC4899", label: "Rosa" },
+  { value: "#6366F1", label: "Índigo" },
+  { value: "#14B8A6", label: "Teal" },
+  { value: "#F97316", label: "Laranja" },
+  { value: "#64748B", label: "Cinza" },
+];
 
 const AdminBlogPage = () => {
   const navigate = useNavigate();
@@ -77,14 +112,20 @@ const AdminBlogPage = () => {
   const queryClient = useQueryClient();
   
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [mainTab, setMainTab] = useState<"posts" | "categories">("posts");
   const [selectedPost, setSelectedPost] = useState<Partial<BlogPost> | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Partial<BlogCategory> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [editorTab, setEditorTab] = useState<"edit" | "preview">("edit");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<BlogCategory | null>(null);
   const [isRebuildingSitemap, setIsRebuildingSitemap] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Check admin status
@@ -116,6 +157,21 @@ const AdminBlogPage = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Fetch categories
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      return data as BlogCategory[];
+    },
+    enabled: isAdmin === true,
+  });
+
   // Fetch all posts (admins can see drafts too)
   const { data: posts, isLoading: postsLoading } = useQuery({
     queryKey: ["admin-blog-posts"],
@@ -129,6 +185,13 @@ const AdminBlogPage = () => {
       return data as BlogPost[];
     },
     enabled: isAdmin === true,
+  });
+
+  // Filtered posts
+  const filteredPosts = posts?.filter(post => {
+    if (filterCategory === "all") return true;
+    if (filterCategory === "uncategorized") return !post.category_id;
+    return post.category_id === filterCategory;
   });
 
   // Save/Create post mutation
@@ -159,6 +222,7 @@ const AdminBlogPage = () => {
             meta_title: post.meta_title || null,
             meta_description: post.meta_description || null,
             tags: post.tags || [],
+            category_id: post.category_id || null,
             published_at: post.is_published && !post.published_at ? new Date().toISOString() : post.published_at,
           })
           .eq("id", post.id);
@@ -178,6 +242,7 @@ const AdminBlogPage = () => {
             meta_title: post.meta_title || null,
             meta_description: post.meta_description || null,
             tags: post.tags || [],
+            category_id: post.category_id || null,
             published_at: post.is_published ? new Date().toISOString() : null,
           }]);
         if (error) throw error;
@@ -188,6 +253,53 @@ const AdminBlogPage = () => {
       toast.success(selectedPost?.id ? "Post atualizado!" : "Post criado!");
       setIsEditing(false);
       setSelectedPost(null);
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao salvar: " + error.message);
+    },
+  });
+
+  // Save/Create category mutation
+  const saveCategoryMutation = useMutation({
+    mutationFn: async (category: Partial<BlogCategory>) => {
+      if (!category.name) {
+        throw new Error("Nome da categoria é obrigatório");
+      }
+
+      const slug = category.slug || category.name.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      if (category.id) {
+        const { error } = await supabase
+          .from("blog_categories")
+          .update({
+            name: category.name,
+            slug,
+            description: category.description || null,
+            color: category.color || "#8B5CF6",
+          })
+          .eq("id", category.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("blog_categories")
+          .insert([{
+            name: category.name,
+            slug,
+            description: category.description || null,
+            color: category.color || "#8B5CF6",
+          }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blog-categories"] });
+      toast.success(selectedCategory?.id ? "Categoria atualizada!" : "Categoria criada!");
+      setIsEditingCategory(false);
+      setSelectedCategory(null);
     },
     onError: (error: Error) => {
       toast.error("Erro ao salvar: " + error.message);
@@ -214,6 +326,26 @@ const AdminBlogPage = () => {
     },
   });
 
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (categoryId: string) => {
+      const { error } = await supabase
+        .from("blog_categories")
+        .delete()
+        .eq("id", categoryId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blog-categories"] });
+      toast.success("Categoria excluída!");
+      setDeleteCategoryDialogOpen(false);
+      setCategoryToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao excluir: " + error.message);
+    },
+  });
+
   const handleNewPost = () => {
     setSelectedPost({ ...emptyPost });
     setIsEditing(true);
@@ -224,6 +356,16 @@ const AdminBlogPage = () => {
     setIsEditing(true);
   };
 
+  const handleNewCategory = () => {
+    setSelectedCategory({ ...emptyCategory });
+    setIsEditingCategory(true);
+  };
+
+  const handleEditCategory = (category: BlogCategory) => {
+    setSelectedCategory({ ...category });
+    setIsEditingCategory(true);
+  };
+
   const handleSave = () => {
     if (!selectedPost?.title || !selectedPost?.content) {
       toast.error("Título e conteúdo são obrigatórios");
@@ -232,8 +374,20 @@ const AdminBlogPage = () => {
     saveMutation.mutate(selectedPost);
   };
 
-  const handleFieldChange = (field: keyof BlogPost, value: string | boolean | string[]) => {
+  const handleSaveCategory = () => {
+    if (!selectedCategory?.name) {
+      toast.error("Nome da categoria é obrigatório");
+      return;
+    }
+    saveCategoryMutation.mutate(selectedCategory);
+  };
+
+  const handleFieldChange = (field: keyof BlogPost, value: string | boolean | string[] | null) => {
     setSelectedPost(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  const handleCategoryFieldChange = (field: keyof BlogCategory, value: string) => {
+    setSelectedCategory(prev => prev ? { ...prev, [field]: value } : null);
   };
 
   // Cover image upload
@@ -311,6 +465,12 @@ const AdminBlogPage = () => {
     return slug ? `trustpageapp.com/blog/${slug}` : '';
   };
 
+  // Get category by id
+  const getCategoryById = (id: string | null) => {
+    if (!id) return null;
+    return categories?.find(c => c.id === id);
+  };
+
   // Rebuild sitemap via Vercel Deploy Hook
   const handleRebuildSitemap = async () => {
     const deployHookUrl = localStorage.getItem("vercel_deploy_hook");
@@ -356,7 +516,113 @@ const AdminBlogPage = () => {
 
   if (!isAdmin) return null;
 
-  // Editor View
+  // Category Editor Modal
+  if (isEditingCategory && selectedCategory) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsEditingCategory(false);
+                setSelectedCategory(null);
+              }}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <h1 className="text-2xl font-bold">
+              {selectedCategory.id ? "Editar Categoria" : "Nova Categoria"}
+            </h1>
+          </div>
+
+          <Card>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="cat-name">Nome da Categoria *</Label>
+                <Input
+                  id="cat-name"
+                  value={selectedCategory.name || ""}
+                  onChange={(e) => handleCategoryFieldChange("name", e.target.value)}
+                  placeholder="Ex: Marketing Digital"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cat-slug">Slug (URL)</Label>
+                <Input
+                  id="cat-slug"
+                  value={selectedCategory.slug || ""}
+                  onChange={(e) => handleCategoryFieldChange("slug", e.target.value)}
+                  placeholder="marketing-digital"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Deixe vazio para gerar automaticamente
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cat-desc">Descrição</Label>
+                <Textarea
+                  id="cat-desc"
+                  value={selectedCategory.description || ""}
+                  onChange={(e) => handleCategoryFieldChange("description", e.target.value)}
+                  placeholder="Uma breve descrição da categoria..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Cor da Categoria</Label>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_OPTIONS.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => handleCategoryFieldChange("color", color.value)}
+                      className={`w-10 h-10 rounded-full border-2 transition-all ${
+                        selectedCategory.color === color.value
+                          ? "border-foreground scale-110"
+                          : "border-transparent hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: color.value }}
+                      title={color.label}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditingCategory(false);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSaveCategory}
+                  disabled={saveCategoryMutation.isPending}
+                >
+                  {saveCategoryMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Salvar Categoria
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Post Editor View
   if (isEditing && selectedPost) {
     return (
       <DashboardLayout>
@@ -463,6 +729,54 @@ const AdminBlogPage = () => {
 
                 {/* Sidebar */}
                 <div className="space-y-6">
+                  {/* Category Selection */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FolderOpen className="w-5 h-5" />
+                        Categoria
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Select
+                        value={selectedPost.category_id || "none"}
+                        onValueChange={(value) => handleFieldChange("category_id", value === "none" ? null : value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem categoria</SelectItem>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: cat.color }}
+                                />
+                                {cat.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {categories?.length === 0 && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Nenhuma categoria criada ainda.{" "}
+                          <button
+                            className="text-primary underline"
+                            onClick={() => {
+                              setIsEditing(false);
+                              setMainTab("categories");
+                            }}
+                          >
+                            Criar categoria
+                          </button>
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -643,6 +957,17 @@ const AdminBlogPage = () => {
                     <article className="p-6 md:p-10">
                       {/* Title */}
                       <header className="mb-8">
+                        {selectedPost.category_id && (
+                          <Badge
+                            className="mb-4"
+                            style={{
+                              backgroundColor: getCategoryById(selectedPost.category_id)?.color,
+                              color: "white"
+                            }}
+                          >
+                            {getCategoryById(selectedPost.category_id)?.name}
+                          </Badge>
+                        )}
                         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
                           {selectedPost.title || "Título do Artigo"}
                         </h1>
@@ -686,6 +1011,19 @@ const AdminBlogPage = () => {
                           </p>
                         )}
                       </div>
+
+                      {/* Tags */}
+                      {(selectedPost.tags || []).length > 0 && (
+                        <div className="mt-10 pt-6 border-t">
+                          <div className="flex flex-wrap gap-2">
+                            {(selectedPost.tags || []).map((tag) => (
+                              <Badge key={tag} variant="outline">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </article>
                   </CardContent>
                 </Card>
@@ -697,7 +1035,7 @@ const AdminBlogPage = () => {
     );
   }
 
-  // List View
+  // List View with Tabs
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
@@ -713,7 +1051,7 @@ const AdminBlogPage = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Blog CMS</h1>
-              <p className="text-muted-foreground">Gerencie os artigos do blog</p>
+              <p className="text-muted-foreground">Gerencie artigos e categorias do blog</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -729,108 +1067,267 @@ const AdminBlogPage = () => {
               )}
               Atualizar Sitemap
             </Button>
-            <Button onClick={handleNewPost}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Artigo
-            </Button>
           </div>
         </div>
 
-        {postsLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        ) : posts && posts.length > 0 ? (
-          <div className="grid gap-4">
-            {posts.map((post) => (
-              <Card key={post.id} className="overflow-hidden">
-                <div className="flex flex-col md:flex-row">
-                  {post.cover_image_url && (
-                    <div className="w-full md:w-48 h-32 md:h-auto shrink-0">
-                      <img
-                        src={post.cover_image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              post.is_published
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                            }`}
-                          >
-                            {post.is_published ? "Publicado" : "Rascunho"}
-                          </span>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {format(new Date(post.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                          </span>
-                        </div>
-                        <h3 className="font-semibold text-foreground mb-1">{post.title}</h3>
-                        {post.excerpt && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {post.is_published && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditPost(post)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            setPostToDelete(post);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="text-center py-16">
-            <CardContent>
-              <FileText className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Nenhum artigo ainda
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Comece criando seu primeiro artigo para o blog
-              </p>
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "posts" | "categories")}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList>
+              <TabsTrigger value="posts" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Artigos
+                {posts && <Badge variant="secondary" className="ml-1">{posts.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="categories" className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                Categorias
+                {categories && <Badge variant="secondary" className="ml-1">{categories.length}</Badge>}
+              </TabsTrigger>
+            </TabsList>
+
+            {mainTab === "posts" && (
               <Button onClick={handleNewPost}>
                 <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro Artigo
+                Novo Artigo
               </Button>
-            </CardContent>
-          </Card>
-        )}
+            )}
+            {mainTab === "categories" && (
+              <Button onClick={handleNewCategory}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Categoria
+              </Button>
+            )}
+          </div>
 
-        {/* Delete Confirmation Dialog */}
+          <TabsContent value="posts" className="space-y-4">
+            {/* Filter by category */}
+            {categories && categories.length > 0 && (
+              <div className="flex items-center gap-2 mb-4">
+                <Label className="text-sm text-muted-foreground">Filtrar:</Label>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    <SelectItem value="uncategorized">Sem categoria</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: cat.color }}
+                          />
+                          {cat.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {postsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filteredPosts && filteredPosts.length > 0 ? (
+              <div className="grid gap-4">
+                {filteredPosts.map((post) => (
+                  <Card key={post.id} className="overflow-hidden">
+                    <div className="flex flex-col md:flex-row">
+                      {post.cover_image_url && (
+                        <div className="w-full md:w-48 h-32 md:h-auto shrink-0">
+                          <img
+                            src={post.cover_image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  post.is_published
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                }`}
+                              >
+                                {post.is_published ? "Publicado" : "Rascunho"}
+                              </span>
+                              {post.category_id && getCategoryById(post.category_id) && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs"
+                                  style={{
+                                    borderColor: getCategoryById(post.category_id)?.color,
+                                    color: getCategoryById(post.category_id)?.color
+                                  }}
+                                >
+                                  {getCategoryById(post.category_id)?.name}
+                                </Badge>
+                              )}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {format(new Date(post.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                              </span>
+                            </div>
+                            <h3 className="font-semibold text-foreground mb-1">{post.title}</h3>
+                            {post.excerpt && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {post.is_published && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditPost(post)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => {
+                                setPostToDelete(post);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="text-center py-16">
+                <CardContent>
+                  <FileText className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    {filterCategory !== "all" ? "Nenhum artigo nesta categoria" : "Nenhum artigo ainda"}
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    {filterCategory !== "all" 
+                      ? "Tente selecionar outra categoria ou crie um novo artigo"
+                      : "Comece criando seu primeiro artigo para o blog"
+                    }
+                  </p>
+                  <Button onClick={handleNewPost}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Primeiro Artigo
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="categories" className="space-y-4">
+            {categoriesLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : categories && categories.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {categories.map((category) => {
+                  const postCount = posts?.filter(p => p.category_id === category.id).length || 0;
+                  return (
+                    <Card key={category.id} className="overflow-hidden">
+                      <div
+                        className="h-2"
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div
+                                className="w-4 h-4 rounded-full shrink-0"
+                                style={{ backgroundColor: category.color }}
+                              />
+                              <h3 className="font-semibold text-foreground truncate">
+                                {category.name}
+                              </h3>
+                            </div>
+                            {category.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                                {category.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                {postCount} {postCount === 1 ? "artigo" : "artigos"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <LinkIcon className="w-3 h-3" />
+                                /{category.slug}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleEditCategory(category)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => {
+                                setCategoryToDelete(category);
+                                setDeleteCategoryDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="text-center py-16">
+                <CardContent>
+                  <FolderOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    Nenhuma categoria ainda
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Organize seus artigos criando categorias
+                  </p>
+                  <Button onClick={handleNewCategory}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Primeira Categoria
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Delete Post Confirmation Dialog */}
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -849,6 +1346,36 @@ const AdminBlogPage = () => {
                 disabled={deleteMutation.isPending}
               >
                 {deleteMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                Excluir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Category Confirmation Dialog */}
+        <Dialog open={deleteCategoryDialogOpen} onOpenChange={setDeleteCategoryDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Excluir Categoria</DialogTitle>
+            </DialogHeader>
+            <p className="text-muted-foreground">
+              Tem certeza que deseja excluir a categoria "{categoryToDelete?.name}"? 
+              Os artigos desta categoria ficarão sem categoria.
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteCategoryDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => categoryToDelete && deleteCategoryMutation.mutate(categoryToDelete.id)}
+                disabled={deleteCategoryMutation.isPending}
+              >
+                {deleteCategoryMutation.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Trash2 className="w-4 h-4 mr-2" />
