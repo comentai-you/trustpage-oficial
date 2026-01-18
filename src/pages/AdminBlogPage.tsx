@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import ReactMarkdown from "react-markdown";
 import { 
   Plus, 
   Edit, 
@@ -27,7 +28,9 @@ import {
   Calendar,
   Loader2,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Pencil,
+  User
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -69,6 +72,7 @@ const AdminBlogPage = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [selectedPost, setSelectedPost] = useState<Partial<BlogPost> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [editorTab, setEditorTab] = useState<"edit" | "preview">("edit");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
   const [isRebuildingSitemap, setIsRebuildingSitemap] = useState(false);
@@ -310,137 +314,217 @@ const AdminBlogPage = () => {
           </div>
 
           <div className="container mx-auto px-4 py-8">
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Conteúdo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Título do Post *</Label>
-                      <Input
-                        id="title"
-                        value={selectedPost.title || ""}
-                        onChange={(e) => handleFieldChange("title", e.target.value)}
-                        placeholder="Ex: Como Criar Landing Pages que Convertem"
-                        className="text-lg font-semibold"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="excerpt">Resumo (Excerpt)</Label>
-                      <Textarea
-                        id="excerpt"
-                        value={selectedPost.excerpt || ""}
-                        onChange={(e) => handleFieldChange("excerpt", e.target.value)}
-                        placeholder="Um breve resumo do artigo para preview e SEO..."
-                        rows={3}
-                      />
-                    </div>
+            {/* Editor/Preview Tabs */}
+            <Tabs value={editorTab} onValueChange={(v) => setEditorTab(v as "edit" | "preview")} className="mb-6">
+              <TabsList className="grid w-full max-w-xs grid-cols-2">
+                <TabsTrigger value="edit" className="flex items-center gap-2">
+                  <Pencil className="w-4 h-4" />
+                  Editar
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="content">Conteúdo *</Label>
-                      <RichTextEditor
-                        value={selectedPost.content || ""}
-                        onChange={(markdown) => handleFieldChange("content", markdown)}
-                        placeholder="Escreva seu artigo aqui..."
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+            {editorTab === "edit" ? (
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Conteúdo
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Título do Post *</Label>
+                        <Input
+                          id="title"
+                          value={selectedPost.title || ""}
+                          onChange={(e) => handleFieldChange("title", e.target.value)}
+                          placeholder="Ex: Como Criar Landing Pages que Convertem"
+                          className="text-lg font-semibold"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="excerpt">Resumo (Excerpt)</Label>
+                        <Textarea
+                          id="excerpt"
+                          value={selectedPost.excerpt || ""}
+                          onChange={(e) => handleFieldChange("excerpt", e.target.value)}
+                          placeholder="Um breve resumo do artigo para preview e SEO..."
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="content">Conteúdo *</Label>
+                        <RichTextEditor
+                          value={selectedPost.content || ""}
+                          onChange={(markdown) => handleFieldChange("content", markdown)}
+                          placeholder="Escreva seu artigo aqui..."
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ImageIcon className="w-5 h-5" />
+                        Mídia
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cover">URL da Imagem de Capa</Label>
+                        <Input
+                          id="cover"
+                          value={selectedPost.cover_image_url || ""}
+                          onChange={(e) => handleFieldChange("cover_image_url", e.target.value)}
+                          placeholder="https://..."
+                        />
+                        {selectedPost.cover_image_url && (
+                          <div className="aspect-video rounded-lg overflow-hidden border border-border mt-2">
+                            <img
+                              src={selectedPost.cover_image_url}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        SEO & Configurações
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="slug">Slug (URL)</Label>
+                        <Input
+                          id="slug"
+                          value={selectedPost.slug || ""}
+                          onChange={(e) => handleFieldChange("slug", e.target.value)}
+                          placeholder="meu-artigo-incrivel"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Deixe vazio para gerar automaticamente
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="author">Autor</Label>
+                        <Input
+                          id="author"
+                          value={selectedPost.author_name || ""}
+                          onChange={(e) => handleFieldChange("author_name", e.target.value)}
+                          placeholder="TrustPage"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
+                        <Input
+                          id="metaTitle"
+                          value={selectedPost.meta_title || ""}
+                          onChange={(e) => handleFieldChange("meta_title", e.target.value)}
+                          placeholder="Título otimizado para Google"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="metaDesc">Meta Description (SEO)</Label>
+                        <Textarea
+                          id="metaDesc"
+                          value={selectedPost.meta_description || ""}
+                          onChange={(e) => handleFieldChange("meta_description", e.target.value)}
+                          placeholder="Descrição para resultados de busca..."
+                          rows={3}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
+            ) : (
+              /* Preview Mode */
+              <div className="max-w-4xl mx-auto">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    {/* Preview Header */}
+                    <div className="bg-muted/50 border-b px-6 py-4">
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Eye className="w-4 h-4" />
+                        Visualização do artigo como será exibido no blog
+                      </p>
+                    </div>
 
-              {/* Sidebar */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ImageIcon className="w-5 h-5" />
-                      Mídia
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cover">URL da Imagem de Capa</Label>
-                      <Input
-                        id="cover"
-                        value={selectedPost.cover_image_url || ""}
-                        onChange={(e) => handleFieldChange("cover_image_url", e.target.value)}
-                        placeholder="https://..."
-                      />
+                    {/* Preview Content */}
+                    <article className="p-6 md:p-10">
+                      {/* Title */}
+                      <header className="mb-8">
+                        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+                          {selectedPost.title || "Título do Artigo"}
+                        </h1>
+                        
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            {selectedPost.author_name || "TrustPage"}
+                          </span>
+                        </div>
+
+                        {selectedPost.excerpt && (
+                          <p className="text-lg text-muted-foreground border-l-4 border-primary pl-4">
+                            {selectedPost.excerpt}
+                          </p>
+                        )}
+                      </header>
+
+                      {/* Cover Image */}
                       {selectedPost.cover_image_url && (
-                        <div className="aspect-video rounded-lg overflow-hidden border border-border mt-2">
+                        <div className="aspect-video overflow-hidden rounded-xl mb-10">
                           <img
                             src={selectedPost.cover_image_url}
-                            alt="Preview"
+                            alt={selectedPost.title || "Cover"}
                             className="w-full h-full object-cover"
                           />
                         </div>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
-                      SEO & Configurações
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="slug">Slug (URL)</Label>
-                      <Input
-                        id="slug"
-                        value={selectedPost.slug || ""}
-                        onChange={(e) => handleFieldChange("slug", e.target.value)}
-                        placeholder="meu-artigo-incrivel"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Deixe vazio para gerar automaticamente
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="author">Autor</Label>
-                      <Input
-                        id="author"
-                        value={selectedPost.author_name || ""}
-                        onChange={(e) => handleFieldChange("author_name", e.target.value)}
-                        placeholder="TrustPage"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="metaTitle">Meta Title (SEO)</Label>
-                      <Input
-                        id="metaTitle"
-                        value={selectedPost.meta_title || ""}
-                        onChange={(e) => handleFieldChange("meta_title", e.target.value)}
-                        placeholder="Título otimizado para Google"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="metaDesc">Meta Description (SEO)</Label>
-                      <Textarea
-                        id="metaDesc"
-                        value={selectedPost.meta_description || ""}
-                        onChange={(e) => handleFieldChange("meta_description", e.target.value)}
-                        placeholder="Descrição para resultados de busca..."
-                        rows={3}
-                      />
-                    </div>
+                      {/* Article Content */}
+                      <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground">
+                        {selectedPost.content ? (
+                          <ReactMarkdown>{selectedPost.content}</ReactMarkdown>
+                        ) : (
+                          <p className="text-muted-foreground italic">
+                            Comece a escrever para ver o preview aqui...
+                          </p>
+                        )}
+                      </div>
+                    </article>
                   </CardContent>
                 </Card>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
