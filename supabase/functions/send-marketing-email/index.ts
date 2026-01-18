@@ -1,14 +1,37 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Send email using Resend API directly
+async function sendEmail(to: string, subject: string, html: string) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "TrustPage <noreply@trustpageapp.com>",
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Resend API error: ${response.status} - ${errorText}`);
+  }
+
+  return await response.json();
+}
 
 // Email template wrapper - table-based for maximum compatibility
 const wrapInEmailTemplate = (content: string, subject: string): string => {
@@ -150,12 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
         "#"
       );
 
-      const emailResponse = await resend.emails.send({
-        from: "TrustPage <noreply@trustpageapp.com>",
-        to: [to],
-        subject: subject,
-        html: finalHtml,
-      });
+      const emailResponse = await sendEmail(to, subject, finalHtml);
 
       console.log("[send-marketing-email] Test email sent:", emailResponse);
 
@@ -225,12 +243,7 @@ const handler = async (req: Request): Promise<Response> => {
             campaign.subject
           ).replace("{{UNSUBSCRIBE_URL}}", "#");
 
-          await resend.emails.send({
-            from: "TrustPage <noreply@trustpageapp.com>",
-            to: [user.email!],
-            subject: campaign.subject,
-            html: finalHtml,
-          });
+          await sendEmail(user.email!, campaign.subject, finalHtml);
 
           sentCount++;
         } catch (emailErr) {
