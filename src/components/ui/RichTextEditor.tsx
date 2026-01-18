@@ -93,7 +93,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[400px] px-4 py-3',
+        class: 'prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3 prose-headings:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground prose-blockquote:not-italic',
       },
     },
   });
