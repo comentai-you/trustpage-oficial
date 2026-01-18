@@ -11,9 +11,9 @@ const LegalFooter = ({ textColor = "#FFFFFF", showWatermark = true, ownerPlan }:
   const { isCustomDomain } = useCustomDomain();
   const { ownerId } = usePageOwner();
 
-  // PRO plans don't show watermark
-  const isPro = ownerPlan === 'pro' || ownerPlan === 'pro_yearly' || ownerPlan === 'elite';
-  const shouldShowWatermark = showWatermark && !isPro;
+  // Essential and PRO plans don't show watermark (only FREE shows)
+  const isPaidPlan = ownerPlan === 'pro' || ownerPlan === 'pro_yearly' || ownerPlan === 'elite' || ownerPlan === 'essential' || ownerPlan === 'essential_yearly';
+  const shouldShowWatermark = showWatermark && !isPaidPlan;
 
   const footerLinks = [
     { label: "Políticas de Privacidade", slug: "politica-de-privacidade" },

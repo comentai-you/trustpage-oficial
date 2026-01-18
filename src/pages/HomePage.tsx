@@ -376,7 +376,7 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            {/* FREE Card - Mantido igual */}
+            {/* FREE Card */}
             <div className="relative">
               <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border shadow-elevated h-full">
                 <div className="pt-2">
@@ -390,20 +390,20 @@ const HomePage = () => {
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span className="text-foreground text-sm sm:text-base">
-                        <span className="font-bold">1 Bio Link</span> Profissional
+                        <span className="font-bold">1 Página</span> Ativa
                       </span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Pixel do Facebook Liberado</span>
+                      <span className="text-foreground text-sm sm:text-base">Todos os Templates</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Analytics Básico</span>
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground text-sm sm:text-base">1.000 visualizações/mês</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
-                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Hospedagem Inclusa</span>
+                      <Check className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground text-sm sm:text-base">Marca d'água obrigatória</span>
                     </li>
                   </ul>
 
@@ -419,12 +419,21 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Essencial Card - Estilo OfertaPage */}
-            <div className="bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow opacity-90 h-full">
-              <div className="mb-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-muted-foreground mb-2">Essencial</h3>
+            {/* Essencial Card - DESTAQUE MÁXIMO */}
+            <div className="relative bg-card rounded-xl sm:rounded-2xl border-2 border-primary p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20 h-full">
+              {/* Badge Principal */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="bg-gradient-to-r from-primary to-accent text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse whitespace-nowrap">
+                  ⭐ MAIS POPULAR
+                </span>
+              </div>
+
+              <div className="mb-6 pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">Essencial</h3>
+                </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">R$ {basicPrice}</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {basicPrice}</span>
                   <span className="text-muted-foreground">/mês</span>
                 </div>
                 {isYearly && (
@@ -433,93 +442,60 @@ const HomePage = () => {
               </div>
 
               <ul className="space-y-3 mb-6 sm:mb-8">
-                <FeatureItem included>2 Páginas Ativas</FeatureItem>
-                <FeatureItem included>Hospedagem Vercel Inclusa</FeatureItem>
-                <FeatureItem included>Página VSL com Vídeo</FeatureItem>
-                <FeatureItem included>Delay no Botão CTA</FeatureItem>
-                <FeatureItem included>Página de Vendas completa</FeatureItem>
-                <FeatureItem included>Marca d'água no rodapé</FeatureItem>
-                <FeatureItem included>Não Pode Anunciar no Ads sem domínio</FeatureItem>
-                <FeatureItem included={false}>Domínio Personalizado</FeatureItem>
-                <FeatureItem included={false}>Pixel Facebook/Google</FeatureItem>
-                <FeatureItem included={false}>IA de Copywriting</FeatureItem>
+                <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
+                  5 Páginas Ativas
+                </FeatureItem>
+                <FeatureItem included icon={<Clock className="w-4 h-4 text-blue-500" />}>
+                  1 Domínio Personalizado
+                </FeatureItem>
+                <FeatureItem included>✅ Zero Marca d'água</FeatureItem>
+                <FeatureItem included>✅ Visualizações Ilimitadas</FeatureItem>
+                <FeatureItem included>Todos os Templates</FeatureItem>
+                <FeatureItem included>Pixel Facebook/Google</FeatureItem>
               </ul>
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
-                  Começar com Essencial
+                <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold shadow-lg">
+                  QUERO O ESSENCIAL
                 </Button>
               </a>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">Ideal para quem está começando</p>
+              <p className="text-xs text-center text-muted-foreground mt-3">Melhor custo-benefício ⚡</p>
             </div>
 
-            {/* Pro Card - DESTAQUE MÁXIMO */}
-            <div className="relative bg-card rounded-xl sm:rounded-2xl border-2 border-primary p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20 h-full">
-              {/* Badge Principal */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse whitespace-nowrap">
-                  🔥 MAIOR DESCONTO (ECONOMIZE R$ 284)
-                </span>
-              </div>
-
-              <div className="mb-6 pt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">Pro</h3>
-                  <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
-                    MAIS VENDIDO
-                  </span>
+            {/* Pro Card */}
+            <div className="bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow h-full">
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-muted-foreground mb-2">Pro</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">R$ {proPrice}</span>
+                  <span className="text-muted-foreground">/mês</span>
                 </div>
-
-                {isYearly ? (
-                  <div>
-                    {/* Preço âncora riscado */}
-                    <p className="text-lg text-muted-foreground line-through">De R$ 1.164,00/ano</p>
-                    {/* Preço destaque */}
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-4xl sm:text-5xl font-black text-primary">12x R$ 73,32</span>
-                    </div>
-                    <p className="text-base text-green-600 font-semibold mt-1">
-                      Desconto De R$ 285,00
-                    </p>
-                    <p className="text-sm text-green-600 font-bold mt-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg inline-block">
-                      ✨ Equivale a 3 meses GRÁTIS!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {proPrice}</span>
-                    <span className="text-muted-foreground">/mês</span>
-                  </div>
+                {isYearly && (
+                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {proYearlyTotal}/ano)</p>
                 )}
               </div>
 
               <ul className="space-y-3 mb-6 sm:mb-8">
-                <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
-                  10 Páginas Ativas
-                </FeatureItem>
-                <FeatureItem included>TUDO do Essencial +</FeatureItem>
+                <FeatureItem included>20 Páginas Ativas</FeatureItem>
+                <FeatureItem included>5 Domínios Personalizados</FeatureItem>
                 <FeatureItem included icon={<Sparkles className="w-4 h-4 text-purple-500" />}>
                   🧠 IA de Copywriting
                 </FeatureItem>
-                <FeatureItem included icon={<Shield className="w-4 h-4 text-blue-500" />}>
-                  🛡️ Anti-Bloqueio Avançado
-                </FeatureItem>
-                <FeatureItem included>✅ Domínio Personalizado Grátis</FeatureItem>
-                <FeatureItem included>✅ Tracking Avançado (Pixel)</FeatureItem>
+                <FeatureItem included>Zero Marca d'água</FeatureItem>
+                <FeatureItem included>Visualizações Ilimitadas</FeatureItem>
                 <FeatureItem included icon={<HeadphonesIcon className="w-4 h-4 text-green-500" />}>
-                  🚀 Suporte VIP Prioritário
+                  Suporte VIP Prioritário
                 </FeatureItem>
-                <FeatureItem included>✅ Sem Marca D'água</FeatureItem>
               </ul>
 
               <a href={proCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold shadow-lg">
-                  QUERO O PLANO PRO
+                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
+                  Assinar Pro
                 </Button>
               </a>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer escalar resultados 🚀</p>
+              <p className="text-xs text-center text-muted-foreground mt-3">Para quem quer escalar 🚀</p>
             </div>
           </div>
 
