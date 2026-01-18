@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import ReactMarkdown from "react-markdown";
+import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
   Edit, 
@@ -30,7 +31,11 @@ import {
   ExternalLink,
   RefreshCw,
   Pencil,
-  User
+  User,
+  Upload,
+  X,
+  Tag,
+  Link as LinkIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -48,6 +53,7 @@ interface BlogPost {
   is_published: boolean;
   meta_title: string | null;
   meta_description: string | null;
+  tags: string[];
   created_at: string;
   updated_at: string;
 }
@@ -62,6 +68,7 @@ const emptyPost: Partial<BlogPost> = {
   is_published: false,
   meta_title: "",
   meta_description: "",
+  tags: [],
 };
 
 const AdminBlogPage = () => {
@@ -76,6 +83,9 @@ const AdminBlogPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
   const [isRebuildingSitemap, setIsRebuildingSitemap] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Check admin status
   useEffect(() => {
@@ -148,6 +158,7 @@ const AdminBlogPage = () => {
             is_published: post.is_published || false,
             meta_title: post.meta_title || null,
             meta_description: post.meta_description || null,
+            tags: post.tags || [],
             published_at: post.is_published && !post.published_at ? new Date().toISOString() : post.published_at,
           })
           .eq("id", post.id);
@@ -166,6 +177,7 @@ const AdminBlogPage = () => {
             is_published: post.is_published || false,
             meta_title: post.meta_title || null,
             meta_description: post.meta_description || null,
+            tags: post.tags || [],
             published_at: post.is_published ? new Date().toISOString() : null,
           }]);
         if (error) throw error;
@@ -220,8 +232,83 @@ const AdminBlogPage = () => {
     saveMutation.mutate(selectedPost);
   };
 
-  const handleFieldChange = (field: keyof BlogPost, value: string | boolean) => {
+  const handleFieldChange = (field: keyof BlogPost, value: string | boolean | string[]) => {
     setSelectedPost(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  // Cover image upload
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione uma imagem válida');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    setIsUploadingCover(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `cover-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `covers/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('blog-content')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('blog-content')
+        .getPublicUrl(filePath);
+
+      if (urlData?.publicUrl) {
+        handleFieldChange('cover_image_url', urlData.publicUrl);
+        toast.success('Imagem de capa enviada!');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erro ao fazer upload da imagem');
+    } finally {
+      setIsUploadingCover(false);
+      if (coverInputRef.current) {
+        coverInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Tags management
+  const handleAddTag = () => {
+    if (!newTag.trim()) return;
+    const currentTags = selectedPost?.tags || [];
+    if (currentTags.includes(newTag.trim())) {
+      toast.error('Tag já existe');
+      return;
+    }
+    handleFieldChange('tags', [...currentTags, newTag.trim()]);
+    setNewTag('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const currentTags = selectedPost?.tags || [];
+    handleFieldChange('tags', currentTags.filter(tag => tag !== tagToRemove));
+  };
+
+  // Generate slug preview
+  const getSlugPreview = () => {
+    const slug = selectedPost?.slug || (selectedPost?.title || '')
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    return slug ? `trustpageapp.com/blog/${slug}` : '';
   };
 
   // Rebuild sitemap via Vercel Deploy Hook
@@ -380,28 +467,99 @@ const AdminBlogPage = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <ImageIcon className="w-5 h-5" />
-                        Mídia
+                        Imagem de Capa
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="cover">URL da Imagem de Capa</Label>
-                        <Input
-                          id="cover"
-                          value={selectedPost.cover_image_url || ""}
-                          onChange={(e) => handleFieldChange("cover_image_url", e.target.value)}
-                          placeholder="https://..."
-                        />
-                        {selectedPost.cover_image_url && (
-                          <div className="aspect-video rounded-lg overflow-hidden border border-border mt-2">
-                            <img
-                              src={selectedPost.cover_image_url}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
-                            />
+                        {selectedPost.cover_image_url ? (
+                          <div className="relative">
+                            <div className="aspect-video rounded-lg overflow-hidden border border-border">
+                              <img
+                                src={selectedPost.cover_image_url}
+                                alt="Cover"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2 h-8 w-8"
+                              onClick={() => handleFieldChange("cover_image_url", "")}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={() => coverInputRef.current?.click()}
+                            className="aspect-video rounded-lg border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-muted/30"
+                          >
+                            {isUploadingCover ? (
+                              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                            ) : (
+                              <>
+                                <Upload className="w-8 h-8 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  Clique para enviar
+                                </span>
+                              </>
+                            )}
                           </div>
                         )}
+                        <input
+                          ref={coverInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCoverUpload}
+                          className="hidden"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Recomendado: 1200x630px (proporção 16:9)
+                        </p>
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Tag className="w-5 h-5" />
+                        Tags
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          placeholder="Nova tag..."
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddTag();
+                            }
+                          }}
+                        />
+                        <Button onClick={handleAddTag} size="icon" variant="outline">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      {(selectedPost.tags || []).length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {(selectedPost.tags || []).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="gap-1">
+                              {tag}
+                              <button
+                                onClick={() => handleRemoveTag(tag)}
+                                className="ml-1 hover:text-destructive"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -421,6 +579,14 @@ const AdminBlogPage = () => {
                           onChange={(e) => handleFieldChange("slug", e.target.value)}
                           placeholder="meu-artigo-incrivel"
                         />
+                        {getSlugPreview() && (
+                          <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                            <LinkIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <span className="text-xs text-muted-foreground truncate">
+                              {getSlugPreview()}
+                            </span>
+                          </div>
+                        )}
                         <p className="text-xs text-muted-foreground">
                           Deixe vazio para gerar automaticamente
                         </p>
