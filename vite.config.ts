@@ -4,47 +4,50 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import Sitemap from "vite-plugin-sitemap";
+import { createClient } from "@supabase/supabase-js";
 
-// Supabase config (public keys)
+// Supabase config (public keys - safe to use in build)
 const SUPABASE_URL = "https://myqrydgbrxhrjkrvkgqq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cXJ5ZGdicnhocmprcnZrZ3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1OTU3NTYsImV4cCI6MjA4MjE3MTc1Nn0.IaczJplwUvk8xn_tOP3_KnKjP8MKvZ6oa0nm-62GQNc";
 
 // Static routes for sitemap
 const staticRoutes = ["/login", "/cadastro", "/pricing", "/blog", "/contato", "/termos", "/privacidade", "/ajuda"];
 
-// Fetch blog post slugs from Supabase during build
-async function fetchBlogSlugs(): Promise<string[]> {
+// Fetch blog post slugs from Supabase during build using the JS client
+async function getBlogRoutes(): Promise<string[]> {
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/blog_posts?select=slug&is_published=eq.true&published_at=not.is.null`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    console.log("[Sitemap] Connecting to Supabase to fetch blog posts...");
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const { data: posts, error } = await supabase
+      .from("blog_posts")
+      .select("slug")
+      .eq("is_published", true)
+      .not("published_at", "is", null);
 
-    if (!response.ok) {
-      console.warn('[Sitemap] Failed to fetch blog posts:', response.statusText);
+    if (error) {
+      console.error("[Sitemap] Supabase error:", error.message);
       return [];
     }
 
-    const posts = (await response.json()) as Array<{ slug: string }>;
-    const slugs = posts.map((post) => `/blog/${post.slug}`);
-    console.log(`[Sitemap] Found ${slugs.length} blog posts`);
-    return slugs;
+    if (!posts || posts.length === 0) {
+      console.log("[Sitemap] No published blog posts found");
+      return [];
+    }
+
+    const routes = posts.map((post) => `/blog/${post.slug}`);
+    console.log(`[Sitemap] Found ${routes.length} blog posts:`, routes);
+    return routes;
   } catch (error) {
-    console.warn('[Sitemap] Error fetching blog posts:', error);
+    console.error("[Sitemap] Error fetching blog posts:", error);
     return [];
   }
 }
 
-// https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
   // Fetch blog slugs during build (not in dev to avoid delays)
-  const blogRoutes = mode === "production" ? await fetchBlogSlugs() : [];
+  const blogRoutes = mode === "production" ? await getBlogRoutes() : [];
   const dynamicRoutes = [...staticRoutes, ...blogRoutes];
   
   console.log(`[Sitemap] Total routes: ${dynamicRoutes.length}`);
