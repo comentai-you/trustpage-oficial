@@ -216,13 +216,7 @@ const TrustPageDashboard = () => {
   };
 
   const handleTemplateSelect = (templateType: TemplateType) => {
-    // FREE plan can only create bio pages
-    if (isFreePlan && templateType !== 'bio') {
-      setUpgradeFeature(templateType === 'vsl' ? 'vsl' : 'sales');
-      setShowUpgradeModal(true);
-      setShowTemplateModal(false);
-      return;
-    }
+    // All templates available for all plans - free plan has watermark + view limits
     navigate(`/new?type=${templateType}`);
   };
 
