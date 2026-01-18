@@ -42,6 +42,7 @@ interface UserProfile {
   domain_verified: boolean | null;
   company_name: string | null;
   support_email: string | null;
+  monthly_views: number;
 }
 
 interface UserDomain {
@@ -110,7 +111,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified, company_name, support_email")
+        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified, company_name, support_email, monthly_views")
         .eq("id", user!.id)
         .maybeSingle();
 
@@ -334,6 +335,7 @@ const TrustPageDashboard = () => {
             totalLeads={totalLeads}
             planType={profile?.plan_type || 'free'}
             subscriptionStatus={profile?.subscription_status || 'free'}
+            monthlyViews={profile?.monthly_views || 0}
           />
         </div>
 
