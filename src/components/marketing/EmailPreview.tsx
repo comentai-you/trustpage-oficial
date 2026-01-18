@@ -63,9 +63,10 @@ const wrapInEmailTemplate = (content: string, subject: string): string => {
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <img 
-                src="https://trustpageapp.com/logo.png" 
+                src="https://asset-safe-zone.lovable.app/favicon.png" 
                 alt="TrustPage" 
-                width="150" 
+                width="48" 
+                height="48"
                 style="display: block;"
               />
             </td>
