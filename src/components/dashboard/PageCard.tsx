@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-
+import { PUBLIC_PAGES_DOMAIN, getPublicPageUrl } from "@/lib/constants";
 interface UserDomain {
   domain: string;
   verified: boolean;
@@ -104,13 +104,7 @@ const PageCard = ({
       toast.error("Publique a página para abrir o link público.");
       return;
     }
-
-    if (domain) {
-      const normalizedDomain = domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-      window.open(`https://${normalizedDomain}/p/${slug}`, "_blank");
-    } else {
-      window.open(`${window.location.origin}/p/${slug}`, "_blank");
-    }
+    window.open(getPublicPageUrl(slug, domain), "_blank");
   };
 
   return (
@@ -159,7 +153,7 @@ const PageCard = ({
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground truncate mb-2">
-                {primaryDomain ? `${primaryDomain}/p/${slug}` : `trustpageapp.com/p/${slug}`}
+                {primaryDomain ? `${primaryDomain}/p/${slug}` : `${PUBLIC_PAGES_DOMAIN}/p/${slug}`}
               </p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <button 
@@ -222,7 +216,7 @@ const PageCard = ({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => handleViewPage(null)}>
                   <Globe className="w-4 h-4 mr-2" />
-                  Abrir em trustpageapp.com
+                  Abrir em {PUBLIC_PAGES_DOMAIN}
                 </DropdownMenuItem>
                 {verifiedDomains.map((d) => (
                   <DropdownMenuItem key={d.domain} onClick={() => handleViewPage(d.domain)}>
@@ -258,7 +252,7 @@ const PageCard = ({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onCopyLink(slug, null)}>
                   <Copy className="w-4 h-4 mr-2" />
-                  Copiar trustpageapp.com/p/{slug}
+                  Copiar {PUBLIC_PAGES_DOMAIN}/p/{slug}
                 </DropdownMenuItem>
                 {verifiedDomains.map((d) => (
                   <DropdownMenuItem key={d.domain} onClick={() => onCopyLink(slug, d.domain)}>

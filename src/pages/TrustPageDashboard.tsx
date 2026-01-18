@@ -18,6 +18,7 @@ import TrafficSourcesChart from "@/components/dashboard/TrafficSourcesChart";
 import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getPublicPageUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
 interface LandingPage {
   id: string;
@@ -199,13 +200,7 @@ const TrustPageDashboard = () => {
   };
 
   const handleCopyLink = (slug: string, customDomain?: string | null) => {
-    let url: string;
-    if (customDomain) {
-      const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-      url = `https://${normalizedDomain}/p/${slug}`;
-    } else {
-      url = `${window.location.origin}/p/${slug}`;
-    }
+    const url = getPublicPageUrl(slug, customDomain);
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
@@ -235,7 +230,7 @@ const TrustPageDashboard = () => {
   };
 
   const handleViewPage = (slug: string) => {
-    window.open(`${window.location.origin}/p/${slug}`, '_blank');
+    window.open(getPublicPageUrl(slug), '_blank');
   };
 
   const handleShowAnalytics = (pageId: string, pageName: string) => {
@@ -309,7 +304,7 @@ const TrustPageDashboard = () => {
               Atenção: Regra Obrigatória para Anúncios (Ads)
             </h4>
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-              É estritamente <strong>PROIBIDO</strong> rodar tráfego pago (Facebook/Google Ads) direto para URLs terminadas em 'trustpageapp.com'. Isso gera bloqueio imediato. Para anunciar, configure seu <strong>Domínio Próprio</strong> (Disponível no Plano PRO).
+              É estritamente <strong>PROIBIDO</strong> rodar tráfego pago (Facebook/Google Ads) direto para URLs terminadas em '{PUBLIC_PAGES_DOMAIN}'. Isso gera bloqueio imediato. Para anunciar, configure seu <strong>Domínio Próprio</strong> (Disponível no Plano PRO).
             </p>
           </div>
         </div>

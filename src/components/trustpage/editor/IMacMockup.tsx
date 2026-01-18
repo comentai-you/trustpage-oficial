@@ -4,6 +4,7 @@ import SalesPageTemplate from "../templates/SalesPageTemplate";
 import BioLinkTemplate from "../templates/BioLinkTemplate";
 import HeroCaptureTemplate from "../templates/HeroCaptureTemplate";
 import ScaledViewport from "./ScaledViewport";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
 interface IMacMockupProps {
   formData: LandingPageFormData;
@@ -47,7 +48,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
               <div className="flex-1 mx-4">
                 <div className="bg-zinc-700 rounded-md h-4 flex items-center justify-center">
-                  <span className="text-[8px] text-zinc-400">trustpage.com/p/sua-pagina</span>
+                  <span className="text-[8px] text-zinc-400">{PUBLIC_PAGES_DOMAIN}/p/sua-pagina</span>
                 </div>
               </div>
             </div>
