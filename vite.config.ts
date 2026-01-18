@@ -100,6 +100,8 @@ export default defineConfig(async ({ mode }) => {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        // Aumentar limite para bundles grandes (5MB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 
         // --- AQUI ESTÁ A CORREÇÃO MÁGICA ---
         // Isso diz ao PWA: "Não se meta nessas URLs, deixe o servidor responder"
