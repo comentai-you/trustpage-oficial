@@ -28,6 +28,7 @@ import LeadsPage from "./pages/LeadsPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import AdminBlogPage from "./pages/AdminBlogPage";
+import AdminMarketingPage from "./pages/AdminMarketingPage";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,11 @@ const SystemRoutes = () => (
     <Route path="/admin/blog" element={
       <ProtectedRoute>
         <AdminBlogPage />
+      </ProtectedRoute>
+    } />
+    <Route path="/admin/marketing" element={
+      <ProtectedRoute>
+        <AdminMarketingPage />
       </ProtectedRoute>
     } />
     <Route path="/new" element={
