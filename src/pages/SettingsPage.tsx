@@ -61,7 +61,6 @@ type SslStatus = {
 const TRIAL_DAYS = 14;
 
 const getMaxDomainsForPlan = (planType: string): number => {
-  if (planType === 'elite') return 10;
   if (['pro', 'pro_yearly'].includes(planType)) return 5;
   if (['essential', 'essential_yearly'].includes(planType)) return 1;
   return 0;
@@ -1091,7 +1090,7 @@ const SettingsPage = () => {
           {/* Domains Tab */}
           <TabsContent value="domains" className="space-y-6 animate-fade-in">
             {/* Check for paid plan access (Essential or higher) */}
-            {!['pro', 'pro_yearly', 'elite', 'essential', 'essential_yearly'].includes(profile?.plan_type || '') ? (
+            {!['pro', 'pro_yearly', 'essential', 'essential_yearly'].includes(profile?.plan_type || '') ? (
               <Card className="border-warning/30 bg-warning/5">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
