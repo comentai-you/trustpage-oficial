@@ -457,9 +457,19 @@ const AdminBlogPage = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Blog Admin</h1>
-            <p className="text-muted-foreground">Gerencie os artigos do blog</p>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/admin')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Admin
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Blog CMS</h1>
+              <p className="text-muted-foreground">Gerencie os artigos do blog</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button 

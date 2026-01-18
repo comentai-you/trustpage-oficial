@@ -16,6 +16,7 @@ import {
   Loader2,
   ShieldCheck,
   RefreshCw,
+  FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -320,16 +321,57 @@ const AdminPage = () => {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadData}
-              disabled={loadingData}
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loadingData ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* Navigation Tabs */}
+              <nav className="hidden sm:flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="bg-white dark:bg-gray-600 shadow-sm"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Usuários
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/admin/blog')}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Blog CMS
+                </Button>
+              </nav>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadData}
+                disabled={loadingData}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${loadingData ? 'animate-spin' : ''}`} />
+                Atualizar
+              </Button>
+            </div>
           </div>
+          {/* Mobile Navigation */}
+          <nav className="flex sm:hidden items-center gap-2 mt-3 pt-3 border-t">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Usuários
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1"
+              onClick={() => navigate('/admin/blog')}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Blog CMS
+            </Button>
+          </nav>
         </div>
       </header>
 
