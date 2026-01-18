@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Lock, Magnet } from "lucide-react"; // Adicionei Magnet
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ interface TemplateSelectionModalProps {
   isFreePlan?: boolean;
 }
 
-const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = false }: TemplateSelectionModalProps) => {
+const TemplateSelectionModal = ({ open, onOpenChange, onSelect }: TemplateSelectionModalProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
   const isMobile = useIsMobile();
 
@@ -28,7 +28,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
   const TemplateContent = () => (
     <>
       <div className="grid grid-cols-1 gap-3">
-        {/* Bio Link Template - Always available */}
+        {/* Bio Link Template */}
         <button
           onClick={() => setSelectedTemplate("bio")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
@@ -55,9 +55,6 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
               </p>
 
               <div className="flex flex-wrap gap-1.5 mt-2">
-                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full font-medium">
-                  Gratuito
-                </span>
                 <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
                   Multi Links
                 </span>
@@ -74,15 +71,13 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
           )}
         </button>
 
-        {/* --- NOVO: Capture Hero Template --- */}
+        {/* Capture Hero Template */}
         <button
           onClick={() => setSelectedTemplate("capture-hero")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
             selectedTemplate === "capture-hero"
               ? "border-primary bg-primary/5 shadow-lg"
-              : isFreePlan
-                ? "border-border/50 opacity-75 hover:border-primary/30"
-                : "border-border hover:border-primary/50"
+              : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
@@ -97,20 +92,12 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-foreground mb-1">Página de Captura Hero</h3>
-                {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
-              </div>
+              <h3 className="text-base font-semibold text-foreground mb-1">Página de Captura Hero</h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Visual premium com destaque para E-books, Iscas e Lançamentos.
               </p>
 
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {isFreePlan && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
-                    Essencial
-                  </span>
-                )}
                 <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
                   Alta Conversão
                 </span>
@@ -129,17 +116,14 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             </div>
           )}
         </button>
-        {/* ----------------------------------- */}
 
-        {/* VSL Template - Locked for FREE */}
+        {/* VSL Template */}
         <button
           onClick={() => setSelectedTemplate("vsl")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
             selectedTemplate === "vsl"
               ? "border-primary bg-primary/5 shadow-lg"
-              : isFreePlan
-                ? "border-border/50 opacity-75 hover:border-primary/30"
-                : "border-border hover:border-primary/50"
+              : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
@@ -154,20 +138,12 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-foreground mb-1">VSL Focada</h3>
-                {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
-              </div>
+              <h3 className="text-base font-semibold text-foreground mb-1">VSL Focada</h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Ideal para PLR e Infoprodutos. Foco total no vídeo de vendas.
               </p>
 
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {isFreePlan && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
-                    Essencial
-                  </span>
-                )}
                 <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
                   Vídeo Central
                 </span>
@@ -187,15 +163,13 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
           )}
         </button>
 
-        {/* Sales Page Template - Locked for FREE */}
+        {/* Sales Page Template */}
         <button
           onClick={() => setSelectedTemplate("sales")}
           className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
             selectedTemplate === "sales"
               ? "border-primary bg-primary/5 shadow-lg"
-              : isFreePlan
-                ? "border-border/50 opacity-75 hover:border-primary/30"
-                : "border-border hover:border-primary/50"
+              : "border-border hover:border-primary/50"
           }`}
         >
           <div className="flex items-start gap-3">
@@ -210,20 +184,12 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-foreground mb-1">Página de Vendas</h3>
-                {isFreePlan && <Lock className="w-4 h-4 text-muted-foreground" />}
-              </div>
+              <h3 className="text-base font-semibold text-foreground mb-1">Página de Vendas</h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
                 Layout completo com vídeo, carrossel e múltiplos CTAs.
               </p>
 
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {isFreePlan && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
-                    Essencial
-                  </span>
-                )}
                 <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
                   Carrossel
                 </span>
@@ -256,7 +222,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
           Cancelar
         </Button>
         <Button className="flex-1" onClick={handleSelect} disabled={!selectedTemplate}>
-          {isFreePlan && selectedTemplate && selectedTemplate !== "bio" ? "Ver Upgrade" : "Continuar"}
+          Continuar
         </Button>
       </div>
     </>
@@ -272,9 +238,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
               Escolha o Tipo de Página
             </DrawerTitle>
             <DrawerDescription className="text-sm">
-              {isFreePlan
-                ? "Bio Link é gratuito. Faça upgrade para VSL, Captura e Vendas."
-                : "Selecione o template ideal para seu produto"}
+              Selecione o template ideal para seu produto
             </DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto">
@@ -294,9 +258,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             Escolha o Tipo de Página
           </DialogTitle>
           <DialogDescription>
-            {isFreePlan
-              ? "Bio Link é gratuito. Faça upgrade para VSL, Captura e Vendas."
-              : "Selecione o template ideal para o seu produto ou serviço"}
+            Selecione o template ideal para o seu produto ou serviço
           </DialogDescription>
         </DialogHeader>
         <TemplateContent />
