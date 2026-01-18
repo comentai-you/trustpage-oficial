@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +38,9 @@ import {
   Tag,
   Link as LinkIcon,
   FolderOpen,
-  Palette
+  Palette,
+  Send,
+  Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -126,7 +128,12 @@ const AdminBlogPage = () => {
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check admin status
   useEffect(() => {
@@ -194,70 +201,133 @@ const AdminBlogPage = () => {
     return post.category_id === filterCategory;
   });
 
-  // Save/Create post mutation
-  const saveMutation = useMutation({
-    mutationFn: async (post: Partial<BlogPost>) => {
-      if (!post.title || !post.content) {
-        throw new Error("Título e conteúdo são obrigatórios");
-      }
+  // Core save function (reusable for both save and publish)
+  const savePostToDb = async (post: Partial<BlogPost>, publish: boolean = false): Promise<string | null> => {
+    const slug = post.slug || (post.title || '').toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
-      const slug = post.slug || post.title.toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
+    const postData = {
+      title: post.title || "Rascunho sem título",
+      slug: slug || `rascunho-${Date.now()}`,
+      content: post.content || "",
+      excerpt: post.excerpt || null,
+      cover_image_url: post.cover_image_url || null,
+      author_name: post.author_name || "TrustPage",
+      is_published: publish ? true : (post.is_published || false),
+      meta_title: post.meta_title || null,
+      meta_description: post.meta_description || null,
+      tags: post.tags || [],
+      category_id: post.category_id || null,
+      published_at: publish && !post.published_at ? new Date().toISOString() : post.published_at,
+    };
 
-      if (post.id) {
-        // Update existing post
-        const { error } = await supabase
-          .from("blog_posts")
-          .update({
-            title: post.title,
-            slug,
-            content: post.content,
-            excerpt: post.excerpt || null,
-            cover_image_url: post.cover_image_url || null,
-            author_name: post.author_name || "TrustPage",
-            is_published: post.is_published || false,
-            meta_title: post.meta_title || null,
-            meta_description: post.meta_description || null,
-            tags: post.tags || [],
-            category_id: post.category_id || null,
-            published_at: post.is_published && !post.published_at ? new Date().toISOString() : post.published_at,
-          })
-          .eq("id", post.id);
-        if (error) throw error;
-      } else {
-        // Create new post
-        const { error } = await supabase
-          .from("blog_posts")
-          .insert([{
-            title: post.title,
-            slug,
-            content: post.content,
-            excerpt: post.excerpt || null,
-            cover_image_url: post.cover_image_url || null,
-            author_name: post.author_name || "TrustPage",
-            is_published: post.is_published || false,
-            meta_title: post.meta_title || null,
-            meta_description: post.meta_description || null,
-            tags: post.tags || [],
-            category_id: post.category_id || null,
-            published_at: post.is_published ? new Date().toISOString() : null,
-          }]);
-        if (error) throw error;
+    if (post.id) {
+      const { error } = await supabase
+        .from("blog_posts")
+        .update(postData)
+        .eq("id", post.id);
+      if (error) throw error;
+      return post.id;
+    } else {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .insert([postData])
+        .select('id')
+        .single();
+      if (error) throw error;
+      return data?.id || null;
+    }
+  };
+
+  // Save as draft (without closing editor)
+  const handleSaveDraft = useCallback(async (showToast: boolean = true) => {
+    if (!selectedPost) return;
+    
+    // Allow saving even with just a title or content
+    if (!selectedPost.title && !selectedPost.content) {
+      if (showToast) toast.error("Adicione um título ou conteúdo antes de salvar");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const savedId = await savePostToDb(selectedPost, false);
+      if (savedId && !selectedPost.id) {
+        setSelectedPost(prev => prev ? { ...prev, id: savedId } : null);
       }
-    },
-    onSuccess: () => {
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
-      toast.success(selectedPost?.id ? "Post atualizado!" : "Post criado!");
-      setIsEditing(false);
-      setSelectedPost(null);
-    },
-    onError: (error: Error) => {
-      toast.error("Erro ao salvar: " + error.message);
-    },
-  });
+      if (showToast) toast.success("Rascunho salvo!");
+    } catch (error: any) {
+      console.error('Save error:', error);
+      if (showToast) toast.error("Erro ao salvar: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [selectedPost, queryClient]);
+
+  // Publish post
+  const handlePublish = async () => {
+    if (!selectedPost?.title || !selectedPost?.content) {
+      toast.error("Título e conteúdo são obrigatórios para publicar");
+      return;
+    }
+
+    setIsPublishing(true);
+    try {
+      const savedId = await savePostToDb(selectedPost, true);
+      if (savedId) {
+        setSelectedPost(prev => prev ? { ...prev, id: savedId, is_published: true, published_at: new Date().toISOString() } : null);
+      }
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      toast.success("Artigo publicado com sucesso!");
+    } catch (error: any) {
+      console.error('Publish error:', error);
+      toast.error("Erro ao publicar: " + error.message);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  // Unpublish post
+  const handleUnpublish = async () => {
+    if (!selectedPost?.id) return;
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from("blog_posts")
+        .update({ is_published: false })
+        .eq("id", selectedPost.id);
+      if (error) throw error;
+      
+      setSelectedPost(prev => prev ? { ...prev, is_published: false } : null);
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      toast.success("Artigo despublicado");
+    } catch (error: any) {
+      toast.error("Erro: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Auto-save when leaving editor
+  const handleCloseEditor = useCallback(async () => {
+    if (hasUnsavedChanges && selectedPost && (selectedPost.title || selectedPost.content)) {
+      await handleSaveDraft(false);
+      toast.success("Rascunho salvo automaticamente");
+    }
+    setIsEditing(false);
+    setSelectedPost(null);
+    setHasUnsavedChanges(false);
+    setLastSaved(null);
+  }, [hasUnsavedChanges, selectedPost, handleSaveDraft]);
 
   // Save/Create category mutation
   const saveCategoryMutation = useMutation({
@@ -349,11 +419,15 @@ const AdminBlogPage = () => {
   const handleNewPost = () => {
     setSelectedPost({ ...emptyPost });
     setIsEditing(true);
+    setHasUnsavedChanges(false);
+    setLastSaved(null);
   };
 
   const handleEditPost = (post: BlogPost) => {
     setSelectedPost({ ...post });
     setIsEditing(true);
+    setHasUnsavedChanges(false);
+    setLastSaved(null);
   };
 
   const handleNewCategory = () => {
@@ -366,14 +440,6 @@ const AdminBlogPage = () => {
     setIsEditingCategory(true);
   };
 
-  const handleSave = () => {
-    if (!selectedPost?.title || !selectedPost?.content) {
-      toast.error("Título e conteúdo são obrigatórios");
-      return;
-    }
-    saveMutation.mutate(selectedPost);
-  };
-
   const handleSaveCategory = () => {
     if (!selectedCategory?.name) {
       toast.error("Nome da categoria é obrigatório");
@@ -384,6 +450,7 @@ const AdminBlogPage = () => {
 
   const handleFieldChange = (field: keyof BlogPost, value: string | boolean | string[] | null) => {
     setSelectedPost(prev => prev ? { ...prev, [field]: value } : null);
+    setHasUnsavedChanges(true);
   };
 
   const handleCategoryFieldChange = (field: keyof BlogCategory, value: string) => {
@@ -629,39 +696,64 @@ const AdminBlogPage = () => {
         <div className="min-h-screen bg-muted/30">
           {/* Editor Header */}
           <div className="sticky top-16 z-40 bg-background border-b border-border">
-            <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => {
-                  setIsEditing(false);
-                  setSelectedPost(null);
-                }}
+                onClick={handleCloseEditor}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="publish"
-                    checked={selectedPost.is_published}
-                    onCheckedChange={(checked) => handleFieldChange("is_published", checked)}
-                  />
-                  <Label htmlFor="publish" className="text-sm">
-                    {selectedPost.is_published ? "Publicado" : "Rascunho"}
-                  </Label>
-                </div>
+                {/* Last saved indicator */}
+                {lastSaved && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    Salvo às {format(lastSaved, "HH:mm")}
+                  </span>
+                )}
+                {hasUnsavedChanges && !lastSaved && (
+                  <span className="text-xs text-muted-foreground">
+                    Alterações não salvas
+                  </span>
+                )}
+                
+                {/* Save Draft Button */}
                 <Button
-                  onClick={handleSave}
-                  disabled={saveMutation.isPending}
+                  variant="outline"
+                  onClick={() => handleSaveDraft(true)}
+                  disabled={isSaving || isPublishing}
                 >
-                  {saveMutation.isPending ? (
+                  {isSaving ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
                   )}
-                  Salvar
+                  Salvar Rascunho
                 </Button>
+
+                {/* Publish/Unpublish Button */}
+                {selectedPost.is_published ? (
+                  <Button
+                    variant="secondary"
+                    onClick={handleUnpublish}
+                    disabled={isSaving || isPublishing}
+                  >
+                    Despublicar
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handlePublish}
+                    disabled={isSaving || isPublishing || !selectedPost.title || !selectedPost.content}
+                  >
+                    {isPublishing ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 mr-2" />
+                    )}
+                    Publicar
+                  </Button>
+                )}
               </div>
             </div>
           </div>
