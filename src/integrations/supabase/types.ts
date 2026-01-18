@@ -264,6 +264,48 @@ export type Database = {
           },
         ]
       }
+      marketing_campaigns: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          failed_count: number | null
+          id: string
+          scheduled_at: string | null
+          sent_count: number | null
+          status: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number | null
+          id?: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number | null
+          id?: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_view_tracking: {
         Row: {
           id: string
