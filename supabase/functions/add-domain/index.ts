@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check user's plan - only PRO can add domains
+    // Check user's plan - Essential and above can add domains
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('subscription_status, plan_type')
@@ -67,11 +67,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Domínio só disponível para planos PRO
-    const proPlanTypes = ['pro', 'pro_yearly', 'elite'];
-    if (!proPlanTypes.includes(profile.plan_type)) {
+    // Domínio disponível para planos pagos (Essential, Pro, Elite)
+    const paidPlanTypes = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'];
+    if (!paidPlanTypes.includes(profile.plan_type)) {
       return new Response(
-        JSON.stringify({ error: 'Domínios personalizados estão disponíveis apenas no plano PRO. Faça upgrade para conectar seu domínio.' }),
+        JSON.stringify({ error: 'Domínios personalizados estão disponíveis a partir do plano Essencial. Faça upgrade para conectar seu domínio.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -87,7 +87,14 @@ Deno.serve(async (req) => {
     }
 
     const domainCount = existingDomains?.length || 0;
-    const maxDomains = profile.plan_type === 'elite' ? 10 : 3; // PRO = 3, Elite = 10
+    // Essential: 1, Pro: 5, Elite: 10
+    const getMaxDomains = (planType: string): number => {
+      if (planType === 'elite') return 10;
+      if (['pro', 'pro_yearly'].includes(planType)) return 5;
+      if (['essential', 'essential_yearly'].includes(planType)) return 1;
+      return 0;
+    };
+    const maxDomains = getMaxDomains(profile.plan_type);
 
     if (domainCount >= maxDomains) {
       return new Response(

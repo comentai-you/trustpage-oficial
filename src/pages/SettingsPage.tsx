@@ -62,7 +62,8 @@ const TRIAL_DAYS = 14;
 
 const getMaxDomainsForPlan = (planType: string): number => {
   if (planType === 'elite') return 10;
-  if (['pro', 'pro_yearly'].includes(planType)) return 3;
+  if (['pro', 'pro_yearly'].includes(planType)) return 5;
+  if (['essential', 'essential_yearly'].includes(planType)) return 1;
   return 0;
 };
 
@@ -1089,8 +1090,8 @@ const SettingsPage = () => {
 
           {/* Domains Tab */}
           <TabsContent value="domains" className="space-y-6 animate-fade-in">
-            {/* Check for PRO plan access */}
-            {!['pro', 'pro_yearly', 'elite'].includes(profile?.plan_type || '') ? (
+            {/* Check for paid plan access (Essential or higher) */}
+            {!['pro', 'pro_yearly', 'elite', 'essential', 'essential_yearly'].includes(profile?.plan_type || '') ? (
               <Card className="border-warning/30 bg-warning/5">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -1099,16 +1100,16 @@ const SettingsPage = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-foreground mb-1">
-                        Recurso exclusivo do Plano PRO
+                        Recurso exclusivo dos Planos Pagos
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Domínios personalizados estão disponíveis apenas no plano PRO (até 3 domínios).
+                        Domínios personalizados estão disponíveis a partir do plano Essencial (1 domínio) ou PRO (até 5 domínios).
                       </p>
                       <Button 
                         className="gradient-button text-primary-foreground border-0"
                         onClick={() => setShowPricingModal(true)}
                       >
-                        Fazer Upgrade para PRO
+                        Fazer Upgrade
                       </Button>
                     </div>
                   </div>
