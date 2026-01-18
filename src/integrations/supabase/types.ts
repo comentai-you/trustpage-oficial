@@ -303,6 +303,8 @@ export type Database = {
           id: string
           is_verified: boolean | null
           kiwify_customer_id: string | null
+          monthly_views: number
+          monthly_views_reset_at: string | null
           plan_type: string
           subscription_status: string
           subscription_updated_at: string | null
@@ -322,6 +324,8 @@ export type Database = {
           id: string
           is_verified?: boolean | null
           kiwify_customer_id?: string | null
+          monthly_views?: number
+          monthly_views_reset_at?: string | null
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
@@ -341,6 +345,8 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           kiwify_customer_id?: string | null
+          monthly_views?: number
+          monthly_views_reset_at?: string | null
           plan_type?: string
           subscription_status?: string
           subscription_updated_at?: string | null
@@ -450,6 +456,7 @@ export type Database = {
       }
       can_add_domain: { Args: { check_user_id: string }; Returns: boolean }
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
+      check_page_view_limit: { Args: { page_id: string }; Returns: Json }
       get_legal_page_by_owner: {
         Args: { owner_user_id: string; page_slug: string }
         Returns: {
@@ -522,6 +529,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_monthly_views: { Args: { page_id: string }; Returns: Json }
       increment_page_views: {
         Args: { page_id: string; viewer_fingerprint?: string }
         Returns: boolean

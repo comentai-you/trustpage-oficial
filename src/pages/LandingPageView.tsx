@@ -6,6 +6,7 @@ import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplat
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
 import HeroCaptureTemplate from "@/components/trustpage/templates/HeroCaptureTemplate";
 import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
+import ViewLimitOverlay from "@/components/ViewLimitOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -74,6 +75,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+  const [isViewLimitReached, setIsViewLimitReached] = useState(false);
   const isMobile = useIsMobile();
 
   // Track page visit with detailed analytics
@@ -213,16 +215,48 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           setOwnerPlan(ownerPlanData.plan_type || 'free');
         }
 
+        // Check and increment monthly views for FREE plan users
+        const viewKey = `monthly_view_${page.id}`;
+        if (!sessionStorage.getItem(viewKey)) {
+          sessionStorage.setItem(viewKey, 'true');
+          
+          // Call the increment function which also checks the limit
+          const { data: viewLimitData, error: viewLimitError } = await supabase
+            .rpc('increment_monthly_views', { page_id: page.id });
+          
+          if (!viewLimitError && viewLimitData) {
+            const result = viewLimitData as { is_blocked: boolean; plan_type: string; current_views: number | null };
+            if (result.is_blocked) {
+              setIsViewLimitReached(true);
+              setLoading(false);
+              return; // Don't continue loading the page
+            }
+          }
+        } else {
+          // Already viewed in this session, just check the limit
+          const { data: checkData } = await supabase
+            .rpc('check_page_view_limit', { page_id: page.id });
+          
+          if (checkData) {
+            const result = checkData as { is_blocked: boolean };
+            if (result.is_blocked) {
+              setIsViewLimitReached(true);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
         // Inject Facebook Pixel if configured (prefer facebook_pixel_id, fallback to pix_pixel_id)
         const pixelId = (page as any).facebook_pixel_id || page.pix_pixel_id;
         if (pixelId) {
           injectFacebookPixel(pixelId);
         }
 
-        // Increment view counter
-        const viewKey = `viewed_${page.id}`;
-        if (!sessionStorage.getItem(viewKey)) {
-          sessionStorage.setItem(viewKey, 'true');
+        // Increment view counter (existing counter for analytics)
+        const analyticsViewKey = `viewed_${page.id}`;
+        if (!sessionStorage.getItem(analyticsViewKey)) {
+          sessionStorage.setItem(analyticsViewKey, 'true');
           void (async () => {
             try {
               await supabase.functions.invoke('increment-page-view', {
@@ -296,6 +330,11 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Show view limit overlay for FREE plan users who exceeded 1000 views
+  if (isViewLimitReached) {
+    return <ViewLimitOverlay />;
   }
 
   if (notFound || !pageData) {
