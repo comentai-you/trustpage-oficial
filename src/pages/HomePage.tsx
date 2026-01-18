@@ -431,13 +431,28 @@ const HomePage = () => {
               <div className="mb-6 pt-4">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground">Essencial</h3>
+                  {isYearly && (
+                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      ECONOMIZE R$ 29
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {basicPrice}</span>
-                  <span className="text-muted-foreground">/mês</span>
-                </div>
-                {isYearly && (
-                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {basicYearlyTotal}/ano)</p>
+                
+                {isYearly ? (
+                  <div>
+                    <p className="text-sm text-muted-foreground line-through">De 12x R$ 39,90 = R$ 478,80</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-3xl sm:text-4xl font-extrabold text-primary">12x R$ 37,49</span>
+                    </div>
+                    <p className="text-sm text-green-600 font-semibold mt-1">
+                      🎉 Desconto de 1 mês grátis
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {basicPrice}</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
                 )}
               </div>
 
@@ -464,15 +479,41 @@ const HomePage = () => {
             </div>
 
             {/* Pro Card */}
-            <div className="bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow h-full">
-              <div className="mb-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-muted-foreground mb-2">Pro</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">R$ {proPrice}</span>
-                  <span className="text-muted-foreground">/mês</span>
+            <div className="relative bg-card rounded-xl sm:rounded-2xl border border-border p-6 sm:p-8 shadow-md hover:shadow-lg transition-shadow h-full">
+              {/* Badge PRO */}
+              {isYearly && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap">
+                    🔥 O PROFISSIONAL
+                  </span>
                 </div>
-                {isYearly && (
-                  <p className="text-sm text-muted-foreground mt-1">Cobrado anualmente (R$ {proYearlyTotal}/ano)</p>
+              )}
+              
+              <div className={`mb-6 ${isYearly ? 'pt-4' : ''}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">Pro</h3>
+                  {isYearly && (
+                    <span className="bg-red-500/10 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                      ECONOMIZE R$ 285
+                    </span>
+                  )}
+                </div>
+                
+                {isYearly ? (
+                  <div>
+                    <p className="text-sm text-muted-foreground line-through">De 12x R$ 97,00 = R$ 1.164,00</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-3xl sm:text-4xl font-extrabold text-foreground">12x R$ 73,33</span>
+                    </div>
+                    <p className="text-sm text-green-600 font-semibold mt-1">
+                      🎉 Desconto de 3 meses grátis
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">R$ {proPrice}</span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </div>
                 )}
               </div>
 
@@ -490,8 +531,8 @@ const HomePage = () => {
               </ul>
 
               <a href={proCheckout} target="_blank" rel="noopener noreferrer" className="block">
-                <Button variant="outline" size="lg" className="w-full text-base font-semibold">
-                  Assinar Pro
+                <Button variant={isYearly ? "default" : "outline"} size="lg" className={`w-full text-base font-semibold ${isYearly ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}>
+                  {isYearly ? 'QUERO O PRO ANUAL' : 'Assinar Pro'}
                 </Button>
               </a>
 
