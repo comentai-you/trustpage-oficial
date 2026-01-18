@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 import { 
   Plus, 
   Edit, 
@@ -343,18 +344,12 @@ const AdminBlogPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="content">Conteúdo (Markdown) *</Label>
-                      <Textarea
-                        id="content"
+                      <Label htmlFor="content">Conteúdo *</Label>
+                      <RichTextEditor
                         value={selectedPost.content || ""}
-                        onChange={(e) => handleFieldChange("content", e.target.value)}
-                        placeholder="Escreva seu artigo aqui usando Markdown..."
-                        rows={20}
-                        className="font-mono text-sm"
+                        onChange={(markdown) => handleFieldChange("content", markdown)}
+                        placeholder="Escreva seu artigo aqui..."
                       />
-                      <p className="text-xs text-muted-foreground">
-                        Suporta Markdown: **negrito**, *itálico*, # títulos, - listas, etc.
-                      </p>
                     </div>
                   </CardContent>
                 </Card>
