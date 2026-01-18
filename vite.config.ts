@@ -47,10 +47,16 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        // Garante atualização mais agressiva (evita ficar preso em versões antigas)
+        // Garante atualização mais agressiva
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+
+        // --- AQUI ESTÁ A CORREÇÃO MÁGICA ---
+        // Isso diz ao PWA: "Não se meta nessas URLs, deixe o servidor responder"
+        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/],
+        // ------------------------------------
+
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -84,12 +90,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "@dnd-kit/core",
-      "@dnd-kit/sortable",
-      "@dnd-kit/utilities",
-    ],
+    include: ["react", "react-dom", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
   },
 }));
