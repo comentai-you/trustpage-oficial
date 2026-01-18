@@ -15,6 +15,7 @@ import PageCard from "@/components/dashboard/PageCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
 import OnboardingModal from "@/components/OnboardingModal";
 import TrafficSourcesChart from "@/components/dashboard/TrafficSourcesChart";
+import { SystemUpdateModal } from "@/components/SystemUpdateModal";
 import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -576,6 +577,12 @@ const TrustPageDashboard = () => {
           }}
         />
       )}
+
+      {/* System Update Modal - only shows if onboarding is complete */}
+      <SystemUpdateModal 
+        isOnboardingComplete={!!(profile?.company_name && profile?.support_email)}
+        isOnboardingModalOpen={showOnboardingModal}
+      />
     </DashboardLayout>
   );
 };
