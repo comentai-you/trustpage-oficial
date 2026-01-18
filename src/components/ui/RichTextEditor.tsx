@@ -17,6 +17,9 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   List,
   ListOrdered,
   Quote,
@@ -57,7 +60,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
+          levels: [1, 2, 3, 4, 5, 6],
         },
       }),
       Underline,
@@ -93,7 +96,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3 prose-headings:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground prose-blockquote:not-italic',
+        class: 'prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3 prose-headings:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-h5:text-base prose-h6:text-sm prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground prose-blockquote:not-italic',
       },
     },
   });
@@ -241,6 +244,27 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
             title="Título 3"
           >
             <Heading3 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            active={editor.isActive('heading', { level: 4 })}
+            title="Título 4"
+          >
+            <Heading4 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+            active={editor.isActive('heading', { level: 5 })}
+            title="Título 5"
+          >
+            <Heading5 className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+            active={editor.isActive('heading', { level: 6 })}
+            title="Título 6"
+          >
+            <Heading6 className="w-4 h-4" />
           </ToolbarButton>
         </div>
 
