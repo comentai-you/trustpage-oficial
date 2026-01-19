@@ -411,9 +411,23 @@ const TrustPageEditor = () => {
       });
     } catch (error: unknown) {
       console.error("Error saving page:", error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Ocorreu um erro ao salvar sua página.";
+      if (error && typeof error === 'object' && 'code' in error) {
+        const pgError = error as { code: string; message?: string };
+        if (pgError.code === '23505') {
+          errorMessage = "Já existe uma página com esse URL. Tente alterar o nome da página.";
+        } else if (pgError.code === '42501') {
+          errorMessage = "Sem permissão para salvar. Verifique sua assinatura.";
+        } else if (pgError.message) {
+          errorMessage = pgError.message;
+        }
+      }
+      
       toast({
         title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar sua página.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
