@@ -1,19 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encode as hexEncode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kiwify-signature, x-webhook-token',
 };
 
-// Mapeamento de produtos Kiwify para planos - ATUALIZADO
+// Mapeamento de produtos Kiwify para planos
 const PRODUCTS: Record<string, { plan: string; billing: string }> = {
   'P7MaOJK': { plan: 'essential', billing: 'monthly' },
   'f0lsmRn': { plan: 'pro', billing: 'monthly' },
   'f8Tg6DT': { plan: 'essential', billing: 'yearly' },
   'TQlihDk': { plan: 'pro', billing: 'yearly' },
-  // Fallback ID
-  'b2e6a470-ed03-11f0-b1ef-038a6e106bac': { plan: 'pro', billing: 'monthly' }
+  // IDs adicionais
+  'b2e6a470-ed03-11f0-b1ef-038a6e106bac': { plan: 'pro', billing: 'monthly' },
+  'bb3e9838-8717-495b-bda3-f61644c9e936': { plan: 'essential', billing: 'monthly' },
 };
 
 const SITE_URL = 'https://trustpageapp.com';
@@ -38,65 +40,43 @@ interface KiwifyPayload {
 }
 
 /**
- * Extrai e normaliza a assinatura de múltiplas fontes
- * Ordem de prioridade: Query Params > Headers > Body
+ * Calcula HMAC-SHA1 e retorna como string hexadecimal
  */
-function extractSignature(req: Request, payload: any): string | null {
-  // 1. Tentar Query Params
-  const url = new URL(req.url);
-  const signatureFromQuery = url.searchParams.get('signature') || 
-                              url.searchParams.get('token') ||
-                              url.searchParams.get('webhook_token');
-  
-  if (signatureFromQuery) {
-    console.log('📍 Signature found in query params');
-    return signatureFromQuery.replace(/^Bearer\s+/i, '').trim();
-  }
+async function calculateHmacSha1(message: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(message);
 
-  // 2. Tentar Headers
-  const signatureFromHeader = req.headers.get('x-kiwify-signature') || 
-                               req.headers.get('authorization') ||
-                               req.headers.get('x-webhook-token') ||
-                               req.headers.get('x-signature');
-  
-  if (signatureFromHeader) {
-    console.log('📍 Signature found in headers');
-    return signatureFromHeader.replace(/^Bearer\s+/i, '').trim();
-  }
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
 
-  // 3. Tentar Body (payload JSON)
-  const signatureFromBody = payload?.signature || 
-                             payload?.webhook_token ||
-                             payload?.token;
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  const hashArray = new Uint8Array(signature);
   
-  if (signatureFromBody) {
-    console.log('📍 Signature found in body');
-    return String(signatureFromBody).replace(/^Bearer\s+/i, '').trim();
-  }
-
-  return null;
+  // Converter para hexadecimal
+  return Array.from(hashArray)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**
- * Valida a assinatura do webhook
+ * Extrai a assinatura da query string
  */
-function validateSignature(providedSignature: string | null, expectedToken: string | null): { valid: boolean; reason: string } {
-  // Se não há token configurado, aceitar (mas logar warning)
-  if (!expectedToken) {
-    return { valid: true, reason: 'No token configured - accepting all requests' };
+function extractSignatureFromUrl(req: Request): string | null {
+  const url = new URL(req.url);
+  const signature = url.searchParams.get('signature');
+  
+  if (signature) {
+    console.log('📍 Signature found in query params');
+    return signature.trim();
   }
-
-  // Se token configurado mas nenhuma assinatura fornecida
-  if (!providedSignature) {
-    return { valid: false, reason: 'No signature provided but token is configured' };
-  }
-
-  // Comparar assinaturas (case-sensitive)
-  if (providedSignature === expectedToken) {
-    return { valid: true, reason: 'Signature validated successfully' };
-  }
-
-  return { valid: false, reason: 'Signature mismatch' };
+  
+  return null;
 }
 
 /**
@@ -204,19 +184,58 @@ serve(async (req) => {
     console.log('📅 Timestamp:', new Date().toISOString());
     console.log('📍 URL:', req.url);
 
-    // Log headers (sem expor valores sensíveis)
-    const headers = Object.fromEntries(req.headers.entries());
-    console.log('📋 Headers:', JSON.stringify({
-      'content-type': headers['content-type'],
-      'x-kiwify-signature': headers['x-kiwify-signature'] ? '[PRESENT]' : '[MISSING]',
-      'authorization': headers['authorization'] ? '[PRESENT]' : '[MISSING]',
-      'x-webhook-token': headers['x-webhook-token'] ? '[PRESENT]' : '[MISSING]',
-    }));
+    // ═══════════════════════════════════════════
+    // PASSO 1: Ler o body BRUTO primeiro (antes de qualquer json())
+    // ═══════════════════════════════════════════
+    const rawBody = await req.text();
+    console.log('📦 Raw body length:', rawBody.length);
 
-    // Parse payload
+    // ═══════════════════════════════════════════
+    // PASSO 2: Extrair assinatura da URL
+    // ═══════════════════════════════════════════
+    const providedSignature = extractSignatureFromUrl(req);
+    console.log('🔐 Provided signature:', providedSignature ? `[${providedSignature.substring(0, 10)}...]` : '[MISSING]');
+
+    // ═══════════════════════════════════════════
+    // PASSO 3: Calcular HMAC-SHA1 e validar
+    // ═══════════════════════════════════════════
+    if (webhookToken) {
+      if (!providedSignature) {
+        console.error('❌ SECURITY: No signature provided but token is configured');
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized', reason: 'Missing signature' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Calcular o HMAC-SHA1 do rawBody usando o token como chave
+      const calculatedHash = await calculateHmacSha1(rawBody, webhookToken);
+      
+      console.log('🔑 Calculated HMAC:', `[${calculatedHash.substring(0, 10)}...]`);
+      console.log('🔑 Provided signature:', `[${providedSignature.substring(0, 10)}...]`);
+
+      // Comparação segura (timing-safe seria ideal, mas para simplificar)
+      if (calculatedHash.toLowerCase() !== providedSignature.toLowerCase()) {
+        console.error('❌ SECURITY: Signature mismatch');
+        console.error('  Expected:', calculatedHash);
+        console.error('  Received:', providedSignature);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized', reason: 'Signature validation failed' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('✅ HMAC-SHA1 signature validated successfully');
+    } else {
+      console.log('⚠️ No webhook token configured - accepting request without validation');
+    }
+
+    // ═══════════════════════════════════════════
+    // PASSO 4: Agora sim, fazer parse do JSON
+    // ═══════════════════════════════════════════
     let payload: KiwifyPayload;
     try {
-      payload = await req.json();
+      payload = JSON.parse(rawBody);
     } catch (parseError) {
       console.error('❌ Failed to parse JSON body');
       return new Response(
@@ -226,24 +245,6 @@ serve(async (req) => {
     }
 
     console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-
-    // ═══════════════════════════════════════════
-    // VALIDAÇÃO DE ASSINATURA (BLINDADA)
-    // ═══════════════════════════════════════════
-    const providedSignature = extractSignature(req, payload);
-    const validation = validateSignature(providedSignature, webhookToken ?? null);
-
-    console.log('🔐 Signature validation:', validation.reason);
-
-    if (!validation.valid) {
-      console.error('❌ SECURITY: Signature validation failed');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', reason: validation.reason }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('✅ Signature validated');
 
     // ═══════════════════════════════════════════
     // PROCESSAMENTO DO EVENTO
