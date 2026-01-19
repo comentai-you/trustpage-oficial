@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface TrackVisitParams {
   pageId: string;
+  excludeOwner?: boolean; // Se true, não rastreia se o usuário for o dono da página
 }
 
 // Detect device type from user agent
@@ -72,7 +73,33 @@ const generateVisitorHash = (): string => {
   return Math.abs(hash).toString(36);
 };
 
-export const useTrackPageVisit = ({ pageId }: TrackVisitParams) => {
+// Check if current referrer is from the TrustPage editor/dashboard (owner testing)
+const isOwnerTestingView = (): boolean => {
+  const referrer = document.referrer;
+  if (!referrer) return false;
+  
+  try {
+    const url = new URL(referrer);
+    const hostname = url.hostname.toLowerCase();
+    const pathname = url.pathname.toLowerCase();
+    
+    // Check if coming from TrustPage dashboard, editor, or admin areas
+    const trustPageDomains = ['trustpageapp.com', 'asset-safe-zone.lovable.app', 'localhost'];
+    const isTrustPageDomain = trustPageDomains.some(domain => hostname.includes(domain));
+    
+    if (isTrustPageDomain) {
+      // Check if coming from editor, dashboard, or internal pages
+      const internalPaths = ['/dashboard', '/edit', '/new', '/admin', '/settings', '/leads'];
+      return internalPaths.some(path => pathname.startsWith(path));
+    }
+    
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+export const useTrackPageVisit = ({ pageId, excludeOwner = true }: TrackVisitParams) => {
   const hasTracked = useRef(false);
 
   useEffect(() => {
@@ -87,6 +114,34 @@ export const useTrackPageVisit = ({ pageId }: TrackVisitParams) => {
 
     const trackVisit = async () => {
       try {
+        // If excludeOwner is true, skip tracking for owner testing views
+        if (excludeOwner && isOwnerTestingView()) {
+          console.log('Skipping analytics: owner testing view detected');
+          hasTracked.current = true;
+          sessionStorage.setItem(viewKey, 'true');
+          return;
+        }
+
+        // Also check if user is authenticated and owns the page
+        if (excludeOwner) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            // Check if user owns this page
+            const { data: page } = await supabase
+              .from('landing_pages')
+              .select('user_id')
+              .eq('id', pageId)
+              .maybeSingle();
+            
+            if (page && page.user_id === user.id) {
+              console.log('Skipping analytics: page owner view detected');
+              hasTracked.current = true;
+              sessionStorage.setItem(viewKey, 'true');
+              return;
+            }
+          }
+        }
+
         const userAgent = navigator.userAgent;
         const deviceType = getDeviceType(userAgent);
         const referrer = document.referrer;
@@ -122,7 +177,7 @@ export const useTrackPageVisit = ({ pageId }: TrackVisitParams) => {
     };
 
     trackVisit();
-  }, [pageId]);
+  }, [pageId, excludeOwner]);
 };
 
 export { parseReferrerSource, getDeviceType };
