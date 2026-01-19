@@ -21,6 +21,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ const AdminMarketingPage = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [processingCampaigns, setProcessingCampaigns] = useState(false);
 
   // Check for editor mode from URL
   useEffect(() => {
@@ -180,6 +182,55 @@ const AdminMarketingPage = () => {
     setSelectedCampaign(null);
     setSearchParams({});
     loadCampaigns();
+  };
+
+  const handleForceProcess = async () => {
+    setProcessingCampaigns(true);
+    try {
+      console.log("Calling process-campaigns edge function...");
+      
+      const { data, error } = await supabase.functions.invoke("process-campaigns");
+      
+      if (error) {
+        console.error("Error from process-campaigns:", error);
+        toast.error(`Erro ao processar: ${error.message}`);
+        return;
+      }
+
+      console.log("Response from process-campaigns:", data);
+      
+      if (data?.processed === 0) {
+        toast.info(
+          `Nenhuma campanha para processar agora. ${data.pendingCampaigns || 0} campanha(s) pendente(s) aguardando horário.`,
+          { description: `Hora do servidor: ${data.serverTime}` }
+        );
+      } else if (data?.processed > 0) {
+        const successCount = data.results?.filter((r: any) => r.status === "completed").length || 0;
+        const failedCount = data.results?.filter((r: any) => r.status === "failed").length || 0;
+        
+        if (failedCount > 0) {
+          toast.warning(
+            `Processado: ${successCount} sucesso, ${failedCount} falha(s)`,
+            { description: `Total: ${data.processed} campanha(s)` }
+          );
+        } else {
+          toast.success(
+            `✅ ${successCount} campanha(s) processada(s) com sucesso!`,
+            { description: `Hora do servidor: ${data.serverTime}` }
+          );
+        }
+      } else {
+        toast.info("Processamento concluído", { description: JSON.stringify(data) });
+      }
+      
+      // Reload campaigns to show updated status
+      await loadCampaigns();
+    } catch (err) {
+      console.error("Exception calling process-campaigns:", err);
+      toast.error(`Erro: ${err instanceof Error ? err.message : "Erro desconhecido"}`);
+    } finally {
+      setProcessingCampaigns(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -396,6 +447,36 @@ const AdminMarketingPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Force Process Button */}
+        <Card className="mb-6 border-dashed border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700">
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg">
+                <Zap className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">Processamento Manual</h3>
+                <p className="text-sm text-muted-foreground">
+                  Força o processamento de campanhas agendadas (bypass no Cron)
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleForceProcess}
+              disabled={processingCampaigns}
+              className="border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900"
+            >
+              {processingCampaigns ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Zap className="w-4 h-4 mr-2" />
+              )}
+              {processingCampaigns ? "Processando..." : "🔄 Forçar Processamento"}
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Campaigns Table */}
         <Card>
