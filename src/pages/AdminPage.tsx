@@ -23,14 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,13 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 interface UserProfile {
@@ -76,14 +63,14 @@ interface AdminStats {
 const AdminPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  
+
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(true);
-  
+
   // Dialog states
   const [changePlanOpen, setChangePlanOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -99,17 +86,17 @@ const AdminPage = () => {
       }
 
       try {
-        const { data, error } = await supabase.rpc('is_admin');
-        
+        const { data, error } = await supabase.rpc("is_admin");
+
         if (error) {
-          console.error('Error checking admin status:', error);
+          console.error("Error checking admin status:", error);
           setIsAdmin(false);
           return;
         }
-        
+
         setIsAdmin(data === true);
       } catch (err) {
-        console.error('Error:', err);
+        console.error("Error:", err);
         setIsAdmin(false);
       }
     };
@@ -122,8 +109,8 @@ const AdminPage = () => {
   // Redirect if not admin
   useEffect(() => {
     if (isAdmin === false) {
-      toast.error('Acesso negado');
-      navigate('/');
+      toast.error("Acesso negado");
+      navigate("/");
     }
   }, [isAdmin, navigate]);
 
@@ -140,15 +127,15 @@ const AdminPage = () => {
       setFilteredUsers(users);
       return;
     }
-    
+
     const query = searchQuery.toLowerCase();
     setFilteredUsers(
       users.filter(
         (u) =>
           u.email?.toLowerCase().includes(query) ||
           u.full_name?.toLowerCase().includes(query) ||
-          u.username?.toLowerCase().includes(query)
-      )
+          u.username?.toLowerCase().includes(query),
+      ),
     );
   }, [searchQuery, users]);
 
@@ -156,20 +143,20 @@ const AdminPage = () => {
     setLoadingData(true);
     try {
       // Load stats
-      const { data: statsData, error: statsError } = await supabase.rpc('admin_get_stats');
+      const { data: statsData, error: statsError } = await supabase.rpc("admin_get_stats");
       if (statsError) throw statsError;
       if (statsData && statsData.length > 0) {
         setStats(statsData[0] as AdminStats);
       }
 
       // Load users
-      const { data: usersData, error: usersError } = await supabase.rpc('admin_get_all_profiles');
+      const { data: usersData, error: usersError } = await supabase.rpc("admin_get_all_profiles");
       if (usersError) throw usersError;
       setUsers((usersData as UserProfile[]) || []);
       setFilteredUsers((usersData as UserProfile[]) || []);
     } catch (err) {
-      console.error('Error loading admin data:', err);
-      toast.error('Erro ao carregar dados');
+      console.error("Error loading admin data:", err);
+      toast.error("Erro ao carregar dados");
     } finally {
       setLoadingData(false);
     }
@@ -177,29 +164,29 @@ const AdminPage = () => {
 
   const handleChangePlan = (user: UserProfile) => {
     setSelectedUser(user);
-    setNewPlan(user.plan_type || 'free');
+    setNewPlan(user.plan_type || "free");
     setChangePlanOpen(true);
   };
 
   const savePlanChange = async () => {
     if (!selectedUser || !newPlan) return;
-    
+
     setActionLoading(true);
     try {
-      const { error } = await supabase.rpc('update_user_plan', {
+      const { error } = await supabase.rpc("update_user_plan", {
         target_user_id: selectedUser.id,
         new_plan_type: newPlan,
-        new_status: 'active',
+        new_status: "active",
       });
-      
+
       if (error) throw error;
-      
+
       toast.success(`Plano atualizado para ${newPlan.toUpperCase()}`);
       setChangePlanOpen(false);
       loadData();
     } catch (err) {
-      console.error('Error updating plan:', err);
-      toast.error('Erro ao atualizar plano');
+      console.error("Error updating plan:", err);
+      toast.error("Erro ao atualizar plano");
     } finally {
       setActionLoading(false);
     }
@@ -207,22 +194,22 @@ const AdminPage = () => {
 
   const handleResendAccess = async (userProfile: UserProfile) => {
     if (!userProfile.email) {
-      toast.error('Usuário sem e-mail');
+      toast.error("Usuário sem e-mail");
       return;
     }
-    
+
     setActionLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(userProfile.email, {
-        redirectTo: 'https://trustpageapp.com/auth/update-password',
+        redirectTo: "https://trustpageapp.com/auth/update-password",
       });
-      
+
       if (error) throw error;
-      
+
       toast.success(`Link de redefinição enviado para ${userProfile.email}`);
     } catch (err) {
-      console.error('Error sending reset email:', err);
-      toast.error('Erro ao enviar e-mail');
+      console.error("Error sending reset email:", err);
+      toast.error("Erro ao enviar e-mail");
     } finally {
       setActionLoading(false);
     }
@@ -232,21 +219,21 @@ const AdminPage = () => {
     if (!confirm(`Deseja realmente bloquear ${userProfile.email || userProfile.full_name}?`)) {
       return;
     }
-    
+
     setActionLoading(true);
     try {
-      const { error } = await supabase.rpc('admin_update_user_status', {
+      const { error } = await supabase.rpc("admin_update_user_status", {
         target_user_id: userProfile.id,
-        new_status: 'inactive',
+        new_status: "inactive",
       });
-      
+
       if (error) throw error;
-      
-      toast.success('Usuário bloqueado');
+
+      toast.success("Usuário bloqueado");
       loadData();
     } catch (err) {
-      console.error('Error blocking user:', err);
-      toast.error('Erro ao bloquear usuário');
+      console.error("Error blocking user:", err);
+      toast.error("Erro ao bloquear usuário");
     } finally {
       setActionLoading(false);
     }
@@ -254,13 +241,13 @@ const AdminPage = () => {
 
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
-      case 'pro':
+      case "pro":
         return <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">PRO</Badge>;
-      case 'pro_yearly':
+      case "pro_yearly":
         return <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">PRO ANUAL</Badge>;
-      case 'essential':
+      case "essential":
         return <Badge className="bg-blue-500 text-white">ESSENCIAL</Badge>;
-      case 'essential_yearly':
+      case "essential_yearly":
         return <Badge className="bg-blue-600 text-white">ESSENCIAL ANUAL</Badge>;
       default:
         return <Badge variant="secondary">FREEMIUM</Badge>;
@@ -269,22 +256,26 @@ const AdminPage = () => {
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <Badge className="bg-green-500 text-white">Ativo</Badge>;
-      case 'inactive':
+      case "inactive":
         return <Badge variant="destructive">Inativo</Badge>;
-      case 'canceled':
-        return <Badge variant="outline" className="text-red-500 border-red-500">Cancelado</Badge>;
+      case "canceled":
+        return (
+          <Badge variant="outline" className="text-red-500 border-red-500">
+            Cancelado
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">Free</Badge>;
     }
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    return new Date(date).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
@@ -313,63 +304,45 @@ const AdminPage = () => {
                 <ShieldCheck className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Admin Control Center
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Gerenciamento de usuários e assinaturas
-                </p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Control Center</h1>
+                <p className="text-sm text-gray-500">Gerenciamento de usuários e assinaturas</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {/* Navigation Tabs */}
               <nav className="hidden sm:flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="bg-white dark:bg-gray-600 shadow-sm"
-                >
+                <Button variant="ghost" size="sm" className="bg-white dark:bg-gray-600 shadow-sm">
                   <Users className="w-4 h-4 mr-2" />
                   Usuários
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/admin/blog')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => navigate("/admin/blog")}>
                   <FileText className="w-4 h-4 mr-2" />
                   Blog CMS
                 </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/admin/marketing")}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Marketing
+                </Button>
               </nav>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadData}
-                disabled={loadingData}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loadingData ? 'animate-spin' : ''}`} />
+              <Button variant="outline" size="sm" onClick={loadData} disabled={loadingData}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${loadingData ? "animate-spin" : ""}`} />
                 Atualizar
               </Button>
             </div>
           </div>
           {/* Mobile Navigation */}
           <nav className="flex sm:hidden items-center gap-2 mt-3 pt-3 border-t">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-            >
+            <Button variant="secondary" size="sm" className="flex-1">
               <Users className="w-4 h-4 mr-2" />
               Usuários
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex-1"
-              onClick={() => navigate('/admin/blog')}
-            >
+            <Button variant="ghost" size="sm" className="flex-1" onClick={() => navigate("/admin/blog")}>
               <FileText className="w-4 h-4 mr-2" />
               Blog CMS
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1" onClick={() => navigate("/admin/marketing")}>
+              <Mail className="w-4 h-4 mr-2" />
+              Marketing
             </Button>
           </nav>
         </div>
@@ -380,57 +353,43 @@ const AdminPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Total de Usuários
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-500">Total de Usuários</CardTitle>
               <Users className="w-5 h-5 text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {loadingData ? '...' : stats?.total_users || 0}
-              </div>
+              <div className="text-3xl font-bold">{loadingData ? "..." : stats?.total_users || 0}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Assinantes PRO
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-500">Assinantes PRO</CardTitle>
               <Crown className="w-5 h-5 text-purple-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">
-                {loadingData ? '...' : stats?.pro_users || 0}
-              </div>
+              <div className="text-3xl font-bold text-purple-600">{loadingData ? "..." : stats?.pro_users || 0}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Assinantes BASIC
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-500">Assinantes BASIC</CardTitle>
               <Star className="w-5 h-5 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">
-                {loadingData ? '...' : stats?.essential_users || 0}
+                {loadingData ? "..." : stats?.essential_users || 0}
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Gratuitos
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-500">Gratuitos</CardTitle>
               <UserX className="w-5 h-5 text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
-                {loadingData ? '...' : stats?.free_users || 0}
-              </div>
+              <div className="text-3xl font-bold text-gray-600">{loadingData ? "..." : stats?.free_users || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -483,16 +442,14 @@ const AdminPage = () => {
                               <Avatar className="h-10 w-10">
                                 <AvatarImage src={userProfile.avatar_url || undefined} />
                                 <AvatarFallback>
-                                  {(userProfile.full_name || userProfile.email || 'U')[0].toUpperCase()}
+                                  {(userProfile.full_name || userProfile.email || "U")[0].toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="font-medium">
-                                  {userProfile.full_name || userProfile.username || 'Sem nome'}
+                                  {userProfile.full_name || userProfile.username || "Sem nome"}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {userProfile.email || 'Sem e-mail'}
-                                </div>
+                                <div className="text-sm text-gray-500">{userProfile.email || "Sem e-mail"}</div>
                               </div>
                             </div>
                           </TableCell>
@@ -515,10 +472,7 @@ const AdminPage = () => {
                                   <Mail className="w-4 h-4 mr-2" />
                                   Reenviar Acesso
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleBlockUser(userProfile)}
-                                  className="text-red-600"
-                                >
+                                <DropdownMenuItem onClick={() => handleBlockUser(userProfile)} className="text-red-600">
                                   <Ban className="w-4 h-4 mr-2" />
                                   Bloquear Usuário
                                 </DropdownMenuItem>
@@ -541,9 +495,7 @@ const AdminPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Alterar Plano</DialogTitle>
-            <DialogDescription>
-              Alterar o plano de {selectedUser?.email || selectedUser?.full_name}
-            </DialogDescription>
+            <DialogDescription>Alterar o plano de {selectedUser?.email || selectedUser?.full_name}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
