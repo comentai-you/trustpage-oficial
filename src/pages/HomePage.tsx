@@ -463,7 +463,7 @@ const HomePage = () => {
 
               <ul className="space-y-3 mb-6 sm:mb-8">
                 <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
-                  Até 5 Páginas Ativas
+                  5 Páginas Ativas
                 </FeatureItem>
                 <FeatureItem included icon={<Clock className="w-4 h-4 text-blue-500" />}>
                   1 Domínio Personalizado
@@ -476,11 +476,11 @@ const HomePage = () => {
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
                 <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold shadow-lg">
-                  QUERO APROVEITAR AGORA
+                  QUERO O ESSENCIAL
                 </Button>
               </a>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">⭐ Melhor custo-benefício</p>
+              <p className="text-xs text-center text-muted-foreground mt-3">Melhor custo-benefício ⚡</p>
             </div>
 
             {/* Pro Card */}
