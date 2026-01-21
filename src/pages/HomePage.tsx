@@ -421,21 +421,16 @@ const HomePage = () => {
 
             {/* Essencial Card - DESTAQUE MÁXIMO */}
             <div className="relative bg-card rounded-xl sm:rounded-2xl border-2 border-primary p-6 sm:p-8 shadow-2xl hover:shadow-3xl transition-shadow ring-2 ring-primary/20 h-full">
-              {/* Badge Principal */}
+              {/* Badge Principal - Oferta de Fundador */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="bg-gradient-to-r from-primary to-accent text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse whitespace-nowrap">
-                  ⭐ MAIS POPULAR
+                <span className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse whitespace-nowrap">
+                  🚀 OFERTA DE FUNDADOR
                 </span>
               </div>
 
               <div className="mb-6 pt-4">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground">Essencial</h3>
-                  {isYearly && (
-                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      ECONOMIZE R$ 29
-                    </span>
-                  )}
                 </div>
                 
                 {isYearly ? (
@@ -445,20 +440,30 @@ const HomePage = () => {
                       <span className="text-3xl sm:text-4xl font-extrabold text-primary">12x R$ 37,49</span>
                     </div>
                     <p className="text-sm text-green-600 font-semibold mt-1">
-                      🎉 Desconto de 1 mês grátis
+                      🎉 Economize R$ 29
                     </p>
                   </div>
                 ) : (
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ {basicPrice}</span>
-                    <span className="text-muted-foreground">/mês</span>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg text-muted-foreground line-through">R$ 39,90</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ 19,90</span>
+                      <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                        -50% OFF
+                      </span>
+                    </div>
+                    <p className="text-sm text-amber-600 font-semibold mt-2 flex items-center gap-1">
+                      ⚡ Apenas no 1º mês • Depois R$ 39,90/mês
+                    </p>
                   </div>
                 )}
               </div>
 
               <ul className="space-y-3 mb-6 sm:mb-8">
                 <FeatureItem included icon={<Zap className="w-4 h-4 text-yellow-500" />}>
-                  5 Páginas Ativas
+                  Até 5 Páginas Ativas
                 </FeatureItem>
                 <FeatureItem included icon={<Clock className="w-4 h-4 text-blue-500" />}>
                   1 Domínio Personalizado
@@ -471,11 +476,11 @@ const HomePage = () => {
 
               <a href={basicCheckout} target="_blank" rel="noopener noreferrer" className="block">
                 <Button className="w-full gradient-button text-base sm:text-lg py-5 sm:py-6 font-bold shadow-lg">
-                  QUERO O ESSENCIAL
+                  QUERO APROVEITAR AGORA
                 </Button>
               </a>
 
-              <p className="text-xs text-center text-muted-foreground mt-3">Melhor custo-benefício ⚡</p>
+              <p className="text-xs text-center text-muted-foreground mt-3">⭐ Melhor custo-benefício</p>
             </div>
 
             {/* Pro Card */}
