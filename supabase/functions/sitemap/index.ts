@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SITE_URL = "https://asset-safe-zone.lovable.app";
+const SITE_URL = "https://www.trustpageapp.com";
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Static routes
@@ -97,12 +97,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error generating sitemap:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate sitemap" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Failed to generate sitemap" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
