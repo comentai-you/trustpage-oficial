@@ -290,8 +290,46 @@ const TrustPageDashboard = () => {
         </div>
       )}
 
+      {/* Founder Offer Banner - Only show for free plans */}
+      {isFreePlan && (
+        <div className="container mx-auto px-4 pt-6">
+          <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/40 rounded-xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">🚀</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground text-sm sm:text-base">
+                    Oferta de Fundador
+                  </h4>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Desbloqueie <strong className="text-foreground">Domínio Próprio</strong> + até <strong className="text-foreground">5 páginas ativas</strong> e todos os benefícios do plano ESSENCIAL.
+                  </p>
+                  <p className="text-sm mt-1">
+                    <span className="text-muted-foreground line-through">R$ 39,90</span>
+                    <span className="text-primary font-bold ml-2">R$ 19,90</span>
+                    <span className="text-amber-600 text-xs ml-1">(1º mês)</span>
+                  </p>
+                </div>
+              </div>
+              <a 
+                href="https://pay.kiwify.com.br/P7MaOJK" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
+              >
+                <Button className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg whitespace-nowrap">
+                  Quero Aproveitar Agora
+                </Button>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ads Good News Alert */}
-      <div className="container mx-auto px-4 pt-6">
+      <div className="container mx-auto px-4 pt-4">
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-start gap-3">
           <Sparkles className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
