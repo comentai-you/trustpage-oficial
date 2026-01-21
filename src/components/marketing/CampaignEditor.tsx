@@ -290,7 +290,11 @@ const CampaignEditor = ({ campaign, onClose }: CampaignEditorProps) => {
                       selected={scheduledDate}
                       onSelect={setScheduledDate}
                       locale={ptBR}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
                     />
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-500" />
