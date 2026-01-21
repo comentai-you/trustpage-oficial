@@ -314,8 +314,8 @@ const TrustPageDashboard = () => {
                 </div>
               </div>
               <a 
-                href="https://pay.kiwify.com.br/P7MaOJK" 
-                target="_blank" 
+                href="https://pay.kiwify.com.br/Vu0ULc6" 
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
               >

@@ -17,7 +17,7 @@ interface PricingModalProps {
 
 // Links externos para checkout na Kiwify
 const KIWIFY_LINKS = {
-  essential_monthly: 'https://pay.kiwify.com.br/P7MaOJK',
+  essential_monthly: 'https://pay.kiwify.com.br/Vu0ULc6',
   pro_monthly: 'https://pay.kiwify.com.br/f0lsmRn',
   essential_yearly: 'https://pay.kiwify.com.br/f8Tg6DT',
   pro_yearly: 'https://pay.kiwify.com.br/TQlihDk',

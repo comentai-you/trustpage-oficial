@@ -22,7 +22,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 // Links reais do Kiwify
 const CHECKOUT_URLS = {
-  basic_monthly: "https://pay.kiwify.com.br/P7MaOJK",
+  basic_monthly: "https://pay.kiwify.com.br/Vu0ULc6",
   basic_yearly: "https://pay.kiwify.com.br/f8Tg6DT",
   pro_monthly: "https://pay.kiwify.com.br/f0lsmRn",
   pro_yearly: "https://pay.kiwify.com.br/TQlihDk",
