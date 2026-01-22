@@ -58,12 +58,12 @@ interface UserProfile {
 // Interface atualizada conforme sua tabela 'landing_pages'
 interface LandingPage {
   id: string;
-  page_name: string; // Nome da coluna no seu banco
+  page_name: string;
   slug: string;
-  is_published: boolean; // Nome da coluna no seu banco
-  views: number; // Nome da coluna no seu banco
+  is_published: boolean;
+  views: number;
   created_at: string;
-  template_type: string; // Para saber se é bio, vsl, legal, etc.
+  template_type: string;
 }
 
 interface AdminStats {
@@ -218,6 +218,7 @@ const AdminPage = () => {
 
     setActionLoading(true);
     try {
+      // NOTA: Mantive trustpageapp.com aqui pois é o link de reset de senha (dashboard)
       const { error } = await supabase.auth.resetPasswordForEmail(userProfile.email, {
         redirectTo: "https://trustpageapp.com/auth/update-password",
       });
@@ -257,7 +258,7 @@ const AdminPage = () => {
     }
   };
 
-  // Função ATUALIZADA para buscar na tabela 'landing_pages'
+  // Função para buscar na tabela 'landing_pages'
   const handleViewPages = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
     setViewPagesOpen(true);
@@ -265,7 +266,7 @@ const AdminPage = () => {
 
     try {
       const { data, error } = await supabase
-        .from("landing_pages") // Tabela correta
+        .from("landing_pages")
         .select("*")
         .eq("user_id", userProfile.id)
         .order("created_at", { ascending: false });
@@ -575,7 +576,7 @@ const AdminPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* View User Pages Dialog (Atualizado com colunas corretas) */}
+      {/* View User Pages Dialog (Atualizado com colunas corretas e DOMÍNIO tpage.com.br) */}
       <Dialog open={viewPagesOpen} onOpenChange={setViewPagesOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -636,7 +637,7 @@ const AdminPage = () => {
 
                         <Button size="sm" variant="outline" asChild>
                           <a
-                            href={`https://trustpageapp.com/${page.slug}`}
+                            href={`https://tpage.com.br/${page.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2"
