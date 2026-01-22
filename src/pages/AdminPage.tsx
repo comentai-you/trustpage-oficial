@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   RefreshCw,
   FileText,
-  Eye, // Adicionado para o ícone de ver páginas
+  Eye,
+  LayoutTemplate,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,14 +55,15 @@ interface UserProfile {
   email: string | null;
 }
 
-// Interface para as páginas do usuário
-interface UserPage {
+// Interface atualizada conforme sua tabela 'landing_pages'
+interface LandingPage {
   id: string;
-  title: string;
+  page_name: string; // Nome da coluna no seu banco
   slug: string;
-  published: boolean;
-  page_views: number;
+  is_published: boolean; // Nome da coluna no seu banco
+  views: number; // Nome da coluna no seu banco
   created_at: string;
+  template_type: string; // Para saber se é bio, vsl, legal, etc.
 }
 
 interface AdminStats {
@@ -90,7 +92,7 @@ const AdminPage = () => {
 
   // States para Visualizar Páginas
   const [viewPagesOpen, setViewPagesOpen] = useState(false);
-  const [selectedUserPages, setSelectedUserPages] = useState<UserPage[]>([]);
+  const [selectedUserPages, setSelectedUserPages] = useState<LandingPage[]>([]);
   const [pagesLoading, setPagesLoading] = useState(false);
 
   // Check if user is admin
@@ -255,7 +257,7 @@ const AdminPage = () => {
     }
   };
 
-  // Nova função para buscar e visualizar páginas
+  // Função ATUALIZADA para buscar na tabela 'landing_pages'
   const handleViewPages = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
     setViewPagesOpen(true);
@@ -263,13 +265,13 @@ const AdminPage = () => {
 
     try {
       const { data, error } = await supabase
-        .from("pages")
+        .from("landing_pages") // Tabela correta
         .select("*")
         .eq("user_id", userProfile.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setSelectedUserPages((data as UserPage[]) || []);
+      setSelectedUserPages((data as LandingPage[]) || []);
     } catch (err) {
       console.error("Error fetching pages:", err);
       toast.error("Erro ao carregar páginas do usuário");
@@ -358,7 +360,7 @@ const AdminPage = () => {
                   <FileText className="w-4 h-4 mr-2" />
                   Blog CMS
                 </Button>
-                {/* Botão de Marketing Adicionado */}
+                {/* Botão de Marketing */}
                 <Button variant="ghost" size="sm" onClick={() => navigate("/admin/marketing")}>
                   <Mail className="w-4 h-4 mr-2" />
                   Marketing
@@ -380,7 +382,7 @@ const AdminPage = () => {
               <FileText className="w-4 h-4 mr-2" />
               Blog CMS
             </Button>
-            {/* Botão de Marketing Mobile Adicionado */}
+            {/* Botão de Marketing Mobile */}
             <Button variant="ghost" size="sm" className="flex-1" onClick={() => navigate("/admin/marketing")}>
               <Mail className="w-4 h-4 mr-2" />
               Marketing
@@ -505,7 +507,7 @@ const AdminPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                {/* Opção Ver Páginas Adicionada */}
+                                {/* Opção Ver Páginas */}
                                 <DropdownMenuItem onClick={() => handleViewPages(userProfile)}>
                                   <Eye className="w-4 h-4 mr-2" />
                                   Ver Páginas
@@ -573,12 +575,12 @@ const AdminPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* View User Pages Dialog - Adicionado */}
+      {/* View User Pages Dialog (Atualizado com colunas corretas) */}
       <Dialog open={viewPagesOpen} onOpenChange={setViewPagesOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Páginas de {selectedUser?.full_name || selectedUser?.email}</DialogTitle>
-            <DialogDescription>Lista de todas as páginas criadas por este usuário.</DialogDescription>
+            <DialogDescription>Lista de todas as páginas (Landing Pages e Legais) deste usuário.</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
@@ -601,24 +603,32 @@ const AdminPage = () => {
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          <FileText className="w-5 h-5 text-purple-600" />
+                          {/* Ícone muda dependendo do tipo */}
+                          {page.template_type === "legal" ? (
+                            <ShieldCheck className="w-5 h-5 text-gray-600" />
+                          ) : (
+                            <LayoutTemplate className="w-5 h-5 text-purple-600" />
+                          )}
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-                            {page.title || "Sem título"}
+                            {page.page_name || "Sem título"}
                           </h4>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Badge variant="outline" className="text-xs">
+                              {page.template_type || "Landing Page"}
+                            </Badge>
                             <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
                               /{page.slug}
                             </span>
                             <span>•</span>
-                            <span>{page.page_views || 0} visualizações</span>
+                            <span>{page.views || 0} visualizações</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        {page.published ? (
+                        {page.is_published ? (
                           <Badge className="bg-green-500 hover:bg-green-600">Publicado</Badge>
                         ) : (
                           <Badge variant="secondary">Rascunho</Badge>
