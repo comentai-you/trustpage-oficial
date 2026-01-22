@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   RefreshCw,
   FileText,
+  Eye, // Adicionado para o ícone de ver páginas
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,16 @@ interface UserProfile {
   email: string | null;
 }
 
+// Interface para as páginas do usuário
+interface UserPage {
+  id: string;
+  title: string;
+  slug: string;
+  published: boolean;
+  page_views: number;
+  created_at: string;
+}
+
 interface AdminStats {
   total_users: number;
   pro_users: number;
@@ -76,6 +87,11 @@ const AdminPage = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [newPlan, setNewPlan] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
+
+  // States para Visualizar Páginas
+  const [viewPagesOpen, setViewPagesOpen] = useState(false);
+  const [selectedUserPages, setSelectedUserPages] = useState<UserPage[]>([]);
+  const [pagesLoading, setPagesLoading] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -239,6 +255,29 @@ const AdminPage = () => {
     }
   };
 
+  // Nova função para buscar e visualizar páginas
+  const handleViewPages = async (userProfile: UserProfile) => {
+    setSelectedUser(userProfile);
+    setViewPagesOpen(true);
+    setPagesLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("pages")
+        .select("*")
+        .eq("user_id", userProfile.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSelectedUserPages((data as UserPage[]) || []);
+    } catch (err) {
+      console.error("Error fetching pages:", err);
+      toast.error("Erro ao carregar páginas do usuário");
+    } finally {
+      setPagesLoading(false);
+    }
+  };
+
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
       case "pro":
@@ -319,6 +358,7 @@ const AdminPage = () => {
                   <FileText className="w-4 h-4 mr-2" />
                   Blog CMS
                 </Button>
+                {/* Botão de Marketing Adicionado */}
                 <Button variant="ghost" size="sm" onClick={() => navigate("/admin/marketing")}>
                   <Mail className="w-4 h-4 mr-2" />
                   Marketing
@@ -340,6 +380,7 @@ const AdminPage = () => {
               <FileText className="w-4 h-4 mr-2" />
               Blog CMS
             </Button>
+            {/* Botão de Marketing Mobile Adicionado */}
             <Button variant="ghost" size="sm" className="flex-1" onClick={() => navigate("/admin/marketing")}>
               <Mail className="w-4 h-4 mr-2" />
               Marketing
@@ -464,6 +505,12 @@ const AdminPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                {/* Opção Ver Páginas Adicionada */}
+                                <DropdownMenuItem onClick={() => handleViewPages(userProfile)}>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Ver Páginas
+                                </DropdownMenuItem>
+
                                 <DropdownMenuItem onClick={() => handleChangePlan(userProfile)}>
                                   <Pencil className="w-4 h-4 mr-2" />
                                   Alterar Plano
@@ -523,6 +570,78 @@ const AdminPage = () => {
               Salvar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View User Pages Dialog - Adicionado */}
+      <Dialog open={viewPagesOpen} onOpenChange={setViewPagesOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Páginas de {selectedUser?.full_name || selectedUser?.email}</DialogTitle>
+            <DialogDescription>Lista de todas as páginas criadas por este usuário.</DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {pagesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : selectedUserPages.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
+                <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>Este usuário ainda não criou nenhuma página.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {selectedUserPages.map((page) => (
+                  <Card
+                    key={page.id}
+                    className="overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <FileText className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {page.title || "Sem título"}
+                          </h4>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                              /{page.slug}
+                            </span>
+                            <span>•</span>
+                            <span>{page.page_views || 0} visualizações</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {page.published ? (
+                          <Badge className="bg-green-500 hover:bg-green-600">Publicado</Badge>
+                        ) : (
+                          <Badge variant="secondary">Rascunho</Badge>
+                        )}
+
+                        <Button size="sm" variant="outline" asChild>
+                          <a
+                            href={`https://trustpageapp.com/${page.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Abrir
+                          </a>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
