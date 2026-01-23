@@ -1,5 +1,6 @@
 import { ContentSection, SectionBuilderContent } from "@/types/section-builder";
 import HeroRenderer from "./HeroRenderer";
+import HeadlineRenderer from "./HeadlineRenderer";
 import TextRenderer from "./TextRenderer";
 import FullImageRenderer from "./FullImageRenderer";
 import DualColumnRenderer from "./DualColumnRenderer";
@@ -41,6 +42,16 @@ export const SectionRenderer = ({
           isDarkTheme={isDarkTheme}
           isMobile={isMobile}
           ctaUrl={ctaUrl}
+        />
+      );
+    case 'headline':
+      return (
+        <HeadlineRenderer
+          data={section.data}
+          primaryColor={primaryColor}
+          textColor={textColor}
+          isDarkTheme={isDarkTheme}
+          isMobile={isMobile}
         />
       );
     case 'text':
