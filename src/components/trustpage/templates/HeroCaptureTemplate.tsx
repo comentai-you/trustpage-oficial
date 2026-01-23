@@ -5,15 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Mail, User, ArrowRight, ImageIcon, Phone, MessageCircle, CheckCircle, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
+import LegalFooter from "./LegalFooter";
 interface HeroCaptureTemplateProps {
   data: LandingPageFormData;
   isMobile?: boolean;
   fullHeight?: boolean;
   pageId?: string; // ID da landing page para salvar leads
+  ownerPlan?: string | null;
 }
 
-const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCaptureTemplateProps) => {
+const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: HeroCaptureTemplateProps) => {
   const bgStart = data.colors.background || "#0f172a";
   const bgEnd = data.colors.primary || "#1e293b";
   const accentColor = data.primary_color || "#3b82f6";
@@ -637,6 +638,9 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId }: HeroCapture
           </div>
         </div>
       </div>
+
+      {/* Legal Footer */}
+      <LegalFooter textColor={textColor} showWatermark={true} ownerPlan={ownerPlan} />
     </div>
   );
 };
