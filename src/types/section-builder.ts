@@ -26,6 +26,16 @@ export interface HeroSection extends BaseSection {
   data: {
     headline: string;
     subheadline?: string;
+    showSubheadline?: boolean;
+    // Typography - Headline
+    headlineSizeMobile?: number; // rem
+    headlineSizeDesktop?: number; // rem
+    headlineColor?: string;
+    // Typography - Subheadline
+    subheadlineSizeMobile?: number; // rem
+    subheadlineSizeDesktop?: number; // rem
+    subheadlineColor?: string;
+    // Media
     mediaType: 'video' | 'image' | 'carousel';
     videoUrl?: string;
     imageUrl?: string;
@@ -298,6 +308,13 @@ export const createDefaultSection = (type: SectionType, order: number): ContentS
         data: {
           headline: 'Transforme Sua Vida Hoje',
           subheadline: 'Descubra o método que já ajudou milhares de pessoas',
+          showSubheadline: true,
+          headlineSizeMobile: 2,
+          headlineSizeDesktop: 3.5,
+          headlineColor: '',
+          subheadlineSizeMobile: 1.1,
+          subheadlineSizeDesktop: 1.5,
+          subheadlineColor: '',
           mediaType: 'image',
           showCta: true,
           ctaText: 'QUERO AGORA',
