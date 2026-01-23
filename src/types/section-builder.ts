@@ -2,6 +2,7 @@
 
 export type SectionType = 
   | 'hero'
+  | 'headline'
   | 'text'
   | 'full-image'
   | 'dual-column'
@@ -18,6 +19,26 @@ export interface BaseSection {
   id: string;
   type: SectionType;
   order: number;
+}
+
+// Headline Section - Simple title block with advanced typography
+export interface HeadlineSection extends BaseSection {
+  type: 'headline';
+  data: {
+    text: string;
+    alignment?: 'left' | 'center' | 'right';
+    sizeMobile?: number; // rem
+    sizeDesktop?: number; // rem
+    fontWeight?: string;
+    letterSpacing?: number; // em
+    color?: string;
+    uppercase?: boolean;
+    decoration?: 'none' | 'underline' | 'gradient-underline' | 'highlight';
+    showTag?: boolean;
+    tagText?: string;
+    tagColor?: string;
+    maxWidth?: number; // percentage
+  };
 }
 
 // Hero Section
@@ -187,6 +208,7 @@ export interface OfferSection extends BaseSection {
 // Union type for all sections
 export type ContentSection = 
   | HeroSection
+  | HeadlineSection
   | TextSection
   | FullImageSection
   | DualColumnSection
@@ -221,6 +243,13 @@ export const sectionCatalog: SectionCatalogItem[] = [
     name: 'Hero Section',
     description: 'Seção de topo com headline, mídia e CTA',
     icon: 'Layout',
+    category: 'content'
+  },
+  {
+    type: 'headline',
+    name: 'Título',
+    description: 'Bloco de título com tipografia avançada',
+    icon: 'Type',
     category: 'content'
   },
   {
@@ -319,6 +348,27 @@ export const createDefaultSection = (type: SectionType, order: number): ContentS
           showCta: true,
           ctaText: 'QUERO AGORA',
           ctaUrl: ''
+        }
+      };
+    case 'headline':
+      return {
+        id,
+        type: 'headline',
+        order,
+        data: {
+          text: 'Seu Título Impactante Aqui',
+          alignment: 'center',
+          sizeMobile: 1.5,
+          sizeDesktop: 2.5,
+          fontWeight: '700',
+          letterSpacing: 0,
+          color: '',
+          uppercase: false,
+          decoration: 'none',
+          showTag: false,
+          tagText: '',
+          tagColor: '',
+          maxWidth: 100
         }
       };
     case 'text':

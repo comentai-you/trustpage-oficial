@@ -40,6 +40,7 @@ import CoverImageUpload from "./CoverImageUpload";
 
 // Section editors
 import HeroSectionEditor from "./sections/HeroSectionEditor";
+import HeadlineSectionEditor from "./sections/HeadlineSectionEditor";
 import TextSectionEditor from "./sections/TextSectionEditor";
 import FullImageSectionEditor from "./sections/FullImageSectionEditor";
 import DualColumnSectionEditor from "./sections/DualColumnSectionEditor";
@@ -162,6 +163,13 @@ const SectionBuilderSidebar = ({ formData, onChange, userPlan = 'free' }: Sectio
       case 'hero':
         return (
           <HeroSectionEditor
+            data={section.data}
+            onChange={(data) => handleUpdateSection(section.id, data)}
+          />
+        );
+      case 'headline':
+        return (
+          <HeadlineSectionEditor
             data={section.data}
             onChange={(data) => handleUpdateSection(section.id, data)}
           />

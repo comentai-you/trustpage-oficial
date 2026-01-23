@@ -5,7 +5,7 @@ import {
   GripVertical, Trash2, ChevronDown, ChevronUp,
   Layout, FileText, Image, Columns, Video, CheckSquare, 
   HelpCircle, MessageSquare, MousePointerClick, Maximize2,
-  DollarSign, LucideIcon
+  DollarSign, LucideIcon, Type
 } from "lucide-react";
 import { ContentSection, SectionType } from "@/types/section-builder";
 import {
@@ -17,6 +17,7 @@ import { useState } from "react";
 
 const ICON_MAP: Record<SectionType, LucideIcon> = {
   'hero': Layout,
+  'headline': Type,
   'text': FileText,
   'full-image': Image,
   'dual-column': Columns,
@@ -31,6 +32,7 @@ const ICON_MAP: Record<SectionType, LucideIcon> = {
 
 const TYPE_LABELS: Record<SectionType, string> = {
   'hero': 'Hero Section',
+  'headline': 'Título',
   'text': 'Texto Livre',
   'full-image': 'Imagem Full Width',
   'dual-column': 'Coluna Dupla',
@@ -80,6 +82,8 @@ const SortableSectionItem = ({
     switch (section.type) {
       case 'hero':
         return section.data.headline?.substring(0, 40) + (section.data.headline?.length > 40 ? '...' : '') || 'Hero Section';
+      case 'headline':
+        return section.data.text?.substring(0, 40) + (section.data.text?.length > 40 ? '...' : '') || 'Título';
       case 'text':
         return section.data.content?.substring(0, 40) + (section.data.content?.length > 40 ? '...' : '') || 'Texto';
       case 'benefits':
