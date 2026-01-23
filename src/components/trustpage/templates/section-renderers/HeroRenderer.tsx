@@ -82,18 +82,27 @@ const HeroRenderer = ({
             <h1
               className="font-black leading-[1.1] mb-5 md:mb-6"
               style={{
-                fontSize: isMobile ? '2rem' : 'clamp(2.2rem, 5vw, 3.5rem)',
+                fontSize: isMobile 
+                  ? `${data.headlineSizeMobile || 2}rem` 
+                  : `${data.headlineSizeDesktop || 3.5}rem`,
                 letterSpacing: '-0.02em',
-                color: textColor,
+                color: data.headlineColor || textColor,
               }}
             >
               {data.headline || "Transforme Sua Vida Hoje"}
             </h1>
 
-            {data.subheadline && (
+            {(data.showSubheadline ?? true) && data.subheadline && (
               <p
-                className="text-xl md:text-2xl lg:text-[1.65rem] mb-8 max-w-xl mx-auto lg:mx-0"
-                style={{ color: textColor, opacity: 0.8, lineHeight: '1.7' }}
+                className="mb-8 max-w-xl mx-auto lg:mx-0"
+                style={{ 
+                  color: data.subheadlineColor || textColor, 
+                  opacity: data.subheadlineColor ? 1 : 0.8, 
+                  lineHeight: '1.7',
+                  fontSize: isMobile 
+                    ? `${data.subheadlineSizeMobile || 1.1}rem` 
+                    : `${data.subheadlineSizeDesktop || 1.5}rem`
+                }}
               >
                 {data.subheadline}
               </p>

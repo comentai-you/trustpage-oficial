@@ -4,8 +4,9 @@ import { Label } from "@/components/ui/label";
 import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { HeroSection } from "@/types/section-builder";
-import { Image, Video, Images, Upload, Loader2, X, Play } from "lucide-react";
+import { Image, Video, Images, Upload, Loader2, X, Play, Type, Smartphone, Monitor, Palette } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,18 +122,163 @@ const HeroSectionEditor = ({ data, onChange }: HeroSectionEditorProps) => {
         />
       </div>
 
-      {/* Subheadline */}
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Subheadline</Label>
-        <TextareaWithAI
-          value={data.subheadline || ''}
-          onChange={(e) => onChange({ ...data, subheadline: e.target.value })}
-          placeholder="Descubra o método que já ajudou milhares..."
-          className="text-sm resize-none"
-          rows={2}
-          aiFieldType="subheadline"
+      {/* Headline Typography */}
+      <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
+        <Label className="text-xs text-muted-foreground flex items-center gap-2">
+          <Type className="w-3 h-3" />
+          Tamanho da Headline
+        </Label>
+        
+        {/* Mobile Size */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Smartphone className="w-3 h-3" />
+            <span>Mobile</span>
+            <span className="ml-auto font-mono">{data.headlineSizeMobile || 2}rem</span>
+          </div>
+          <Slider
+            value={[data.headlineSizeMobile || 2]}
+            onValueChange={(value) => onChange({ ...data, headlineSizeMobile: value[0] })}
+            min={1}
+            max={4}
+            step={0.1}
+            className="w-full"
+          />
+        </div>
+
+        {/* Desktop Size */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Monitor className="w-3 h-3" />
+            <span>Desktop</span>
+            <span className="ml-auto font-mono">{data.headlineSizeDesktop || 3.5}rem</span>
+          </div>
+          <Slider
+            value={[data.headlineSizeDesktop || 3.5]}
+            onValueChange={(value) => onChange({ ...data, headlineSizeDesktop: value[0] })}
+            min={1.5}
+            max={6}
+            step={0.1}
+            className="w-full"
+          />
+        </div>
+
+        {/* Headline Color */}
+        <div className="flex items-center gap-2">
+          <Palette className="w-3 h-3 text-muted-foreground" />
+          <Label className="text-xs text-muted-foreground">Cor</Label>
+          <div className="ml-auto flex items-center gap-2">
+            <input
+              type="color"
+              value={data.headlineColor || '#ffffff'}
+              onChange={(e) => onChange({ ...data, headlineColor: e.target.value })}
+              className="w-6 h-6 rounded cursor-pointer border-0"
+            />
+            {data.headlineColor && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                onClick={() => onChange({ ...data, headlineColor: '' })}
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Subheadline Toggle */}
+      <div className="flex items-center justify-between py-2">
+        <Label className="text-xs text-muted-foreground">Mostrar Subheadline</Label>
+        <Switch
+          checked={data.showSubheadline ?? true}
+          onCheckedChange={(checked) => onChange({ ...data, showSubheadline: checked })}
         />
       </div>
+
+      {/* Subheadline */}
+      {(data.showSubheadline ?? true) && (
+        <>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Subheadline</Label>
+            <TextareaWithAI
+              value={data.subheadline || ''}
+              onChange={(e) => onChange({ ...data, subheadline: e.target.value })}
+              placeholder="Descubra o método que já ajudou milhares..."
+              className="text-sm resize-none"
+              rows={2}
+              aiFieldType="subheadline"
+            />
+          </div>
+
+          {/* Subheadline Typography */}
+          <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
+            <Label className="text-xs text-muted-foreground flex items-center gap-2">
+              <Type className="w-3 h-3" />
+              Tamanho da Subheadline
+            </Label>
+            
+            {/* Mobile Size */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Smartphone className="w-3 h-3" />
+                <span>Mobile</span>
+                <span className="ml-auto font-mono">{data.subheadlineSizeMobile || 1.1}rem</span>
+              </div>
+              <Slider
+                value={[data.subheadlineSizeMobile || 1.1]}
+                onValueChange={(value) => onChange({ ...data, subheadlineSizeMobile: value[0] })}
+                min={0.8}
+                max={2.5}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+            {/* Desktop Size */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Monitor className="w-3 h-3" />
+                <span>Desktop</span>
+                <span className="ml-auto font-mono">{data.subheadlineSizeDesktop || 1.5}rem</span>
+              </div>
+              <Slider
+                value={[data.subheadlineSizeDesktop || 1.5]}
+                onValueChange={(value) => onChange({ ...data, subheadlineSizeDesktop: value[0] })}
+                min={1}
+                max={3}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+            {/* Subheadline Color */}
+            <div className="flex items-center gap-2">
+              <Palette className="w-3 h-3 text-muted-foreground" />
+              <Label className="text-xs text-muted-foreground">Cor</Label>
+              <div className="ml-auto flex items-center gap-2">
+                <input
+                  type="color"
+                  value={data.subheadlineColor || '#ffffff'}
+                  onChange={(e) => onChange({ ...data, subheadlineColor: e.target.value })}
+                  className="w-6 h-6 rounded cursor-pointer border-0"
+                />
+                {data.subheadlineColor && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => onChange({ ...data, subheadlineColor: '' })}
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Media Type Selector */}
       <div className="space-y-3">
