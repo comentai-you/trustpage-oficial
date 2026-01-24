@@ -271,6 +271,7 @@ export type Database = {
           created_by: string | null
           failed_count: number | null
           id: string
+          last_sent_at: string | null
           scheduled_at: string | null
           sent_count: number | null
           status: string
@@ -284,6 +285,7 @@ export type Database = {
           created_by?: string | null
           failed_count?: number | null
           id?: string
+          last_sent_at?: string | null
           scheduled_at?: string | null
           sent_count?: number | null
           status?: string
@@ -297,6 +299,7 @@ export type Database = {
           created_by?: string | null
           failed_count?: number | null
           id?: string
+          last_sent_at?: string | null
           scheduled_at?: string | null
           sent_count?: number | null
           status?: string
