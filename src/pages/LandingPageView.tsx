@@ -195,15 +195,17 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
 
         // Store the page owner ID for legal footer links
         // For legal pages and custom domain pages, we have the owner ID
-        // For public pages via RPC, user_id is not exposed for security
+        // For public pages via RPC, fetch the owner ID securely
         if (isLegalSlug) {
           setPageOwnerId(legalOwnerId);
         } else if (ownerIdOverride) {
           // Custom domain scenario - we know the owner
           setPageOwnerId(ownerIdOverride);
         } else {
-          // Public pages via RPC - owner not exposed (security fix)
-          setPageOwnerId(null);
+          // Public pages via RPC - fetch owner ID for legal footer links
+          const { data: ownerIdData } = await supabase
+            .rpc('get_page_owner_id', { page_id: page.id });
+          setPageOwnerId(ownerIdData || null);
         }
 
         // Fetch owner's plan type
