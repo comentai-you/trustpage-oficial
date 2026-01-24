@@ -201,7 +201,11 @@ const TrustPageDashboard = () => {
   };
 
   const handleCopyLink = (slug: string, customDomain?: string | null) => {
-    const url = getPublicPageUrl(slug, customDomain);
+    const url = getPublicPageUrl(
+      slug,
+      customDomain,
+      isLegalPage(slug) ? user?.id : null,
+    );
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
@@ -225,7 +229,10 @@ const TrustPageDashboard = () => {
   };
 
   const handleViewPage = (slug: string) => {
-    window.open(getPublicPageUrl(slug), '_blank');
+    window.open(
+      getPublicPageUrl(slug, null, isLegalPage(slug) ? user?.id : null),
+      '_blank',
+    );
   };
 
   const handleShowAnalytics = (pageId: string, pageName: string) => {

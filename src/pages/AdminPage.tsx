@@ -42,6 +42,9 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { getPublicPageUrl } from "@/lib/constants";
+
+const LEGAL_PAGE_SLUGS = new Set(["politica-de-privacidade", "termos-de-uso", "contato"]);
 
 interface UserProfile {
   id: string;
@@ -637,7 +640,13 @@ const AdminPage = () => {
 
                         <Button size="sm" variant="outline" asChild>
                           <a
-                            href={`https://tpage.com.br/${page.slug}`}
+                            href={getPublicPageUrl(
+                              page.slug,
+                              null,
+                              LEGAL_PAGE_SLUGS.has(String(page.slug).toLowerCase())
+                                ? selectedUser?.id
+                                : null,
+                            )}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2"
