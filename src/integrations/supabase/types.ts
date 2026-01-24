@@ -564,6 +564,7 @@ export type Database = {
         Args: { check_user_id: string }
         Returns: number
       }
+      get_page_owner_id: { Args: { page_id: string }; Returns: string }
       get_page_owner_plan: {
         Args: { page_id: string }
         Returns: {
