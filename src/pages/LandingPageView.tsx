@@ -15,6 +15,10 @@ import { PageOwnerProvider } from "@/contexts/PageOwnerContext";
 import { useTrackPageVisit } from "@/hooks/useTrackPageVisit";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+
+// Domínio principal do sistema - NÃO pode servir páginas de usuários na rota /p/
+const MAIN_APP_DOMAIN = 'trustpageapp.com';
 
 interface LandingPageViewProps {
   slugOverride?: string;
@@ -72,11 +76,26 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
   const [pageData, setPageData] = useState<LandingPageFormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [blockedDomain, setBlockedDomain] = useState(false);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [isViewLimitReached, setIsViewLimitReached] = useState(false);
   const isMobile = useIsMobile();
+
+  // Block /p/ route access on main domain (trustpageapp.com)
+  // User pages should ONLY be accessible via tpage.com.br (or custom domains)
+  useEffect(() => {
+    const hostname = window.location.hostname.toLowerCase();
+    const pathname = window.location.pathname;
+    const isMainDomain = hostname === MAIN_APP_DOMAIN || hostname === `www.${MAIN_APP_DOMAIN}`;
+    const isPRoute = pathname.startsWith('/p/');
+    
+    if (isMainDomain && isPRoute && !ownerIdOverride) {
+      setBlockedDomain(true);
+      setLoading(false);
+    }
+  }, [ownerIdOverride]);
 
   // Track page visit with detailed analytics
   useTrackPageVisit({ pageId: currentPageId || '' });
@@ -330,6 +349,33 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Block access to /p/ on main domain - redirect to correct domain
+  if (blockedDomain) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-primary mb-4">🔒</h1>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">Página não disponível neste domínio</h2>
+          <p className="text-muted-foreground mb-6">
+            Esta página está disponível apenas em{' '}
+            <a 
+              href={`https://${PUBLIC_PAGES_DOMAIN}/p/${slug}`}
+              className="text-primary underline hover:no-underline"
+            >
+              {PUBLIC_PAGES_DOMAIN}
+            </a>
+          </p>
+          <a 
+            href={`https://${PUBLIC_PAGES_DOMAIN}/p/${slug}`}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+          >
+            Ir para a página correta
+          </a>
+        </div>
       </div>
     );
   }
