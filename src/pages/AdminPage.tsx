@@ -644,7 +644,7 @@ const AdminPage = () => {
                               page.slug,
                               null,
                               LEGAL_PAGE_SLUGS.has(String(page.slug).toLowerCase())
-                                ? selectedUser?.id
+                                ? selectedUser?.username
                                 : null,
                             )}
                             target="_blank"

@@ -125,7 +125,9 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
       }
 
       try {
-        const ownerParam = searchParams.get('owner');
+        // Support both ?u= (username - new) and ?owner= (UUID - legacy)
+        const usernameParam = searchParams.get('u');
+        const legacyOwnerParam = searchParams.get('owner');
         const isLegalSlug = LEGAL_SLUGS.has(String(slug).toLowerCase());
 
         let page: any = null;
@@ -133,7 +135,17 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
 
         // PÁGINAS LEGAIS: sempre precisam de owner (NUNCA pode cair em "qualquer página publicada")
         if (isLegalSlug) {
-          legalOwnerId = ownerParam || ownerIdOverride || null;
+          // Resolve username to user_id if provided
+          if (usernameParam) {
+            const { data: resolvedUserId } = await supabase
+              .rpc('get_user_id_by_username', { p_username: usernameParam });
+            legalOwnerId = resolvedUserId || null;
+          } else if (legacyOwnerParam) {
+            // Legacy support for ?owner=UUID
+            legalOwnerId = legacyOwnerParam;
+          } else if (ownerIdOverride) {
+            legalOwnerId = ownerIdOverride;
+          }
 
           // Se não veio owner (visitante), mas o usuário está logado, usa o próprio auth.uid()
           if (!legalOwnerId) {
@@ -236,34 +248,44 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           setOwnerPlan(ownerPlanData.plan_type || 'free');
         }
 
+        // Check if current user is the page owner (should not count their views)
+        const { data: currentUserData } = await supabase.auth.getUser();
+        const currentUserId = currentUserData.user?.id ?? null;
+        const isPageOwner = currentUserId && currentUserId === (ownerIdOverride || legalOwnerId || (await supabase.rpc('get_page_owner_id', { page_id: page.id })).data);
+
         // Check and increment monthly views for FREE plan users
-        const viewKey = `monthly_view_${page.id}`;
-        if (!sessionStorage.getItem(viewKey)) {
-          sessionStorage.setItem(viewKey, 'true');
-          
-          // Call the increment function which also checks the limit
-          const { data: viewLimitData, error: viewLimitError } = await supabase
-            .rpc('increment_monthly_views', { page_id: page.id });
-          
-          if (!viewLimitError && viewLimitData) {
-            const result = viewLimitData as { is_blocked: boolean; plan_type: string; current_views: number | null };
-            if (result.is_blocked) {
-              setIsViewLimitReached(true);
-              setLoading(false);
-              return; // Don't continue loading the page
+        // SKIP counting for: 1) Legal pages, 2) Page owner viewing their own page
+        const shouldCountView = !isLegalSlug && !isPageOwner;
+        
+        if (shouldCountView) {
+          const viewKey = `monthly_view_${page.id}`;
+          if (!sessionStorage.getItem(viewKey)) {
+            sessionStorage.setItem(viewKey, 'true');
+            
+            // Call the increment function which also checks the limit
+            const { data: viewLimitData, error: viewLimitError } = await supabase
+              .rpc('increment_monthly_views', { page_id: page.id });
+            
+            if (!viewLimitError && viewLimitData) {
+              const result = viewLimitData as { is_blocked: boolean; plan_type: string; current_views: number | null };
+              if (result.is_blocked) {
+                setIsViewLimitReached(true);
+                setLoading(false);
+                return; // Don't continue loading the page
+              }
             }
-          }
-        } else {
-          // Already viewed in this session, just check the limit
-          const { data: checkData } = await supabase
-            .rpc('check_page_view_limit', { page_id: page.id });
-          
-          if (checkData) {
-            const result = checkData as { is_blocked: boolean };
-            if (result.is_blocked) {
-              setIsViewLimitReached(true);
-              setLoading(false);
-              return;
+          } else {
+            // Already viewed in this session, just check the limit
+            const { data: checkData } = await supabase
+              .rpc('check_page_view_limit', { page_id: page.id });
+            
+            if (checkData) {
+              const result = checkData as { is_blocked: boolean };
+              if (result.is_blocked) {
+                setIsViewLimitReached(true);
+                setLoading(false);
+                return;
+              }
             }
           }
         }

@@ -39,6 +39,7 @@ interface UserProfile {
   subscription_status: string;
   plan_type: string;
   full_name: string | null;
+  username: string | null;
   avatar_url: string | null;
   custom_domain: string | null;
   domain_verified: boolean | null;
@@ -113,7 +114,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("created_at, subscription_status, plan_type, full_name, avatar_url, custom_domain, domain_verified, company_name, support_email, monthly_views")
+        .select("created_at, subscription_status, plan_type, full_name, username, avatar_url, custom_domain, domain_verified, company_name, support_email, monthly_views")
         .eq("id", user!.id)
         .maybeSingle();
 
@@ -204,7 +205,7 @@ const TrustPageDashboard = () => {
     const url = getPublicPageUrl(
       slug,
       customDomain,
-      isLegalPage(slug) ? user?.id : null,
+      isLegalPage(slug) ? profile?.username : null,
     );
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
@@ -230,7 +231,7 @@ const TrustPageDashboard = () => {
 
   const handleViewPage = (slug: string) => {
     window.open(
-      getPublicPageUrl(slug, null, isLegalPage(slug) ? user?.id : null),
+      getPublicPageUrl(slug, null, isLegalPage(slug) ? profile?.username : null),
       '_blank',
     );
   };
