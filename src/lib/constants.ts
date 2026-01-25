@@ -11,19 +11,19 @@ const LEGAL_PAGE_SLUGS = new Set(['politica-de-privacidade', 'termos-de-uso', 'c
 export const getPublicPageUrl = (
   slug: string,
   customDomain?: string | null,
-  ownerId?: string | null,
+  ownerUsername?: string | null,
 ): string => {
   const normalizedSlug = String(slug).toLowerCase();
 
-  // Custom domains: the domain itself identifies the owner, so we don't need ?owner=
+  // Custom domains: the domain itself identifies the owner, so we don't need ?u=
   if (customDomain) {
     const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
     return `https://${normalizedDomain}/p/${normalizedSlug}`;
   }
 
-  // System domain: legal pages MUST include ownerId to avoid 404 and cross-user leakage
-  if (ownerId && LEGAL_PAGE_SLUGS.has(normalizedSlug)) {
-    return `${PUBLIC_PAGES_BASE_URL}/p/${normalizedSlug}?owner=${encodeURIComponent(ownerId)}`;
+  // System domain: legal pages MUST include username to avoid 404 and cross-user leakage
+  if (ownerUsername && LEGAL_PAGE_SLUGS.has(normalizedSlug)) {
+    return `${PUBLIC_PAGES_BASE_URL}/p/${normalizedSlug}?u=${encodeURIComponent(ownerUsername)}`;
   }
 
   return `${PUBLIC_PAGES_BASE_URL}/p/${normalizedSlug}`;
