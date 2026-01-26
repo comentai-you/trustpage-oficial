@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Plus, HelpCircle, LogOut, User, CreditCard, BookOpen } from "lucide-react";
+import { Sparkles, Plus, LogOut, User, CreditCard, BookOpen, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -57,6 +57,23 @@ const DashboardLayout = ({
             </Link>
             
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* WhatsApp Support Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 sm:h-10 sm:w-10 text-green-600 hover:text-green-700 hover:bg-green-50"
+                asChild
+              >
+                <a
+                  href="https://wa.me/5561999686641?text=Olá! Preciso de suporte com o TrustPage."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Suporte via WhatsApp"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </a>
+              </Button>
+
               {onNewPage && (
                 <Button 
                   onClick={onNewPage} 
