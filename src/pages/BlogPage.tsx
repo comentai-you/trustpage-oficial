@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +6,7 @@ import { Sparkles, Calendar, User, ArrowRight, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import BlogSearchFilters from "@/components/blog/BlogSearchFilters";
 
 interface BlogPost {
   id: string;
@@ -15,15 +16,26 @@ interface BlogPost {
   cover_image_url: string | null;
   published_at: string;
   author_name: string;
+  category_id: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  color: string | null;
 }
 
 const BlogPage = () => {
-  const { data: posts, isLoading } = useQuery({
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const { data: posts, isLoading: postsLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("id, title, slug, excerpt, cover_image_url, published_at, author_name")
+        .select("id, title, slug, excerpt, cover_image_url, published_at, author_name, category_id")
         .eq("is_published", true)
         .not("published_at", "is", null)
         .order("published_at", { ascending: false });
@@ -33,11 +45,40 @@ const BlogPage = () => {
     },
   });
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_categories")
+        .select("id, name, slug, color")
+        .order("name");
+
+      if (error) throw error;
+      return data as Category[];
+    },
+  });
+
+  // Filter posts based on search and category
+  const filteredPosts = useMemo(() => {
+    if (!posts) return [];
+
+    return posts.filter((post) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+
+      const matchesCategory =
+        selectedCategory === null || post.category_id === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [posts, searchQuery, selectedCategory]);
+
   // SEO Meta Tags
   useEffect(() => {
     document.title = "Blog - TrustPage | Dicas de Marketing e Conversão";
     
-    // Meta description
     let metaDescription = document.querySelector('meta[name="description"]');
     if (!metaDescription) {
       metaDescription = document.createElement("meta");
@@ -46,7 +87,6 @@ const BlogPage = () => {
     }
     metaDescription.setAttribute("content", "Aprenda estratégias de marketing digital, landing pages de alta conversão e técnicas de vendas online. Artigos exclusivos do TrustPage.");
 
-    // Open Graph
     const ogTags = [
       { property: "og:title", content: "Blog - TrustPage" },
       { property: "og:description", content: "Aprenda estratégias de marketing digital e técnicas de conversão." },
@@ -117,10 +157,29 @@ const BlogPage = () => {
         </div>
       </section>
 
+      {/* Search & Filters */}
+      <BlogSearchFilters
+        categories={categories}
+        searchQuery={searchQuery}
+        selectedCategory={selectedCategory}
+        onSearchChange={setSearchQuery}
+        onCategoryChange={setSelectedCategory}
+      />
+
       {/* Blog Posts Grid */}
-      <section className="py-16">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          {isLoading ? (
+          {/* Results count */}
+          {(searchQuery || selectedCategory) && posts && (
+            <p className="text-sm text-muted-foreground mb-6 text-center">
+              {filteredPosts.length} {filteredPosts.length === 1 ? "artigo encontrado" : "artigos encontrados"}
+              {searchQuery && ` para "${searchQuery}"`}
+              {selectedCategory && categories.find(c => c.id === selectedCategory) && 
+                ` em ${categories.find(c => c.id === selectedCategory)?.name}`}
+            </p>
+          )}
+
+          {postsLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="rounded-xl border border-border overflow-hidden">
@@ -133,9 +192,9 @@ const BlogPage = () => {
                 </div>
               ))}
             </div>
-          ) : posts && posts.length > 0 ? (
+          ) : filteredPosts && filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
+              {filteredPosts.map((post) => (
                 <article 
                   key={post.id} 
                   className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300"
@@ -155,6 +214,14 @@ const BlogPage = () => {
                       </div>
                     )}
                     <div className="p-6">
+                      {/* Category Badge */}
+                      {post.category_id && categories.find(c => c.id === post.category_id) && (
+                        <span 
+                          className="inline-block px-2 py-1 text-xs font-medium rounded-full mb-3 bg-primary/10 text-primary"
+                        >
+                          {categories.find(c => c.id === post.category_id)?.name}
+                        </span>
+                      )}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
@@ -186,11 +253,26 @@ const BlogPage = () => {
             <div className="text-center py-16">
               <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                Nenhum artigo publicado ainda
+                {searchQuery || selectedCategory 
+                  ? "Nenhum artigo encontrado" 
+                  : "Nenhum artigo publicado ainda"}
               </h3>
               <p className="text-muted-foreground">
-                Em breve teremos conteúdo incrível para você!
+                {searchQuery || selectedCategory 
+                  ? "Tente ajustar os filtros ou buscar por outros termos."
+                  : "Em breve teremos conteúdo incrível para você!"}
               </p>
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory(null);
+                  }}
+                  className="mt-4 text-primary hover:underline font-medium"
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
           )}
         </div>
