@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import InstallAppBanner from "@/components/pwa/InstallAppBanner";
 
 interface DashboardLayoutProps {
@@ -58,21 +59,30 @@ const DashboardLayout = ({
             
             <div className="flex items-center gap-2 sm:gap-3">
               {/* WhatsApp Support Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 sm:h-10 sm:w-10 text-green-600 hover:text-green-700 hover:bg-green-50"
-                asChild
-              >
-                <a
-                  href="https://wa.me/5561999686641?text=Olá! Preciso de suporte com o TrustPage."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Suporte via WhatsApp"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                </a>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 sm:h-10 sm:w-10 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      asChild
+                    >
+                      <a
+                        href="https://wa.me/5561999686641?text=Olá! Preciso de suporte com o TrustPage."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Suporte via WhatsApp"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                      </a>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Suporte direto via WhatsApp</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               {onNewPage && (
                 <Button 
