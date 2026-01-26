@@ -40,7 +40,7 @@ const generateSlugFromName = (name: string): string => {
 const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
   const [isEditingSlug, setIsEditingSlug] = useState(false);
   const [slugInput, setSlugInput] = useState("");
-  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable' | 'invalid' | 'reserved'>('idle');
+  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable' | 'invalid' | 'reserved' | 'url_detected'>('idle');
   const [hasCustomSlug, setHasCustomSlug] = useState(!!formData.slug);
 
   const generatedSlug = generateSlugFromName(formData.page_name);
@@ -106,6 +106,32 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
   };
 
   const handleSlugChange = (value: string) => {
+    // Detect if user pasted a URL
+    const urlPattern = /^(https?:\/\/|www\.)/i;
+    if (urlPattern.test(value.trim())) {
+      // Try to extract slug from URL
+      try {
+        const url = new URL(value.startsWith('http') ? value : `https://${value}`);
+        const pathSegments = url.pathname.split('/').filter(Boolean);
+        const lastSegment = pathSegments[pathSegments.length - 1] || '';
+        // Use extracted segment or show error
+        if (lastSegment) {
+          const extracted = lastSegment
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, "")
+            .replace(/-+/g, "-")
+            .substring(0, 40);
+          setSlugInput(extracted);
+          setSlugStatus('idle');
+          return;
+        }
+      } catch {
+        // Invalid URL, just sanitize the whole thing
+      }
+      setSlugStatus('url_detected');
+      return;
+    }
+
     const normalized = value
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "")
@@ -144,6 +170,7 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
       case 'unavailable':
       case 'invalid':
       case 'reserved':
+      case 'url_detected':
         return <X className="w-4 h-4 text-destructive" />;
       default:
         return null;
@@ -160,6 +187,8 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
         return <span className="text-destructive text-xs">Mín. 2 caracteres, apenas letras, números e hífen</span>;
       case 'reserved':
         return <span className="text-destructive text-xs">Nome reservado pelo sistema</span>;
+      case 'url_detected':
+        return <span className="text-destructive text-xs">Digite apenas o nome da página, não a URL completa</span>;
       default:
         return null;
     }
@@ -209,10 +238,10 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
         {isEditingSlug ? (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="flex-1 relative">
+            <div className="flex-1 relative">
                 <div className="flex items-center">
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-2 rounded-l-md border border-r-0 border-border">
-                    /
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-2 rounded-l-md border border-r-0 border-border whitespace-nowrap">
+                    tpage.com.br/p/
                   </span>
                   <Input
                     value={slugInput}
@@ -241,7 +270,7 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
                 <button
                   type="button"
                   onClick={handleSaveSlug}
-                  disabled={slugStatus === 'unavailable' || slugStatus === 'invalid' || slugStatus === 'reserved' || slugStatus === 'checking'}
+                  disabled={slugStatus === 'unavailable' || slugStatus === 'invalid' || slugStatus === 'reserved' || slugStatus === 'checking' || slugStatus === 'url_detected'}
                   className="text-xs text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Salvar
