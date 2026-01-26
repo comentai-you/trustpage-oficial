@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LandingPageFormData } from "@/types/landing-page";
 import ImageUpload from "./ImageUpload";
+import SlugHelpModal from "./SlugHelpModal";
 import { Link2, Check, X, Loader2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -222,7 +223,10 @@ const PerfilTab = ({ formData, onChange, existingPageId }: PerfilTabProps) => {
       {/* Slug / URL Section */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Link da Página</Label>
+          <div className="flex items-center gap-1.5">
+            <Label>Link da Página</Label>
+            <SlugHelpModal />
+          </div>
           {!isEditingSlug && (
             <button
               type="button"
