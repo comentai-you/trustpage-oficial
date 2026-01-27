@@ -50,6 +50,8 @@ import { CTASectionEditor } from "./sections/CTASectionEditor";
 import TestimonialsSectionEditor from "./sections/TestimonialsSectionEditor";
 import VideoGridSectionEditor from "./sections/VideoGridSectionEditor";
 import OfferSectionEditor from "./sections/OfferSectionEditor";
+import VideoVSLSectionEditor from "./sections/VideoVSLSectionEditor";
+import SocialProofSectionEditor from "./sections/SocialProofSectionEditor";
 
 interface SectionBuilderSidebarProps {
   formData: LandingPageFormData;
@@ -233,6 +235,20 @@ const SectionBuilderSidebar = ({ formData, onChange, userPlan = 'free' }: Sectio
       case 'offer':
         return (
           <OfferSectionEditor
+            data={section.data}
+            onChange={(data) => handleUpdateSection(section.id, data)}
+          />
+        );
+      case 'video-vsl':
+        return (
+          <VideoVSLSectionEditor
+            data={section.data}
+            onChange={(data) => handleUpdateSection(section.id, data)}
+          />
+        );
+      case 'social-proof':
+        return (
+          <SocialProofSectionEditor
             data={section.data}
             onChange={(data) => handleUpdateSection(section.id, data)}
           />

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Layout, FileText, Image, Columns, Video, CheckSquare, 
   HelpCircle, MessageSquare, MousePointerClick, Maximize2,
-  DollarSign, LucideIcon
+  DollarSign, LucideIcon, Type, Play, Images
 } from "lucide-react";
 import { SectionType, sectionCatalog, SectionCatalogItem } from "@/types/section-builder";
 
@@ -24,7 +24,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   MessageSquare,
   MousePointerClick,
   Maximize2,
-  DollarSign
+  DollarSign,
+  Type,
+  Play,
+  Images
 };
 
 interface AddSectionModalProps {

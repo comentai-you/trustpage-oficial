@@ -11,6 +11,8 @@ import CTARenderer from "./CTARenderer";
 import SpacerRenderer from "./SpacerRenderer";
 import VideoGridRenderer from "./VideoGridRenderer";
 import OfferRenderer from "./OfferRenderer";
+import VideoVSLRenderer from "./VideoVSLRenderer";
+import SocialProofRenderer from "./SocialProofRenderer";
 
 interface SectionRendererProps {
   section: ContentSection;
@@ -139,6 +141,23 @@ export const SectionRenderer = ({
     case 'spacer':
       return (
         <SpacerRenderer data={section.data} />
+      );
+    case 'video-vsl':
+      return (
+        <VideoVSLRenderer
+          data={section.data}
+          primaryColor={primaryColor}
+          isMobile={isMobile}
+        />
+      );
+    case 'social-proof':
+      return (
+        <SocialProofRenderer
+          data={section.data}
+          primaryColor={primaryColor}
+          textColor={textColor}
+          isMobile={isMobile}
+        />
       );
     default:
       return null;
