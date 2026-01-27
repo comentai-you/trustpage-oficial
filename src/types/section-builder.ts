@@ -7,12 +7,14 @@ export type SectionType =
   | 'full-image'
   | 'dual-column'
   | 'video-grid'
+  | 'video-vsl'
   | 'benefits'
   | 'faq'
   | 'testimonials'
   | 'cta'
   | 'spacer'
-  | 'offer';
+  | 'offer'
+  | 'social-proof';
 
 // Base interface for all sections
 export interface BaseSection {
@@ -205,6 +207,26 @@ export interface OfferSection extends BaseSection {
   };
 }
 
+// Video VSL Section - Cinematic video display
+export interface VideoVSLSection extends BaseSection {
+  type: 'video-vsl';
+  data: {
+    videoUrl: string;
+    width: 'contained' | 'full';
+    neonGlow: boolean;
+  };
+}
+
+// Social Proof Section - Logos or Prints
+export interface SocialProofSection extends BaseSection {
+  type: 'social-proof';
+  data: {
+    images: string[];
+    variant: 'logos' | 'prints';
+    title?: string;
+  };
+}
+
 // Union type for all sections
 export type ContentSection = 
   | HeroSection
@@ -213,12 +235,14 @@ export type ContentSection =
   | FullImageSection
   | DualColumnSection
   | VideoGridSection
+  | VideoVSLSection
   | BenefitsSection
   | FAQSection
   | TestimonialsSection
   | CTASection
   | SpacerSection
-  | OfferSection;
+  | OfferSection
+  | SocialProofSection;
 
 // Content structure that replaces fixed SalesPageContent
 export interface SectionBuilderContent {
@@ -321,6 +345,20 @@ export const sectionCatalog: SectionCatalogItem[] = [
     description: 'Preço, benefícios e botão de compra',
     icon: 'DollarSign',
     category: 'conversion'
+  },
+  {
+    type: 'video-vsl',
+    name: 'Vídeo VSL',
+    description: 'Vídeo de vendas em destaque cinematográfico',
+    icon: 'Play',
+    category: 'media'
+  },
+  {
+    type: 'social-proof',
+    name: 'Prova Social',
+    description: 'Logos de mídia ou prints de resultados',
+    icon: 'Images',
+    category: 'social-proof'
   }
 ];
 
@@ -498,6 +536,28 @@ export const createDefaultSection = (type: SectionType, order: number): ContentS
           ctaUrl: '',
           showGuarantee: true,
           guaranteeText: '7 dias de garantia incondicional'
+        }
+      };
+    case 'video-vsl':
+      return {
+        id,
+        type: 'video-vsl',
+        order,
+        data: {
+          videoUrl: '',
+          width: 'contained',
+          neonGlow: true
+        }
+      };
+    case 'social-proof':
+      return {
+        id,
+        type: 'social-proof',
+        order,
+        data: {
+          images: [],
+          variant: 'logos',
+          title: 'Visto na Mídia'
         }
       };
   }

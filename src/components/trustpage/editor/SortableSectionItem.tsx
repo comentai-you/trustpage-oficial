@@ -5,7 +5,7 @@ import {
   GripVertical, Trash2, ChevronDown, ChevronUp,
   Layout, FileText, Image, Columns, Video, CheckSquare, 
   HelpCircle, MessageSquare, MousePointerClick, Maximize2,
-  DollarSign, LucideIcon, Type
+  DollarSign, LucideIcon, Type, Play, Images
 } from "lucide-react";
 import { ContentSection, SectionType } from "@/types/section-builder";
 import {
@@ -22,12 +22,14 @@ const ICON_MAP: Record<SectionType, LucideIcon> = {
   'full-image': Image,
   'dual-column': Columns,
   'video-grid': Video,
+  'video-vsl': Play,
   'benefits': CheckSquare,
   'faq': HelpCircle,
   'testimonials': MessageSquare,
   'cta': MousePointerClick,
   'spacer': Maximize2,
-  'offer': DollarSign
+  'offer': DollarSign,
+  'social-proof': Images
 };
 
 const TYPE_LABELS: Record<SectionType, string> = {
@@ -37,12 +39,14 @@ const TYPE_LABELS: Record<SectionType, string> = {
   'full-image': 'Imagem Full Width',
   'dual-column': 'Coluna Dupla',
   'video-grid': 'Grid de Vídeos',
+  'video-vsl': 'Vídeo VSL',
   'benefits': 'Lista de Benefícios',
   'faq': 'FAQ',
   'testimonials': 'Depoimentos',
   'cta': 'Botão CTA',
   'spacer': 'Espaçador',
-  'offer': 'Seção de Oferta'
+  'offer': 'Seção de Oferta',
+  'social-proof': 'Prova Social'
 };
 
 interface SortableSectionItemProps {
@@ -98,6 +102,10 @@ const SortableSectionItem = ({
         return section.data.title || 'Coluna Dupla';
       case 'video-grid':
         return `${section.data.videos?.length || 0} vídeos`;
+      case 'video-vsl':
+        return section.data.videoUrl ? 'Vídeo configurado' : 'Adicione um vídeo';
+      case 'social-proof':
+        return `${section.data.images?.length || 0} imagens (${section.data.variant || 'logos'})`;
       case 'offer':
         return section.data.finalPrice || 'Oferta';
       default:
