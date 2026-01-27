@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import BlogSearchFilters from "@/components/blog/BlogSearchFilters";
+import BlogPagination from "@/components/blog/BlogPagination";
 
 interface BlogPost {
   id: string;
@@ -26,9 +27,12 @@ interface Category {
   color: string | null;
 }
 
+const POSTS_PER_PAGE = 9;
+
 const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: posts, isLoading: postsLoading } = useQuery({
     queryKey: ["blog-posts"],
@@ -58,6 +62,11 @@ const BlogPage = () => {
     },
   });
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
   // Filter posts based on search and category
   const filteredPosts = useMemo(() => {
     if (!posts) return [];
@@ -74,6 +83,13 @@ const BlogPage = () => {
       return matchesSearch && matchesCategory;
     });
   }, [posts, searchQuery, selectedCategory]);
+
+  // Paginate filtered posts
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  const paginatedPosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    return filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+  }, [filteredPosts, currentPage]);
 
   // SEO Meta Tags
   useEffect(() => {
@@ -192,63 +208,71 @@ const BlogPage = () => {
                 </div>
               ))}
             </div>
-          ) : filteredPosts && filteredPosts.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post) => (
-                <article 
-                  key={post.id} 
-                  className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300"
-                >
-                  <Link to={`/blog/${post.slug}`}>
-                    {post.cover_image_url ? (
-                      <div className="aspect-video overflow-hidden">
-                        <img
-                          src={post.cover_image_url}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                        <BookOpen className="w-12 h-12 text-primary/40" />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      {/* Category Badge */}
-                      {post.category_id && categories.find(c => c.id === post.category_id) && (
-                        <span 
-                          className="inline-block px-2 py-1 text-xs font-medium rounded-full mb-3 bg-primary/10 text-primary"
-                        >
-                          {categories.find(c => c.id === post.category_id)?.name}
-                        </span>
+          ) : paginatedPosts && paginatedPosts.length > 0 ? (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {paginatedPosts.map((post) => (
+                  <article 
+                    key={post.id} 
+                    className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300"
+                  >
+                    <Link to={`/blog/${post.slug}`}>
+                      {post.cover_image_url ? (
+                        <div className="aspect-video overflow-hidden">
+                          <img
+                            src={post.cover_image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                          <BookOpen className="w-12 h-12 text-primary/40" />
+                        </div>
                       )}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {format(new Date(post.published_at), "d 'de' MMM, yyyy", { locale: ptBR })}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          {post.author_name}
+                      <div className="p-6">
+                        {/* Category Badge */}
+                        {post.category_id && categories.find(c => c.id === post.category_id) && (
+                          <span 
+                            className="inline-block px-2 py-1 text-xs font-medium rounded-full mb-3 bg-primary/10 text-primary"
+                          >
+                            {categories.find(c => c.id === post.category_id)?.name}
+                          </span>
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {format(new Date(post.published_at), "d 'de' MMM, yyyy", { locale: ptBR })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            {post.author_name}
+                          </span>
+                        </div>
+                        <h2 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                          {post.title}
+                        </h2>
+                        {post.excerpt && (
+                          <p className="text-muted-foreground line-clamp-3 mb-4">
+                            {post.excerpt}
+                          </p>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                          Ler artigo
+                          <ArrowRight className="w-4 h-4" />
                         </span>
                       </div>
-                      <h2 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                        {post.title}
-                      </h2>
-                      {post.excerpt && (
-                        <p className="text-muted-foreground line-clamp-3 mb-4">
-                          {post.excerpt}
-                        </p>
-                      )}
-                      <span className="inline-flex items-center gap-1 text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                        Ler artigo
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </Link>
-                </article>
-              ))}
-            </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+              
+              <BlogPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           ) : (
             <div className="text-center py-16">
               <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
