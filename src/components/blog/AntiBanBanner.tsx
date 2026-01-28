@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import ebookMockup from "@/assets/ebook-anti-ban-mockup.png";
 
 const AntiBanBanner = () => {
   return (
@@ -48,61 +49,15 @@ const AntiBanBanner = () => {
                 }}
               />
               
-              {/* Book mockup */}
-              <div
-                className="relative w-40 md:w-48 h-56 md:h-64 rounded-lg transform group-hover:scale-105 transition-transform duration-300"
+              {/* Book mockup image */}
+              <img
+                src={ebookMockup}
+                alt="O Protocolo Anti-Ban 2026 - Manual Técnico"
+                className="relative w-40 md:w-56 h-auto transform group-hover:scale-105 transition-transform duration-300 drop-shadow-2xl"
                 style={{
-                  background: "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%)",
-                  boxShadow: `
-                    0 0 40px rgba(0, 255, 0, 0.4),
-                    0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                    inset 0 0 0 1px rgba(0, 255, 0, 0.3)
-                  `,
-                  border: "2px solid rgba(0, 255, 0, 0.5)",
+                  filter: "drop-shadow(0 0 30px rgba(0, 255, 0, 0.4))",
                 }}
-              >
-                {/* Book spine effect */}
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-3"
-                  style={{
-                    background: "linear-gradient(90deg, rgba(0, 255, 0, 0.2), transparent)",
-                  }}
-                />
-                
-                {/* Book content */}
-                <div className="absolute inset-4 flex flex-col items-center justify-center text-center">
-                  {/* Decorative lines */}
-                  <div className="w-12 h-0.5 mb-4" style={{ background: "#00ff00" }} />
-                  
-                  <span
-                    className="text-xs font-bold tracking-widest mb-2"
-                    style={{ color: "#00ff00" }}
-                  >
-                    MANUAL TÉCNICO
-                  </span>
-                  
-                  <h3
-                    className="text-lg md:text-xl font-black leading-tight"
-                    style={{ color: "#ffffff" }}
-                  >
-                    O PROTOCOLO
-                    <br />
-                    <span style={{ color: "#00ff00" }}>ANTI-BAN</span>
-                    <br />
-                    2026
-                  </h3>
-                  
-                  {/* Decorative lines */}
-                  <div className="w-12 h-0.5 mt-4" style={{ background: "#00ff00" }} />
-                  
-                  {/* Circuit decoration */}
-                  <div className="absolute bottom-3 left-3 right-3 flex justify-between opacity-30">
-                    <div className="w-2 h-2 rounded-full" style={{ background: "#00ff00" }} />
-                    <div className="w-2 h-2 rounded-full" style={{ background: "#00ff00" }} />
-                    <div className="w-2 h-2 rounded-full" style={{ background: "#00ff00" }} />
-                  </div>
-                </div>
-              </div>
+              />
             </div>
           </div>
 
