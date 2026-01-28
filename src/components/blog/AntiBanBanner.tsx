@@ -53,7 +53,7 @@ const AntiBanBanner = () => {
               <img
                 src={ebookMockup}
                 alt="O Protocolo Anti-Ban 2026 - Manual Técnico"
-                className="relative w-40 md:w-56 h-auto transform group-hover:scale-105 transition-transform duration-300 drop-shadow-2xl"
+                className="relative w-52 md:w-72 lg:w-80 h-auto transform group-hover:scale-105 transition-transform duration-300 drop-shadow-2xl"
                 style={{
                   filter: "drop-shadow(0 0 30px rgba(0, 255, 0, 0.4))",
                 }}
