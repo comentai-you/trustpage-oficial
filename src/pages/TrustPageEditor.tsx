@@ -13,6 +13,7 @@ import {
   Check,
   Cloud,
 } from "lucide-react";
+import { PUBLIC_PAGES_BASE_URL } from "@/lib/constants";
 import {
   LandingPageFormData,
   defaultFormData,
@@ -449,7 +450,8 @@ const TrustPageEditor = () => {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (lastSavedSlugRef.current) {
-      window.open(`${window.location.origin}/p/${lastSavedSlugRef.current}`, "_blank", "noopener,noreferrer");
+      // Open directly on tpage.com.br without intermediate redirect
+      window.open(`${PUBLIC_PAGES_BASE_URL}/p/${lastSavedSlugRef.current}`, "_blank", "noopener,noreferrer");
     }
   };
 

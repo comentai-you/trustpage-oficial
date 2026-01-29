@@ -130,25 +130,25 @@ const BlogPage = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <Sparkles className="w-5 h-5 text-primary" />
+          <div className="flex items-center justify-between h-16 gap-2">
+            <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
-              <span className="text-xl font-bold text-foreground">TrustPage</span>
+              <span className="text-lg sm:text-xl font-bold text-foreground hidden xs:inline">TrustPage</span>
             </Link>
-            <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-2 sm:gap-4">
               <Link 
                 to="/auth" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 Entrar
               </Link>
               <Link 
                 to="/auth" 
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
               >
-                Começar Grátis
+                Começar
               </Link>
             </nav>
           </div>

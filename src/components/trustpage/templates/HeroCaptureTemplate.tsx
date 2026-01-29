@@ -243,21 +243,21 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
       {/* Background Glow Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full blur-3xl opacity-20"
+          className="absolute -top-1/4 -left-1/4 w-1/3 md:w-1/2 h-1/3 md:h-1/2 rounded-full blur-3xl opacity-20"
           style={{ backgroundColor: accentColor }}
         />
         <div
-          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full blur-3xl opacity-15"
+          className="absolute -bottom-1/4 -right-1/4 w-1/3 md:w-1/2 h-1/3 md:h-1/2 rounded-full blur-3xl opacity-15"
           style={{ backgroundColor: accentColor }}
         />
       </div>
 
-      <div className={`relative z-10 container mx-auto ${isMobile ? 'px-4 py-8' : 'px-6 py-16'}`}>
-        <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'lg:grid-cols-2 gap-12'} items-center`}>
+      <div className="relative z-10 w-full px-4 py-6 md:px-6 md:py-12 lg:py-16 max-w-7xl mx-auto">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center">
           
           {/* Left Column: Copy + Form (Neon Box) */}
           <div
-            className="relative p-[1px] rounded-2xl overflow-hidden"
+            className="relative p-[1px] rounded-2xl overflow-hidden w-full order-2 lg:order-1"
             style={{
               background: `linear-gradient(135deg, ${accentColor}60 0%, transparent 50%, ${accentColor}30 100%)`,
             }}
@@ -272,7 +272,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
             />
 
             <div
-              className={`rounded-2xl backdrop-blur-xl ${isMobile ? 'p-6' : 'p-8 lg:p-10'}`}
+              className="rounded-2xl backdrop-blur-xl p-5 md:p-8 lg:p-10"
               style={{
                 backgroundColor: `${bgStart}cc`,
               }}
@@ -282,10 +282,10 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
               ) : (
                 <>
                   {/* Headline */}
-                  <div className={`${isMobile ? 'space-y-3' : 'space-y-4'}`}>
+                  <div className="space-y-3 md:space-y-4">
                     {data.subheadline && (
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider`}
+                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
                         style={{
                           backgroundColor: `${accentColor}20`,
                           color: accentColor,
@@ -296,19 +296,16 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                       </span>
                     )}
                     <h1
-                      className="font-extrabold leading-tight"
+                      className="font-extrabold leading-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl"
                       style={{ 
                         color: textColor,
-                        fontSize: isMobile
-                          ? `${headlineSizeMobile}rem`
-                          : `clamp(1.5rem, 4vw, ${headlineSizeDesktop}rem)`,
                         lineHeight: 1.15,
                       }}
                     >
                       {data.headline || "Sua Headline Impactante Vai Aqui"}
                     </h1>
                     <p
-                      className={`leading-relaxed ${isMobile ? 'text-sm' : 'text-base lg:text-lg'}`}
+                      className="leading-relaxed text-sm md:text-base lg:text-lg"
                       style={{ color: `${textColor}cc` }}
                     >
                       {data.description || "Descrição persuasiva sobre o que a pessoa vai ganhar ao se cadastrar agora."}
@@ -317,7 +314,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                   {/* Capture Form */}
                   <form
-                    className={`${isMobile ? 'mt-6 space-y-3' : 'mt-8 space-y-4'}`}
+                    className="mt-5 md:mt-8 space-y-3 md:space-y-4"
                     onSubmit={handleSubmit}
                   >
                     {formFields.showName && (
@@ -404,7 +401,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-14 text-base font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full h-12 md:h-14 text-sm md:text-base font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
                       style={{
                         background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
                         color: '#ffffff',
@@ -437,7 +434,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
           </div>
 
           {/* Right Column: Hero Image (Ebook or Person) - Premium Studio Effect */}
-          <div className={`relative flex flex-col items-center justify-end ${isMobile ? 'order-first pb-4' : 'pb-8'}`}>
+          <div className="relative flex flex-col items-center justify-end order-1 lg:order-2 pb-4 lg:pb-8 w-full">
             
             {data.image_url ? (
               <>
@@ -493,7 +490,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                 {/* Layered Backlight System with Breathing Animation */}
                 {/* Layer 1: Large ambient glow - creates atmosphere */}
                 <div
-                  className={`absolute ${isMobile ? 'w-72 h-72' : 'w-[450px] h-[450px] lg:w-[600px] lg:h-[600px]'} rounded-full blur-[120px]`}
+                  className="absolute w-48 h-48 sm:w-64 sm:h-64 md:w-[450px] md:h-[450px] lg:w-[600px] lg:h-[600px] rounded-full blur-[80px] md:blur-[120px]"
                   style={{ 
                     backgroundColor: accentColor,
                     top: '10%',
@@ -503,7 +500,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                 
                 {/* Layer 2: Medium focused glow - highlights silhouette */}
                 <div
-                  className={`absolute ${isMobile ? 'w-48 h-48' : 'w-72 h-72 lg:w-96 lg:h-96'} rounded-full blur-[80px]`}
+                  className="absolute w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-full blur-[60px] md:blur-[80px]"
                   style={{ 
                     backgroundColor: accentColor,
                     top: '20%',
@@ -514,7 +511,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                 
                 {/* Layer 3: Tight intense core glow - rim light effect */}
                 <div
-                  className={`absolute ${isMobile ? 'w-32 h-40' : 'w-48 h-60 lg:w-56 lg:h-72'} rounded-full blur-[50px]`}
+                  className="absolute w-24 h-32 sm:w-32 sm:h-40 md:w-48 md:h-60 lg:w-56 lg:h-72 rounded-full blur-[40px] md:blur-[50px]"
                   style={{ 
                     background: `radial-gradient(ellipse, ${accentColor} 0%, transparent 70%)`,
                     top: '15%',
@@ -525,10 +522,9 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                 {/* Side Integration Glows - Left */}
                 <div
-                  className={`absolute ${isMobile ? 'w-24 h-48' : 'w-40 h-80 lg:w-48 lg:h-96'} blur-[60px] opacity-30`}
+                  className="absolute w-16 h-32 sm:w-24 sm:h-48 md:w-40 md:h-80 lg:w-48 lg:h-96 blur-[40px] md:blur-[60px] opacity-30 -left-[10%] md:-left-[5%]"
                   style={{ 
                     background: `radial-gradient(ellipse at center, ${accentColor} 0%, transparent 70%)`,
-                    left: isMobile ? '-10%' : '-5%',
                     top: '20%',
                     animation: 'breathe-slow 5s ease-in-out infinite',
                     animationDelay: '0.3s',
@@ -537,10 +533,9 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                 {/* Side Integration Glows - Right */}
                 <div
-                  className={`absolute ${isMobile ? 'w-24 h-48' : 'w-40 h-80 lg:w-48 lg:h-96'} blur-[60px] opacity-30`}
+                  className="absolute w-16 h-32 sm:w-24 sm:h-48 md:w-40 md:h-80 lg:w-48 lg:h-96 blur-[40px] md:blur-[60px] opacity-30 -right-[10%] md:-right-[5%]"
                   style={{ 
                     background: `radial-gradient(ellipse at center, ${accentColor} 0%, transparent 70%)`,
-                    right: isMobile ? '-10%' : '-5%',
                     top: '20%',
                     animation: 'breathe-slow 5s ease-in-out infinite',
                     animationDelay: '0.8s',
@@ -551,7 +546,6 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                 <div 
                   className="relative z-10"
                   style={{
-                    transform: `scale(${isMobile ? heroImageSizeMobile / 100 : heroImageSizeDesktop / 100})`,
                     transformOrigin: 'center bottom',
                     WebkitMaskImage: `
                       linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
@@ -568,7 +562,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                   <img
                     src={data.image_url}
                     alt="Hero"
-                    className={`relative max-w-full ${isMobile ? 'max-h-60' : 'max-h-[420px] lg:max-h-[540px]'} object-contain`}
+                    className="relative max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
                     style={{
                       filter: `drop-shadow(0 0 80px ${accentColor}60) drop-shadow(0 30px 50px rgba(0,0,0,0.5))`,
                     }}
@@ -578,9 +572,8 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                 {/* Reflection Layer - Mirrored Image */}
                 <div 
-                  className="absolute z-[5] w-full flex justify-center"
+                  className="absolute z-[5] w-full flex justify-center -bottom-[18%] md:-bottom-[15%]"
                   style={{
-                    bottom: isMobile ? '-18%' : '-15%',
                     transform: 'scaleY(-1)',
                     WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
                     maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
@@ -592,43 +585,41 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                     src={data.image_url}
                     alt=""
                     aria-hidden="true"
-                    className={`max-w-full ${isMobile ? 'max-h-60' : 'max-h-[420px] lg:max-h-[540px]'} object-contain`}
+                    className="max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
                   />
                 </div>
 
                 {/* Ground Shadow - Elliptical for realism */}
                 <div
-                  className={`absolute z-[4] ${isMobile ? 'w-40 h-5' : 'w-56 h-8 lg:w-72 lg:h-10'} rounded-[100%] blur-2xl`}
+                  className="absolute z-[4] w-32 h-4 sm:w-40 sm:h-5 md:w-56 md:h-8 lg:w-72 lg:h-10 rounded-[100%] blur-2xl bottom-[5%] md:bottom-[8%]"
                   style={{
                     background: `radial-gradient(ellipse, ${accentColor}50 0%, transparent 70%)`,
-                    bottom: isMobile ? '5%' : '8%',
                   }}
                 />
                 
                 {/* Secondary dark ground shadow for depth */}
                 <div
-                  className={`absolute z-[3] ${isMobile ? 'w-32 h-4' : 'w-48 h-6 lg:w-64 lg:h-8'} rounded-[100%] blur-xl`}
+                  className="absolute z-[3] w-24 h-3 sm:w-32 sm:h-4 md:w-48 md:h-6 lg:w-64 lg:h-8 rounded-[100%] blur-xl bottom-[3%] md:bottom-[6%]"
                   style={{
                     background: 'radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%)',
-                    bottom: isMobile ? '3%' : '6%',
                   }}
                 />
               </>
             ) : (
               // Visual placeholder if no image
               <div
-                className={`relative z-10 flex flex-col items-center justify-center ${isMobile ? 'w-48 h-48' : 'w-72 h-72 lg:w-96 lg:h-96'} rounded-2xl border-2 border-dashed`}
+                className="relative z-10 flex flex-col items-center justify-center w-40 h-40 sm:w-48 sm:h-48 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-2xl border-2 border-dashed"
                 style={{
                   borderColor: `${textColor}30`,
                   backgroundColor: `${textColor}05`,
                 }}
               >
                 <ImageIcon
-                  className={`${isMobile ? 'w-12 h-12' : 'w-16 h-16'} mb-4`}
+                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mb-4"
                   style={{ color: `${textColor}40` }}
                 />
                 <p
-                  className={`text-center px-4 ${isMobile ? 'text-xs' : 'text-sm'}`}
+                  className="text-center px-4 text-xs md:text-sm"
                   style={{ color: `${textColor}50` }}
                 >
                   Adicione uma imagem sem fundo (PNG) para o efeito Hero
