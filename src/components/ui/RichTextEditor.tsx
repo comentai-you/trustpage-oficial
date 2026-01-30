@@ -27,6 +27,7 @@ import {
   Image as ImageIcon,
   Youtube as YoutubeIcon,
   Loader2,
+  MousePointerClick,
   Undo,
   Redo,
   Minus,
@@ -53,8 +54,11 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
   const [isUploading, setIsUploading] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [youtubeDialogOpen, setYoutubeDialogOpen] = useState(false);
+  const [customButtonDialogOpen, setCustomButtonDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [customButtonText, setCustomButtonText] = useState('');
+  const [customButtonUrl, setCustomButtonUrl] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -184,6 +188,23 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     setYoutubeUrl('');
     setYoutubeDialogOpen(false);
   }, [editor, youtubeUrl]);
+
+  const handleInsertCustomButton = useCallback(() => {
+    if (!customButtonText || !customButtonUrl || !editor) return;
+    
+    let url = customButtonUrl;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    
+    // Insert a styled button as HTML
+    const buttonHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="custom-cta-button" style="display: inline-block; background: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 76%, 29%)); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">${customButtonText}</a>`;
+    
+    editor.chain().focus().insertContent(buttonHtml).run();
+    setCustomButtonText('');
+    setCustomButtonUrl('');
+    setCustomButtonDialogOpen(false);
+  }, [editor, customButtonText, customButtonUrl]);
 
   const handleRemoveLink = useCallback(() => {
     if (!editor) return;
@@ -372,6 +393,16 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
           <YoutubeIcon className="w-4 h-4" />
         </ToolbarButton>
 
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Custom Button */}
+        <ToolbarButton
+          onClick={() => setCustomButtonDialogOpen(true)}
+          title="Inserir Botão Personalizado"
+        >
+          <MousePointerClick className="w-4 h-4" />
+        </ToolbarButton>
+
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -454,6 +485,59 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
               Cancelar
             </Button>
             <Button onClick={handleInsertYoutube} disabled={!youtubeUrl}>
+              Inserir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Button Dialog */}
+      <Dialog open={customButtonDialogOpen} onOpenChange={setCustomButtonDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Inserir Botão Personalizado</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="button-text">Texto do Botão</Label>
+              <Input
+                id="button-text"
+                value={customButtonText}
+                onChange={(e) => setCustomButtonText(e.target.value)}
+                placeholder="Ex: Comece Agora"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="button-url">URL do Botão</Label>
+              <Input
+                id="button-url"
+                value={customButtonUrl}
+                onChange={(e) => setCustomButtonUrl(e.target.value)}
+                placeholder="https://exemplo.com"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInsertCustomButton();
+                  }
+                }}
+              />
+            </div>
+            <div className="p-3 bg-muted rounded-md">
+              <p className="text-xs text-muted-foreground mb-2">Pré-visualização:</p>
+              <a 
+                href="#" 
+                onClick={(e) => e.preventDefault()}
+                className="inline-block bg-gradient-to-br from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+              >
+                {customButtonText || 'Texto do Botão'}
+              </a>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCustomButtonDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleInsertCustomButton} disabled={!customButtonText || !customButtonUrl}>
               Inserir
             </Button>
           </DialogFooter>
