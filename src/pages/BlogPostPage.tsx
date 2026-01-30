@@ -8,7 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import TableOfContents from "@/components/blog/TableOfContents";
+
 import ArticleContentWithCTA from "@/components/blog/ArticleContentWithCTA";
 import AuthorSidebar from "@/components/blog/AuthorSidebar";
 
@@ -213,9 +213,6 @@ const BlogPostPage = () => {
       ) : post ? (
         <div className="container mx-auto px-4 py-8 md:py-16">
           <div className="flex gap-8 max-w-7xl mx-auto">
-            {/* Table of Contents - Desktop Sidebar */}
-            <TableOfContents content={post.content} />
-            
             {/* Author Sidebar - Desktop */}
             <AuthorSidebar />
 
