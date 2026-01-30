@@ -29,6 +29,7 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import AdminBlogPage from "./pages/AdminBlogPage";
 import AdminMarketingPage from "./pages/AdminMarketingPage";
+import AboutPage from "./pages/AboutPage";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const SystemRoutes = () => (
     <Route path="/contato" element={<ContactPage />} />
     <Route path="/oferta" element={<OfertaPage />} />
     <Route path="/obrigado" element={<ThankYouPage />} />
+    <Route path="/sobre" element={<AboutPage />} />
     
     {/* Blog Routes - Public */}
     <Route path="/blog" element={<BlogPage />} />
@@ -164,6 +166,7 @@ const App = () => {
     "/edit",
     "/oferta",
     "/obrigado",
+    "/sobre",
     "/termos",
     "/privacidade",
     "/contato",

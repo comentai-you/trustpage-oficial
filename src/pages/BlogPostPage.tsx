@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import TableOfContents from "@/components/blog/TableOfContents";
 import ArticleContentWithCTA from "@/components/blog/ArticleContentWithCTA";
+import AuthorSidebar from "@/components/blog/AuthorSidebar";
 
 interface BlogPost {
   id: string;
@@ -214,6 +215,9 @@ const BlogPostPage = () => {
           <div className="flex gap-8 max-w-7xl mx-auto">
             {/* Table of Contents - Desktop Sidebar */}
             <TableOfContents content={post.content} />
+            
+            {/* Author Sidebar - Desktop */}
+            <AuthorSidebar />
 
             {/* Main Article Content */}
             <article className="flex-1 max-w-4xl">
