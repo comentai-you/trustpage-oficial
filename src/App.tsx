@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,32 +7,56 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FacebookPixelTracker from "./components/FacebookPixelTracker";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Critical pages - loaded eagerly for fast initial render
+import HomePage from "./pages/HomePage";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import HomePage from "./pages/HomePage";
-import TrustPageDashboard from "./pages/TrustPageDashboard";
-import TrustPageEditor from "./pages/TrustPageEditor";
 import LandingPageView from "./pages/LandingPageView";
-import CustomDomainPage from "./pages/CustomDomainPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import ContactPage from "./pages/ContactPage";
-import SettingsPage from "./pages/SettingsPage";
-import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import SubscriptionPage from "./pages/SubscriptionPage";
-import HelpPage from "./pages/HelpPage";
-import OfertaPage from "./pages/OfertaPage";
-import UpdatePasswordPage from "./pages/UpdatePasswordPage";
-import ThankYouPage from "./pages/ThankYouPage";
-import AdminPage from "./pages/AdminPage";
-import LeadsPage from "./pages/LeadsPage";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
-import AdminBlogPage from "./pages/AdminBlogPage";
-import AdminMarketingPage from "./pages/AdminMarketingPage";
-import AboutPage from "./pages/AboutPage";
+
+// Lazy loaded pages - reduces initial bundle size by ~600KB
+const TrustPageDashboard = lazy(() => import("./pages/TrustPageDashboard"));
+const TrustPageEditor = lazy(() => import("./pages/TrustPageEditor"));
+const CustomDomainPage = lazy(() => import("./pages/CustomDomainPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
+const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"));
+const HelpPage = lazy(() => import("./pages/HelpPage"));
+const OfertaPage = lazy(() => import("./pages/OfertaPage"));
+const UpdatePasswordPage = lazy(() => import("./pages/UpdatePasswordPage"));
+const ThankYouPage = lazy(() => import("./pages/ThankYouPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const LeadsPage = lazy(() => import("./pages/LeadsPage"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const AdminBlogPage = lazy(() => import("./pages/AdminBlogPage"));
+const AdminMarketingPage = lazy(() => import("./pages/AdminMarketingPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
 
 const queryClient = new QueryClient();
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="space-y-4 w-full max-w-md px-4">
+      <Skeleton className="h-8 w-3/4 mx-auto" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-5/6" />
+      <Skeleton className="h-32 w-full rounded-lg" />
+    </div>
+  </div>
+);
+
+// Lazy wrapper for consistent loading states
+const LazyPage = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<PageLoader />}>
+    {children}
+  </Suspense>
+);
 
 // ALLOWLIST ESTRITA: Domínios que pertencem ao SISTEMA (dashboard, auth, etc)
 // Qualquer domínio fora desta lista = domínio de CLIENTE
@@ -57,7 +82,7 @@ const CustomDomainRoutes = () => (
   <>
     <FacebookPixelTracker />
     <Routes>
-      <Route path="*" element={<CustomDomainPage />} />
+      <Route path="*" element={<LazyPage><CustomDomainPage /></LazyPage>} />
     </Routes>
   </>
 );
@@ -65,75 +90,77 @@ const CustomDomainRoutes = () => (
 // Rotas do SISTEMA - dashboard, auth, etc
 const SystemRoutes = () => (
   <Routes>
-    {/* Public Routes */}
+    {/* Public Routes - Critical (loaded eagerly) */}
     <Route path="/" element={<HomePage />} />
     <Route path="/auth" element={<Auth />} />
-    <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
-    <Route path="/termos" element={<TermsPage />} />
-    <Route path="/privacidade" element={<PrivacyPage />} />
-    <Route path="/contato" element={<ContactPage />} />
-    <Route path="/oferta" element={<OfertaPage />} />
-    <Route path="/obrigado" element={<ThankYouPage />} />
-    <Route path="/sobre" element={<AboutPage />} />
     
-    {/* Blog Routes - Public */}
-    <Route path="/blog" element={<BlogPage />} />
-    <Route path="/blog/:slug" element={<BlogPostPage />} />
+    {/* Public Routes - Non-critical (lazy loaded) */}
+    <Route path="/auth/update-password" element={<LazyPage><UpdatePasswordPage /></LazyPage>} />
+    <Route path="/termos" element={<LazyPage><TermsPage /></LazyPage>} />
+    <Route path="/privacidade" element={<LazyPage><PrivacyPage /></LazyPage>} />
+    <Route path="/contato" element={<LazyPage><ContactPage /></LazyPage>} />
+    <Route path="/oferta" element={<LazyPage><OfertaPage /></LazyPage>} />
+    <Route path="/obrigado" element={<LazyPage><ThankYouPage /></LazyPage>} />
+    <Route path="/sobre" element={<LazyPage><AboutPage /></LazyPage>} />
     
-    {/* Protected Routes - DEVE vir ANTES das rotas dinâmicas /:slug */}
+    {/* Blog Routes - Lazy loaded */}
+    <Route path="/blog" element={<LazyPage><BlogPage /></LazyPage>} />
+    <Route path="/blog/:slug" element={<LazyPage><BlogPostPage /></LazyPage>} />
+    
+    {/* Protected Routes - All lazy loaded */}
     <Route path="/dashboard" element={
       <ProtectedRoute>
-        <TrustPageDashboard />
+        <LazyPage><TrustPageDashboard /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/settings" element={
       <ProtectedRoute>
-        <SettingsPage />
+        <LazyPage><SettingsPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/subscription" element={
       <ProtectedRoute>
-        <SubscriptionPage />
+        <LazyPage><SubscriptionPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/payment-success" element={
       <ProtectedRoute>
-        <PaymentSuccessPage />
+        <LazyPage><PaymentSuccessPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/help" element={
       <ProtectedRoute>
-        <HelpPage />
+        <LazyPage><HelpPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/admin" element={
       <ProtectedRoute>
-        <AdminPage />
+        <LazyPage><AdminPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/leads" element={
       <ProtectedRoute>
-        <LeadsPage />
+        <LazyPage><LeadsPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/admin/blog" element={
       <ProtectedRoute>
-        <AdminBlogPage />
+        <LazyPage><AdminBlogPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/admin/marketing" element={
       <ProtectedRoute>
-        <AdminMarketingPage />
+        <LazyPage><AdminMarketingPage /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/new" element={
       <ProtectedRoute>
-        <TrustPageEditor />
+        <LazyPage><TrustPageEditor /></LazyPage>
       </ProtectedRoute>
     } />
     <Route path="/edit/:id" element={
       <ProtectedRoute>
-        <TrustPageEditor />
+        <LazyPage><TrustPageEditor /></LazyPage>
       </ProtectedRoute>
     } />
 
