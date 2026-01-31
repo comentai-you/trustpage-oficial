@@ -202,30 +202,6 @@
     @apply relative;
     filter: drop-shadow(0 25px 25px hsl(217 91% 10% / 0.25)) drop-shadow(0 10px 10px hsl(217 91% 10% / 0.15));
   }
-
-  /* Custom CTA Button for Blog Articles */
-  .custom-cta-button {
-    display: inline-block;
-    background: linear-gradient(135deg, hsl(142 76% 25%), hsl(142 76% 20%));
-    color: white !important;
-    padding: 12px 24px;
-    border-radius: 8px;
-    text-decoration: none !important;
-    font-weight: 600;
-    margin: 16px 0;
-    transition: all 0.2s ease;
-  }
-
-  .custom-cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px hsl(142 76% 25% / 0.4);
-  }
-
-  /* Override prose link styles for custom buttons */
-  .prose .custom-cta-button {
-    color: white !important;
-    text-decoration: none !important;
-  }
 }
 
 @layer utilities {
