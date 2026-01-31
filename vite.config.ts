@@ -57,46 +57,6 @@ export default defineConfig(async ({ mode }) => {
       host: "::",
       port: 8080,
     },
-    build: {
-      // Improved code splitting for better caching
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            // Core vendor chunks - cached separately
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-router': ['react-router-dom'],
-            'vendor-query': ['@tanstack/react-query'],
-            'vendor-supabase': ['@supabase/supabase-js'],
-            // UI libraries
-            'vendor-ui': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-tooltip',
-              '@radix-ui/react-popover',
-              '@radix-ui/react-select',
-            ],
-            // DND libraries (only loaded when needed)
-            'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-            // Editor libraries (heavy, loaded lazily)
-            'vendor-editor': [
-              '@tiptap/react',
-              '@tiptap/starter-kit',
-              '@tiptap/extension-link',
-              '@tiptap/extension-image',
-            ],
-            // Charts (only on dashboard)
-            'vendor-charts': ['recharts'],
-          },
-        },
-      },
-      // Enable source maps for production debugging
-      sourcemap: false,
-      // Minification settings
-      minify: 'esbuild' as const,
-      // Target modern browsers for smaller bundle
-      target: 'es2020',
-    },
     plugins: [
       react(),
       mode === "development" && componentTagger(),
@@ -106,85 +66,85 @@ export default defineConfig(async ({ mode }) => {
         robots: [{ userAgent: "*", allow: "/" }],
       }),
       VitePWA({
-        // Usamos registro manual (ver src/main.tsx) para conseguir forçar updates em domínios customizados
-        registerType: "prompt",
-        injectRegister: null,
-        includeAssets: ["favicon.png", "favicon.svg"],
-        manifest: {
-          name: "TrustPage",
-          short_name: "TrustPage",
-          description: "Crie landing pages profissionais para seus links de bio",
-          start_url: "/",
-          display: "standalone",
-          background_color: "#ffffff",
-          theme_color: "#3b82f6",
-          icons: [
-            {
-              src: "/pwa-192x192.png",
-              sizes: "192x192",
-              type: "image/png",
-            },
-            {
-              src: "/pwa-512x512.png",
-              sizes: "512x512",
-              type: "image/png",
-            },
-            {
-              src: "/pwa-512x512.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "maskable",
-            },
-          ],
-        },
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-          // Garante atualização mais agressiva
-          cleanupOutdatedCaches: true,
-          clientsClaim: true,
-          skipWaiting: true,
-          // Aumentar limite para bundles grandes (5MB)
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-
-          // --- AQUI ESTÁ A CORREÇÃO MÁGICA ---
-          // Isso diz ao PWA: "Não se meta nessas URLs, deixe o servidor responder"
-          navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/],
-          // ------------------------------------
-
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "google-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
-            },
-            {
-              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "gstatic-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
-            },
-          ],
-        },
-      }),
-    ].filter(Boolean),
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
+      // Usamos registro manual (ver src/main.tsx) para conseguir forçar updates em domínios customizados
+      registerType: "prompt",
+      injectRegister: null,
+      includeAssets: ["favicon.png", "favicon.svg"],
+      manifest: {
+        name: "TrustPage",
+        short_name: "TrustPage",
+        description: "Crie landing pages profissionais para seus links de bio",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#ffffff",
+        theme_color: "#3b82f6",
+        icons: [
+          {
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
       },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Garante atualização mais agressiva
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        // Aumentar limite para bundles grandes (5MB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+
+        // --- AQUI ESTÁ A CORREÇÃO MÁGICA ---
+        // Isso diz ao PWA: "Não se meta nessas URLs, deixe o servidor responder"
+        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/],
+        // ------------------------------------
+
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gstatic-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    optimizeDeps: {
-      include: ["react", "react-dom", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
-    },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
+  },
   };
 });
