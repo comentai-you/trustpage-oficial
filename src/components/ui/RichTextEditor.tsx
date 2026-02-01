@@ -93,9 +93,10 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      // Use HTML instead of Markdown to preserve custom elements like CTA buttons
-      const html = editor.getHTML();
-      onChange(html);
+      // Get markdown using the storage API from tiptap-markdown
+      const storage = editor.storage as { markdown?: { getMarkdown: () => string } };
+      const markdown = storage.markdown?.getMarkdown() || editor.getHTML();
+      onChange(markdown);
     },
     editorProps: {
       attributes: {
