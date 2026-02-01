@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import ContextualCTA from "./ContextualCTA";
 import AntiBanBanner from "./AntiBanBanner";
 
@@ -45,11 +46,11 @@ const ArticleContentWithCTA = ({
 
       return (
         <>
-          {beforeBanner && <ReactMarkdown>{beforeBanner}</ReactMarkdown>}
+          {beforeBanner && <ReactMarkdown rehypePlugins={[rehypeRaw]}>{beforeBanner}</ReactMarkdown>}
           <AntiBanBanner />
-          <ReactMarkdown>{beforeCTA}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{beforeCTA}</ReactMarkdown>
           <ContextualCTA categorySlug={categorySlug} categoryName={categoryName} />
-          <ReactMarkdown>{afterCTA}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{afterCTA}</ReactMarkdown>
         </>
       );
     }
@@ -63,21 +64,20 @@ const ArticleContentWithCTA = ({
 
       return (
         <>
-          {beforeBanner && <ReactMarkdown>{beforeBanner}</ReactMarkdown>}
+          {beforeBanner && <ReactMarkdown rehypePlugins={[rehypeRaw]}>{beforeBanner}</ReactMarkdown>}
           <AntiBanBanner />
-          <ReactMarkdown>{beforeCTA}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{beforeCTA}</ReactMarkdown>
           <ContextualCTA categorySlug={categorySlug} categoryName={categoryName} />
-          <ReactMarkdown>{afterCTA}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{afterCTA}</ReactMarkdown>
         </>
       );
     }
 
-    // Fallback: render content with banner after first paragraph and CTA at the end
     return (
       <>
-        {beforeBanner && <ReactMarkdown>{beforeBanner}</ReactMarkdown>}
+        {beforeBanner && <ReactMarkdown rehypePlugins={[rehypeRaw]}>{beforeBanner}</ReactMarkdown>}
         <AntiBanBanner />
-        <ReactMarkdown>{afterBanner}</ReactMarkdown>
+        <ReactMarkdown rehypePlugins={[rehypeRaw]}>{afterBanner}</ReactMarkdown>
         <ContextualCTA categorySlug={categorySlug} categoryName={categoryName} />
       </>
     );
