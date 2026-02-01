@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
@@ -1096,7 +1097,7 @@ const AdminBlogPage = () => {
                       {/* Article Content */}
                       <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground">
                         {selectedPost.content ? (
-                          <ReactMarkdown>{selectedPost.content}</ReactMarkdown>
+                          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{selectedPost.content}</ReactMarkdown>
                         ) : (
                           <p className="text-muted-foreground italic">
                             Comece a escrever para ver o preview aqui...
