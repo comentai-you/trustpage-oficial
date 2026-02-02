@@ -31,6 +31,7 @@ import {
   Undo,
   Redo,
   Minus,
+  Plus,
 } from 'lucide-react';
 import {
   Dialog,
@@ -51,14 +52,27 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEditorProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const floatingFileInputRef = useRef<HTMLInputElement>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [youtubeDialogOpen, setYoutubeDialogOpen] = useState(false);
   const [customButtonDialogOpen, setCustomButtonDialogOpen] = useState(false);
+  const [bubbleLinkDialogOpen, setBubbleLinkDialogOpen] = useState(false);
+  const [floatingYoutubeDialogOpen, setFloatingYoutubeDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [customButtonText, setCustomButtonText] = useState('');
   const [customButtonUrl, setCustomButtonUrl] = useState('');
+  const [floatingMenuExpanded, setFloatingMenuExpanded] = useState(false);
+  
+  // Bubble menu state
+  const [bubbleMenuVisible, setBubbleMenuVisible] = useState(false);
+  const [bubbleMenuPosition, setBubbleMenuPosition] = useState({ top: 0, left: 0 });
+  
+  // Floating menu state
+  const [floatingMenuVisible, setFloatingMenuVisible] = useState(false);
+  const [floatingMenuPosition, setFloatingMenuPosition] = useState({ top: 0, left: 0 });
 
   const editor = useEditor({
     extensions: [
@@ -98,12 +112,76 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
       const markdown = storage.markdown?.getMarkdown() || editor.getHTML();
       onChange(markdown);
     },
+    onSelectionUpdate: ({ editor }) => {
+      updateMenus(editor);
+    },
+    onFocus: ({ editor }) => {
+      updateMenus(editor);
+    },
+    onBlur: () => {
+      // Delay hiding to allow clicking on menu buttons
+      setTimeout(() => {
+        setBubbleMenuVisible(false);
+        setFloatingMenuVisible(false);
+        setFloatingMenuExpanded(false);
+      }, 150);
+    },
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-4 py-3 prose-headings:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-h5:text-base prose-h6:text-sm prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-blockquote:border-primary prose-blockquote:text-muted-foreground prose-blockquote:not-italic',
       },
     },
   });
+
+  const updateMenus = useCallback((editorInstance: typeof editor) => {
+    if (!editorInstance || !editorContainerRef.current) return;
+
+    const { state, view } = editorInstance;
+    const { from, to, empty } = state.selection;
+    
+    // Get the container's bounding rect for relative positioning
+    const containerRect = editorContainerRef.current.getBoundingClientRect();
+
+    // Check if we should show bubble menu (text is selected)
+    if (!empty && from !== to && !editorInstance.isActive('image')) {
+      try {
+        const start = view.coordsAtPos(from);
+        const end = view.coordsAtPos(to);
+        
+        // Position bubble menu above the selection
+        const left = (start.left + end.left) / 2 - containerRect.left;
+        const top = start.top - containerRect.top - 45; // 45px above selection
+        
+        setBubbleMenuPosition({ top: Math.max(0, top), left: Math.max(10, left) });
+        setBubbleMenuVisible(true);
+        setFloatingMenuVisible(false);
+      } catch {
+        setBubbleMenuVisible(false);
+      }
+    } else {
+      setBubbleMenuVisible(false);
+      
+      // Check if we should show floating menu (empty line)
+      const { $from } = state.selection;
+      const isEmptyLine = $from.parent.isTextblock && $from.parent.content.size === 0;
+      
+      if (isEmptyLine && editorInstance.isFocused) {
+        try {
+          const coords = view.coordsAtPos(from);
+          const left = 10; // Fixed left position
+          const top = coords.top - containerRect.top;
+          
+          setFloatingMenuPosition({ top, left });
+          setFloatingMenuVisible(true);
+        } catch {
+          setFloatingMenuVisible(false);
+        }
+      } else {
+        setFloatingMenuVisible(false);
+        setFloatingMenuExpanded(false);
+      }
+    }
+  }, []);
 
   // Update editor content when value changes externally
   useEffect(() => {
@@ -167,6 +245,19 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     }
   }, [handleImageUpload]);
 
+  const handleFloatingFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+      setFloatingMenuExpanded(false);
+      setFloatingMenuVisible(false);
+    }
+    // Reset input
+    if (floatingFileInputRef.current) {
+      floatingFileInputRef.current.value = '';
+    }
+  }, [handleImageUpload]);
+
   const handleInsertLink = useCallback(() => {
     if (!linkUrl || !editor) return;
     
@@ -181,12 +272,36 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
     setLinkDialogOpen(false);
   }, [editor, linkUrl]);
 
+  const handleBubbleInsertLink = useCallback(() => {
+    if (!linkUrl || !editor) return;
+    
+    // Validate URL
+    let url = linkUrl;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    
+    editor.chain().focus().setLink({ href: url }).run();
+    setLinkUrl('');
+    setBubbleLinkDialogOpen(false);
+  }, [editor, linkUrl]);
+
   const handleInsertYoutube = useCallback(() => {
     if (!youtubeUrl || !editor) return;
     
     editor.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run();
     setYoutubeUrl('');
     setYoutubeDialogOpen(false);
+  }, [editor, youtubeUrl]);
+
+  const handleFloatingInsertYoutube = useCallback(() => {
+    if (!youtubeUrl || !editor) return;
+    
+    editor.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run();
+    setYoutubeUrl('');
+    setFloatingYoutubeDialogOpen(false);
+    setFloatingMenuExpanded(false);
+    setFloatingMenuVisible(false);
   }, [editor, youtubeUrl]);
 
   const handleInsertCustomButton = useCallback(() => {
@@ -220,7 +335,119 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
   }
 
   return (
-    <div className={cn('border rounded-md bg-background overflow-hidden', className)}>
+    <div ref={editorContainerRef} className={cn('border rounded-md bg-background overflow-hidden relative', className)}>
+      {/* BubbleMenu - appears when text is selected */}
+      {bubbleMenuVisible && (
+        <div
+          className="absolute bg-card border border-border rounded-lg shadow-lg p-1 flex gap-0.5 items-center z-50 animate-fade-in"
+          style={{ 
+            top: bubbleMenuPosition.top, 
+            left: bubbleMenuPosition.left,
+            transform: 'translateX(-50%)'
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <BubbleButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            active={editor.isActive('bold')}
+            title="Negrito"
+          >
+            <Bold className="w-4 h-4" />
+          </BubbleButton>
+          <BubbleButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            active={editor.isActive('italic')}
+            title="Itálico"
+          >
+            <Italic className="w-4 h-4" />
+          </BubbleButton>
+          <BubbleButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            active={editor.isActive('underline')}
+            title="Sublinhado"
+          >
+            <UnderlineIcon className="w-4 h-4" />
+          </BubbleButton>
+          <div className="w-px h-5 bg-border mx-0.5" />
+          <BubbleButton
+            onClick={() => {
+              if (editor.isActive('link')) {
+                editor.chain().focus().unsetLink().run();
+              } else {
+                setBubbleLinkDialogOpen(true);
+              }
+            }}
+            active={editor.isActive('link')}
+            title={editor.isActive('link') ? 'Remover Link' : 'Inserir Link'}
+          >
+            <LinkIcon className="w-4 h-4" />
+          </BubbleButton>
+        </div>
+      )}
+
+      {/* FloatingMenu - appears on empty lines */}
+      {floatingMenuVisible && (
+        <div
+          className="absolute flex items-center gap-1 z-50"
+          style={{ 
+            top: floatingMenuPosition.top, 
+            left: floatingMenuPosition.left
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {!floatingMenuExpanded ? (
+            <button
+              type="button"
+              onClick={() => setFloatingMenuExpanded(true)}
+              className="p-1.5 rounded-full bg-card border border-border shadow-md hover:bg-accent hover:text-accent-foreground transition-colors animate-fade-in"
+              title="Adicionar conteúdo"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          ) : (
+            <div className="bg-card border border-border rounded-lg shadow-lg p-1 flex gap-0.5 items-center animate-fade-in">
+              <BubbleButton
+                onClick={() => {
+                  floatingFileInputRef.current?.click();
+                }}
+                disabled={isUploading}
+                title="Adicionar Imagem"
+              >
+                {isUploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ImageIcon className="w-4 h-4" />
+                )}
+              </BubbleButton>
+              <BubbleButton
+                onClick={() => setFloatingYoutubeDialogOpen(true)}
+                title="Adicionar Vídeo do YouTube"
+              >
+                <YoutubeIcon className="w-4 h-4" />
+              </BubbleButton>
+              <div className="w-px h-5 bg-border mx-0.5" />
+              <button
+                type="button"
+                onClick={() => setFloatingMenuExpanded(false)}
+                className="p-1.5 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-muted-foreground"
+                title="Fechar"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Hidden file input for floating menu */}
+      <input
+        ref={floatingFileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFloatingFileSelect}
+        className="hidden"
+      />
+
       {/* Toolbar */}
       <div className="border-b bg-muted/30 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10">
         {/* Undo/Redo */}
@@ -413,14 +640,13 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
         />
       </div>
 
-
       {/* Editor Content */}
       <EditorContent 
         editor={editor} 
         className="focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-b-md"
       />
 
-      {/* Link Dialog */}
+      {/* Link Dialog (Toolbar) */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -454,7 +680,41 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
         </DialogContent>
       </Dialog>
 
-      {/* YouTube Dialog */}
+      {/* Link Dialog (BubbleMenu) */}
+      <Dialog open={bubbleLinkDialogOpen} onOpenChange={setBubbleLinkDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Inserir Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="bubble-link-url">URL do Link</Label>
+              <Input
+                id="bubble-link-url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://exemplo.com"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleBubbleInsertLink();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBubbleLinkDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleBubbleInsertLink} disabled={!linkUrl}>
+              Inserir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* YouTube Dialog (Toolbar) */}
       <Dialog open={youtubeDialogOpen} onOpenChange={setYoutubeDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -485,6 +745,48 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
               Cancelar
             </Button>
             <Button onClick={handleInsertYoutube} disabled={!youtubeUrl}>
+              Inserir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* YouTube Dialog (FloatingMenu) */}
+      <Dialog open={floatingYoutubeDialogOpen} onOpenChange={(open) => {
+        setFloatingYoutubeDialogOpen(open);
+        if (!open) {
+          setFloatingMenuExpanded(false);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Inserir Vídeo do YouTube</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="floating-youtube-url">URL do Vídeo</Label>
+              <Input
+                id="floating-youtube-url"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleFloatingInsertYoutube();
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Cole o link completo do vídeo do YouTube
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFloatingYoutubeDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleFloatingInsertYoutube} disabled={!youtubeUrl}>
               Inserir
             </Button>
           </DialogFooter>
@@ -527,7 +829,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
               <a 
                 href="#" 
                 onClick={(e) => e.preventDefault()}
-                className="inline-block bg-gradient-to-br from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+                className="inline-block bg-gradient-to-br from-success to-success/80 text-primary-foreground px-6 py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
               >
                 {customButtonText || 'Texto do Botão'}
               </a>
@@ -565,6 +867,30 @@ const ToolbarButton = ({ onClick, active, disabled, title, children }: ToolbarBu
       'p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors',
       'disabled:opacity-50 disabled:cursor-not-allowed',
       active && 'bg-accent text-accent-foreground'
+    )}
+  >
+    {children}
+  </button>
+);
+
+interface BubbleButtonProps {
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+  title: string;
+  children: React.ReactNode;
+}
+
+const BubbleButton = ({ onClick, active, disabled, title, children }: BubbleButtonProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    title={title}
+    className={cn(
+      'p-1.5 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      active && 'bg-primary text-primary-foreground'
     )}
   >
     {children}
