@@ -408,6 +408,37 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
             <div className="bg-card border border-border rounded-lg shadow-lg p-1 flex gap-0.5 items-center animate-fade-in">
               <BubbleButton
                 onClick={() => {
+                  editor.chain().focus().toggleHeading({ level: 1 }).run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Título 1"
+              >
+                <Heading1 className="w-4 h-4" />
+              </BubbleButton>
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().toggleHeading({ level: 2 }).run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Título 2"
+              >
+                <Heading2 className="w-4 h-4" />
+              </BubbleButton>
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().toggleHeading({ level: 3 }).run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Título 3"
+              >
+                <Heading3 className="w-4 h-4" />
+              </BubbleButton>
+              <div className="w-px h-5 bg-border mx-0.5" />
+              <BubbleButton
+                onClick={() => {
                   floatingFileInputRef.current?.click();
                 }}
                 disabled={isUploading}
