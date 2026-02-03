@@ -166,6 +166,9 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Legal page slugs that should NOT be the default homepage
+    const LEGAL_SLUGS = ['politica-de-privacidade', 'termos-de-uso', 'contato'];
+
     // If no slug or page not found, return the user's published pages for homepage
     const { data: pages, error: pagesError } = await supabase
       .from('landing_pages')
@@ -173,7 +176,7 @@ Deno.serve(async (req) => {
       .eq('user_id', profile.id)
       .eq('is_published', true)
       .order('created_at', { ascending: true })
-      .limit(10);
+      .limit(20);
 
     if (pagesError) {
       console.error('Error fetching pages:', pagesError);
@@ -196,9 +199,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Return the first page as default homepage, plus list of all pages
-    const defaultPage = pages[0];
-    console.log(`Returning default page: ${defaultPage.slug}`);
+    // Filter out legal pages for default homepage selection
+    const nonLegalPages = pages.filter(p => !LEGAL_SLUGS.includes(p.slug.toLowerCase()));
+    
+    // Use first non-legal page as default, or first page if only legal pages exist
+    const defaultPage = nonLegalPages.length > 0 ? nonLegalPages[0] : pages[0];
+    console.log(`Returning default page: ${defaultPage.slug} (filtered ${pages.length - nonLegalPages.length} legal pages)`);
 
     return new Response(
       JSON.stringify({

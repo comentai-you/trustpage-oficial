@@ -144,6 +144,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
             // Legacy support for ?owner=UUID
             legalOwnerId = legacyOwnerParam;
           } else if (ownerIdOverride) {
+            // Custom domain scenario - use the domain owner
             legalOwnerId = ownerIdOverride;
           }
 
