@@ -426,6 +426,48 @@ const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEdi
                 <YoutubeIcon className="w-4 h-4" />
               </BubbleButton>
               <div className="w-px h-5 bg-border mx-0.5" />
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().toggleBlockquote().run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Citação"
+              >
+                <Quote className="w-4 h-4" />
+              </BubbleButton>
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().setHorizontalRule().run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Linha Horizontal"
+              >
+                <Minus className="w-4 h-4" />
+              </BubbleButton>
+              <div className="w-px h-5 bg-border mx-0.5" />
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().toggleBulletList().run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Lista com Marcadores"
+              >
+                <List className="w-4 h-4" />
+              </BubbleButton>
+              <BubbleButton
+                onClick={() => {
+                  editor.chain().focus().toggleOrderedList().run();
+                  setFloatingMenuExpanded(false);
+                  setFloatingMenuVisible(false);
+                }}
+                title="Lista Numerada"
+              >
+                <ListOrdered className="w-4 h-4" />
+              </BubbleButton>
+              <div className="w-px h-5 bg-border mx-0.5" />
               <button
                 type="button"
                 onClick={() => setFloatingMenuExpanded(false)}
