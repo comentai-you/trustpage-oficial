@@ -581,6 +581,37 @@ export type Database = {
         }[]
       }
       get_page_whatsapp: { Args: { page_id: string }; Returns: string }
+      get_published_page_by_owner_and_slug: {
+        Args: { owner_id: string; page_slug: string }
+        Returns: {
+          colors: Json
+          content: Json
+          cover_image_url: string
+          created_at: string
+          cta_delay_enabled: boolean
+          cta_delay_percentage: number
+          cta_text: string
+          cta_url: string
+          description: string
+          facebook_pixel_id: string
+          headline: string
+          id: string
+          image_url: string
+          is_published: boolean
+          page_name: string
+          pix_pixel_id: string
+          primary_color: string
+          profile_image_url: string
+          slug: string
+          subheadline: string
+          template_id: number
+          template_type: string
+          updated_at: string
+          video_storage_path: string
+          video_url: string
+          whatsapp_number: string
+        }[]
+      }
       get_published_page_by_slug: {
         Args: { page_slug: string }
         Returns: {

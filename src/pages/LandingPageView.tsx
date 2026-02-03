@@ -158,29 +158,24 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           if (!legalOwnerId) {
             page = null;
           } else {
+            // Use secure RPC to bypass RLS for public page viewing
             const { data, error } = await supabase
-              .from('landing_pages')
-              .select('*')
-              .eq('user_id', legalOwnerId)
-              .eq('slug', String(slug))
-              .eq('is_published', true)
-              .order('updated_at', { ascending: false })
-              .limit(1)
+              .rpc('get_published_page_by_owner_and_slug', { 
+                owner_id: legalOwnerId, 
+                page_slug: String(slug) 
+              })
               .maybeSingle();
 
             if (error) throw error;
             page = data;
           }
         } else if (ownerIdOverride) {
-          // DOMÍNIO CUSTOMIZADO: o slug só faz sentido dentro do dono do domínio
+          // DOMÍNIO CUSTOMIZADO: use secure RPC to bypass RLS for public page viewing
           const { data, error } = await supabase
-            .from('landing_pages')
-            .select('*')
-            .eq('user_id', ownerIdOverride)
-            .eq('slug', String(slug))
-            .eq('is_published', true)
-            .order('updated_at', { ascending: false })
-            .limit(1)
+            .rpc('get_published_page_by_owner_and_slug', { 
+              owner_id: ownerIdOverride, 
+              page_slug: String(slug) 
+            })
             .maybeSingle();
 
           if (error) throw error;
