@@ -69,6 +69,15 @@ interface LandingPage {
   template_type: string;
 }
 
+// Interface para páginas legais (tabela legal_pages)
+interface LegalPage {
+  id: string;
+  title: string;
+  slug: string;
+  is_published: boolean;
+  created_at: string;
+}
+
 interface AdminStats {
   total_users: number;
   pro_users: number;
@@ -96,6 +105,7 @@ const AdminPage = () => {
   // States para Visualizar Páginas
   const [viewPagesOpen, setViewPagesOpen] = useState(false);
   const [selectedUserPages, setSelectedUserPages] = useState<LandingPage[]>([]);
+  const [selectedUserLegalPages, setSelectedUserLegalPages] = useState<LegalPage[]>([]);
   const [pagesLoading, setPagesLoading] = useState(false);
 
   // Check if user is admin
@@ -261,21 +271,32 @@ const AdminPage = () => {
     }
   };
 
-  // Função para buscar na tabela 'landing_pages'
+  // Função para buscar páginas do usuário (landing_pages + legal_pages)
   const handleViewPages = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
     setViewPagesOpen(true);
     setPagesLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from("landing_pages")
-        .select("*")
-        .eq("user_id", userProfile.id)
-        .order("created_at", { ascending: false });
+      // Buscar de ambas as tabelas em paralelo
+      const [landingPagesRes, legalPagesRes] = await Promise.all([
+        supabase
+          .from("landing_pages")
+          .select("id, page_name, slug, is_published, views, created_at, template_type")
+          .eq("user_id", userProfile.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("legal_pages")
+          .select("id, title, slug, is_published, created_at")
+          .eq("user_id", userProfile.id)
+          .order("created_at", { ascending: false }),
+      ]);
 
-      if (error) throw error;
-      setSelectedUserPages((data as LandingPage[]) || []);
+      if (landingPagesRes.error) throw landingPagesRes.error;
+      if (legalPagesRes.error) throw legalPagesRes.error;
+
+      setSelectedUserPages((landingPagesRes.data as LandingPage[]) || []);
+      setSelectedUserLegalPages((legalPagesRes.data as LegalPage[]) || []);
     } catch (err) {
       console.error("Error fetching pages:", err);
       toast.error("Erro ao carregar páginas do usuário");
@@ -587,79 +608,138 @@ const AdminPage = () => {
             <DialogDescription>Lista de todas as páginas (Landing Pages e Legais) deste usuário.</DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
+          <div className="py-4 space-y-6">
             {pagesLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-            ) : selectedUserPages.length === 0 ? (
+            ) : selectedUserPages.length === 0 && selectedUserLegalPages.length === 0 ? (
               <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
                 <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
                 <p>Este usuário ainda não criou nenhuma página.</p>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {selectedUserPages.map((page) => (
-                  <Card
-                    key={page.id}
-                    className="overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          {/* Ícone muda dependendo do tipo */}
-                          {page.template_type === "legal" ? (
-                            <ShieldCheck className="w-5 h-5 text-gray-600" />
-                          ) : (
-                            <LayoutTemplate className="w-5 h-5 text-purple-600" />
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-                            {page.page_name || "Sem título"}
-                          </h4>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Badge variant="outline" className="text-xs">
-                              {page.template_type || "Landing Page"}
-                            </Badge>
-                            <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
-                              /{page.slug}
-                            </span>
-                            <span>•</span>
-                            <span>{page.views || 0} visualizações</span>
-                          </div>
-                        </div>
-                      </div>
+              <>
+                {/* Landing Pages */}
+                {selectedUserPages.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <LayoutTemplate className="w-4 h-4" />
+                      Landing Pages ({selectedUserPages.length})
+                    </h3>
+                    <div className="grid gap-3">
+                      {selectedUserPages.map((page) => (
+                        <Card
+                          key={page.id}
+                          className="overflow-hidden hover:bg-muted/50 transition-colors"
+                        >
+                          <CardContent className="p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                                <LayoutTemplate className="w-5 h-5 text-purple-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-foreground">
+                                  {page.page_name || "Sem título"}
+                                </h4>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Badge variant="outline" className="text-xs">
+                                    {page.template_type || "Landing Page"}
+                                  </Badge>
+                                  <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+                                    /{page.slug}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{page.views || 0} visualizações</span>
+                                </div>
+                              </div>
+                            </div>
 
-                      <div className="flex items-center gap-3">
-                        {page.is_published ? (
-                          <Badge className="bg-green-500 hover:bg-green-600">Publicado</Badge>
-                        ) : (
-                          <Badge variant="secondary">Rascunho</Badge>
-                        )}
+                            <div className="flex items-center gap-3">
+                              {page.is_published ? (
+                                <Badge className="bg-green-500 hover:bg-green-600">Publicado</Badge>
+                              ) : (
+                                <Badge variant="secondary">Rascunho</Badge>
+                              )}
 
-                        <Button size="sm" variant="outline" asChild>
-                          <a
-                            href={getPublicPageUrl(
-                              page.slug,
-                              null,
-                              LEGAL_PAGE_SLUGS.has(String(page.slug).toLowerCase())
-                                ? selectedUser?.username
-                                : null,
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2"
-                          >
-                            <Eye className="w-4 h-4" />
-                            Abrir
-                          </a>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                              <Button size="sm" variant="outline" asChild>
+                                <a
+                                  href={getPublicPageUrl(page.slug, null, null)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Abrir
+                                </a>
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Legal Pages */}
+                {selectedUserLegalPages.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4" />
+                      Páginas Legais ({selectedUserLegalPages.length})
+                    </h3>
+                    <div className="grid gap-3">
+                      {selectedUserLegalPages.map((page) => (
+                        <Card
+                          key={page.id}
+                          className="overflow-hidden hover:bg-muted/50 transition-colors"
+                        >
+                          <CardContent className="p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-muted rounded-lg">
+                                <ShieldCheck className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-foreground">
+                                  {page.title || "Sem título"}
+                                </h4>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Badge variant="outline" className="text-xs">
+                                    Legal
+                                  </Badge>
+                                  <span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+                                    /{page.slug}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              {page.is_published ? (
+                                <Badge className="bg-green-500 hover:bg-green-600">Publicado</Badge>
+                              ) : (
+                                <Badge variant="secondary">Rascunho</Badge>
+                              )}
+
+                              <Button size="sm" variant="outline" asChild>
+                                <a
+                                  href={getPublicPageUrl(page.slug, null, selectedUser?.username || null)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Abrir
+                                </a>
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </DialogContent>
