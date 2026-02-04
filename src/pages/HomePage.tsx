@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon } from "lucide-react";
+import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon, LinkIcon, Magnet, ShoppingBag, HelpCircle, Copy } from "lucide-react";
 import { useState } from "react";
 import FAQSection from "@/components/FAQSection";
 
@@ -302,6 +302,108 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Templates Showcase Section */}
+      <section className="py-16 sm:py-24 bg-muted/30 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-10 sm:mb-16">
+            <span className="inline-block px-3 sm:px-4 py-2 bg-primary/10 rounded-full text-primary font-semibold text-xs sm:text-sm mb-4">
+              🎨 Templates Profissionais
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4">
+              Tudo que você precisa, <span className="gradient-text">em um só lugar</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+              6 tipos de páginas para todas as suas necessidades de marketing digital
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+            {/* Link na Bio */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <LinkIcon className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Link na Bio</h3>
+              <p className="text-sm text-muted-foreground">
+                Reúna todos os seus links em uma única página profissional e elegante.
+              </p>
+            </div>
+
+            {/* Página VSL */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Play className="w-6 h-6 text-white" fill="white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Página VSL</h3>
+              <p className="text-sm text-muted-foreground">
+                Ideal para PLR e Infoprodutos. Foco total no vídeo de vendas.
+              </p>
+            </div>
+
+            {/* Página de Vendas */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <ShoppingBag className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Página de Vendas</h3>
+              <p className="text-sm text-muted-foreground">
+                Layout completo com vídeo, carrossel, benefícios e múltiplos CTAs.
+              </p>
+            </div>
+
+            {/* Página de Captura */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Magnet className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Página de Captura</h3>
+              <p className="text-sm text-muted-foreground">
+                Visual premium para E-books, Iscas Digitais e Lançamentos.
+              </p>
+            </div>
+
+            {/* Quiz */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <HelpCircle className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Quiz Interativo</h3>
+              <p className="text-sm text-muted-foreground">
+                Funis de perguntas estilo Typeform para qualificar leads.
+              </p>
+            </div>
+
+            {/* Clonador de Páginas */}
+            <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-5 sm:p-6 border-2 border-amber-300 dark:border-amber-700 hover:border-amber-400 transition-all hover:shadow-lg group">
+              <div className="absolute -top-2 -right-2">
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                  ✨ EXCLUSIVO
+                </span>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Copy className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Clonador de Páginas</h3>
+              <p className="text-sm text-muted-foreground">
+                Clone qualquer página de vendas e substitua os links. 100% funcional!
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link to="/auth">
+              <Button size="lg" className="gradient-button font-bold px-8 group">
+                Criar Minha Primeira Página
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Social Proof / Trust Bar */}
       <section className="py-8 sm:py-12 bg-muted/50 border-y border-border">
         <div className="container mx-auto px-4 sm:px-6">
@@ -395,7 +497,7 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Todos os Templates</span>
+                      <span className="text-foreground text-sm sm:text-base">Link na Bio, VSL, Vendas e Captura</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
