@@ -26,13 +26,17 @@ const ClonedPageView = () => {
       }
 
       try {
+        console.log('[ClonedPageView] Fetching page with slug:', slug);
+        
         // Fetch the cloned page by slug
         const { data, error: fetchError } = await supabase
           .from("cloned_pages")
-          .select("id, html_content, page_name, is_published")
+          .select("id, html_content, page_name, is_published, views")
           .eq("slug", slug)
           .eq("is_published", true)
           .maybeSingle();
+
+        console.log('[ClonedPageView] Query result:', { data: data ? { id: data.id, hasHtml: !!data.html_content, htmlLength: data.html_content?.length } : null, error: fetchError });
 
         if (fetchError) throw fetchError;
 
@@ -44,11 +48,12 @@ const ClonedPageView = () => {
 
         setPageData(data);
 
-        // Increment views
-        await supabase
+        // Increment views (fire and forget)
+        supabase
           .from("cloned_pages")
-          .update({ views: (data as any).views + 1 })
-          .eq("id", data.id);
+          .update({ views: (data.views || 0) + 1 })
+          .eq("id", data.id)
+          .then(() => console.log('[ClonedPageView] Views incremented'));
 
       } catch (err) {
         console.error("Error fetching cloned page:", err);

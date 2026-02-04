@@ -10,6 +10,9 @@ interface ResolveRequest {
   path?: string;
 }
 
+// System domain for public pages (free plan + cloned pages)
+const SYSTEM_DOMAIN = 'tpage.com.br';
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -26,7 +29,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Resolving custom domain: ${hostname}, path: ${path || '/'}`);
+    console.log(`Resolving domain: ${hostname}, path: ${path || '/'}`);
 
     // Initialize Supabase with service role for public access
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -36,9 +39,131 @@ Deno.serve(async (req) => {
     // Normalize hostname (remove www. prefix if present)
     const normalizedHostname = hostname.toLowerCase().replace(/^www\./, '');
 
-    // STEP 1: Search in user_domains table first (supports multiple domains per user)
+    // Parse path to find slug - handle /p/, /c/ prefixes and clean URLs
+    let pathSlug = path || '';
+    let isClonedPagePath = false;
+    
+    // Check for cloned page prefix /c/
+    if (pathSlug.startsWith('/c/')) {
+      pathSlug = pathSlug.substring(3);
+      isClonedPagePath = true;
+    }
+    // Check for landing page prefix /p/
+    else if (pathSlug.startsWith('/p/')) {
+      pathSlug = pathSlug.substring(3);
+    }
+    
+    // Remove leading slashes and get first segment
+    pathSlug = pathSlug.replace(/^\/+/, '');
+    pathSlug = pathSlug.split('/')[0] || '';
+    
+    console.log(`Extracted slug: "${pathSlug}", isClonedPagePath: ${isClonedPagePath}`);
+
+    // ===== CASE 1: SYSTEM DOMAIN (tpage.com.br) =====
+    // On system domain, we search pages directly by slug (no user filtering)
+    if (normalizedHostname === SYSTEM_DOMAIN || normalizedHostname === `www.${SYSTEM_DOMAIN}`) {
+      console.log('System domain detected, searching by slug only...');
+      
+      // Handle cloned pages on system domain
+      if (isClonedPagePath && pathSlug) {
+        const { data: clonedPage, error: clonedError } = await supabase
+          .from('cloned_pages')
+          .select('id, slug, page_name, is_published, user_id')
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (clonedError) {
+          console.error('Error finding cloned page:', clonedError);
+        }
+
+        if (clonedPage) {
+          console.log(`Found cloned page: ${clonedPage.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'cloned_page',
+              userId: clonedPage.user_id,
+              pageId: clonedPage.id,
+              slug: clonedPage.slug,
+              pageName: clonedPage.page_name
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ found: false, error: 'Página clonada não encontrada' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Handle landing pages on system domain (search by slug only)
+      if (pathSlug) {
+        const { data: page, error: pageError } = await supabase
+          .from('landing_pages')
+          .select('id, slug, template_type, page_name, is_published, user_id')
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (pageError) {
+          console.error('Error finding page by slug:', pageError);
+        }
+
+        if (page) {
+          console.log(`Found landing page: ${page.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'page',
+              userId: page.user_id,
+              pageId: page.id,
+              slug: page.slug,
+              templateType: page.template_type,
+              pageName: page.page_name
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Fallback: try cloned page without /c/ prefix
+        const { data: clonedFallback } = await supabase
+          .from('cloned_pages')
+          .select('id, slug, page_name, is_published, user_id')
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (clonedFallback) {
+          console.log(`Found cloned page (fallback): ${clonedFallback.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'cloned_page',
+              userId: clonedFallback.user_id,
+              pageId: clonedFallback.id,
+              slug: clonedFallback.slug,
+              pageName: clonedFallback.page_name
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ found: false, error: 'Página não encontrada' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ===== CASE 2: CUSTOM DOMAIN =====
+    // For custom domains, we need to find the user first, then their pages
+    console.log(`Custom domain detected: ${normalizedHostname}`);
+
     let profile: { id: string; plan_type: string; subscription_status: string } | null = null;
 
+    // Step 1: Search in user_domains table (supports multiple domains per user)
     const { data: userDomain, error: domainError } = await supabase
       .from('user_domains')
       .select('user_id')
@@ -50,7 +175,7 @@ Deno.serve(async (req) => {
       console.error('Error finding user_domain:', domainError);
     }
 
-    // STEP 2: If found in user_domains, load profile by user_id
+    // Step 2: If found in user_domains, load profile by user_id
     if (userDomain?.user_id) {
       console.log(`Found domain in user_domains for user: ${userDomain.user_id}`);
       
@@ -67,9 +192,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    // STEP 3: Fallback - check profiles.custom_domain for backwards compatibility
+    // Step 3: Fallback - check profiles.custom_domain for backwards compatibility
     if (!profile) {
-      console.log(`Domain not found in user_domains, trying profiles.custom_domain fallback...`);
+      console.log('Trying profiles.custom_domain fallback...');
       
       const { data: legacyProfile, error: legacyError } = await supabase
         .from('profiles')
@@ -115,60 +240,41 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse path to find slug - handle /p/, /c/ prefixes and clean URLs
-    let pathSlug = path || '';
-    let isClonedPagePath = false;
+    // ===== RESOLVE PAGE FOR CUSTOM DOMAIN =====
     
-    // Check for cloned page prefix /c/
-    if (pathSlug.startsWith('/c/')) {
-      pathSlug = pathSlug.substring(3);
-      isClonedPagePath = true;
-    }
-    // Check for landing page prefix /p/
-    else if (pathSlug.startsWith('/p/')) {
-      pathSlug = pathSlug.substring(3);
-    }
-    
-    // Remove leading slashes and get first segment
-    pathSlug = pathSlug.replace(/^\/+/, '');
-    pathSlug = pathSlug.split('/')[0] || '';
-    
-    console.log(`Extracted slug from path "${path}": "${pathSlug}", isClonedPagePath: ${isClonedPagePath}`);
+    // Handle cloned pages
+    if (isClonedPagePath && pathSlug) {
+      const { data: clonedPage, error: clonedError } = await supabase
+        .from('cloned_pages')
+        .select('id, slug, page_name, is_published')
+        .eq('user_id', profile.id)
+        .eq('slug', pathSlug)
+        .eq('is_published', true)
+        .maybeSingle();
 
-    // If path has a slug, find that specific page
-    if (pathSlug && pathSlug !== '') {
-      // First check cloned_pages if it's a /c/ path or we haven't found a landing page
-      if (isClonedPagePath) {
-        const { data: clonedPage, error: clonedError } = await supabase
-          .from('cloned_pages')
-          .select('id, slug, page_name, is_published')
-          .eq('user_id', profile.id)
-          .eq('slug', pathSlug)
-          .eq('is_published', true)
-          .maybeSingle();
-
-        if (clonedError) {
-          console.error('Error finding cloned page by slug:', clonedError);
-        }
-
-        if (clonedPage) {
-          console.log(`Found cloned page by slug: ${clonedPage.slug}`);
-          return new Response(
-            JSON.stringify({
-              found: true,
-              type: 'cloned_page',
-              userId: profile.id,
-              pageId: clonedPage.id,
-              slug: clonedPage.slug,
-              pageName: clonedPage.page_name,
-              planType: profile.plan_type
-            }),
-            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+      if (clonedError) {
+        console.error('Error finding cloned page:', clonedError);
       }
 
-      // Check landing_pages
+      if (clonedPage) {
+        console.log(`Found cloned page: ${clonedPage.slug}`);
+        return new Response(
+          JSON.stringify({
+            found: true,
+            type: 'cloned_page',
+            userId: profile.id,
+            pageId: clonedPage.id,
+            slug: clonedPage.slug,
+            pageName: clonedPage.page_name,
+            planType: profile.plan_type
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Handle landing pages with slug
+    if (pathSlug) {
       const { data: page, error: pageError } = await supabase
         .from('landing_pages')
         .select('id, slug, template_type, page_name, is_published')
@@ -182,7 +288,7 @@ Deno.serve(async (req) => {
       }
 
       if (page) {
-        console.log(`Found landing page by slug: ${page.slug}`);
+        console.log(`Found landing page: ${page.slug}`);
         return new Response(
           JSON.stringify({
             found: true,
@@ -198,9 +304,9 @@ Deno.serve(async (req) => {
         );
       }
 
-      // If not isClonedPagePath, also try cloned_pages as fallback
+      // Fallback: try cloned page without /c/ prefix
       if (!isClonedPagePath) {
-        const { data: clonedPage, error: clonedError } = await supabase
+        const { data: clonedPage } = await supabase
           .from('cloned_pages')
           .select('id, slug, page_name, is_published')
           .eq('user_id', profile.id)
@@ -208,8 +314,8 @@ Deno.serve(async (req) => {
           .eq('is_published', true)
           .maybeSingle();
 
-        if (!clonedError && clonedPage) {
-          console.log(`Found cloned page by slug (fallback): ${clonedPage.slug}`);
+        if (clonedPage) {
+          console.log(`Found cloned page (fallback): ${clonedPage.slug}`);
           return new Response(
             JSON.stringify({
               found: true,
@@ -229,7 +335,7 @@ Deno.serve(async (req) => {
     // Legal page slugs that should NOT be the default homepage
     const LEGAL_SLUGS = ['politica-de-privacidade', 'termos-de-uso', 'contato'];
 
-    // If no slug or page not found, return the user's published pages for homepage
+    // No slug provided - return homepage (first non-legal published page)
     const { data: pages, error: pagesError } = await supabase
       .from('landing_pages')
       .select('id, slug, template_type, page_name, is_published, created_at')
@@ -264,7 +370,7 @@ Deno.serve(async (req) => {
     
     // Use first non-legal page as default, or first page if only legal pages exist
     const defaultPage = nonLegalPages.length > 0 ? nonLegalPages[0] : pages[0];
-    console.log(`Returning default page: ${defaultPage.slug} (filtered ${pages.length - nonLegalPages.length} legal pages)`);
+    console.log(`Returning default page: ${defaultPage.slug}`);
 
     return new Response(
       JSON.stringify({
