@@ -7,7 +7,7 @@ export interface LandingPageColors {
 }
 
 export type PageTheme = 'dark' | 'light' | 'modern-gray';
-export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero';
+export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz';
 
 export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
   dark: {

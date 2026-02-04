@@ -528,10 +528,12 @@ export type Database = {
       }
       quizzes: {
         Row: {
+          cover_image_url: string | null
           created_at: string
           description: string | null
           id: string
           is_published: boolean | null
+          page_name: string | null
           primary_color: string | null
           questions: Json
           redirect_url: string | null
@@ -542,10 +544,12 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_published?: boolean | null
+          page_name?: string | null
           primary_color?: string | null
           questions?: Json
           redirect_url?: string | null
@@ -556,10 +560,12 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_published?: boolean | null
+          page_name?: string | null
           primary_color?: string | null
           questions?: Json
           redirect_url?: string | null
