@@ -30,6 +30,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import AdminBlogPage from "./pages/AdminBlogPage";
 import AdminMarketingPage from "./pages/AdminMarketingPage";
 import AboutPage from "./pages/AboutPage";
+import PageClonerPage from "./pages/PageClonerPage";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,11 @@ const SystemRoutes = () => (
         <AdminMarketingPage />
       </ProtectedRoute>
     } />
+    <Route path="/clonador" element={
+      <ProtectedRoute>
+        <PageClonerPage />
+      </ProtectedRoute>
+    } />
     <Route path="/new" element={
       <ProtectedRoute>
         <TrustPageEditor />
@@ -156,6 +162,7 @@ const App = () => {
     "/admin",
     "/auth",
     "/blog",
+    "/clonador",
     "/dashboard",
     "/leads",
     "/settings",
