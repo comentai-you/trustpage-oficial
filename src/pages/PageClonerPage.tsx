@@ -4,7 +4,6 @@ import {
   Copy, 
   Loader2, 
   Link2, 
-  Image as ImageIcon, 
   Code2, 
   ArrowLeft,
   Download,
@@ -18,7 +17,8 @@ import {
   AlertTriangle,
   Edit3,
   Replace,
-  Eye
+  Eye,
+  Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,55 @@ const CLONING_STEPS = [
   "Finalizando..."
 ];
 
+// Função robusta para substituir links no HTML usando parsing seguro
+function replaceLinksInHtml(html: string, links: ExtractedLink[]): string {
+  // Criar mapa de substituições (href original -> novo href)
+  const replacements = new Map<string, string>();
+  
+  links.forEach(link => {
+    if (link.newHref && link.newHref !== link.href && link.newHref.trim()) {
+      replacements.set(link.href, link.newHref);
+    }
+  });
+  
+  if (replacements.size === 0) return html;
+  
+  // Usar abordagem mais segura: substituir apenas href="..." patterns exatos
+  let result = html;
+  
+  replacements.forEach((newHref, originalHref) => {
+    // Escapar caracteres especiais do regex na URL original
+    const escapedHref = originalHref
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Substituir href="original" por href="novo" de forma segura
+    // Matches: href="url", href='url', href=url (sem aspas)
+    const patterns = [
+      new RegExp(`(href=")${escapedHref}(")`, 'g'),
+      new RegExp(`(href=')${escapedHref}(')`, 'g'),
+    ];
+    
+    patterns.forEach(pattern => {
+      result = result.replace(pattern, `$1${newHref}$2`);
+    });
+  });
+  
+  return result;
+}
+
+// Gerar slug único a partir do título
+function generateSlug(title: string): string {
+  const base = title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 40);
+  
+  return `${base}-${Date.now().toString(36)}`;
+}
+
 const PageClonerPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -77,6 +126,7 @@ const PageClonerPage = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [cloning, setCloning] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [cloningStep, setCloningStep] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   
@@ -86,6 +136,7 @@ const PageClonerPage = () => {
   const [links, setLinks] = useState<ExtractedLink[]>([]);
   const [headCode, setHeadCode] = useState("");
   const [globalLinkReplace, setGlobalLinkReplace] = useState("");
+  const [pageName, setPageName] = useState("");
   
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
@@ -137,28 +188,28 @@ const PageClonerPage = () => {
     return () => clearInterval(interval);
   }, [cloning]);
 
+  // Gerar HTML final com substituições
+  const getFinalHtml = useCallback(() => {
+    if (!editedHtml) return "";
+    
+    let finalHtml = editedHtml;
+    
+    // Aplicar substituições de links de forma segura
+    finalHtml = replaceLinksInHtml(finalHtml, links);
+    
+    // Injetar código customizado no head
+    if (headCode.trim()) {
+      finalHtml = finalHtml.replace('</head>', `${headCode}\n</head>`);
+    }
+    
+    return finalHtml;
+  }, [editedHtml, links, headCode]);
+
   // Update iframe when HTML changes
   const updatePreview = useCallback(() => {
     if (!iframeRef.current || !editedHtml) return;
     
-    // Inject head code and modified links
-    let finalHtml = editedHtml;
-    
-    // Apply link replacements
-    links.forEach(link => {
-      if (link.newHref && link.newHref !== link.href) {
-        const escapedHref = link.href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        finalHtml = finalHtml.replace(
-          new RegExp(`href=["']${escapedHref}["']`, 'g'),
-          `href="${link.newHref}"`
-        );
-      }
-    });
-    
-    // Inject custom head code
-    if (headCode.trim()) {
-      finalHtml = finalHtml.replace('</head>', `${headCode}\n</head>`);
-    }
+    const finalHtml = getFinalHtml();
     
     // Write to iframe
     const doc = iframeRef.current.contentDocument;
@@ -167,7 +218,7 @@ const PageClonerPage = () => {
       doc.write(finalHtml);
       doc.close();
     }
-  }, [editedHtml, links, headCode]);
+  }, [editedHtml, getFinalHtml]);
 
   useEffect(() => {
     updatePreview();
@@ -209,6 +260,7 @@ const PageClonerPage = () => {
       setCloneResult(data);
       setEditedHtml(data.html);
       setLinks(data.links.map((l: ExtractedLink) => ({ ...l, newHref: l.href })));
+      setPageName(data.metadata.title || 'Página Clonada');
       toast.success(`Página clonada! ${data.metadata.linksCount} links encontrados.`);
       
     } catch (error) {
@@ -236,25 +288,74 @@ const PageClonerPage = () => {
     toast.success("Todos os links atualizados!");
   };
 
+  const handleSave = async () => {
+    if (!cloneResult || !user) return;
+    
+    const trimmedName = pageName.trim();
+    if (!trimmedName) {
+      toast.error("Digite um nome para a página");
+      return;
+    }
+    
+    setSaving(true);
+    
+    try {
+      const finalHtml = getFinalHtml();
+      const slug = generateSlug(trimmedName);
+      
+      // Salvar como landing page do tipo 'cloned'
+      // Converter links para formato JSON compatível
+      const linksJson = links.map(l => ({
+        text: l.text,
+        href: l.href,
+        selector: l.selector,
+        newHref: l.newHref || l.href
+      }));
+      
+      const { data, error } = await supabase
+        .from('landing_pages')
+        .insert([{
+          user_id: user.id,
+          slug,
+          template_type: 'cloned',
+          template_id: 1,
+          page_name: trimmedName,
+          headline: cloneResult.metadata.title,
+          is_published: false,
+          content: {
+            clonedHtml: finalHtml,
+            sourceUrl: cloneResult.sourceUrl,
+            links: linksJson,
+            headCode: headCode
+          }
+        }])
+        .select('id, slug')
+        .single();
+      
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("Já existe uma página com esse slug. Tente um nome diferente.");
+        } else {
+          throw error;
+        }
+        return;
+      }
+      
+      toast.success("Página salva com sucesso!");
+      navigate(`/dashboard`);
+      
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Erro ao salvar página. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleDownload = () => {
     if (!editedHtml) return;
     
-    let finalHtml = editedHtml;
-    
-    // Apply all modifications
-    links.forEach(link => {
-      if (link.newHref && link.newHref !== link.href) {
-        const escapedHref = link.href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        finalHtml = finalHtml.replace(
-          new RegExp(`href=["']${escapedHref}["']`, 'g'),
-          `href="${link.newHref}"`
-        );
-      }
-    });
-    
-    if (headCode.trim()) {
-      finalHtml = finalHtml.replace('</head>', `${headCode}\n</head>`);
-    }
+    const finalHtml = getFinalHtml();
     
     const blob = new Blob([finalHtml], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -501,23 +602,37 @@ const PageClonerPage = () => {
             {/* Editor Sidebar */}
             <Card>
               <CardHeader className="border-b py-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <Edit3 className="w-4 h-4 text-muted-foreground" />
                     <span className="font-medium text-sm">Editor</span>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={handleSave} 
+                      disabled={saving}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-1" />
+                      )}
+                      Salvar
+                    </Button>
                     <Button variant="outline" size="sm" onClick={handleDownload}>
                       <Download className="w-4 h-4 mr-1" />
-                      Baixar HTML
+                      HTML
                     </Button>
                     <Button 
                       variant="ghost" 
-                      size="sm"
+                      size="icon"
                       onClick={() => {
                         setCloneResult(null);
                         setEditedHtml("");
                         setLinks([]);
+                        setPageName("");
                       }}
                     >
                       <RefreshCw className="w-4 h-4" />
@@ -526,6 +641,16 @@ const PageClonerPage = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-0">
+                {/* Page Name Input */}
+                <div className="p-4 border-b">
+                  <Label className="text-sm font-medium mb-2 block">Nome da Página</Label>
+                  <Input
+                    placeholder="Ex: Minha Página de Vendas"
+                    value={pageName}
+                    onChange={(e) => setPageName(e.target.value)}
+                  />
+                </div>
+
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="w-full rounded-none border-b h-auto p-0">
                     <TabsTrigger 
@@ -545,7 +670,7 @@ const PageClonerPage = () => {
                   </TabsList>
 
                   <TabsContent value="links" className="m-0">
-                    <ScrollArea style={{ height: 'calc(100vh - 420px)', minHeight: '400px' }}>
+                    <ScrollArea style={{ height: 'calc(100vh - 520px)', minHeight: '300px' }}>
                       <div className="p-4 space-y-4">
                         {/* Global Replace */}
                         <div className="bg-muted/50 rounded-lg p-3 space-y-2">
@@ -612,7 +737,7 @@ const PageClonerPage = () => {
                   </TabsContent>
 
                   <TabsContent value="code" className="m-0">
-                    <ScrollArea style={{ height: 'calc(100vh - 420px)', minHeight: '400px' }}>
+                    <ScrollArea style={{ height: 'calc(100vh - 520px)', minHeight: '300px' }}>
                       <div className="p-4 space-y-4">
                         {/* Head Injection */}
                         <div className="space-y-2">
