@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
     const slug = url.searchParams.get('slug');
     
     if (!slug) {
+      console.log('[serve-proxy] No slug provided');
       return new Response(
         JSON.stringify({ error: 'Slug not found' }), 
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -31,11 +32,20 @@ Deno.serve(async (req) => {
 
     console.log(`[serve-proxy] Serving page with slug: ${slug}`);
 
-    // 1. Get page config from database
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    // 1. Get page config from database using SERVICE_ROLE_KEY to bypass RLS
+    // This ensures we can always read published pages regardless of auth context
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('[serve-proxy] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: page, error: dbError } = await supabase
       .from('cloned_pages')
@@ -43,6 +53,8 @@ Deno.serve(async (req) => {
       .eq('slug', slug)
       .eq('is_published', true)
       .maybeSingle();
+    
+    console.log(`[serve-proxy] DB query result - page: ${page ? 'found' : 'null'}, error: ${dbError?.message || 'none'}`);
 
     if (dbError) {
       console.error('[serve-proxy] Database error:', dbError);

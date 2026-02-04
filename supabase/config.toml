@@ -30,8 +30,5 @@ verify_jwt = false
 [functions.process-campaigns]
 verify_jwt = false
 
-[functions.clone-page]
-verify_jwt = false
-
 [functions.serve-proxy]
 verify_jwt = false
