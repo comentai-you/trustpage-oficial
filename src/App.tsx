@@ -190,7 +190,6 @@ const App = () => {
     "/sobre",
     "/termos",
     "/privacidade",
-    "/contato",
   ];
 
   const forceSystemRoutes = FORCE_SYSTEM_PREFIXES.some(
