@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,7 +20,7 @@ import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { getPublicPageUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+import { getPublicPageUrl, getClonedPageUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
 interface LandingPage {
   id: string;
@@ -255,14 +255,15 @@ const TrustPageDashboard = () => {
     toast.success("Link copiado!");
   };
 
-  const handleCopyClonedLink = (slug: string) => {
-    // Cloned pages are served on the primary custom domain or tpage.com.br
-    const primaryDomain = userDomains.find(d => d.verified && d.is_primary);
-    const url = primaryDomain 
-      ? `https://${primaryDomain.domain}/c/${slug}`
-      : `https://${PUBLIC_PAGES_DOMAIN}/c/${slug}`;
+  const handleCopyClonedLink = (slug: string, customDomain?: string | null) => {
+    const url = getClonedPageUrl(slug, customDomain);
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
+  };
+
+  const handleViewClonedPage = (slug: string, customDomain?: string | null) => {
+    const url = getClonedPageUrl(slug, customDomain);
+    window.open(url, '_blank');
   };
 
   const handleNewPage = () => {
@@ -294,14 +295,6 @@ const TrustPageDashboard = () => {
     );
   };
 
-  const handleViewClonedPage = (slug: string) => {
-    // Cloned pages are served on the primary custom domain or tpage.com.br
-    const primaryDomain = userDomains.find(d => d.verified && d.is_primary);
-    const url = primaryDomain 
-      ? `https://${primaryDomain.domain}/c/${slug}`
-      : `https://${PUBLIC_PAGES_DOMAIN}/c/${slug}`;
-    window.open(url, '_blank');
-  };
 
   const handleShowAnalytics = (pageId: string, pageName: string) => {
     setAnalyticsDialog({ open: true, pageId, pageName });
@@ -633,14 +626,28 @@ const TrustPageDashboard = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewClonedPage(page.slug)}>
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              Visualizar
+                            {/* View options with all domains */}
+                            <DropdownMenuItem onClick={() => handleViewClonedPage(page.slug, null)}>
+                              <Globe className="w-4 h-4 mr-2" />
+                              Abrir em {PUBLIC_PAGES_DOMAIN}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleCopyClonedLink(page.slug)}>
+                            {userDomains.filter(d => d.verified).map((d) => (
+                              <DropdownMenuItem key={`view-${d.domain}`} onClick={() => handleViewClonedPage(page.slug, d.domain)}>
+                                <Globe className="w-4 h-4 mr-2" />
+                                Abrir em {d.domain}
+                              </DropdownMenuItem>
+                            ))}
+                            {/* Copy link options */}
+                            <DropdownMenuItem onClick={() => handleCopyClonedLink(page.slug, null)}>
                               <Copy className="w-4 h-4 mr-2" />
-                              Copiar Link
+                              Copiar link ({PUBLIC_PAGES_DOMAIN})
                             </DropdownMenuItem>
+                            {userDomains.filter(d => d.verified).map((d) => (
+                              <DropdownMenuItem key={`copy-${d.domain}`} onClick={() => handleCopyClonedLink(page.slug, d.domain)}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copiar link ({d.domain})
+                              </DropdownMenuItem>
+                            ))}
                             <DropdownMenuItem onClick={() => handleEditCloned(page.id)}>
                               <FileText className="w-4 h-4 mr-2" />
                               Editar

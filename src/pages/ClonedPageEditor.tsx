@@ -11,9 +11,7 @@ import {
   CheckCircle2,
   Edit3,
   Replace,
-  Eye,
-  Save,
-  Globe
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +21,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -230,7 +227,7 @@ const ClonedPageEditor = () => {
     toast.success("Todos os links atualizados!");
   };
 
-  const handleSave = async () => {
+  const handleSaveAndPublish = async () => {
     if (!pageData || !user) return;
     
     const trimmedName = pageName.trim();
@@ -258,13 +255,14 @@ const ClonedPageEditor = () => {
           html_content: finalHtml,
           head_code: headCode || null,
           links: linksJson,
-          is_published: isPublished
+          is_published: true // Always publish when saving
         })
         .eq("id", pageData.id);
       
       if (error) throw error;
       
-      toast.success("Página salva com sucesso!");
+      setIsPublished(true);
+      toast.success("Página salva e publicada com sucesso!");
       
     } catch (error) {
       console.error("Save error:", error);
@@ -385,7 +383,7 @@ const ClonedPageEditor = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
-                    onClick={handleSave} 
+                    onClick={handleSaveAndPublish} 
                     disabled={saving}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700"
@@ -393,9 +391,9 @@ const ClonedPageEditor = () => {
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                     ) : (
-                      <Save className="w-4 h-4 mr-1" />
+                      <CheckCircle2 className="w-4 h-4 mr-1" />
                     )}
-                    Salvar
+                    Salvar e Publicar
                   </Button>
                   <Button variant="outline" size="sm" onClick={handleDownload}>
                     <Download className="w-4 h-4 mr-1" />
@@ -405,7 +403,7 @@ const ClonedPageEditor = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              {/* Page Name & Publish */}
+              {/* Page Name */}
               <div className="p-4 border-b space-y-3">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Nome da Página</Label>
@@ -415,20 +413,10 @@ const ClonedPageEditor = () => {
                     onChange={(e) => setPageName(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Publicar página</span>
-                  </div>
-                  <Switch 
-                    checked={isPublished} 
-                    onCheckedChange={setIsPublished} 
-                  />
-                </div>
                 {isPublished && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <CheckCircle2 className="w-3 h-3 text-green-500" />
-                    <span>Disponível em: /c/{pageData.slug}</span>
+                    <span>Disponível em: tpage.com.br/c/{pageData.slug}</span>
                   </div>
                 )}
               </div>
