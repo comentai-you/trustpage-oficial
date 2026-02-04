@@ -33,6 +33,8 @@ interface ReplacedLink {
   new: string;
 }
 
+const GLOBAL_REPLACE_MARKER = "__GLOBAL__";
+
 interface ClonedPageData {
   id: string;
   slug: string;
@@ -181,14 +183,19 @@ const ClonedPageEditor = () => {
   const handleGlobalReplace = () => {
     if (!globalLinkReplace.trim()) return;
 
-    setLinks((prev) =>
-      prev.map((link) => ({
-        ...link,
-        new: globalLinkReplace,
-      })),
-    );
+    const target = globalLinkReplace.trim();
 
-    toast.success("Todos os links atualizados!");
+    // If user hasn't configured specific originals yet, enable GLOBAL mode.
+    // This matches the UI promise: replace all checkout/button destinations automatically.
+    if (links.length === 0) {
+      setLinks([{ original: GLOBAL_REPLACE_MARKER, new: target }]);
+      toast.success("Substituição global ativada! (links/botões serão redirecionados)");
+      return;
+    }
+
+    // Otherwise, just set the same destination for all existing rules.
+    setLinks((prev) => prev.map((link) => ({ ...link, new: target })));
+    toast.success("Todos os destinos foram atualizados!");
   };
 
   const handleRefreshPreview = () => {
@@ -435,7 +442,9 @@ const ClonedPageEditor = () => {
                             Aplicar
                           </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground">Substitui TODOS os links de destino de uma vez</p>
+                        <p className="text-xs text-muted-foreground">
+                          Se não houver regras abaixo, isso ativa o modo GLOBAL (troca links/botões de checkout automaticamente).
+                        </p>
                       </div>
 
                       {/* Link Replacements */}
@@ -473,10 +482,16 @@ const ClonedPageEditor = () => {
                                 <Label className="text-xs text-muted-foreground">Link Original</Label>
                                 <Input
                                   placeholder="https://checkout-produtor.com/..."
-                                  value={link.original}
+                                  value={link.original === GLOBAL_REPLACE_MARKER ? "(GLOBAL)" : link.original}
                                   onChange={(e) => handleLinkChange(index, "original", e.target.value)}
                                   className="text-sm mt-1"
+                                  disabled={link.original === GLOBAL_REPLACE_MARKER}
                                 />
+                                {link.original === GLOBAL_REPLACE_MARKER && (
+                                  <p className="text-[11px] text-muted-foreground mt-1">
+                                    Modo GLOBAL: o proxy tentará substituir automaticamente links/botões de checkout.
+                                  </p>
+                                )}
                               </div>
                               <div>
                                 <Label className="text-xs text-muted-foreground">Novo Link</Label>

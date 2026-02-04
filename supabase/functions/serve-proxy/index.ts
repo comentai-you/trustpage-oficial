@@ -12,6 +12,9 @@ interface ReplacedLink {
   new: string;
 }
 
+const GLOBAL_REPLACE_MARKERS = new Set(["__GLOBAL__", "*", "__ALL__"]);
+const CHECKOUT_HINT_RE = /(checkout|pay\.|pagamento|compra|comprar|carrinho|cart|order|pedido|hotmart|kiwify|monetizze|eduzz|perfectpay|braip)/i;
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -159,40 +162,137 @@ Deno.serve(async (req) => {
 
     // C. Swap links (checkout/affiliate links replacement)
     // links is a JSONB array: [{ original, new }] OR legacy format [{ href, newHref }]
-    if (page.links && Array.isArray(page.links)) {
-      interface LinkReplacement {
-        original?: string;
-        new?: string;
-        href?: string;
-        newHref?: string;
+    // Note: some clients may accidentally store JSON as a string in jsonb.
+    // We defensively parse it here.
+    const rawLinks = (page as unknown as { links?: unknown }).links;
+    let linksValue: unknown = rawLinks;
+    if (typeof linksValue === 'string') {
+      try {
+        linksValue = JSON.parse(linksValue);
+      } catch {
+        // ignore
       }
-      const linksData = page.links as LinkReplacement[];
-      let replacedCount = 0;
-      
-      linksData.forEach((link) => {
-        // Support both new format (original/new) and legacy format (href/newHref)
-        const originalUrl = link.original || link.href || '';
-        const newUrl = link.new || link.newHref || '';
-        
-        if (originalUrl && newUrl && originalUrl !== newUrl) {
-          // Global string replace for the link
-          const escapedHref = originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          
-          // Replace in href attributes
-          html = html.replace(new RegExp(`(href=["'])${escapedHref}(["'])`, 'gi'), `$1${newUrl}$2`);
-          html = html.replace(new RegExp(`(href=)${escapedHref}([\\s>])`, 'gi'), `$1${newUrl}$2`);
-          
-          // Also replace any onclick or data attributes that might contain the URL
-          html = html.split(originalUrl).join(newUrl);
-          replacedCount++;
+    }
+
+    interface LinkReplacement {
+      original?: string;
+      new?: string;
+      href?: string;
+      newHref?: string;
+      mode?: string;
+    }
+
+    const shouldReplaceUrlGlobally = (value: string, targetOriginForCheck: string): boolean => {
+      const v = (value || '').trim();
+      if (!v) return false;
+      if (v.startsWith('#')) return false;
+      const lower = v.toLowerCase();
+      if (lower.startsWith('mailto:') || lower.startsWith('tel:') || lower.startsWith('javascript:')) return false;
+
+      // Replace only links that look like checkout/compra/pagamento or known checkout providers.
+      if (CHECKOUT_HINT_RE.test(v)) return true;
+
+      // If it's an absolute URL and points outside the origin, it could still be a checkout.
+      // Keep this conservative (require hint) to avoid breaking nav/social links.
+      try {
+        const u = new URL(v);
+        if (u.origin !== targetOriginForCheck && CHECKOUT_HINT_RE.test(u.hostname)) return true;
+      } catch {
+        // not an absolute URL
+      }
+
+      return false;
+    };
+
+    const applyGlobalReplace = (inputHtml: string, newUrl: string, targetOriginForCheck: string) => {
+      let out = inputHtml;
+      let replaced = 0;
+
+      // Replace common destination-carrying attributes
+      const attrRe = /(\b(?:href|action|formaction|data-href|data-url|data-link)\s*=\s*)(["'])([^"']+)(\2)/gi;
+      out = out.replace(attrRe, (match, prefix, quote, value, endQuote) => {
+        if (shouldReplaceUrlGlobally(value, targetOriginForCheck)) {
+          replaced++;
+          return `${prefix}${quote}${newUrl}${endQuote}`;
         }
+        return match;
       });
-      
+
+      // Replace URLs embedded inside onclick="..."
+      const onclickRe = /(\bonclick\s*=\s*)(["'])([\s\S]*?)(\2)/gi;
+      out = out.replace(onclickRe, (match, prefix, quote, content, endQuote) => {
+        if (!content || !CHECKOUT_HINT_RE.test(content)) return match;
+        const updated = content.replace(/https?:\/\/[^'"\s]+/gi, (url: string) =>
+          shouldReplaceUrlGlobally(url, targetOriginForCheck) ? newUrl : url
+        );
+        if (updated !== content) {
+          replaced++;
+          return `${prefix}${quote}${updated}${endQuote}`;
+        }
+        return match;
+      });
+
+      return { html: out, replaced };
+    };
+
+    if (linksValue && Array.isArray(linksValue)) {
+      const linksData = linksValue as LinkReplacement[];
+      let replacedCount = 0;
+
+      // Global mode: replace checkout/button destinations broadly.
+      const globalRule = linksData.find((l) => {
+        const original = (l.original || l.href || '').trim();
+        return (l.mode && l.mode.toLowerCase() === 'global') || GLOBAL_REPLACE_MARKERS.has(original);
+      });
+
+      if (globalRule) {
+        const globalNew = (globalRule.new || globalRule.newHref || '').trim();
+        if (globalNew) {
+          const { html: updated, replaced } = applyGlobalReplace(html, globalNew, targetOrigin);
+          html = updated;
+          replacedCount += replaced;
+          console.log(`[serve-proxy] Global replace applied (${replaced} replacements)`);
+        }
+      }
+
+      // Exact replacements (original -> new)
+      linksData.forEach((link) => {
+        const originalUrl = (link.original || link.href || '').trim();
+        const newUrl = (link.new || link.newHref || '').trim();
+
+        if (!originalUrl || !newUrl || originalUrl === newUrl) return;
+        if (GLOBAL_REPLACE_MARKERS.has(originalUrl)) return; // handled above
+
+        const variants = [originalUrl];
+        if (originalUrl.includes('&')) variants.push(originalUrl.replace(/&/g, '&amp;'));
+
+        variants.forEach((variant) => {
+          const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+          // Replace in common attributes (href/action/formaction/data-*)
+          html = html.replace(
+            new RegExp(`(\\b(?:href|action|formaction|data-href|data-url|data-link)\\s*=\\s*["'])${escaped}(["'])`, 'gi'),
+            `$1${newUrl}$2`,
+          );
+
+          // Fallback: raw string replacement (covers inline scripts/data blobs)
+          html = html.split(variant).join(newUrl);
+        });
+
+        replacedCount++;
+      });
+
       console.log(`[serve-proxy] Replaced ${replacedCount} links`);
+    } else {
+      console.log('[serve-proxy] No links array configured for this page');
     }
 
     // D. Remove tracking scripts from original page FIRST (security/privacy measure)
     // This ensures the cloned page uses YOUR pixels, not the original owner's
+    // Also remove meta CSP that could block injected pixels/tags inside srcDoc.
+    html = html.replace(/<meta[^>]+http-equiv=["']content-security-policy["'][^>]*>/gi, '');
+    html = html.replace(/<meta[^>]+content-security-policy[^>]*>/gi, '');
+
     html = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match) => {
       const lowerMatch = match.toLowerCase();
       if (lowerMatch.includes('google-analytics') || 
