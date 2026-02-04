@@ -74,6 +74,8 @@ const ClonedPageEditor = () => {
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0); // For forcing iframe refresh
+  const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Fetch profile and page data
   useEffect(() => {
@@ -139,11 +141,30 @@ const ClonedPageEditor = () => {
     fetchData();
   }, [user, id, navigate]);
 
-  // Get preview URL (proxy URL with slug)
-  const getPreviewUrl = useCallback(() => {
-    if (!pageData?.slug) return "";
-    return `${PROXY_URL}?slug=${encodeURIComponent(pageData.slug)}`;
-  }, [pageData?.slug]);
+  // Fetch preview HTML (using srcDoc approach to bypass Supabase text/plain limitation)
+  const fetchPreviewHtml = useCallback(async () => {
+    if (!pageData?.slug || !isPublished) return;
+    
+    setPreviewLoading(true);
+    try {
+      const response = await fetch(`${PROXY_URL}?slug=${encodeURIComponent(pageData.slug)}`);
+      if (response.ok) {
+        const html = await response.text();
+        setPreviewHtml(html);
+      }
+    } catch (error) {
+      console.error('[ClonedPageEditor] Preview fetch error:', error);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, [pageData?.slug, isPublished]);
+
+  // Fetch preview when published or previewKey changes
+  useEffect(() => {
+    if (isPublished && pageData?.slug) {
+      fetchPreviewHtml();
+    }
+  }, [isPublished, pageData?.slug, previewKey, fetchPreviewHtml]);
 
   const handleAddLink = () => {
     setLinks((prev) => [...prev, { original: "", new: "" }]);
@@ -294,17 +315,23 @@ const ClonedPageEditor = () => {
                 style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}
               >
                 {isPublished ? (
-                  <iframe
-                    key={previewKey}
-                    ref={iframeRef}
-                    src={getPreviewUrl()}
-                    title="Preview"
-                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
-                    className={`bg-white border-0 ${
-                      previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl" : "w-full h-full"
-                    }`}
-                    style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
-                  />
+                  previewLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <iframe
+                      key={previewKey}
+                      ref={iframeRef}
+                      srcDoc={previewHtml}
+                      title="Preview"
+                      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
+                      className={`border-0 ${
+                        previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl bg-white" : "w-full h-full bg-white"
+                      }`}
+                      style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
+                    />
+                  )
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center p-8">
                     <Eye className="w-12 h-12 text-muted-foreground/50 mb-4" />
