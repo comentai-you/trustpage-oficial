@@ -45,6 +45,15 @@ interface ClonedPage {
   updated_at: string;
 }
 
+interface LegalPage {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  is_published: boolean | null;
+  updated_at: string;
+}
+
 interface UserProfile {
   created_at: string;
   subscription_status: string;
@@ -102,6 +111,7 @@ const getMaxClonedPages = (planType: string) => {
 const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
   const [clonedPages, setClonedPages] = useState<ClonedPage[]>([]);
+  const [legalPages, setLegalPages] = useState<LegalPage[]>([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -116,9 +126,8 @@ const TrustPageDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Separate regular pages from legal pages
+  // Regular pages (exclude legal slugs from landing_pages if any legacy remains)
   const regularPages = pages.filter(page => !isLegalPage(page.slug));
-  const legalPages = pages.filter(page => isLegalPage(page.slug));
 
   const isFreePlan = profile?.plan_type === 'free';
   const isPaidPlan = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'].includes(profile?.plan_type || '');
@@ -134,6 +143,7 @@ const TrustPageDashboard = () => {
       fetchProfile();
       fetchPages();
       fetchClonedPages();
+      fetchLegalPages();
       fetchUserDomains();
       fetchLeadsCount();
     }
@@ -204,6 +214,21 @@ const TrustPageDashboard = () => {
       setClonedPages(data || []);
     } catch (error) {
       console.error("Error fetching cloned pages:", error);
+    }
+  };
+
+  const fetchLegalPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("legal_pages")
+        .select("id, slug, title, description, is_published, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      setLegalPages(data || []);
+    } catch (error) {
+      console.error("Error fetching legal pages:", error);
     }
   };
 
@@ -739,7 +764,7 @@ const TrustPageDashboard = () => {
                         </div>
                         <div>
                           <h4 className="font-medium text-foreground text-sm">
-                            {getLegalPageName(page.slug, page.page_name)}
+                            {getLegalPageName(page.slug, page.title)}
                           </h4>
                           <p className="text-xs text-muted-foreground">/{page.slug}</p>
                         </div>
@@ -827,7 +852,7 @@ const TrustPageDashboard = () => {
           onComplete={() => {
             setShowOnboardingModal(false);
             fetchProfile();
-            fetchPages();
+            fetchLegalPages();
           }}
         />
       )}
