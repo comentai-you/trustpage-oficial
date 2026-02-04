@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet } from "lucide-react";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { TemplateType } from "@/types/landing-page";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
+import UpgradeModal from "./UpgradeModal";
 
 interface TemplateSelectionModalProps {
   open: boolean;
@@ -13,15 +15,26 @@ interface TemplateSelectionModalProps {
   isFreePlan?: boolean;
 }
 
-const TemplateSelectionModal = ({ open, onOpenChange, onSelect }: TemplateSelectionModalProps) => {
+const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = false }: TemplateSelectionModalProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const handleSelect = () => {
     if (selectedTemplate) {
       onSelect(selectedTemplate);
       onOpenChange(false);
       setSelectedTemplate(null);
+    }
+  };
+
+  const handleClonerClick = () => {
+    if (isFreePlan) {
+      setShowUpgradeModal(true);
+    } else {
+      onOpenChange(false);
+      navigate("/clonador");
     }
   };
 
@@ -208,6 +221,70 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect }: TemplateSelect
             </div>
           )}
         </button>
+
+        {/* Divider */}
+        <div className="relative py-2">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-background px-3 text-xs text-muted-foreground uppercase tracking-wider">
+              Ferramenta Avançada
+            </span>
+          </div>
+        </div>
+
+        {/* Page Cloner - Premium Feature */}
+        <button
+          onClick={handleClonerClick}
+          className={`group relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-lg ${
+            isFreePlan 
+              ? "border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 dark:border-amber-800/50"
+              : "border-border hover:border-primary/50"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                isFreePlan
+                  ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white"
+                  : "bg-primary/10 text-primary group-hover:bg-primary/20"
+              }`}
+            >
+              <Copy className="w-5 h-5" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-base font-semibold text-foreground">Clonador de Páginas</h3>
+                {isFreePlan && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded-full uppercase">
+                    <Crown className="w-3 h-3" />
+                    Pro
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                Clone qualquer página de vendas e substitua links de checkout.
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                  Import URL
+                </span>
+                <span className="px-2 py-0.5 bg-secondary/50 text-xs rounded-full text-secondary-foreground">
+                  Link Swapper
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {isFreePlan && (
+            <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center">
+              <Lock className="w-3 h-3 text-white" />
+            </div>
+          )}
+        </button>
       </div>
 
       <div className="flex gap-3 mt-4">
@@ -225,6 +302,13 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect }: TemplateSelect
           Continuar
         </Button>
       </div>
+
+      {/* Upgrade Modal for Free Users */}
+      <UpgradeModal 
+        open={showUpgradeModal} 
+        onOpenChange={setShowUpgradeModal} 
+        feature="cloner" 
+      />
     </>
   );
 

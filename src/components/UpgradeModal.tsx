@@ -6,13 +6,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Crown, Lock, Zap, Video, Clock, Globe, Sparkles } from "lucide-react";
+import { Crown, Lock, Zap, Video, Clock, Globe, Sparkles, Copy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  feature: 'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit';
+  feature: 'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit' | 'cloner';
 }
 
 const featureDetails = {
@@ -50,6 +50,11 @@ const featureDetails = {
     icon: Crown,
     title: 'Limite de Páginas',
     description: 'Você atingiu o limite de páginas do seu plano. Faça upgrade para criar mais páginas.',
+  },
+  cloner: {
+    icon: Copy,
+    title: 'Clonador de Páginas',
+    description: 'Clone qualquer página de vendas da internet, substitua links de checkout e publique em minutos. Recurso exclusivo para assinantes.',
   },
 };
 
