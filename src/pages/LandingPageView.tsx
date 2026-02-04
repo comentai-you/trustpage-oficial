@@ -133,7 +133,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         let page: any = null;
         let legalOwnerId: string | null = null;
 
-        // PÁGINAS LEGAIS: sempre precisam de owner (NUNCA pode cair em "qualquer página publicada")
+        // PÁGINAS LEGAIS: buscar da tabela legal_pages (nova infraestrutura)
         if (isLegalSlug) {
           // Resolve username to user_id if provided
           if (usernameParam) {
@@ -158,16 +158,26 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           if (!legalOwnerId) {
             page = null;
           } else {
-            // Use secure RPC to bypass RLS for public page viewing
+            // Use secure RPC to fetch from legal_pages table
             const { data, error } = await supabase
-              .rpc('get_published_page_by_owner_and_slug', { 
-                owner_id: legalOwnerId, 
+              .rpc('get_legal_page_from_legal_table', { 
+                owner_user_id: legalOwnerId, 
                 page_slug: String(slug) 
               })
               .maybeSingle();
 
             if (error) throw error;
-            page = data;
+            
+            // Map legal_pages columns to expected format
+            if (data) {
+              page = {
+                ...data,
+                page_name: data.title, // Map title -> page_name for compatibility
+                headline: data.title,
+                template_type: 'bio',
+                colors: { background: '#FFFFFF', text: '#1F2937', primary: '#8B5CF6' },
+              };
+            }
           }
         } else if (ownerIdOverride) {
           // DOMÍNIO CUSTOMIZADO: use secure RPC to bypass RLS for public page viewing
