@@ -361,15 +361,25 @@ const QuizEditor = () => {
 
                     {/* Question Image */}
                     <div className="space-y-2">
-                      <ImageUpload
-                        value={activeQuestion?.imageUrl || ""}
-                        onChange={(url) =>
-                          updateQuestion(activeQuestionIndex, { imageUrl: url })
-                        }
-                        label="Imagem da Pergunta (opcional)"
-                        hint="Adicione uma imagem ilustrativa para esta pergunta"
-                        aspectRatio="video"
-                      />
+                      <Label className="flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4" />
+                        Imagem da Pergunta (opcional)
+                      </Label>
+                      <div className="flex items-start gap-4">
+                        <ImageUpload
+                          value={activeQuestion?.imageUrl || ""}
+                          onChange={(url) =>
+                            updateQuestion(activeQuestionIndex, { imageUrl: url })
+                          }
+                          label=""
+                          hint=""
+                          aspectRatio="square"
+                        />
+                        <div className="text-xs text-muted-foreground pt-2">
+                          <p>Tamanho recomendado: <strong>400x300px</strong></p>
+                          <p className="mt-1">Formatos: PNG, JPG até 5MB</p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Options */}
@@ -437,13 +447,26 @@ const QuizEditor = () => {
                     </div>
 
                     {/* Cover Image - for dashboard thumbnail */}
-                    <ImageUpload
-                      value={coverImageUrl}
-                      onChange={setCoverImageUrl}
-                      label="Imagem de Capa (Dashboard)"
-                      hint="Esta imagem aparece como thumbnail no seu dashboard"
-                      aspectRatio="video"
-                    />
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4" />
+                        Imagem de Capa (Dashboard)
+                      </Label>
+                      <div className="flex items-start gap-4">
+                        <ImageUpload
+                          value={coverImageUrl}
+                          onChange={setCoverImageUrl}
+                          label=""
+                          hint=""
+                          aspectRatio="square"
+                        />
+                        <div className="text-xs text-muted-foreground pt-2">
+                          <p>Tamanho recomendado: <strong>240x320px</strong></p>
+                          <p className="mt-1">Formatos: PNG, JPG até 5MB</p>
+                          <p className="mt-1 text-primary/70">Esta imagem aparece como thumbnail no dashboard</p>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Divider */}
                     <div className="border-t border-border pt-6">
