@@ -589,6 +589,10 @@ export type Database = {
         Returns: boolean
       }
       can_add_domain: { Args: { check_user_id: string }; Returns: boolean }
+      can_create_cloned_page: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       can_create_page: { Args: { check_user_id: string }; Returns: boolean }
       can_submit_lead: { Args: { target_page_id: string }; Returns: boolean }
       check_page_view_limit: { Args: { page_id: string }; Returns: Json }
@@ -605,6 +609,10 @@ export type Database = {
           slug: string
           template_type: string
         }[]
+      }
+      get_max_cloned_pages_for_plan: {
+        Args: { check_user_id: string }
+        Returns: number
       }
       get_max_domains_for_plan: {
         Args: { check_user_id: string }

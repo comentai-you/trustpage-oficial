@@ -9,7 +9,8 @@ import {
   Lock,
   Sparkles,
   CheckCircle2,
-  Zap
+  Zap,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,12 +58,13 @@ const PageClonerPage = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallReason, setPaywallReason] = useState<'free_plan' | 'limit_reached'>('free_plan');
   
   const [targetUrl, setTargetUrl] = useState("");
 
-  // Fetch user profile
+  // Fetch user profile and check limits
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndCheckLimits = async () => {
       if (!user) return;
       
       try {
@@ -75,9 +77,27 @@ const PageClonerPage = () => {
         if (error) throw error;
         setProfile(data);
         
-        // Check if free plan
+        // Check if free plan - cloner is blocked
         const allowedPlans = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'];
         if (!allowedPlans.includes(data.plan_type) || data.subscription_status !== 'active') {
+          setPaywallReason('free_plan');
+          setShowPaywall(true);
+          setLoading(false);
+          return;
+        }
+
+        // Check cloned pages limit
+        const { count: clonedCount } = await supabase
+          .from("cloned_pages")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+
+        // Get max cloned pages for plan
+        const maxClones = data.plan_type === 'elite' ? 10 : 
+                          data.plan_type.includes('pro') ? 6 : 2;
+        
+        if ((clonedCount || 0) >= maxClones) {
+          setPaywallReason('limit_reached');
           setShowPaywall(true);
         }
       } catch (error) {
@@ -87,7 +107,7 @@ const PageClonerPage = () => {
       }
     };
 
-    fetchProfile();
+    fetchProfileAndCheckLimits();
   }, [user]);
 
   const handleCreate = async () => {
@@ -185,31 +205,57 @@ const PageClonerPage = () => {
               </div>
             </div>
             <DialogTitle className="text-2xl font-bold">
-              Clonador de Páginas
+              {paywallReason === 'limit_reached' 
+                ? 'Limite de Clones Atingido' 
+                : 'Clonador de Páginas'}
             </DialogTitle>
             <DialogDescription className="text-base mt-2">
-              Clone qualquer página de vendas e personalize com seus próprios links e textos!
+              {paywallReason === 'limit_reached'
+                ? 'Você atingiu o limite de páginas clonadas do seu plano. Faça upgrade para criar mais!'
+                : 'Clone qualquer página de vendas e personalize com seus próprios links e textos!'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 my-4">
-            <div className="flex items-center gap-3 text-sm">
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>Clone páginas de vendas de alta conversão</span>
+          {paywallReason === 'free_plan' && (
+            <div className="space-y-4 my-4">
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span>Clone páginas de vendas de alta conversão</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span>Substitua links de checkout automaticamente</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span>100% fidelidade visual garantida</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span>Injete seu próprio Pixel/GTM/Scripts</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>Substitua links de checkout automaticamente</span>
+          )}
+
+          {paywallReason === 'limit_reached' && (
+            <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 my-4">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">
+                    {profile?.plan_type?.includes('essential') 
+                      ? 'Plano Essential: 2 clones' 
+                      : profile?.plan_type?.includes('pro')
+                        ? 'Plano Pro: 6 clones'
+                        : 'Limite atingido'}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Faça upgrade para o Pro e tenha até 6 clones, ou exclua um clone existente.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>100% fidelidade visual garantida</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span>Injete seu próprio Pixel/GTM/Scripts</span>
-            </div>
-          </div>
+          )}
 
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
             <div className="flex items-center gap-3">
@@ -217,8 +263,16 @@ const PageClonerPage = () => {
                 <Crown className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-foreground">Disponível a partir do Plano Essencial</p>
-                <p className="text-sm text-muted-foreground">R$ 39,90/mês ou R$ 19,90 no 1º mês</p>
+                <p className="font-bold text-foreground">
+                  {paywallReason === 'limit_reached' 
+                    ? 'Upgrade para mais clones' 
+                    : 'Disponível a partir do Plano Essencial'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {paywallReason === 'limit_reached'
+                    ? 'Pro: até 6 clones | Elite: até 10 clones'
+                    : 'R$ 39,90/mês ou R$ 19,90 no 1º mês'}
+                </p>
               </div>
             </div>
           </div>

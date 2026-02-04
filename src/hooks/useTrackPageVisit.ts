@@ -122,23 +122,23 @@ export const useTrackPageVisit = ({ pageId, excludeOwner = true }: TrackVisitPar
           return;
         }
 
-        // Also check if user is authenticated and owns the page
-        if (excludeOwner) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            // Check if user owns this page
-            const { data: page } = await supabase
-              .from('landing_pages')
-              .select('user_id')
-              .eq('id', pageId)
-              .maybeSingle();
-            
-            if (page && page.user_id === user.id) {
-              console.log('Skipping analytics: page owner view detected');
-              hasTracked.current = true;
-              sessionStorage.setItem(viewKey, 'true');
-              return;
-            }
+        // Get current user session to pass auth token
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Also check if user is authenticated and owns the page (client-side check)
+        if (excludeOwner && session?.user) {
+          // Check if user owns this page
+          const { data: page } = await supabase
+            .from('landing_pages')
+            .select('user_id')
+            .eq('id', pageId)
+            .maybeSingle();
+          
+          if (page && page.user_id === session.user.id) {
+            console.log('Skipping analytics: page owner view detected');
+            hasTracked.current = true;
+            sessionStorage.setItem(viewKey, 'true');
+            return;
           }
         }
 
@@ -152,6 +152,14 @@ export const useTrackPageVisit = ({ pageId, excludeOwner = true }: TrackVisitPar
         
         // Generate visitor hash for unique visitor tracking
         const ipHash = generateVisitorHash();
+
+        // Build headers with auth token if available
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
 
         // Insert visit record
         const { error } = await supabase
