@@ -56,10 +56,13 @@ const isKnownAppDomain = (hostname: string): boolean =>
 
 
 // Rotas para domínios de CLIENTES - TUDO resolve via CustomDomainPage
+// Também usado para tpage.com.br servindo páginas clonadas via /c/:slug
 const CustomDomainRoutes = () => (
   <>
     <FacebookPixelTracker />
     <Routes>
+      {/* Cloned pages served on /c/:slug */}
+      <Route path="/c/:slug" element={<ClonedPageView />} />
       <Route path="*" element={<CustomDomainPage />} />
     </Routes>
   </>

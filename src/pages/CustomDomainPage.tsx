@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -7,7 +7,7 @@ import NotFound from "./NotFound";
 
 interface ResolvedDomain {
   found: boolean;
-  type?: 'page' | 'homepage' | 'no_pages';
+  type?: 'page' | 'homepage' | 'no_pages' | 'cloned_page';
   userId?: string;
   pageId?: string;
   slug?: string;
@@ -24,18 +24,39 @@ interface ResolvedDomain {
     pageName: string;
   }>;
   planType?: string;
+  pageName?: string;
   error?: string;
+}
+
+interface ClonedPageData {
+  id: string;
+  html_content: string;
+  page_name: string;
 }
 
 const CustomDomainPage = () => {
   const location = useLocation();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [resolvedSlug, setResolvedSlug] = useState<string | null>(null);
   const [resolvedOwnerId, setResolvedOwnerId] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [clonedPageData, setClonedPageData] = useState<ClonedPageData | null>(null);
 
   const debugEnabled = new URLSearchParams(location.search).has('tp_debug');
   const [debugInfo, setDebugInfo] = useState<any>(null);
+
+  // Write HTML to iframe when cloned page data is loaded
+  useEffect(() => {
+    if (clonedPageData && iframeRef.current) {
+      const doc = iframeRef.current.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(clonedPageData.html_content);
+        doc.close();
+      }
+    }
+  }, [clonedPageData]);
 
   useEffect(() => {
     const resolveDomain = async () => {
@@ -46,9 +67,9 @@ const CustomDomainPage = () => {
         console.log(`[CustomDomain] Starting resolution for: ${hostname}${path}`);
       }
 
-      // Extract slug directly from path - handle /p/ prefix for legacy support
+      // Extract slug directly from path - handle /p/ and /c/ prefixes
       let pathSlug = path || '';
-      if (pathSlug.startsWith('/p/')) {
+      if (pathSlug.startsWith('/p/') || pathSlug.startsWith('/c/')) {
         pathSlug = pathSlug.substring(3);
       }
       pathSlug = pathSlug.replace(/^\/+/, '').split('/')[0] || '';
@@ -85,7 +106,6 @@ const CustomDomainPage = () => {
         // Check for network/invoke errors
         if (response.error) {
           console.error('[CustomDomain] Edge function error:', response.error);
-          // Segurança: sem conseguir resolver domínio -> NÃO pode tentar "achar por slug" (evita vazamento)
           setNotFound(true);
           setLoading(false);
           return;
@@ -104,7 +124,30 @@ const CustomDomainPage = () => {
           return;
         }
 
-        // Handle response types
+        // Handle cloned page type
+        if (data.type === 'cloned_page' && data.pageId) {
+          console.log('[CustomDomain] Cloned page found, fetching content...');
+          
+          const { data: clonedPage, error: clonedError } = await supabase
+            .from('cloned_pages')
+            .select('id, html_content, page_name')
+            .eq('id', data.pageId)
+            .eq('is_published', true)
+            .maybeSingle();
+
+          if (clonedError || !clonedPage) {
+            console.error('[CustomDomain] Error fetching cloned page:', clonedError);
+            setNotFound(true);
+            setLoading(false);
+            return;
+          }
+
+          setClonedPageData(clonedPage);
+          setLoading(false);
+          return;
+        }
+
+        // Handle response types for landing pages
         if (data.type === 'page' && data.slug) {
           console.log('[CustomDomain] Page found, slug:', data.slug);
           setResolvedOwnerId(data.userId || null);
@@ -117,7 +160,6 @@ const CustomDomainPage = () => {
           console.log('[CustomDomain] No published pages');
           setNotFound(true);
         } else {
-          // Unexpected response - fallback seguro: tenta o slug do path, mas sempre preso ao userId do domínio
           console.log('[CustomDomain] Unexpected response, using path slug:', pathSlug);
           setResolvedOwnerId(data.userId || null);
           if (pathSlug) {
@@ -128,7 +170,6 @@ const CustomDomainPage = () => {
         }
       } catch (err) {
         console.error('[CustomDomain] Exception:', err);
-        // Segurança: sem conseguir resolver domínio -> não renderiza nada
         setNotFound(true);
       } finally {
         setLoading(false);
@@ -149,6 +190,18 @@ const CustomDomainPage = () => {
           </div>
         )}
       </div>
+    );
+  }
+
+  // Render cloned page in iframe
+  if (clonedPageData) {
+    return (
+      <iframe
+        ref={iframeRef}
+        title={clonedPageData.page_name || "Página"}
+        className="w-full h-screen border-0"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+      />
     );
   }
 

@@ -103,8 +103,6 @@ Deno.serve(async (req) => {
 
     console.log(`Found profile ${profile.id} for domain ${normalizedHostname}`);
 
-    console.log(`Found profile ${profile.id} for domain ${normalizedHostname}`);
-
     // Check if subscription is active
     const isActive = profile.subscription_status === 'active' || profile.subscription_status === 'free';
     if (!isActive) {
@@ -117,25 +115,60 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse path to find slug - handle legacy /p/ prefix and clean URLs
-    // Examples: /p/oferta-natal -> oferta-natal, /oferta-natal -> oferta-natal
+    // Parse path to find slug - handle /p/, /c/ prefixes and clean URLs
     let pathSlug = path || '';
+    let isClonedPagePath = false;
     
-    // Step 1: Remove /p/ prefix if present (legacy route support)
-    if (pathSlug.startsWith('/p/')) {
+    // Check for cloned page prefix /c/
+    if (pathSlug.startsWith('/c/')) {
+      pathSlug = pathSlug.substring(3);
+      isClonedPagePath = true;
+    }
+    // Check for landing page prefix /p/
+    else if (pathSlug.startsWith('/p/')) {
       pathSlug = pathSlug.substring(3);
     }
     
-    // Step 2: Remove leading slashes
+    // Remove leading slashes and get first segment
     pathSlug = pathSlug.replace(/^\/+/, '');
-    
-    // Step 3: Get only the first segment (before any additional slashes)
     pathSlug = pathSlug.split('/')[0] || '';
     
-    console.log(`Extracted slug from path "${path}": "${pathSlug}"`);
+    console.log(`Extracted slug from path "${path}": "${pathSlug}", isClonedPagePath: ${isClonedPagePath}`);
 
     // If path has a slug, find that specific page
     if (pathSlug && pathSlug !== '') {
+      // First check cloned_pages if it's a /c/ path or we haven't found a landing page
+      if (isClonedPagePath) {
+        const { data: clonedPage, error: clonedError } = await supabase
+          .from('cloned_pages')
+          .select('id, slug, page_name, is_published')
+          .eq('user_id', profile.id)
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (clonedError) {
+          console.error('Error finding cloned page by slug:', clonedError);
+        }
+
+        if (clonedPage) {
+          console.log(`Found cloned page by slug: ${clonedPage.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'cloned_page',
+              userId: profile.id,
+              pageId: clonedPage.id,
+              slug: clonedPage.slug,
+              pageName: clonedPage.page_name,
+              planType: profile.plan_type
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      // Check landing_pages
       const { data: page, error: pageError } = await supabase
         .from('landing_pages')
         .select('id, slug, template_type, page_name, is_published')
@@ -149,7 +182,7 @@ Deno.serve(async (req) => {
       }
 
       if (page) {
-        console.log(`Found page by slug: ${page.slug}`);
+        console.log(`Found landing page by slug: ${page.slug}`);
         return new Response(
           JSON.stringify({
             found: true,
@@ -163,6 +196,33 @@ Deno.serve(async (req) => {
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
+      }
+
+      // If not isClonedPagePath, also try cloned_pages as fallback
+      if (!isClonedPagePath) {
+        const { data: clonedPage, error: clonedError } = await supabase
+          .from('cloned_pages')
+          .select('id, slug, page_name, is_published')
+          .eq('user_id', profile.id)
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (!clonedError && clonedPage) {
+          console.log(`Found cloned page by slug (fallback): ${clonedPage.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'cloned_page',
+              userId: profile.id,
+              pageId: clonedPage.id,
+              slug: clonedPage.slug,
+              pageName: clonedPage.page_name,
+              planType: profile.plan_type
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
       }
     }
 
