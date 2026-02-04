@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { 
-  Loader2, 
-  Link2, 
-  Code2, 
+import {
+  Loader2,
+  Link2,
+  Code2,
   ArrowLeft,
   ExternalLink,
   Wand2,
@@ -13,7 +13,7 @@ import {
   Eye,
   Plus,
   Trash2,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,18 +59,18 @@ const ClonedPageEditor = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pageData, setPageData] = useState<ClonedPageData | null>(null);
-  
+
   const [pageName, setPageName] = useState("");
   const [links, setLinks] = useState<ReplacedLink[]>([]);
   const [headCode, setHeadCode] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [globalLinkReplace, setGlobalLinkReplace] = useState("");
-  
+
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0); // For forcing iframe refresh
@@ -79,7 +79,7 @@ const ClonedPageEditor = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!user || !id) return;
-      
+
       try {
         // Fetch profile
         const { data: profileData } = await supabase
@@ -109,21 +109,24 @@ const ClonedPageEditor = () => {
         // Convert links from old format to new format if needed
         let parsedLinks: ReplacedLink[] = [];
         if (pageResult.links && Array.isArray(pageResult.links)) {
-          parsedLinks = (pageResult.links as Array<{ href?: string; newHref?: string; original?: string; new?: string }>).map(l => ({
-            original: l.original || l.href || '',
-            new: l.new || l.newHref || l.original || l.href || ''
-          })).filter(l => l.original);
+          parsedLinks = (
+            pageResult.links as Array<{ href?: string; newHref?: string; original?: string; new?: string }>
+          )
+            .map((l) => ({
+              original: l.original || l.href || "",
+              new: l.new || l.newHref || l.original || l.href || "",
+            }))
+            .filter((l) => l.original);
         }
 
         setPageData({
           ...pageResult,
-          links: parsedLinks
+          links: parsedLinks,
         });
         setPageName(pageResult.page_name);
         setLinks(parsedLinks);
         setHeadCode(pageResult.head_code || "");
         setIsPublished(pageResult.is_published);
-
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Erro ao carregar a página");
@@ -138,56 +141,54 @@ const ClonedPageEditor = () => {
 
   // Get preview URL (proxy URL with slug)
   const getPreviewUrl = useCallback(() => {
-    if (!pageData?.slug) return '';
+    if (!pageData?.slug) return "";
     return `${PROXY_URL}?slug=${encodeURIComponent(pageData.slug)}`;
   }, [pageData?.slug]);
 
   const handleAddLink = () => {
-    setLinks(prev => [...prev, { original: '', new: '' }]);
+    setLinks((prev) => [...prev, { original: "", new: "" }]);
   };
 
   const handleRemoveLink = (index: number) => {
-    setLinks(prev => prev.filter((_, i) => i !== index));
+    setLinks((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleLinkChange = (index: number, field: 'original' | 'new', value: string) => {
-    setLinks(prev => prev.map((link, i) => 
-      i === index ? { ...link, [field]: value } : link
-    ));
+  const handleLinkChange = (index: number, field: "original" | "new", value: string) => {
+    setLinks((prev) => prev.map((link, i) => (i === index ? { ...link, [field]: value } : link)));
   };
 
   const handleGlobalReplace = () => {
     if (!globalLinkReplace.trim()) return;
-    
-    setLinks(prev => prev.map(link => ({
-      ...link,
-      new: globalLinkReplace
-    })));
-    
+
+    setLinks((prev) =>
+      prev.map((link) => ({
+        ...link,
+        new: globalLinkReplace,
+      })),
+    );
+
     toast.success("Todos os links atualizados!");
   };
 
   const handleRefreshPreview = () => {
-    setPreviewKey(prev => prev + 1);
+    setPreviewKey((prev) => prev + 1);
   };
 
   const handleSaveAndPublish = async () => {
     if (!pageData || !user) return;
-    
+
     const trimmedName = pageName.trim();
     if (!trimmedName) {
       toast.error("Digite um nome para a página");
       return;
     }
-    
+
     setSaving(true);
-    
+
     try {
       // Filter out empty links and convert to JSON-compatible format
-      const validLinks = links
-        .filter(l => l.original.trim())
-        .map(l => ({ original: l.original, new: l.new }));
-      
+      const validLinks = links.filter((l) => l.original.trim()).map((l) => ({ original: l.original, new: l.new }));
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
         .from("cloned_pages")
@@ -196,19 +197,18 @@ const ClonedPageEditor = () => {
           head_code: headCode || null,
           links: validLinks as any,
           is_published: true,
-          html_content: '' // Clear old HTML content - not used in proxy mode
+          html_content: "", // Clear old HTML content - not used in proxy mode
         })
         .eq("id", pageData.id);
-      
+
       if (error) throw error;
-      
+
       setIsPublished(true);
-      
+
       // Refresh preview to show updated changes
       handleRefreshPreview();
-      
+
       toast.success("Página salva e publicada! As alterações já estão ativas.");
-      
     } catch (error) {
       console.error("Save error:", error);
       toast.error("Erro ao salvar página. Tente novamente.");
@@ -218,7 +218,7 @@ const ClonedPageEditor = () => {
   };
 
   const getPublicUrl = () => {
-    if (!pageData?.slug) return '';
+    if (!pageData?.slug) return "";
     return `${PUBLIC_PAGES_BASE_URL}/c/${pageData.slug}`;
   };
 
@@ -241,7 +241,7 @@ const ClonedPageEditor = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1">
@@ -249,9 +249,7 @@ const ClonedPageEditor = () => {
               <Wand2 className="w-6 h-6 text-primary" />
               Editor de Página Clonada
             </h1>
-            <p className="text-muted-foreground text-sm">
-              {pageData.source_url}
-            </p>
+            <p className="text-muted-foreground text-sm">{pageData.source_url}</p>
           </div>
         </div>
 
@@ -266,12 +264,7 @@ const ClonedPageEditor = () => {
                   <span className="font-medium text-sm">Preview (Tempo Real)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRefreshPreview}
-                    title="Atualizar preview"
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleRefreshPreview} title="Atualizar preview">
                     <RefreshCw className="w-4 h-4" />
                   </Button>
                   <Button
@@ -294,11 +287,11 @@ const ClonedPageEditor = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div 
+              <div
                 className={`bg-muted/30 flex items-start justify-center overflow-auto ${
                   previewMode === "mobile" ? "p-4" : ""
                 }`}
-                style={{ height: 'calc(100vh - 320px)', minHeight: '500px' }}
+                style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}
               >
                 {isPublished ? (
                   <iframe
@@ -306,19 +299,20 @@ const ClonedPageEditor = () => {
                     ref={iframeRef}
                     src={getPreviewUrl()}
                     title="Preview"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
                     className={`bg-white border-0 ${
-                      previewMode === "mobile" 
-                        ? "w-[375px] rounded-lg shadow-xl" 
-                        : "w-full h-full"
+                      previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl" : "w-full h-full"
                     }`}
-                    style={previewMode === "mobile" ? { height: 'calc(100vh - 360px)' } : {}}
+                    style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
+                    className={`bg-white border-0 ${
+                      previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl" : "w-full h-full"
+                    }`}
+                    style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center p-8">
                     <Eye className="w-12 h-12 text-muted-foreground/50 mb-4" />
-                    <p className="text-muted-foreground">
-                      Salve e publique para ver o preview em tempo real
-                    </p>
+                    <p className="text-muted-foreground">Salve e publique para ver o preview em tempo real</p>
                     <p className="text-xs text-muted-foreground/70 mt-2">
                       O preview mostra a página exatamente como seus visitantes verão
                     </p>
@@ -337,8 +331,8 @@ const ClonedPageEditor = () => {
                   <span className="font-medium text-sm">Configurações</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    onClick={handleSaveAndPublish} 
+                  <Button
+                    onClick={handleSaveAndPublish}
                     disabled={saving}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700"
@@ -351,11 +345,7 @@ const ClonedPageEditor = () => {
                     Salvar e Publicar
                   </Button>
                   {isPublished && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => window.open(getPublicUrl(), '_blank')}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => window.open(getPublicUrl(), "_blank")}>
                       <ExternalLink className="w-4 h-4 mr-1" />
                       Abrir
                     </Button>
@@ -377,21 +367,23 @@ const ClonedPageEditor = () => {
                 {isPublished && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <CheckCircle2 className="w-3 h-3 text-green-500" />
-                    <span>Disponível em: {PUBLIC_PAGES_BASE_URL}/c/{pageData.slug}</span>
+                    <span>
+                      Disponível em: {PUBLIC_PAGES_BASE_URL}/c/{pageData.slug}
+                    </span>
                   </div>
                 )}
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full rounded-none border-b h-auto p-0">
-                  <TabsTrigger 
-                    value="links" 
+                  <TabsTrigger
+                    value="links"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3"
                   >
                     <Link2 className="w-4 h-4 mr-2" />
                     Links
                   </TabsTrigger>
-                  <TabsTrigger 
+                  <TabsTrigger
                     value="code"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3"
                   >
@@ -401,7 +393,7 @@ const ClonedPageEditor = () => {
                 </TabsList>
 
                 <TabsContent value="links" className="m-0">
-                  <ScrollArea style={{ height: 'calc(100vh - 580px)', minHeight: '250px' }}>
+                  <ScrollArea style={{ height: "calc(100vh - 580px)", minHeight: "250px" }}>
                     <div className="p-4 space-y-4">
                       {/* Global Replace */}
                       <div className="bg-muted/50 rounded-lg p-3 space-y-2">
@@ -420,9 +412,7 @@ const ClonedPageEditor = () => {
                             Aplicar
                           </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Substitui TODOS os links de destino de uma vez
-                        </p>
+                        <p className="text-xs text-muted-foreground">Substitui TODOS os links de destino de uma vez</p>
                       </div>
 
                       {/* Link Replacements */}
@@ -461,7 +451,7 @@ const ClonedPageEditor = () => {
                                 <Input
                                   placeholder="https://checkout-produtor.com/..."
                                   value={link.original}
-                                  onChange={(e) => handleLinkChange(index, 'original', e.target.value)}
+                                  onChange={(e) => handleLinkChange(index, "original", e.target.value)}
                                   className="text-sm mt-1"
                                 />
                               </div>
@@ -470,7 +460,7 @@ const ClonedPageEditor = () => {
                                 <Input
                                   placeholder="https://seu-link-afiliado.com/..."
                                   value={link.new}
-                                  onChange={(e) => handleLinkChange(index, 'new', e.target.value)}
+                                  onChange={(e) => handleLinkChange(index, "new", e.target.value)}
                                   className="text-sm mt-1"
                                 />
                               </div>
@@ -485,9 +475,7 @@ const ClonedPageEditor = () => {
                 <TabsContent value="code" className="m-0 p-4">
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Scripts do Head (Pixel/GTM)
-                      </Label>
+                      <Label className="text-sm font-medium mb-2 block">Scripts do Head (Pixel/GTM)</Label>
                       <Textarea
                         placeholder={`<!-- Cole aqui seu código do Facebook Pixel, Google Tag Manager, etc. -->\n<script>...</script>`}
                         value={headCode}
