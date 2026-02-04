@@ -28,3 +28,19 @@ export const getPublicPageUrl = (
 
   return `${PUBLIC_PAGES_BASE_URL}/p/${normalizedSlug}`;
 };
+
+// Helper function to generate cloned page URL
+// Cloned pages use /c/ prefix and work on tpage.com.br and all custom domains
+export const getClonedPageUrl = (
+  slug: string,
+  customDomain?: string | null,
+): string => {
+  const normalizedSlug = String(slug).toLowerCase();
+
+  if (customDomain) {
+    const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    return `https://${normalizedDomain}/c/${normalizedSlug}`;
+  }
+
+  return `${PUBLIC_PAGES_BASE_URL}/c/${normalizedSlug}`;
+};
