@@ -646,6 +646,17 @@ export type Database = {
           template_type: string
         }[]
       }
+      get_legal_page_from_legal_table: {
+        Args: { owner_user_id: string; page_slug: string }
+        Returns: {
+          content: Json
+          description: string
+          id: string
+          is_published: boolean
+          slug: string
+          title: string
+        }[]
+      }
       get_max_cloned_pages_for_plan: {
         Args: { check_user_id: string }
         Returns: number

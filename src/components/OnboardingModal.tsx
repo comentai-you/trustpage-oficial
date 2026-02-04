@@ -208,9 +208,9 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
 
       if (profileError) throw profileError;
 
-      // 2. Check if legal pages already exist
+      // 2. Check if legal pages already exist in legal_pages table
       const { data: existingPages } = await supabase
-        .from("landing_pages")
+        .from("legal_pages")
         .select("id, slug")
         .eq("user_id", userId)
         .in("slug", ["politica-de-privacidade", "termos-de-uso", "contato"]);
@@ -223,7 +223,7 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
         { type: 'contact', slug: 'contato', name: 'Contato' },
       ];
 
-      // 3. Upsert: update existing or create new
+      // 3. Upsert: update existing or create new in legal_pages table
       for (const page of legalPages) {
         const generatedContent = generateLegalPageContent(page.type, companyName.trim(), supportEmail.trim());
         const existingId = existingMap.get(page.slug);
@@ -231,9 +231,9 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
         if (existingId) {
           // Update existing page with fresh content
           const { error: updateError } = await supabase
-            .from("landing_pages")
+            .from("legal_pages")
             .update({
-              headline: generatedContent.headline,
+              title: generatedContent.headline,
               description: generatedContent.description,
               content: generatedContent.content,
               is_published: true,
@@ -244,21 +244,16 @@ const OnboardingModal = ({ open, userId, onComplete }: OnboardingModalProps) => 
             console.error(`Error updating ${page.slug}:`, updateError);
           }
         } else {
-          // Create new page
+          // Create new page in legal_pages table
           const { error: insertError } = await supabase
-            .from("landing_pages")
+            .from("legal_pages")
             .insert({
               user_id: userId,
               slug: page.slug,
-              page_name: page.name,
-              headline: generatedContent.headline,
+              title: page.name,
               description: generatedContent.description,
               content: generatedContent.content,
-              template_type: 'bio',
-              template_id: 1,
               is_published: true,
-              primary_color: '#8B5CF6',
-              colors: { background: '#FFFFFF', text: '#1F2937', primary: '#8B5CF6' },
             });
 
           if (insertError) {
