@@ -17,9 +17,15 @@ interface QuizData {
   primary_color: string;
 }
 
-const QuizView = () => {
-  const { slug } = useParams();
+interface QuizViewProps {
+  slugOverride?: string;
+}
+
+const QuizView = ({ slugOverride }: QuizViewProps) => {
+  const { slug: routeSlug } = useParams();
   const navigate = useNavigate();
+  
+  const slug = slugOverride || routeSlug;
 
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<QuizData | null>(null);

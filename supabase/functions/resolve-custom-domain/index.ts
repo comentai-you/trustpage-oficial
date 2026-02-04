@@ -42,14 +42,20 @@ Deno.serve(async (req) => {
     // Normalize hostname (remove www. prefix if present)
     const normalizedHostname = hostname.toLowerCase().replace(/^www\./, '');
 
-    // Parse path to find slug - handle /p/, /c/ prefixes and clean URLs
+    // Parse path to find slug - handle /p/, /c/, /q/ prefixes and clean URLs
     let pathSlug = path || '';
     let isClonedPagePath = false;
+    let isQuizPath = false;
     
     // Check for cloned page prefix /c/
     if (pathSlug.startsWith('/c/')) {
       pathSlug = pathSlug.substring(3);
       isClonedPagePath = true;
+    }
+    // Check for quiz prefix /q/
+    else if (pathSlug.startsWith('/q/')) {
+      pathSlug = pathSlug.substring(3);
+      isQuizPath = true;
     }
     // Check for landing page prefix /p/
     else if (pathSlug.startsWith('/p/')) {
@@ -60,12 +66,46 @@ Deno.serve(async (req) => {
     pathSlug = pathSlug.replace(/^\/+/, '');
     pathSlug = pathSlug.split('/')[0] || '';
     
-    console.log(`Extracted slug: "${pathSlug}", isClonedPagePath: ${isClonedPagePath}`);
+    console.log(`Extracted slug: "${pathSlug}", isClonedPagePath: ${isClonedPagePath}, isQuizPath: ${isQuizPath}`);
 
     // ===== CASE 1: SYSTEM DOMAIN (tpage.com.br) =====
     // On system domain, we search pages directly by slug (no user filtering)
     if (normalizedHostname === SYSTEM_DOMAIN || normalizedHostname === `www.${SYSTEM_DOMAIN}`) {
       console.log('System domain detected, searching by slug only...');
+      
+      // Handle quiz pages on system domain
+      if (isQuizPath && pathSlug) {
+        const { data: quiz, error: quizError } = await supabase
+          .from('quizzes')
+          .select('id, slug, title, page_name, is_published, user_id')
+          .eq('slug', pathSlug)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        if (quizError) {
+          console.error('Error finding quiz:', quizError);
+        }
+
+        if (quiz) {
+          console.log(`Found quiz: ${quiz.slug}`);
+          return new Response(
+            JSON.stringify({
+              found: true,
+              type: 'quiz',
+              userId: quiz.user_id,
+              pageId: quiz.id,
+              slug: quiz.slug,
+              pageName: quiz.page_name || quiz.title
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ found: false, error: 'Quiz não encontrado' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       // Handle cloned pages on system domain
       if (isClonedPagePath && pathSlug) {
@@ -244,6 +284,42 @@ Deno.serve(async (req) => {
     }
 
     // ===== RESOLVE PAGE FOR CUSTOM DOMAIN =====
+    
+    // Handle quiz pages
+    if (isQuizPath && pathSlug) {
+      const { data: quiz, error: quizError } = await supabase
+        .from('quizzes')
+        .select('id, slug, title, page_name, is_published')
+        .eq('user_id', profile.id)
+        .eq('slug', pathSlug)
+        .eq('is_published', true)
+        .maybeSingle();
+
+      if (quizError) {
+        console.error('Error finding quiz:', quizError);
+      }
+
+      if (quiz) {
+        console.log(`Found quiz: ${quiz.slug}`);
+        return new Response(
+          JSON.stringify({
+            found: true,
+            type: 'quiz',
+            userId: profile.id,
+            pageId: quiz.id,
+            slug: quiz.slug,
+            pageName: quiz.page_name || quiz.title,
+            planType: profile.plan_type
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ found: false, error: 'Quiz não encontrado' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Handle cloned pages
     if (isClonedPagePath && pathSlug) {

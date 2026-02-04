@@ -3,11 +3,12 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import LandingPageView from "./LandingPageView";
+import QuizView from "./QuizView";
 import NotFound from "./NotFound";
 
 interface ResolvedDomain {
   found: boolean;
-  type?: 'page' | 'homepage' | 'no_pages' | 'cloned_page' | 'legal_page';
+  type?: 'page' | 'homepage' | 'no_pages' | 'cloned_page' | 'legal_page' | 'quiz';
   userId?: string;
   pageId?: string;
   slug?: string;
@@ -42,6 +43,7 @@ const CustomDomainPage = () => {
   const [resolvedOwnerId, setResolvedOwnerId] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [clonedPageData, setClonedPageData] = useState<ClonedPageData | null>(null);
+  const [quizSlug, setQuizSlug] = useState<string | null>(null);
 
   const debugEnabled = new URLSearchParams(location.search).has('tp_debug');
   const [debugInfo, setDebugInfo] = useState<any>(null);
@@ -124,6 +126,14 @@ const CustomDomainPage = () => {
           return;
         }
 
+        // Handle quiz type
+        if (data.type === 'quiz' && data.slug) {
+          console.log('[CustomDomain] Quiz found, slug:', data.slug);
+          setQuizSlug(data.slug);
+          setLoading(false);
+          return;
+        }
+
         // Handle cloned page type
         if (data.type === 'cloned_page' && data.pageId) {
           console.log('[CustomDomain] Cloned page found, fetching content...');
@@ -195,6 +205,11 @@ const CustomDomainPage = () => {
         )}
       </div>
     );
+  }
+
+  // Render quiz
+  if (quizSlug) {
+    return <QuizView slugOverride={quizSlug} />;
   }
 
   // Render cloned page in iframe
