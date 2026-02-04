@@ -303,8 +303,7 @@ const PageClonerPage = () => {
       const finalHtml = getFinalHtml();
       const slug = generateSlug(trimmedName);
       
-      // Salvar como landing page do tipo 'cloned'
-      // Converter links para formato JSON compatível
+      // Salvar na tabela dedicada de páginas clonadas
       const linksJson = links.map(l => ({
         text: l.text,
         href: l.href,
@@ -312,25 +311,18 @@ const PageClonerPage = () => {
         newHref: l.newHref || l.href
       }));
       
-      const { data, error } = await supabase
-        .from('landing_pages')
+      const { error } = await supabase
+        .from('cloned_pages')
         .insert([{
           user_id: user.id,
           slug,
-          template_type: 'cloned',
-          template_id: 1,
           page_name: trimmedName,
-          headline: cloneResult.metadata.title,
-          is_published: false,
-          content: {
-            clonedHtml: finalHtml,
-            sourceUrl: cloneResult.sourceUrl,
-            links: linksJson,
-            headCode: headCode
-          }
-        }])
-        .select('id, slug')
-        .single();
+          source_url: cloneResult.sourceUrl,
+          html_content: finalHtml,
+          head_code: headCode || null,
+          links: linksJson,
+          is_published: false
+        }]);
       
       if (error) {
         if (error.code === '23505') {
