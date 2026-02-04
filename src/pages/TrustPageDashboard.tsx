@@ -256,8 +256,11 @@ const TrustPageDashboard = () => {
   };
 
   const handleCopyClonedLink = (slug: string) => {
-    // Cloned pages have their own route: /c/slug
-    const url = `${window.location.origin}/c/${slug}`;
+    // Cloned pages are served on the primary custom domain or tpage.com.br
+    const primaryDomain = userDomains.find(d => d.verified && d.is_primary);
+    const url = primaryDomain 
+      ? `https://${primaryDomain.domain}/c/${slug}`
+      : `https://${PUBLIC_PAGES_DOMAIN}/c/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
@@ -292,7 +295,12 @@ const TrustPageDashboard = () => {
   };
 
   const handleViewClonedPage = (slug: string) => {
-    window.open(`${window.location.origin}/c/${slug}`, '_blank');
+    // Cloned pages are served on the primary custom domain or tpage.com.br
+    const primaryDomain = userDomains.find(d => d.verified && d.is_primary);
+    const url = primaryDomain 
+      ? `https://${primaryDomain.domain}/c/${slug}`
+      : `https://${PUBLIC_PAGES_DOMAIN}/c/${slug}`;
+    window.open(url, '_blank');
   };
 
   const handleShowAnalytics = (pageId: string, pageName: string) => {

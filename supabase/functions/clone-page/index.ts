@@ -5,15 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// User agent moderno para evitar bloqueios simples
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
-// Regex patterns para reescrever assets
-const SRC_PATTERN = /(src|href|action|poster)=["'](?!data:|javascript:|#|mailto:|tel:)(\/[^"']*|(?!https?:\/\/)[^"']*)/gi;
-const SRCSET_PATTERN = /srcset=["']([^"']+)["']/gi;
-const URL_CSS_PATTERN = /url\(["']?(?!data:|#)(\/[^)"']+|(?!https?:\/\/)[^)"']+)["']?\)/gi;
-const STYLE_URL_PATTERN = /@import\s+["'](?!data:|#)(\/[^"']+|(?!https?:\/\/)[^"']+)["']/gi;
-
 // Lista de domínios problemáticos conhecidos
 const BLOCKED_DOMAINS = [
   'facebook.com',
@@ -43,14 +34,10 @@ function isBlockedDomain(url: string): boolean {
 
 function makeAbsoluteUrl(relativePath: string, baseUrl: URL): string {
   try {
-    // Se já é absoluto, retorna como está (convertendo http para https)
     if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
       return relativePath.replace(/^http:\/\//, 'https://');
     }
-    
-    // Construir URL absoluta
     const absolute = new URL(relativePath, baseUrl);
-    // Forçar HTTPS para evitar mixed content
     absolute.protocol = 'https:';
     return absolute.href;
   } catch {
@@ -60,6 +47,12 @@ function makeAbsoluteUrl(relativePath: string, baseUrl: URL): string {
 
 function rewriteHtml(html: string, baseUrl: URL): string {
   let result = html;
+  
+  // Regex patterns para reescrever assets
+  const SRC_PATTERN = /(src|href|action|poster)=["'](?!data:|javascript:|#|mailto:|tel:)(\/[^"']*|(?!https?:\/\/)[^"']*)/gi;
+  const SRCSET_PATTERN = /srcset=["']([^"']+)["']/gi;
+  const URL_CSS_PATTERN = /url\(["']?(?!data:|#)(\/[^)"']+|(?!https?:\/\/)[^)"']+)["']?\)/gi;
+  const STYLE_URL_PATTERN = /@import\s+["'](?!data:|#)(\/[^"']+|(?!https?:\/\/)[^"']+)["']/gi;
   
   // 1. Reescrever src, href, action, poster
   result = result.replace(SRC_PATTERN, (match, attr, path) => {
@@ -95,8 +88,7 @@ function rewriteHtml(html: string, baseUrl: URL): string {
   });
   
   // 5. Remover scripts potencialmente perigosos e trackers
-  result = result.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match, content) => {
-    // Manter apenas scripts inline que não fazem fetch/XMLHttpRequest
+  result = result.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match) => {
     const lowerMatch = match.toLowerCase();
     if (lowerMatch.includes('google-analytics') || 
         lowerMatch.includes('gtag') ||
@@ -114,9 +106,6 @@ function rewriteHtml(html: string, baseUrl: URL): string {
   // 6. Remover meta refresh e redirects
   result = result.replace(/<meta[^>]*http-equiv=["']refresh["'][^>]*>/gi, '<!-- redirect removed -->');
   
-  // 7. Remover noscript que podem quebrar layout
-  // result = result.replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '');
-  
   return result;
 }
 
@@ -127,9 +116,8 @@ function extractLinks(html: string, baseUrl: URL): Array<{ text: string; href: s
   let match;
   let index = 0;
   while ((match = linkRegex.exec(html)) !== null) {
-    const [, attrs, href, innerContent] = match;
+    const [, , href, innerContent] = match;
     
-    // Extrair texto limpo (remover tags HTML internas)
     const textContent = innerContent
       .replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
@@ -150,7 +138,6 @@ function extractLinks(html: string, baseUrl: URL): Array<{ text: string; href: s
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -246,79 +233,61 @@ Deno.serve(async (req) => {
 
     console.log(`[clone-page] Cloning ${targetUrl} for user ${userId}`);
 
-    // 4. Buscar página com timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    // 4. Tentar usar Firecrawl para renderizar JavaScript
+    const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    let html: string;
+    let finalUrl = parsedUrl;
 
-    let response: Response;
-    try {
-      response = await fetch(targetUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': USER_AGENT,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
-        signal: controller.signal,
-        redirect: 'follow',
-      });
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      console.error(`[clone-page] Fetch error:`, fetchError);
+    if (firecrawlApiKey) {
+      console.log('[clone-page] Using Firecrawl for full JS rendering');
       
-      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        return new Response(
-          JSON.stringify({ error: 'Tempo limite excedido. O site demorou muito para responder.' }),
-          { status: 408, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ 
-          error: 'Não foi possível acessar este site. Verifique se a URL está correta e acessível.' 
-        }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    clearTimeout(timeoutId);
-
-    // Verificar status
-    if (!response.ok) {
-      if (response.status === 403 || response.status === 503) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Este site possui proteção avançada de firewall (Cloudflare/WAF). Tente uma URL diferente.' 
+      try {
+        const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${firecrawlApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: targetUrl,
+            formats: ['html', 'rawHtml'],
+            waitFor: 5000, // Aguardar 5s para JavaScript renderizar
+            onlyMainContent: false, // Queremos a página inteira
           }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ error: `Erro ao acessar o site: HTTP ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+        });
 
-    // Verificar content-type
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
-      return new Response(
-        JSON.stringify({ error: 'A URL não retornou uma página HTML válida.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+        const firecrawlData = await firecrawlResponse.json();
+
+        if (!firecrawlResponse.ok) {
+          console.error('[clone-page] Firecrawl error:', firecrawlData);
+          throw new Error(firecrawlData.error || 'Firecrawl request failed');
+        }
+
+        // Usar rawHtml se disponível (HTML original), senão html processado
+        html = firecrawlData.data?.rawHtml || firecrawlData.data?.html || '';
+        
+        if (!html) {
+          throw new Error('Firecrawl returned empty HTML');
+        }
+
+        // Atualizar URL final se houver redirect
+        if (firecrawlData.data?.metadata?.sourceURL) {
+          finalUrl = new URL(firecrawlData.data.metadata.sourceURL);
+        }
+
+        console.log(`[clone-page] Firecrawl success, got ${html.length} bytes`);
+      } catch (firecrawlError) {
+        console.error('[clone-page] Firecrawl failed, falling back to fetch:', firecrawlError);
+        // Fallback para fetch simples
+        html = await fallbackFetch(targetUrl, parsedUrl);
+        finalUrl = parsedUrl;
+      }
+    } else {
+      console.log('[clone-page] Firecrawl not configured, using basic fetch');
+      html = await fallbackFetch(targetUrl, parsedUrl);
     }
 
     // 5. Processar HTML
-    let html = await response.text();
-    
-    // Usar URL final após redirects
-    const finalUrl = new URL(response.url || targetUrl);
-    
-    // Reescrever todos os caminhos relativos para absolutos
     html = rewriteHtml(html, finalUrl);
     
     // Extrair links para o editor
@@ -351,3 +320,51 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// Fallback: fetch simples sem renderização JavaScript
+async function fallbackFetch(targetUrl: string, parsedUrl: URL): Promise<string> {
+  const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      headers: {
+        'User-Agent': USER_AGENT,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      if (response.status === 403 || response.status === 503) {
+        throw new Error('Este site possui proteção avançada de firewall (Cloudflare/WAF). Tente uma URL diferente.');
+      }
+      throw new Error(`Erro ao acessar o site: HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
+      throw new Error('A URL não retornou uma página HTML válida.');
+    }
+
+    return await response.text();
+  } catch (fetchError) {
+    clearTimeout(timeoutId);
+    
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      throw new Error('Tempo limite excedido. O site demorou muito para responder.');
+    }
+    
+    throw fetchError;
+  }
+}
