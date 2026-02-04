@@ -551,14 +551,14 @@ const TrustPageDashboard = () => {
         <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground">Suas Páginas</h2>
           
-          {/* Page Counter - Only counts regular pages */}
+          {/* Page Counter - Counts regular pages + quizzes */}
           <div className={`inline-flex self-start sm:self-auto items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm ${
             hasReachedLimit 
               ? 'bg-warning/10 text-warning border border-warning/30' 
               : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
             {hasReachedLimit && <Crown className="w-3.5 sm:w-4 h-3.5 sm:h-4" />}
-            <span className="font-semibold">{regularPages.length}/{maxPages} {maxPages === 1 ? 'página' : 'páginas'}</span>
+            <span className="font-semibold">{totalStandardPages}/{maxPages} {maxPages === 1 ? 'página' : 'páginas'}</span>
           </div>
         </div>
 
