@@ -124,6 +124,7 @@ const PageClonerPage = () => {
       const pageName = urlObj.hostname.replace('www.', '');
 
       // Simply save to database - NO scraping! The proxy will fetch in real-time
+      // Automatically publish on creation for instant preview
       const { data: newPage, error } = await supabase
         .from('cloned_pages')
         .insert([{
@@ -134,7 +135,7 @@ const PageClonerPage = () => {
           html_content: '', // Not used anymore in proxy architecture
           head_code: null,
           links: [],
-          is_published: false
+          is_published: true // Auto-publish on creation!
         }])
         .select('id')
         .single();
@@ -150,8 +151,8 @@ const PageClonerPage = () => {
         return;
       }
 
-      toast.success("Página criada! Redirecionando para o editor...");
-      navigate(`/clonadas/${newPage.id}/editar`);
+      toast.success("Página criada e publicada! Redirecionando para o editor...");
+      navigate(`/clonador/edit/${newPage.id}`);
       
     } catch (error) {
       console.error("Create error:", error);
