@@ -7,7 +7,7 @@ import NotFound from "./NotFound";
 
 interface ResolvedDomain {
   found: boolean;
-  type?: 'page' | 'homepage' | 'no_pages' | 'cloned_page';
+  type?: 'page' | 'homepage' | 'no_pages' | 'cloned_page' | 'legal_page';
   userId?: string;
   pageId?: string;
   slug?: string;
@@ -147,8 +147,12 @@ const CustomDomainPage = () => {
           return;
         }
 
-        // Handle response types for landing pages
-        if (data.type === 'page' && data.slug) {
+        // Handle response types for landing pages and legal pages
+        if (data.type === 'legal_page' && data.slug) {
+          console.log('[CustomDomain] Legal page found, slug:', data.slug);
+          setResolvedOwnerId(data.userId || null);
+          setResolvedSlug(data.slug);
+        } else if (data.type === 'page' && data.slug) {
           console.log('[CustomDomain] Page found, slug:', data.slug);
           setResolvedOwnerId(data.userId || null);
           setResolvedSlug(data.slug);
