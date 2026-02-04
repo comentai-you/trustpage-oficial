@@ -17,11 +17,14 @@ const ClonedPageView = () => {
       return;
     }
 
-    // Just mark as loaded - the iframe will handle everything via proxy
-    setLoading(false);
+    // Redirect the entire page to the proxy URL
+    // This is the cleanest solution - the proxy returns HTML directly
+    // and the browser renders it natively without any iframe issues
+    window.location.replace(`${PROXY_URL}?slug=${encodeURIComponent(slug)}`);
   }, [slug]);
 
-  if (loading) {
+  // Show loading while redirecting
+  if (loading && !error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -40,25 +43,7 @@ const ClonedPageView = () => {
     );
   }
 
-  // Render the page via proxy in an iframe that fills the entire viewport
-  const proxyUrl = `${PROXY_URL}?slug=${encodeURIComponent(slug)}`;
-
-  return (
-    <iframe
-      src={proxyUrl}
-      title="Página"
-      className="w-full h-screen border-0"
-      style={{ 
-        display: 'block',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        border: 'none'
-      }}
-    />
-  );
+  return null;
 };
 
 export default ClonedPageView;
