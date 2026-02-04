@@ -33,6 +33,8 @@ import AboutPage from "./pages/AboutPage";
 import PageClonerPage from "./pages/PageClonerPage";
 import ClonedPageView from "./pages/ClonedPageView";
 import ClonedPageEditor from "./pages/ClonedPageEditor";
+import QuizEditor from "./pages/QuizEditor";
+import QuizView from "./pages/QuizView";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,8 @@ const CustomDomainRoutes = () => (
     <Routes>
       {/* Cloned pages served on /c/:slug */}
       <Route path="/c/:slug" element={<ClonedPageView />} />
+      {/* Quiz pages served on /q/:slug */}
+      <Route path="/q/:slug" element={<QuizView />} />
       <Route path="*" element={<CustomDomainPage />} />
     </Routes>
   </>
@@ -153,8 +157,21 @@ const SystemRoutes = () => (
       </ProtectedRoute>
     } />
     
-    {/* Cloned pages public view */}
+    {/* Quiz Builder routes */}
+    <Route path="/dashboard/quiz/new" element={
+      <ProtectedRoute>
+        <QuizEditor />
+      </ProtectedRoute>
+    } />
+    <Route path="/dashboard/quiz/edit/:id" element={
+      <ProtectedRoute>
+        <QuizEditor />
+      </ProtectedRoute>
+    } />
+    
+    {/* Public views */}
     <Route path="/c/:slug" element={<ClonedPageView />} />
+    <Route path="/q/:slug" element={<QuizView />} />
 
     {/* Landing pages públicas - DEVE vir DEPOIS das rotas específicas */}
     <Route path="/p/:slug" element={<LandingPageView />} />
@@ -179,6 +196,7 @@ const App = () => {
     "/clonador",
     "/dashboard",
     "/leads",
+    "/q",
     "/settings",
     "/subscription",
     "/payment-success",

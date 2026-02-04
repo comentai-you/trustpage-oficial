@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical, Globe } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical, Globe, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,7 @@ import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { getPublicPageUrl, getClonedPageUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+import { getPublicPageUrl, getClonedPageUrl, getQuizPublicUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
 interface LandingPage {
   id: string;
@@ -51,6 +51,15 @@ interface LegalPage {
   title: string;
   description: string | null;
   is_published: boolean | null;
+  updated_at: string;
+}
+
+interface Quiz {
+  id: string;
+  slug: string;
+  title: string;
+  is_published: boolean | null;
+  views: number | null;
   updated_at: string;
 }
 
@@ -112,6 +121,7 @@ const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
   const [clonedPages, setClonedPages] = useState<ClonedPage[]>([]);
   const [legalPages, setLegalPages] = useState<LegalPage[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -121,7 +131,7 @@ const TrustPageDashboard = () => {
   const [upgradeFeature, setUpgradeFeature] = useState<'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit'>('limit');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userDomains, setUserDomains] = useState<UserDomain[]>([]);
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string; type: 'page' | 'cloned' }>({ open: false, id: '', name: '', type: 'page' });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string; type: 'page' | 'cloned' | 'quiz' }>({ open: false, id: '', name: '', type: 'page' });
   const [analyticsDialog, setAnalyticsDialog] = useState<{ open: boolean; pageId: string; pageName: string }>({ open: false, pageId: '', pageName: '' });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -132,8 +142,9 @@ const TrustPageDashboard = () => {
   const isFreePlan = profile?.plan_type === 'free';
   const isPaidPlan = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'].includes(profile?.plan_type || '');
   const maxPages = getMaxPages(profile?.plan_type || 'free');
-  // Only count regular pages towards the limit
-  const hasReachedLimit = regularPages.length >= maxPages;
+  // Count regular pages + quizzes towards the limit
+  const totalStandardPages = regularPages.length + quizzes.length;
+  const hasReachedLimit = totalStandardPages >= maxPages;
 
   // Calculate total views (only from regular pages)
   const totalViews = regularPages.reduce((sum, page) => sum + (page.views || 0), 0);
@@ -144,6 +155,7 @@ const TrustPageDashboard = () => {
       fetchPages();
       fetchClonedPages();
       fetchLegalPages();
+      fetchQuizzes();
       fetchUserDomains();
       fetchLeadsCount();
     }
@@ -232,6 +244,21 @@ const TrustPageDashboard = () => {
     }
   };
 
+  const fetchQuizzes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("quizzes")
+        .select("id, slug, title, is_published, views, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      setQuizzes(data || []);
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+    }
+  };
+
   const fetchLeadsCount = async () => {
     try {
       // Get leads count from user's pages
@@ -254,6 +281,10 @@ const TrustPageDashboard = () => {
     setDeleteDialog({ open: true, id, name: pageName || 'esta página clonada', type: 'cloned' });
   };
 
+  const handleDeleteQuiz = (id: string, title: string) => {
+    setDeleteDialog({ open: true, id, name: title || 'este quiz', type: 'quiz' });
+  };
+
   const confirmDelete = async () => {
     const { id, type } = deleteDialog;
     setDeleteDialog({ open: false, id: '', name: '', type: 'page' });
@@ -268,6 +299,15 @@ const TrustPageDashboard = () => {
         if (error) throw error;
         setClonedPages(clonedPages.filter(p => p.id !== id));
         toast.success("Página clonada excluída com sucesso");
+      } else if (type === 'quiz') {
+        const { error } = await supabase
+          .from("quizzes")
+          .delete()
+          .eq("id", id);
+
+        if (error) throw error;
+        setQuizzes(quizzes.filter(q => q.id !== id));
+        toast.success("Quiz excluído com sucesso");
       } else {
         const { error } = await supabase
           .from("landing_pages")
@@ -279,8 +319,8 @@ const TrustPageDashboard = () => {
         toast.success("Página excluída com sucesso");
       }
     } catch (error) {
-      console.error("Error deleting page:", error);
-      toast.error("Erro ao excluir página");
+      console.error("Error deleting:", error);
+      toast.error("Erro ao excluir");
     }
   };
 
@@ -303,6 +343,21 @@ const TrustPageDashboard = () => {
   const handleViewClonedPage = (slug: string, customDomain?: string | null) => {
     const url = getClonedPageUrl(slug, customDomain);
     window.open(url, '_blank');
+  };
+
+  const handleCopyQuizLink = (slug: string, customDomain?: string | null) => {
+    const url = getQuizPublicUrl(slug, customDomain);
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
+  };
+
+  const handleViewQuiz = (slug: string, customDomain?: string | null) => {
+    const url = getQuizPublicUrl(slug, customDomain);
+    window.open(url, '_blank');
+  };
+
+  const handleEditQuiz = (quizId: string) => {
+    navigate(`/dashboard/quiz/edit/${quizId}`);
   };
 
   const handleNewPage = () => {
@@ -473,7 +528,7 @@ const TrustPageDashboard = () => {
         <div className="mb-6 sm:mb-8">
           <StatsBar
             totalViews={totalViews}
-            totalPages={regularPages.length}
+            totalPages={totalStandardPages}
             totalClonedPages={clonedPages.length}
             totalLeads={totalLeads}
             planType={profile?.plan_type || 'free'}
@@ -709,6 +764,101 @@ const TrustPageDashboard = () => {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Quizzes Section */}
+        {quizzes.length > 0 && (
+          <div className="mt-10 sm:mt-12">
+            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Quizzes</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Funis de perguntas interativas para qualificar leads
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/dashboard/quiz/new')}
+                className="self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Quiz
+              </Button>
+            </div>
+
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {quizzes.map((quiz) => (
+                <Card key={quiz.id} className="bg-card hover:border-primary/30 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium text-foreground text-sm truncate">
+                            {quiz.title}
+                          </h4>
+                          {quiz.is_published ? (
+                            <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-0 flex-shrink-0">
+                              Ativo
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground border-0 flex-shrink-0">
+                              Rascunho
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate mb-2">
+                          /q/{quiz.slug}
+                        </p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {quiz.views || 0}
+                          </span>
+                          <span>{formatDate(quiz.updated_at)}</span>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {quiz.is_published && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleViewQuiz(quiz.slug, null)}>
+                                <Globe className="w-4 h-4 mr-2" />
+                                Abrir Quiz
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleCopyQuizLink(quiz.slug, null)}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copiar link
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuItem onClick={() => handleEditQuiz(quiz.id)}>
+                            <FileText className="w-4 h-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteQuiz(quiz.id, quiz.title)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 

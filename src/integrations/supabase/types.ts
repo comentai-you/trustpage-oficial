@@ -526,6 +526,51 @@ export type Database = {
         }
         Relationships: []
       }
+      quizzes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean | null
+          primary_color: string | null
+          questions: Json
+          redirect_url: string | null
+          slug: string
+          title: string
+          updated_at: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          primary_color?: string | null
+          questions?: Json
+          redirect_url?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          primary_color?: string | null
+          questions?: Json
+          redirect_url?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       reserved_slugs: {
         Row: {
           reason: string
