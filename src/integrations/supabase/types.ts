@@ -133,6 +133,51 @@ export type Database = {
           },
         ]
       }
+      cloned_pages: {
+        Row: {
+          created_at: string
+          head_code: string | null
+          html_content: string
+          id: string
+          is_published: boolean | null
+          links: Json | null
+          page_name: string
+          slug: string
+          source_url: string
+          updated_at: string
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          created_at?: string
+          head_code?: string | null
+          html_content: string
+          id?: string
+          is_published?: boolean | null
+          links?: Json | null
+          page_name: string
+          slug: string
+          source_url: string
+          updated_at?: string
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          created_at?: string
+          head_code?: string | null
+          html_content?: string
+          id?: string
+          is_published?: boolean | null
+          links?: Json | null
+          page_name?: string
+          slug?: string
+          source_url?: string
+          updated_at?: string
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       landing_pages: {
         Row: {
           colors: Json | null
