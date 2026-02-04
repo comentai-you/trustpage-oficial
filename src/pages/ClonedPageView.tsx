@@ -8,7 +8,28 @@ interface ClonedPageData {
   html_content: string;
   page_name: string;
   is_published: boolean;
+  source_url: string;
 }
+
+// Inject base tag to fix relative paths (CSS, images, scripts)
+const injectBaseTag = (html: string, sourceUrl: string): string => {
+  try {
+    const urlObj = new URL(sourceUrl);
+    const baseUrl = urlObj.origin + '/';
+    const baseTag = `<base href="${baseUrl}" target="_blank" />`;
+
+    if (html.toLowerCase().includes('<head>')) {
+      return html.replace(/<head>/i, `<head>\n${baseTag}`);
+    } else if (html.toLowerCase().includes('<html>')) {
+      return html.replace(/<html[^>]*>/i, (match) => `${match}\n<head>${baseTag}</head>`);
+    } else {
+      return `<head>${baseTag}</head>\n${html}`;
+    }
+  } catch (e) {
+    console.warn('Invalid source URL for base tag:', e);
+    return html;
+  }
+};
 
 const ClonedPageView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -28,10 +49,10 @@ const ClonedPageView = () => {
       try {
         console.log('[ClonedPageView] Fetching page with slug:', slug);
         
-        // Fetch the cloned page by slug
+        // Fetch the cloned page by slug (including source_url for base tag injection)
         const { data, error: fetchError } = await supabase
           .from("cloned_pages")
-          .select("id, html_content, page_name, is_published, views")
+          .select("id, html_content, page_name, is_published, views, source_url")
           .eq("slug", slug)
           .eq("is_published", true)
           .maybeSingle();
@@ -66,13 +87,15 @@ const ClonedPageView = () => {
     fetchPage();
   }, [slug]);
 
-  // Write HTML to iframe when data is loaded
+  // Write HTML to iframe when data is loaded (with base tag injection)
   useEffect(() => {
     if (pageData && iframeRef.current) {
       const doc = iframeRef.current.contentDocument;
       if (doc) {
+        // Inject base tag to fix relative paths
+        const fixedHtml = injectBaseTag(pageData.html_content, pageData.source_url);
         doc.open();
-        doc.write(pageData.html_content);
+        doc.write(fixedHtml);
         doc.close();
       }
     }

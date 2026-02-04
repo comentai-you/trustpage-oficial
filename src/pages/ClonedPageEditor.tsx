@@ -156,19 +156,49 @@ const ClonedPageEditor = () => {
     fetchData();
   }, [user, id, navigate]);
 
-  // Generate final HTML with substitutions
+  // Generate final HTML with substitutions and FIX relative paths
   const getFinalHtml = useCallback(() => {
     if (!htmlContent) return "";
     
     let finalHtml = htmlContent;
+
+    // 1. O CORRETOR DE RENDERIZAÇÃO (Tag Base)
+    // Isso conserta CSS, Imagens e Scripts relativos instantaneamente
+    if (pageData?.source_url) {
+      try {
+        // Extrai a URL base (origem + path até o último /)
+        const urlObj = new URL(pageData.source_url);
+        const baseUrl = urlObj.origin + '/';
+        const baseTag = `<base href="${baseUrl}" target="_blank" />`;
+
+        // Injeta logo após a abertura do head para ter prioridade
+        if (finalHtml.toLowerCase().includes('<head>')) {
+          finalHtml = finalHtml.replace(/<head>/i, `<head>\n${baseTag}`);
+        } else if (finalHtml.toLowerCase().includes('<html>')) {
+          finalHtml = finalHtml.replace(/<html[^>]*>/i, (match) => `${match}\n<head>${baseTag}</head>`);
+        } else {
+          // Fallback: injeta no início
+          finalHtml = `<head>${baseTag}</head>\n${finalHtml}`;
+        }
+      } catch (e) {
+        console.warn('Invalid source URL for base tag:', e);
+      }
+    }
+
+    // 2. Substitui os links de checkout/botões
     finalHtml = replaceLinksInHtml(finalHtml, links);
     
+    // 3. Injeta códigos personalizados (Pixel/GTM)
     if (headCode.trim()) {
-      finalHtml = finalHtml.replace('</head>', `${headCode}\n</head>`);
+      if (finalHtml.toLowerCase().includes('</head>')) {
+        finalHtml = finalHtml.replace(/<\/head>/i, `${headCode}\n</head>`);
+      } else {
+        finalHtml = `${finalHtml}\n${headCode}`;
+      }
     }
     
     return finalHtml;
-  }, [htmlContent, links, headCode]);
+  }, [htmlContent, links, headCode, pageData?.source_url]);
 
   // Update iframe with debounce
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
