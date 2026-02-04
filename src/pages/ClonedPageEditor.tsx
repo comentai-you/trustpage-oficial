@@ -5,32 +5,32 @@ import {
   Link2, 
   Code2, 
   ArrowLeft,
-  Download,
   ExternalLink,
   Wand2,
   CheckCircle2,
   Edit3,
   Replace,
-  Eye
+  Eye,
+  Plus,
+  Trash2,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { PUBLIC_PAGES_BASE_URL } from "@/lib/constants";
 
-interface ExtractedLink {
-  text: string;
-  href: string;
-  selector: string;
-  newHref?: string;
+interface ReplacedLink {
+  original: string;
+  new: string;
 }
 
 interface ClonedPageData {
@@ -38,9 +38,8 @@ interface ClonedPageData {
   slug: string;
   page_name: string;
   source_url: string;
-  html_content: string;
   head_code: string | null;
-  links: ExtractedLink[];
+  links: ReplacedLink[];
   is_published: boolean;
   views: number;
 }
@@ -52,35 +51,8 @@ interface UserProfile {
   avatar_url: string | null;
 }
 
-// Função robusta para substituir links no HTML
-function replaceLinksInHtml(html: string, links: ExtractedLink[]): string {
-  const replacements = new Map<string, string>();
-  
-  links.forEach(link => {
-    if (link.newHref && link.newHref !== link.href && link.newHref.trim()) {
-      replacements.set(link.href, link.newHref);
-    }
-  });
-  
-  if (replacements.size === 0) return html;
-  
-  let result = html;
-  
-  replacements.forEach((newHref, originalHref) => {
-    const escapedHref = originalHref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    
-    const patterns = [
-      new RegExp(`(href=")${escapedHref}(")`, 'g'),
-      new RegExp(`(href=')${escapedHref}(')`, 'g'),
-    ];
-    
-    patterns.forEach(pattern => {
-      result = result.replace(pattern, `$1${newHref}$2`);
-    });
-  });
-  
-  return result;
-}
+// Supabase Edge Function URL for proxy
+const PROXY_URL = `https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/serve-proxy`;
 
 const ClonedPageEditor = () => {
   const navigate = useNavigate();
@@ -94,14 +66,14 @@ const ClonedPageEditor = () => {
   const [pageData, setPageData] = useState<ClonedPageData | null>(null);
   
   const [pageName, setPageName] = useState("");
-  const [htmlContent, setHtmlContent] = useState("");
-  const [links, setLinks] = useState<ExtractedLink[]>([]);
+  const [links, setLinks] = useState<ReplacedLink[]>([]);
   const [headCode, setHeadCode] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [globalLinkReplace, setGlobalLinkReplace] = useState("");
   
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
+  const [previewKey, setPreviewKey] = useState(0); // For forcing iframe refresh
 
   // Fetch profile and page data
   useEffect(() => {
@@ -121,7 +93,7 @@ const ClonedPageEditor = () => {
         // Fetch cloned page
         const { data: pageResult, error: pageError } = await supabase
           .from("cloned_pages")
-          .select("*")
+          .select("id, slug, page_name, source_url, head_code, links, is_published, views")
           .eq("id", id)
           .eq("user_id", user.id)
           .single();
@@ -134,13 +106,21 @@ const ClonedPageEditor = () => {
           return;
         }
 
+        // Convert links from old format to new format if needed
+        let parsedLinks: ReplacedLink[] = [];
+        if (pageResult.links && Array.isArray(pageResult.links)) {
+          parsedLinks = (pageResult.links as Array<{ href?: string; newHref?: string; original?: string; new?: string }>).map(l => ({
+            original: l.original || l.href || '',
+            new: l.new || l.newHref || l.original || l.href || ''
+          })).filter(l => l.original);
+        }
+
         setPageData({
           ...pageResult,
-          links: (pageResult.links as unknown as ExtractedLink[]) || []
+          links: parsedLinks
         });
         setPageName(pageResult.page_name);
-        setHtmlContent(pageResult.html_content);
-        setLinks((pageResult.links as unknown as ExtractedLink[]) || []);
+        setLinks(parsedLinks);
         setHeadCode(pageResult.head_code || "");
         setIsPublished(pageResult.is_published);
 
@@ -156,93 +136,23 @@ const ClonedPageEditor = () => {
     fetchData();
   }, [user, id, navigate]);
 
-  // Generate final HTML with substitutions and FIX relative paths
-  const getFinalHtml = useCallback(() => {
-    if (!htmlContent) return "";
-    
-    let finalHtml = htmlContent;
+  // Get preview URL (proxy URL with slug)
+  const getPreviewUrl = useCallback(() => {
+    if (!pageData?.slug) return '';
+    return `${PROXY_URL}?slug=${encodeURIComponent(pageData.slug)}`;
+  }, [pageData?.slug]);
 
-    // 1. O CORRETOR DE RENDERIZAÇÃO (Tag Base)
-    // Isso conserta CSS, Imagens e Scripts relativos instantaneamente
-    if (pageData?.source_url) {
-      try {
-        // Extrai a URL base (origem + path até o último /)
-        const urlObj = new URL(pageData.source_url);
-        const baseUrl = urlObj.origin + '/';
-        const baseTag = `<base href="${baseUrl}" target="_blank" />`;
+  const handleAddLink = () => {
+    setLinks(prev => [...prev, { original: '', new: '' }]);
+  };
 
-        // Injeta logo após a abertura do head para ter prioridade
-        if (finalHtml.toLowerCase().includes('<head>')) {
-          finalHtml = finalHtml.replace(/<head>/i, `<head>\n${baseTag}`);
-        } else if (finalHtml.toLowerCase().includes('<html>')) {
-          finalHtml = finalHtml.replace(/<html[^>]*>/i, (match) => `${match}\n<head>${baseTag}</head>`);
-        } else {
-          // Fallback: injeta no início
-          finalHtml = `<head>${baseTag}</head>\n${finalHtml}`;
-        }
-      } catch (e) {
-        console.warn('Invalid source URL for base tag:', e);
-      }
-    }
+  const handleRemoveLink = (index: number) => {
+    setLinks(prev => prev.filter((_, i) => i !== index));
+  };
 
-    // 2. Substitui os links de checkout/botões
-    finalHtml = replaceLinksInHtml(finalHtml, links);
-    
-    // 3. Injeta códigos personalizados (Pixel/GTM)
-    if (headCode.trim()) {
-      if (finalHtml.toLowerCase().includes('</head>')) {
-        finalHtml = finalHtml.replace(/<\/head>/i, `${headCode}\n</head>`);
-      } else {
-        finalHtml = `${finalHtml}\n${headCode}`;
-      }
-    }
-    
-    return finalHtml;
-  }, [htmlContent, links, headCode, pageData?.source_url]);
-
-  // Update iframe with debounce
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    
-    debounceTimerRef.current = setTimeout(() => {
-      if (iframeRef.current && htmlContent) {
-        const finalHtml = getFinalHtml();
-        const doc = iframeRef.current.contentDocument;
-        if (doc) {
-          doc.open();
-          doc.write(finalHtml);
-          doc.close();
-        }
-      }
-    }, 500);
-    
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [links, headCode, getFinalHtml]);
-
-  // Immediate update when HTML content changes
-  useEffect(() => {
-    if (iframeRef.current && htmlContent) {
-      const finalHtml = getFinalHtml();
-      const doc = iframeRef.current.contentDocument;
-      if (doc) {
-        doc.open();
-        doc.write(finalHtml);
-        doc.close();
-      }
-    }
-  }, [htmlContent]);
-
-  const handleLinkChange = (index: number, newHref: string) => {
+  const handleLinkChange = (index: number, field: 'original' | 'new', value: string) => {
     setLinks(prev => prev.map((link, i) => 
-      i === index ? { ...link, newHref } : link
+      i === index ? { ...link, [field]: value } : link
     ));
   };
 
@@ -251,10 +161,14 @@ const ClonedPageEditor = () => {
     
     setLinks(prev => prev.map(link => ({
       ...link,
-      newHref: globalLinkReplace
+      new: globalLinkReplace
     })));
     
     toast.success("Todos os links atualizados!");
+  };
+
+  const handleRefreshPreview = () => {
+    setPreviewKey(prev => prev + 1);
   };
 
   const handleSaveAndPublish = async () => {
@@ -269,30 +183,31 @@ const ClonedPageEditor = () => {
     setSaving(true);
     
     try {
-      const finalHtml = getFinalHtml();
+      // Filter out empty links and convert to JSON-compatible format
+      const validLinks = links
+        .filter(l => l.original.trim())
+        .map(l => ({ original: l.original, new: l.new }));
       
-      const linksJson = links.map(l => ({
-        text: l.text,
-        href: l.href,
-        selector: l.selector,
-        newHref: l.newHref || l.href
-      }));
-      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
         .from("cloned_pages")
         .update({
           page_name: trimmedName,
-          html_content: finalHtml,
           head_code: headCode || null,
-          links: linksJson,
-          is_published: true // Always publish when saving
+          links: validLinks as any,
+          is_published: true,
+          html_content: '' // Clear old HTML content - not used in proxy mode
         })
         .eq("id", pageData.id);
       
       if (error) throw error;
       
       setIsPublished(true);
-      toast.success("Página salva e publicada com sucesso!");
+      
+      // Refresh preview to show updated changes
+      handleRefreshPreview();
+      
+      toast.success("Página salva e publicada! As alterações já estão ativas.");
       
     } catch (error) {
       console.error("Save error:", error);
@@ -302,20 +217,9 @@ const ClonedPageEditor = () => {
     }
   };
 
-  const handleDownload = () => {
-    if (!htmlContent) return;
-    
-    const finalHtml = getFinalHtml();
-    
-    const blob = new Blob([finalHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${pageName || 'clone'}-${Date.now()}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast.success("HTML baixado!");
+  const getPublicUrl = () => {
+    if (!pageData?.slug) return '';
+    return `${PUBLIC_PAGES_BASE_URL}/c/${pageData.slug}`;
   };
 
   if (loading) {
@@ -343,7 +247,7 @@ const ClonedPageEditor = () => {
           <div className="flex-1">
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Wand2 className="w-6 h-6 text-primary" />
-              Editar Página Clonada
+              Editor de Página Clonada
             </h1>
             <p className="text-muted-foreground text-sm">
               {pageData.source_url}
@@ -353,15 +257,23 @@ const ClonedPageEditor = () => {
 
         {/* Editor Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Preview */}
+          {/* Preview via Proxy */}
           <Card className="overflow-hidden">
             <CardHeader className="border-b py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">Preview</span>
+                  <span className="font-medium text-sm">Preview (Tempo Real)</span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRefreshPreview}
+                    title="Atualizar preview"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -388,17 +300,30 @@ const ClonedPageEditor = () => {
                 }`}
                 style={{ height: 'calc(100vh - 320px)', minHeight: '500px' }}
               >
-                <iframe
-                  ref={iframeRef}
-                  title="Preview"
-                  className={`bg-white border-0 ${
-                    previewMode === "mobile" 
-                      ? "w-[375px] rounded-lg shadow-xl" 
-                      : "w-full h-full"
-                  }`}
-                  style={previewMode === "mobile" ? { height: 'calc(100vh - 360px)' } : {}}
-                  sandbox="allow-same-origin allow-scripts"
-                />
+                {isPublished ? (
+                  <iframe
+                    key={previewKey}
+                    ref={iframeRef}
+                    src={getPreviewUrl()}
+                    title="Preview"
+                    className={`bg-white border-0 ${
+                      previewMode === "mobile" 
+                        ? "w-[375px] rounded-lg shadow-xl" 
+                        : "w-full h-full"
+                    }`}
+                    style={previewMode === "mobile" ? { height: 'calc(100vh - 360px)' } : {}}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                    <Eye className="w-12 h-12 text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground">
+                      Salve e publique para ver o preview em tempo real
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 mt-2">
+                      O preview mostra a página exatamente como seus visitantes verão
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -409,7 +334,7 @@ const ClonedPageEditor = () => {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Edit3 className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">Editor</span>
+                  <span className="font-medium text-sm">Configurações</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -425,10 +350,16 @@ const ClonedPageEditor = () => {
                     )}
                     Salvar e Publicar
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="w-4 h-4 mr-1" />
-                    HTML
-                  </Button>
+                  {isPublished && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => window.open(getPublicUrl(), '_blank')}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Abrir
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -446,7 +377,7 @@ const ClonedPageEditor = () => {
                 {isPublished && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <CheckCircle2 className="w-3 h-3 text-green-500" />
-                    <span>Disponível em: tpage.com.br/c/{pageData.slug}</span>
+                    <span>Disponível em: {PUBLIC_PAGES_BASE_URL}/c/{pageData.slug}</span>
                   </div>
                 )}
               </div>
@@ -458,7 +389,7 @@ const ClonedPageEditor = () => {
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3"
                   >
                     <Link2 className="w-4 h-4 mr-2" />
-                    Links ({links.length})
+                    Links
                   </TabsTrigger>
                   <TabsTrigger 
                     value="code"
@@ -490,89 +421,84 @@ const ClonedPageEditor = () => {
                           </Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Substitui TODOS os links de uma vez
+                          Substitui TODOS os links de destino de uma vez
                         </p>
                       </div>
 
-                      {/* Individual Links */}
+                      {/* Link Replacements */}
                       <div className="space-y-3">
-                        {links.map((link, index) => (
-                          <div key={index} className="border rounded-lg p-3 space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
-                                  {link.text || `Link ${index + 1}`}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {link.href}
-                                </p>
-                              </div>
-                              <a 
-                                href={link.href} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
-                            </div>
-                            <Input
-                              placeholder="Novo link..."
-                              value={link.newHref || ""}
-                              onChange={(e) => handleLinkChange(index, e.target.value)}
-                              className="text-sm"
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      {links.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Link2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">Nenhum link encontrado</p>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium">Substituições de Links</Label>
+                          <Button size="sm" variant="outline" onClick={handleAddLink}>
+                            <Plus className="w-3 h-3 mr-1" />
+                            Adicionar
+                          </Button>
                         </div>
-                      )}
+
+                        {links.length === 0 ? (
+                          <div className="text-center py-6 text-muted-foreground text-sm">
+                            <p>Nenhuma substituição configurada.</p>
+                            <p className="text-xs mt-1">Adicione links para trocar checkouts, WhatsApp, etc.</p>
+                          </div>
+                        ) : (
+                          links.map((link, index) => (
+                            <div key={index} className="border rounded-lg p-3 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-muted-foreground">
+                                  Substituição #{index + 1}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  onClick={() => handleRemoveLink(index)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Link Original</Label>
+                                <Input
+                                  placeholder="https://checkout-produtor.com/..."
+                                  value={link.original}
+                                  onChange={(e) => handleLinkChange(index, 'original', e.target.value)}
+                                  className="text-sm mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Novo Link</Label>
+                                <Input
+                                  placeholder="https://seu-link-afiliado.com/..."
+                                  value={link.new}
+                                  onChange={(e) => handleLinkChange(index, 'new', e.target.value)}
+                                  className="text-sm mt-1"
+                                />
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="code" className="m-0">
-                  <ScrollArea style={{ height: 'calc(100vh - 580px)', minHeight: '250px' }}>
-                    <div className="p-4 space-y-4">
-                      {/* Head Injection */}
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">
-                          Injetar no &lt;head&gt;
-                        </Label>
-                        <Textarea
-                          placeholder={`<!-- Cole seu Pixel, GTM, etc -->\n<script>\n  // Seu código aqui\n</script>`}
-                          value={headCode}
-                          onChange={(e) => setHeadCode(e.target.value)}
-                          className="font-mono text-xs min-h-[150px]"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Adicione scripts de rastreamento (Facebook Pixel, Google Tag Manager, etc)
-                        </p>
-                      </div>
-
-                      {/* Source Info */}
-                      <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                        <p className="text-xs font-medium">Fonte Original</p>
-                        <a 
-                          href={pageData.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline flex items-center gap-1"
-                        >
-                          {pageData.source_url}
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Views: {pageData.views}
-                        </p>
-                      </div>
+                <TabsContent value="code" className="m-0 p-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Scripts do Head (Pixel/GTM)
+                      </Label>
+                      <Textarea
+                        placeholder={`<!-- Cole aqui seu código do Facebook Pixel, Google Tag Manager, etc. -->\n<script>...</script>`}
+                        value={headCode}
+                        onChange={(e) => setHeadCode(e.target.value)}
+                        className="font-mono text-xs min-h-[200px]"
+                      />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Este código será injetado antes do fechamento da tag &lt;/head&gt;
+                      </p>
                     </div>
-                  </ScrollArea>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
