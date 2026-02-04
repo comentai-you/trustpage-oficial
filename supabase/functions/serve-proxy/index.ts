@@ -158,38 +158,41 @@ Deno.serve(async (req) => {
     }
 
     // C. Swap links (checkout/affiliate links replacement)
-    // links is a JSONB array: [{ text, href, selector, newHref }]
+    // links is a JSONB array: [{ original, new }] OR legacy format [{ href, newHref }]
     if (page.links && Array.isArray(page.links)) {
-      const linksData = page.links as Array<{ href: string; newHref?: string }>;
+      interface LinkReplacement {
+        original?: string;
+        new?: string;
+        href?: string;
+        newHref?: string;
+      }
+      const linksData = page.links as LinkReplacement[];
+      let replacedCount = 0;
       
       linksData.forEach((link) => {
-        if (link.href && link.newHref && link.href !== link.newHref) {
+        // Support both new format (original/new) and legacy format (href/newHref)
+        const originalUrl = link.original || link.href || '';
+        const newUrl = link.new || link.newHref || '';
+        
+        if (originalUrl && newUrl && originalUrl !== newUrl) {
           // Global string replace for the link
-          const escapedHref = link.href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const escapedHref = originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           
           // Replace in href attributes
-          html = html.replace(new RegExp(`(href=["'])${escapedHref}(["'])`, 'gi'), `$1${link.newHref}$2`);
-          html = html.replace(new RegExp(`(href=)${escapedHref}([\\s>])`, 'gi'), `$1${link.newHref}$2`);
+          html = html.replace(new RegExp(`(href=["'])${escapedHref}(["'])`, 'gi'), `$1${newUrl}$2`);
+          html = html.replace(new RegExp(`(href=)${escapedHref}([\\s>])`, 'gi'), `$1${newUrl}$2`);
           
           // Also replace any onclick or data attributes that might contain the URL
-          html = html.split(link.href).join(link.newHref);
+          html = html.split(originalUrl).join(newUrl);
+          replacedCount++;
         }
       });
       
-      console.log(`[serve-proxy] Replaced ${linksData.filter(l => l.newHref && l.href !== l.newHref).length} links`);
+      console.log(`[serve-proxy] Replaced ${replacedCount} links`);
     }
 
-    // D. Inject custom head scripts (Pixel, GTM, etc.)
-    if (page.head_code && page.head_code.trim()) {
-      if (html.toLowerCase().includes('</head>')) {
-        html = html.replace(/<\/head>/i, `${page.head_code}\n</head>`);
-      } else {
-        html = `${html}\n${page.head_code}`;
-      }
-      console.log('[serve-proxy] Injected custom head code');
-    }
-
-    // E. Remove tracking scripts from original page (optional security/privacy measure)
+    // D. Remove tracking scripts from original page FIRST (security/privacy measure)
+    // This ensures the cloned page uses YOUR pixels, not the original owner's
     html = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (match) => {
       const lowerMatch = match.toLowerCase();
       if (lowerMatch.includes('google-analytics') || 
@@ -198,10 +201,21 @@ Deno.serve(async (req) => {
           lowerMatch.includes('facebook.net') ||
           lowerMatch.includes('hotjar') ||
           lowerMatch.includes('clarity.ms')) {
-        return '<!-- tracking script removed -->';
+        return '<!-- original tracking script removed -->';
       }
       return match;
     });
+
+    // E. Inject custom head scripts (Pixel, GTM, etc.) AFTER removing original tracking
+    // This ensures user's pixels are not accidentally removed
+    if (page.head_code && page.head_code.trim()) {
+      if (html.toLowerCase().includes('</head>')) {
+        html = html.replace(/<\/head>/i, `${page.head_code}\n</head>`);
+      } else {
+        html = `${html}\n${page.head_code}`;
+      }
+      console.log('[serve-proxy] Injected custom head code');
+    }
 
     console.log(`[serve-proxy] Returning modified HTML (${html.length} bytes)`);
 
