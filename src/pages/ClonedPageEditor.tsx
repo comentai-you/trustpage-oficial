@@ -304,10 +304,6 @@ const ClonedPageEditor = () => {
                       previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl" : "w-full h-full"
                     }`}
                     style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
-                    className={`bg-white border-0 ${
-                      previewMode === "mobile" ? "w-[375px] rounded-lg shadow-xl" : "w-full h-full"
-                    }`}
-                    style={previewMode === "mobile" ? { height: "calc(100vh - 360px)" } : {}}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center p-8">
