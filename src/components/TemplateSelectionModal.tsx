@@ -112,7 +112,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
     },
     {
       id: "vsl" as TemplateType,
-      icon: <Play className="w-4 h-4 sm:w-5 sm:h-5" fill={selectedTemplate === "vsl" ? "currentColor" : "currentColor"} />,
+      icon: <Play className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" />,
       title: "VSL Focada",
       description: "Ideal para PLR e Infoprodutos. Foco total no vídeo.",
       tags: ["Vídeo Central", "Timer CTA"],
@@ -127,7 +127,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
   ];
 
   const TemplatesList = () => (
-    <div className="grid grid-cols-1 gap-2 sm:gap-3">
+    <div className="grid grid-cols-1 gap-2 sm:gap-3 pb-2">
       {templates.map((template) => (
         <TemplateOption
           key={template.id}
@@ -204,7 +204,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
   );
 
   const ActionButtons = () => (
-    <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border mt-3 sm:mt-4">
+    <div className="flex gap-2 sm:gap-3 pt-3 border-t border-border bg-background">
       <Button
         variant="outline"
         className="flex-1 h-9 sm:h-10 text-sm"
@@ -229,8 +229,8 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader className="px-4 pt-4 pb-2">
+          <DrawerContent className="max-h-[85vh] flex flex-col">
+            <DrawerHeader className="px-4 pt-4 pb-2 flex-shrink-0">
               <DrawerTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="w-4 h-4 text-primary" />
                 Escolha o Tipo de Página
@@ -239,10 +239,12 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
                 Selecione o template ideal para seu produto
               </DrawerDescription>
             </DrawerHeader>
-            <div className="px-4 pb-4 flex flex-col overflow-hidden">
-              <ScrollArea className="flex-1 -mx-4 px-4" style={{ maxHeight: 'calc(85vh - 180px)' }}>
+            <div className="flex-1 overflow-hidden px-4">
+              <ScrollArea className="h-[50vh]">
                 <TemplatesList />
               </ScrollArea>
+            </div>
+            <div className="px-4 pb-4 flex-shrink-0">
               <ActionButtons />
             </div>
           </DrawerContent>
@@ -260,8 +262,8 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-2">
+        <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-5 pt-5 pb-3 flex-shrink-0">
             <DialogTitle className="flex items-center gap-2 text-lg">
               <Sparkles className="w-5 h-5 text-primary" />
               Escolha o Tipo de Página
@@ -270,10 +272,12 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
               Selecione o template ideal para o seu produto
             </DialogDescription>
           </DialogHeader>
-          <div className="px-6 pb-6 flex flex-col overflow-hidden flex-1">
-            <ScrollArea className="flex-1 -mx-6 px-6" style={{ maxHeight: 'calc(85vh - 200px)' }}>
+          <div className="flex-1 overflow-hidden px-5">
+            <ScrollArea className="h-[45vh]">
               <TemplatesList />
             </ScrollArea>
+          </div>
+          <div className="px-5 pb-5 flex-shrink-0">
             <ActionButtons />
           </div>
         </DialogContent>
