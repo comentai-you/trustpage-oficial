@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3 } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +19,7 @@ import { SystemUpdateModal } from "@/components/SystemUpdateModal";
 import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getPublicPageUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
 interface LandingPage {
@@ -32,6 +33,17 @@ interface LandingPage {
   video_url: string | null;
   cover_image_url: string | null;
   template_type: string | null;
+}
+
+interface ClonedPage {
+  id: string;
+  slug: string;
+  page_name: string;
+  source_url: string;
+  is_published: boolean;
+  views: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface UserProfile {
@@ -75,6 +87,7 @@ const getMaxPages = (planType: string) => {
 
 const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
+  const [clonedPages, setClonedPages] = useState<ClonedPage[]>([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -84,7 +97,7 @@ const TrustPageDashboard = () => {
   const [upgradeFeature, setUpgradeFeature] = useState<'vsl' | 'sales' | 'delay' | 'domain' | 'video' | 'html' | 'limit'>('limit');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userDomains, setUserDomains] = useState<UserDomain[]>([]);
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string; type: 'page' | 'cloned' }>({ open: false, id: '', name: '', type: 'page' });
   const [analyticsDialog, setAnalyticsDialog] = useState<{ open: boolean; pageId: string; pageName: string }>({ open: false, pageId: '', pageName: '' });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +107,7 @@ const TrustPageDashboard = () => {
   const legalPages = pages.filter(page => isLegalPage(page.slug));
 
   const isFreePlan = profile?.plan_type === 'free';
+  const isPaidPlan = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'].includes(profile?.plan_type || '');
   const maxPages = getMaxPages(profile?.plan_type || 'free');
   // Only count regular pages towards the limit
   const hasReachedLimit = regularPages.length >= maxPages;
@@ -105,6 +119,7 @@ const TrustPageDashboard = () => {
     if (user) {
       fetchProfile();
       fetchPages();
+      fetchClonedPages();
       fetchUserDomains();
       fetchLeadsCount();
     }
@@ -163,6 +178,21 @@ const TrustPageDashboard = () => {
     }
   };
 
+  const fetchClonedPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cloned_pages")
+        .select("id, slug, page_name, source_url, is_published, views, created_at, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      setClonedPages(data || []);
+    } catch (error) {
+      console.error("Error fetching cloned pages:", error);
+    }
+  };
+
   const fetchLeadsCount = async () => {
     try {
       // Get leads count from user's pages
@@ -178,23 +208,37 @@ const TrustPageDashboard = () => {
   };
 
   const handleDelete = async (id: string, pageName: string) => {
-    setDeleteDialog({ open: true, id, name: pageName || 'esta página' });
+    setDeleteDialog({ open: true, id, name: pageName || 'esta página', type: 'page' });
+  };
+
+  const handleDeleteCloned = (id: string, pageName: string) => {
+    setDeleteDialog({ open: true, id, name: pageName || 'esta página clonada', type: 'cloned' });
   };
 
   const confirmDelete = async () => {
-    const { id } = deleteDialog;
-    setDeleteDialog({ open: false, id: '', name: '' });
+    const { id, type } = deleteDialog;
+    setDeleteDialog({ open: false, id: '', name: '', type: 'page' });
     
     try {
-      const { error } = await supabase
-        .from("landing_pages")
-        .delete()
-        .eq("id", id);
+      if (type === 'cloned') {
+        const { error } = await supabase
+          .from("cloned_pages")
+          .delete()
+          .eq("id", id);
 
-      if (error) throw error;
-      
-      setPages(pages.filter(p => p.id !== id));
-      toast.success("Página excluída com sucesso");
+        if (error) throw error;
+        setClonedPages(clonedPages.filter(p => p.id !== id));
+        toast.success("Página clonada excluída com sucesso");
+      } else {
+        const { error } = await supabase
+          .from("landing_pages")
+          .delete()
+          .eq("id", id);
+
+        if (error) throw error;
+        setPages(pages.filter(p => p.id !== id));
+        toast.success("Página excluída com sucesso");
+      }
     } catch (error) {
       console.error("Error deleting page:", error);
       toast.error("Erro ao excluir página");
@@ -207,6 +251,13 @@ const TrustPageDashboard = () => {
       customDomain,
       isLegalPage(slug) ? profile?.username : null,
     );
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
+  };
+
+  const handleCopyClonedLink = (slug: string) => {
+    // Cloned pages have their own route: /c/slug
+    const url = `${window.location.origin}/c/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
   };
@@ -229,11 +280,19 @@ const TrustPageDashboard = () => {
     navigate(`/edit/${pageId}`);
   };
 
+  const handleEditCloned = (pageId: string) => {
+    navigate(`/clonador/edit/${pageId}`);
+  };
+
   const handleViewPage = (slug: string) => {
     window.open(
       getPublicPageUrl(slug, null, isLegalPage(slug) ? profile?.username : null),
       '_blank',
     );
+  };
+
+  const handleViewClonedPage = (slug: string) => {
+    window.open(`${window.location.origin}/c/${slug}`, '_blank');
   };
 
   const handleShowAnalytics = (pageId: string, pageName: string) => {
@@ -265,6 +324,13 @@ const TrustPageDashboard = () => {
       default:
         return slug;
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short'
+    });
   };
 
   return (
@@ -473,6 +539,122 @@ const TrustPageDashboard = () => {
           </div>
         )}
 
+        {/* Cloned Pages Section - Only show for paid plans */}
+        {isPaidPlan && (
+          <div className="mt-10 sm:mt-12">
+            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Copy className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Páginas Clonadas</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Páginas externas que você clonou e personalizou
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/clonador')}
+                className="self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Clonar Nova
+              </Button>
+            </div>
+
+            {clonedPages.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="py-8">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                      <Copy className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">Nenhuma página clonada</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1">
+                        Use o clonador para copiar páginas de vendas e personalizar com seus links de checkout.
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate('/clonador')}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Ir para o Clonador
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {clonedPages.map((page) => (
+                  <Card key={page.id} className="bg-card hover:border-primary/30 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-foreground text-sm truncate">
+                              {page.page_name}
+                            </h4>
+                            {page.is_published ? (
+                              <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-0 flex-shrink-0">
+                                Ativa
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground border-0 flex-shrink-0">
+                                Rascunho
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mb-2">
+                            Fonte: {new URL(page.source_url).hostname}
+                          </p>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              {page.views}
+                            </span>
+                            <span>{formatDate(page.updated_at)}</span>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewClonedPage(page.slug)}>
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                              Visualizar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleCopyClonedLink(page.slug)}>
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copiar Link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditCloned(page.id)}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteCloned(page.id, page.page_name)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Legal Pages Section - Always shown, separate from templates */}
         <div className="mt-10 sm:mt-12">
           <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -532,7 +714,7 @@ const TrustPageDashboard = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {page.is_published && (
-                          <Badge variant="secondary" className="text-xs bg-success/10 text-success border-0">
+                          <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-0">
                             Ativa
                           </Badge>
                         )}

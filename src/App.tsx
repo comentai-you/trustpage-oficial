@@ -31,6 +31,8 @@ import AdminBlogPage from "./pages/AdminBlogPage";
 import AdminMarketingPage from "./pages/AdminMarketingPage";
 import AboutPage from "./pages/AboutPage";
 import PageClonerPage from "./pages/PageClonerPage";
+import ClonedPageView from "./pages/ClonedPageView";
+import ClonedPageEditor from "./pages/ClonedPageEditor";
 
 const queryClient = new QueryClient();
 
@@ -132,6 +134,11 @@ const SystemRoutes = () => (
         <PageClonerPage />
       </ProtectedRoute>
     } />
+    <Route path="/clonador/edit/:id" element={
+      <ProtectedRoute>
+        <ClonedPageEditor />
+      </ProtectedRoute>
+    } />
     <Route path="/new" element={
       <ProtectedRoute>
         <TrustPageEditor />
@@ -142,6 +149,9 @@ const SystemRoutes = () => (
         <TrustPageEditor />
       </ProtectedRoute>
     } />
+    
+    {/* Cloned pages public view */}
+    <Route path="/c/:slug" element={<ClonedPageView />} />
 
     {/* Landing pages públicas - DEVE vir DEPOIS das rotas específicas */}
     <Route path="/p/:slug" element={<LandingPageView />} />
@@ -162,6 +172,7 @@ const App = () => {
     "/admin",
     "/auth",
     "/blog",
+    "/c",
     "/clonador",
     "/dashboard",
     "/leads",
