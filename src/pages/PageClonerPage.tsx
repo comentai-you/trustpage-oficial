@@ -205,8 +205,8 @@ const PageClonerPage = () => {
     return finalHtml;
   }, [editedHtml, links, headCode]);
 
-  // Update iframe when HTML changes
-  const updatePreview = useCallback(() => {
+  // Update iframe when HTML changes - with debounce to avoid constant reloads
+  const updatePreviewImmediate = useCallback(() => {
     if (!iframeRef.current || !editedHtml) return;
     
     const finalHtml = getFinalHtml();
@@ -220,9 +220,33 @@ const PageClonerPage = () => {
     }
   }, [editedHtml, getFinalHtml]);
 
+  // Debounced version for link/code changes
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
-    updatePreview();
-  }, [updatePreview]);
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Debounce the preview update (500ms delay)
+    debounceTimerRef.current = setTimeout(() => {
+      updatePreviewImmediate();
+    }, 500);
+    
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [links, headCode]);
+
+  // Immediate update only when the base HTML changes (after cloning)
+  useEffect(() => {
+    if (editedHtml) {
+      updatePreviewImmediate();
+    }
+  }, [editedHtml]);
 
   const handleClone = async () => {
     if (!targetUrl.trim()) {
