@@ -84,6 +84,21 @@ const getMaxPages = (planType: string) => {
   }
 };
 
+const getMaxClonedPages = (planType: string) => {
+  switch (planType) {
+    case 'pro':
+    case 'pro_yearly':
+      return 6;
+    case 'elite':
+      return 10;
+    case 'essential':
+    case 'essential_yearly':
+      return 2;
+    default:
+      return 0; // FREE plan - cloner blocked
+  }
+};
+
 const TrustPageDashboard = () => {
   const [pages, setPages] = useState<LandingPage[]>([]);
   const [clonedPages, setClonedPages] = useState<ClonedPage[]>([]);
@@ -434,10 +449,13 @@ const TrustPageDashboard = () => {
           <StatsBar
             totalViews={totalViews}
             totalPages={regularPages.length}
+            totalClonedPages={clonedPages.length}
             totalLeads={totalLeads}
             planType={profile?.plan_type || 'free'}
             subscriptionStatus={profile?.subscription_status || 'free'}
             monthlyViews={profile?.monthly_views || 0}
+            maxPages={maxPages}
+            maxClonedPages={getMaxClonedPages(profile?.plan_type || 'free')}
           />
         </div>
 

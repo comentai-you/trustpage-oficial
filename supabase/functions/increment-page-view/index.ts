@@ -35,8 +35,21 @@ const handler = async (req: Request): Promise<Response> => {
                      req.headers.get("cf-connecting-ip") ||
                      "unknown";
 
-    if (clientIp === "unknown") {
-      console.log("Unable to determine client IP");
+    // Get auth token if present (to check if page owner)
+    const authHeader = req.headers.get("authorization");
+    let viewerId: string | null = null;
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      const supabaseForAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { data: { user } } = await supabaseForAuth.auth.getUser(token);
+      if (user) {
+        viewerId = user.id;
+      }
+    }
+
+    if (clientIp === "unknown" && !viewerId) {
+      console.log("Unable to determine client IP or viewer");
       return new Response(
         JSON.stringify({ success: false, error: "Unable to process request" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -111,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Verify the page exists and is published
     const { data: page, error: pageError } = await supabase
       .from("landing_pages")
-      .select("id, is_published")
+      .select("id, is_published, user_id")
       .eq("id", page_id)
       .eq("is_published", true)
       .maybeSingle();
@@ -121,6 +134,15 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({ success: false, error: "Page not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Skip counting if the viewer is the page owner
+    if (viewerId && page.user_id === viewerId) {
+      console.log(`Skipping view count: viewer ${viewerId} is page owner`);
+      return new Response(
+        JSON.stringify({ success: true, counted: false, reason: "Owner view" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
