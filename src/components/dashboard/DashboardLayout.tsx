@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Plus, LogOut, User, CreditCard, BookOpen, MessageCircle } from "lucide-react";
+import { Sparkles, Plus, LogOut, User, CreditCard, BookOpen, MessageCircle, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -141,6 +141,13 @@ const DashboardLayout = ({
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       Ajuda & Tutoriais
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => navigate("/clonador")}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Clonador de Páginas
                     </DropdownMenuItem>
                   </div>
                   <DropdownMenuSeparator />
