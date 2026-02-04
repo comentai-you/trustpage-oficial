@@ -44,3 +44,19 @@ export const getClonedPageUrl = (
 
   return `${PUBLIC_PAGES_BASE_URL}/c/${normalizedSlug}`;
 };
+
+// Helper function to generate quiz public URL
+// Quizzes use /q/ prefix
+export const getQuizPublicUrl = (
+  slug: string,
+  customDomain?: string | null,
+): string => {
+  const normalizedSlug = String(slug).toLowerCase();
+
+  if (customDomain) {
+    const normalizedDomain = customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    return `https://${normalizedDomain}/q/${normalizedSlug}`;
+  }
+
+  return `${PUBLIC_PAGES_BASE_URL}/q/${normalizedSlug}`;
+};

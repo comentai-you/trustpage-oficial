@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown } from "lucide-react";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,11 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       onOpenChange(false);
       navigate("/clonador");
     }
+  };
+
+  const handleQuizClick = () => {
+    onOpenChange(false);
+    navigate("/dashboard/quiz/new");
   };
 
   const templates = [
@@ -199,6 +204,39 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
             <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
           </div>
         )}
+      </button>
+
+      {/* Quiz Builder - Available for all plans */}
+      <button
+        onClick={handleQuizClick}
+        className="group relative p-3 sm:p-4 rounded-xl border-2 transition-all text-left hover:shadow-md border-border hover:border-primary/50"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
+            <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground">Quiz Builder</h3>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 text-green-600 text-[9px] sm:text-[10px] font-bold rounded-full uppercase">
+                Novo
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+              Crie funis de perguntas interativas para qualificar leads.
+            </p>
+
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
+              <span className="px-1.5 sm:px-2 py-0.5 bg-secondary/50 text-[10px] sm:text-xs rounded-full text-secondary-foreground">
+                Typeform Style
+              </span>
+              <span className="px-1.5 sm:px-2 py-0.5 bg-secondary/50 text-[10px] sm:text-xs rounded-full text-secondary-foreground">
+                Alta Conversão
+              </span>
+            </div>
+          </div>
+        </div>
       </button>
     </div>
   );
