@@ -194,14 +194,13 @@ Deno.serve(async (req) => {
     console.log(`[serve-proxy] Returning modified HTML (${html.length} bytes)`);
 
     // 5. Return modified HTML with permissive headers
+    // CRITICAL: Headers must tell browser this is HTML to render, not text to display
     return new Response(html, {
       status: 200,
       headers: {
-        ...corsHeaders,
         'Content-Type': 'text/html; charset=utf-8',
-        'X-Frame-Options': 'ALLOWALL',
-        'Content-Security-Policy': '', // Disable strict CSP to allow modifications
-        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'ALLOWALL', // Allow embedding in iframes
+        'Access-Control-Allow-Origin': '*', // CORS for preview
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     });
