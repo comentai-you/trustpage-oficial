@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Save, Eye, GripVertical, Settings, ExternalLink, Loader2, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Eye, GripVertical, Settings, ExternalLink, Loader2, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { QuizQuestion, QuizOption } from "@/types/quiz";
 import { getQuizPublicUrl } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import ImageUpload from "@/components/trustpage/ImageUpload";
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -40,6 +41,8 @@ const QuizEditor = () => {
 
   // Form state
   const [title, setTitle] = useState("Meu Quiz");
+  const [pageName, setPageName] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [slug, setSlug] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
@@ -69,6 +72,8 @@ const QuizEditor = () => {
 
       if (data) {
         setTitle(data.title);
+        setPageName(data.page_name || "");
+        setCoverImageUrl(data.cover_image_url || "");
         setDescription(data.description || "");
         setSlug(data.slug);
         setRedirectUrl(data.redirect_url || "");
@@ -113,6 +118,8 @@ const QuizEditor = () => {
       const quizPayload = {
         user_id: user.id,
         title: title.trim(),
+        page_name: pageName.trim() || null,
+        cover_image_url: coverImageUrl.trim() || null,
         description: description.trim() || null,
         slug: slug.trim().toLowerCase().replace(/\s+/g, '-'),
         redirect_url: redirectUrl.trim() || null,
@@ -352,6 +359,19 @@ const QuizEditor = () => {
                       />
                     </div>
 
+                    {/* Question Image */}
+                    <div className="space-y-2">
+                      <ImageUpload
+                        value={activeQuestion?.imageUrl || ""}
+                        onChange={(url) =>
+                          updateQuestion(activeQuestionIndex, { imageUrl: url })
+                        }
+                        label="Imagem da Pergunta (opcional)"
+                        hint="Adicione uma imagem ilustrativa para esta pergunta"
+                        aspectRatio="video"
+                      />
+                    </div>
+
                     {/* Options */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -403,6 +423,33 @@ const QuizEditor = () => {
                     <CardTitle className="text-base">Configurações Gerais</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {/* Page Name - for dashboard identification */}
+                    <div className="space-y-2">
+                      <Label>Nome da Página (Dashboard)</Label>
+                      <Input
+                        placeholder="Ex: Quiz Perfil de Investidor"
+                        value={pageName}
+                        onChange={(e) => setPageName(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Este nome aparece no seu dashboard para identificar o quiz
+                      </p>
+                    </div>
+
+                    {/* Cover Image - for dashboard thumbnail */}
+                    <ImageUpload
+                      value={coverImageUrl}
+                      onChange={setCoverImageUrl}
+                      label="Imagem de Capa (Dashboard)"
+                      hint="Esta imagem aparece como thumbnail no seu dashboard"
+                      aspectRatio="video"
+                    />
+
+                    {/* Divider */}
+                    <div className="border-t border-border pt-6">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-4">Configurações do Quiz</h4>
+                    </div>
+
                     {/* Title */}
                     <div className="space-y-2">
                       <Label>Título do Quiz</Label>
@@ -411,6 +458,9 @@ const QuizEditor = () => {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Título que aparece na tela inicial do quiz para o usuário
+                      </p>
                     </div>
 
                     {/* Description */}

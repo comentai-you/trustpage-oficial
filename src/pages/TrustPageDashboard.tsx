@@ -12,6 +12,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import StatsBar from "@/components/dashboard/StatsBar";
 import PageCard from "@/components/dashboard/PageCard";
+import QuizCard from "@/components/dashboard/QuizCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
 import OnboardingModal from "@/components/OnboardingModal";
 import TrafficSourcesChart from "@/components/dashboard/TrafficSourcesChart";
@@ -58,6 +59,8 @@ interface Quiz {
   id: string;
   slug: string;
   title: string;
+  page_name: string | null;
+  cover_image_url: string | null;
   is_published: boolean | null;
   views: number | null;
   updated_at: string;
@@ -248,7 +251,7 @@ const TrustPageDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("quizzes")
-        .select("id, slug, title, is_published, views, updated_at")
+        .select("id, slug, title, page_name, cover_image_url, is_published, views, updated_at")
         .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
 
@@ -370,6 +373,11 @@ const TrustPageDashboard = () => {
   };
 
   const handleTemplateSelect = (templateType: TemplateType) => {
+    // Quiz has its own editor
+    if (templateType === 'quiz') {
+      navigate('/dashboard/quiz/new');
+      return;
+    }
     // All templates available for all plans - free plan has watermark + view limits
     navigate(`/new?type=${templateType}`);
   };
@@ -634,6 +642,25 @@ const TrustPageDashboard = () => {
                 onShowAnalytics={handleShowAnalytics}
               />
             ))}
+
+            {/* Quizzes - shown together with regular pages */}
+            {quizzes.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                id={quiz.id}
+                pageName={quiz.page_name}
+                title={quiz.title}
+                slug={quiz.slug}
+                views={quiz.views}
+                isPublished={quiz.is_published}
+                updatedAt={quiz.updated_at}
+                coverImageUrl={quiz.cover_image_url}
+                customDomains={userDomains}
+                onEdit={handleEditQuiz}
+                onDelete={handleDeleteQuiz}
+                onCopyLink={handleCopyQuizLink}
+              />
+            ))}
           </div>
         )}
 
@@ -764,101 +791,6 @@ const TrustPageDashboard = () => {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Quizzes Section */}
-        {quizzes.length > 0 && (
-          <div className="mt-10 sm:mt-12">
-            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Quizzes</h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Funis de perguntas interativas para qualificar leads
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/dashboard/quiz/new')}
-                className="self-start sm:self-auto"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Quiz
-              </Button>
-            </div>
-
-            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {quizzes.map((quiz) => (
-                <Card key={quiz.id} className="bg-card hover:border-primary/30 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-foreground text-sm truncate">
-                            {quiz.title}
-                          </h4>
-                          {quiz.is_published ? (
-                            <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-0 flex-shrink-0">
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground border-0 flex-shrink-0">
-                              Rascunho
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate mb-2">
-                          /q/{quiz.slug}
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="w-3 h-3" />
-                            {quiz.views || 0}
-                          </span>
-                          <span>{formatDate(quiz.updated_at)}</span>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {quiz.is_published && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleViewQuiz(quiz.slug, null)}>
-                                <Globe className="w-4 h-4 mr-2" />
-                                Abrir Quiz
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleCopyQuizLink(quiz.slug, null)}>
-                                <Copy className="w-4 h-4 mr-2" />
-                                Copiar link
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          <DropdownMenuItem onClick={() => handleEditQuiz(quiz.id)}>
-                            <FileText className="w-4 h-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteQuiz(quiz.id, quiz.title)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         )}
 

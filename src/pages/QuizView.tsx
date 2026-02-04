@@ -219,6 +219,17 @@ const QuizView = () => {
             transition={{ duration: 0.3 }}
             className="max-w-lg w-full"
           >
+            {/* Question Image */}
+            {currentQuestion.imageUrl && (
+              <div className="mb-6 rounded-xl overflow-hidden">
+                <img
+                  src={currentQuestion.imageUrl}
+                  alt=""
+                  className="w-full h-auto max-h-48 object-cover"
+                />
+              </div>
+            )}
+
             <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-8 text-center">
               {currentQuestion.text}
             </h2>

@@ -23,4 +23,6 @@ export interface Quiz {
   views: number | null;
   created_at: string;
   updated_at: string;
+  cover_image_url: string | null;
+  page_name: string | null;
 }
