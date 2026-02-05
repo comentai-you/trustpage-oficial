@@ -549,6 +549,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                   className="relative z-10"
                   style={{
                     transformOrigin: 'center bottom',
+                    transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
                     WebkitMaskImage: `
                       linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
                       linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
