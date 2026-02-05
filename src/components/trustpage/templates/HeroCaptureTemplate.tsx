@@ -546,11 +546,15 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                 {/* Main Image Container with Enhanced Multi-Directional Mask */}
                 <div 
-                  className="relative z-10 w-full flex justify-center overflow-hidden"
+                  className="relative z-10 w-full flex items-center justify-center overflow-hidden"
                   style={{
-                    maxHeight: isMobile ? '280px' : undefined,
-                    WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 100%)',
-                    maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 100%)',
+                    // Reserve espaço no layout no mobile para que o scale não “estoure” para fora
+                    height: isMobile ? `${Math.round(280 * (heroImageSizeMobile / 100))}px` : undefined,
+                    // Fade suave em todas as bordas para não aparecer nenhuma “linha” de corte
+                    WebkitMaskImage:
+                      'radial-gradient(120% 120% at 50% 55%, black 82%, transparent 100%)',
+                    maskImage:
+                      'radial-gradient(120% 120% at 50% 55%, black 82%, transparent 100%)',
                   }}
                 >
                   <div
@@ -558,13 +562,13 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                       transformOrigin: 'center center',
                       transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
                       WebkitMaskImage: `
-                        linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                        linear-gradient(to bottom, black 0%, black 52%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)
                       `,
                       WebkitMaskComposite: 'source-in',
                       maskImage: `
-                        linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                        linear-gradient(to bottom, black 0%, black 52%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)
                       `,
                       maskComposite: 'intersect',
                     }}
