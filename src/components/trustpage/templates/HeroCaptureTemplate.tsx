@@ -244,11 +244,17 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
       </div>
 
       <div className="relative z-10 w-full px-4 py-6 md:px-6 md:py-12 lg:py-16 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center">
+        <div
+          className={`flex flex-col gap-6 md:gap-8 lg:gap-12 items-center ${
+            isMobile ? "" : "lg:grid lg:grid-cols-2"
+          }`}
+        >
           
           {/* Left Column: Copy + Form (Neon Box) */}
           <div
-            className="relative p-[1px] rounded-2xl overflow-hidden w-full order-2 lg:order-1"
+            className={`relative p-[1px] rounded-2xl overflow-hidden w-full order-2 ${
+              isMobile ? "" : "lg:order-1"
+            }`}
             style={{
               background: `linear-gradient(135deg, ${accentColor}60 0%, transparent 50%, ${accentColor}30 100%)`,
             }}
@@ -426,7 +432,11 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
           </div>
 
           {/* Right Column: Hero Image (Ebook or Person) - Premium Studio Effect */}
-          <div className="relative flex flex-col items-center justify-end order-1 lg:order-2 pb-4 lg:pb-8 w-full">
+          <div
+            className={`relative flex flex-col items-center justify-end w-full order-1 pb-4 ${
+              isMobile ? "" : "lg:order-2 lg:pb-8"
+            }`}
+          >
             
             {data.image_url ? (
               <>
