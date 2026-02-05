@@ -224,12 +224,11 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
   return (
     <div
-      className="relative w-full"
+      className="relative w-full overflow-x-hidden"
       style={{
         background: isGradientBg ? bgStart : `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd}20 100%)`,
         backgroundColor: isGradientBg ? undefined : bgStart,
         minHeight: fullHeight ? '100vh' : 'auto',
-        overflowX: 'hidden',
       }}
     >
       {/* Background Glow Effects */}
@@ -288,10 +287,11 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                       </span>
                     )}
                     <h1
-                      className="font-extrabold leading-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl"
+                      className="font-extrabold leading-tight"
                       style={{ 
                         color: textColor,
                         lineHeight: 1.15,
+                        fontSize: isMobile ? `${headlineSizeMobile}rem` : `${headlineSizeDesktop}rem`,
                       }}
                     >
                       {data.headline || "Sua Headline Impactante Vai Aqui"}

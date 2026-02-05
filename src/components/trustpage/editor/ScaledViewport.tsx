@@ -42,6 +42,7 @@ const ScaledViewport = ({ viewportWidth, scale, children }: ScaledViewportProps)
         style={{
           width: `${viewportWidth}px`,
           zoom: scale,
+         overflow: 'hidden',
         }}
       >
         {children}

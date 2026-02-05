@@ -95,7 +95,8 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              backgroundColor: formData.colors.background
+              backgroundColor: formData.colors.background,
+              overflowX: 'hidden',
             }}
           >
             <style>
@@ -107,10 +108,11 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
             </style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
               <div 
-                className="w-full relative" 
+                className="w-full relative flex flex-col" 
                 style={{ 
                   backgroundColor: formData.colors.background,
                   minHeight: isCaptureHero ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
+                  alignItems: 'stretch',
                 }}
               >
                 {isSalesPage ? (
