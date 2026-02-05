@@ -546,30 +546,36 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
 
                 {/* Main Image Container with Enhanced Multi-Directional Mask */}
                 <div 
-                  className="relative z-10"
+                  className="relative z-10 w-full flex justify-center overflow-hidden"
                   style={{
-                    transformOrigin: 'center bottom',
-                    transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
-                    WebkitMaskImage: `
-                      linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
-                      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
-                    `,
-                    WebkitMaskComposite: 'source-in',
-                    maskImage: `
-                      linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
-                      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
-                    `,
-                    maskComposite: 'intersect',
+                    maxHeight: isMobile ? '280px' : undefined,
                   }}
                 >
-                  <img
-                    src={data.image_url}
-                    alt="Hero"
-                    className="relative max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
+                  <div
                     style={{
-                      filter: `drop-shadow(0 0 80px ${accentColor}60) drop-shadow(0 30px 50px rgba(0,0,0,0.5))`,
+                      transformOrigin: 'center center',
+                      transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
+                      WebkitMaskImage: `
+                        linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                      `,
+                      WebkitMaskComposite: 'source-in',
+                      maskImage: `
+                        linear-gradient(to bottom, black 0%, black 65%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)
+                      `,
+                      maskComposite: 'intersect',
                     }}
-                  />
+                  >
+                    <img
+                      src={data.image_url}
+                      alt="Hero"
+                      className="relative max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
+                      style={{
+                        filter: `drop-shadow(0 0 80px ${accentColor}60) drop-shadow(0 30px 50px rgba(0,0,0,0.5))`,
+                      }}
+                    />
+                  </div>
                 </div>
 
 
