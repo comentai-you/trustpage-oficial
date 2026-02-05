@@ -549,6 +549,8 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                   className="relative z-10 w-full flex justify-center overflow-hidden"
                   style={{
                     maxHeight: isMobile ? '280px' : undefined,
+                    WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 100%)',
+                    maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 100%)',
                   }}
                 >
                   <div
