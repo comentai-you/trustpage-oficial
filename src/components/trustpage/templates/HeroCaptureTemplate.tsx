@@ -552,23 +552,24 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                     height: isMobile ? `${Math.round(280 * (heroImageSizeMobile / 100))}px` : undefined,
                     // Fade suave em todas as bordas para não aparecer nenhuma “linha” de corte
                     WebkitMaskImage:
-                      'radial-gradient(120% 120% at 50% 55%, black 82%, transparent 100%)',
+                      'radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)',
                     maskImage:
-                      'radial-gradient(120% 120% at 50% 55%, black 82%, transparent 100%)',
+                      'radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)',
                   }}
                 >
                   <div
                     style={{
                       transformOrigin: 'center center',
                       transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
+                      // Laterais com fade amplo (30% cada lado) para eliminar qualquer linha visível
                       WebkitMaskImage: `
-                        linear-gradient(to bottom, black 0%, black 52%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)
+                        linear-gradient(to bottom, black 0%, black 40%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)
                       `,
                       WebkitMaskComposite: 'source-in',
                       maskImage: `
-                        linear-gradient(to bottom, black 0%, black 52%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)
+                        linear-gradient(to bottom, black 0%, black 40%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)
                       `,
                       maskComposite: 'intersect',
                     }}
