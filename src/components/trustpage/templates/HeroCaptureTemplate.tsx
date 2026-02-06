@@ -333,12 +333,17 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu nome"
                           value={formData.name}
                           onChange={(e) => handleInputChange('name', e.target.value)}
-                          className="pl-10 h-12 border-0 text-base"
+                          className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
                             color: textColor,
-                          }}
+                            '--tw-placeholder-opacity': 1,
+                            '--placeholder-color': `${textColor}80`,
+                          } as React.CSSProperties}
                         />
+                        <style>{`
+                          input[placeholder="Seu nome"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                        `}</style>
                       </div>
                     )}
 
@@ -354,12 +359,15 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           value={formData.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}
                           required={formFields.showEmail}
-                          className="pl-10 h-12 border-0 text-base"
+                          className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
                             color: textColor,
-                          }}
+                          } as React.CSSProperties}
                         />
+                        <style>{`
+                          input[placeholder="Seu melhor e-mail"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                        `}</style>
                       </div>
                     )}
 
@@ -374,12 +382,15 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu telefone"
                           value={formData.phone}
                           onChange={(e) => handleInputChange('phone', e.target.value)}
-                          className="pl-10 h-12 border-0 text-base"
+                          className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
                             color: textColor,
-                          }}
+                          } as React.CSSProperties}
                         />
+                        <style>{`
+                          input[placeholder="Seu telefone"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                        `}</style>
                       </div>
                     )}
 
@@ -394,12 +405,15 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu WhatsApp"
                           value={formData.whatsapp}
                           onChange={(e) => handleInputChange('whatsapp', e.target.value)}
-                          className="pl-10 h-12 border-0 text-base"
+                          className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
                             color: textColor,
-                          }}
+                          } as React.CSSProperties}
                         />
+                        <style>{`
+                          input[placeholder="Seu WhatsApp"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                        `}</style>
                       </div>
                     )}
 
