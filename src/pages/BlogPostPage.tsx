@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import ArticleContentWithCTA from "@/components/blog/ArticleContentWithCTA";
 import AuthorSidebar from "@/components/blog/AuthorSidebar";
+import RecentArticles from "@/components/blog/RecentArticles";
 
 interface BlogPost {
   id: string;
@@ -310,6 +311,9 @@ const BlogPostPage = () => {
           </div>
         </div>
       ) : null}
+
+      {/* Recent Articles Section */}
+      {post && <RecentArticles currentPostId={post.id} />}
 
       {/* CTA Section */}
       <section className="py-16 bg-primary/5">
