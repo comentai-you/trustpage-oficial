@@ -228,11 +228,13 @@ const TrustPageEditor = () => {
         return;
       }
 
-      // Include headline sizes in the content JSON for persistence
+      // Include headline sizes and hero image sizes in the content JSON for persistence
       const contentWithSizes = {
         ...(formData.content as any),
         headline_size_mobile: formData.headline_size_mobile,
         headline_size_desktop: formData.headline_size_desktop,
+        hero_image_size_mobile: formData.hero_image_size_mobile,
+        hero_image_size_desktop: formData.hero_image_size_desktop,
         google_tag_id: formData.google_tag_id,
         video_orientation: formData.video_orientation,
       };
