@@ -550,26 +550,26 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                   style={{
                     // Reserve espaço no layout no mobile para que o scale não “estoure” para fora
                     height: isMobile ? `${Math.round(280 * (heroImageSizeMobile / 100))}px` : undefined,
-                    // Fade suave em todas as bordas para não aparecer nenhuma “linha” de corte
+                    // Fade MUITO sutil nas bordas (sem “cortar” a imagem)
                     WebkitMaskImage:
-                      'radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)',
+                      'radial-gradient(120% 120% at 50% 50%, black 92%, transparent 100%)',
                     maskImage:
-                      'radial-gradient(ellipse 75% 80% at 50% 50%, black 55%, transparent 100%)',
+                      'radial-gradient(120% 120% at 50% 50%, black 92%, transparent 100%)',
                   }}
                 >
                   <div
                     style={{
                       transformOrigin: 'center center',
                       transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
-                      // Laterais com fade amplo (30% cada lado) para eliminar qualquer linha visível
+                      // Edge fade em px (bem leve) para suavizar laterais/topo/base sem “comer” a imagem
                       WebkitMaskImage: `
-                        linear-gradient(to bottom, black 0%, black 40%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)
+                        linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%),
+                        linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%)
                       `,
                       WebkitMaskComposite: 'source-in',
                       maskImage: `
-                        linear-gradient(to bottom, black 0%, black 40%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 30%, black 70%, transparent 100%)
+                        linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%),
+                        linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%)
                       `,
                       maskComposite: 'intersect',
                     }}
