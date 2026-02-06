@@ -9,13 +9,14 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
 import { 
-  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown
+  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown, Palette
 } from "lucide-react";
 import CoverImageUpload from "./CoverImageUpload";
 import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 import ImageUpload from "@/components/trustpage/ImageUpload";
 import LeadMagnetUpload from "./LeadMagnetUpload";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import TextColorPicker from "./TextColorPicker";
 
 interface CaptureHeroEditorSidebarProps {
   formData: LandingPageFormData;
@@ -363,91 +364,88 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
             </div>
 
             <div className="border-t pt-4 space-y-3">
-              <Label className="text-xs text-gray-600 font-medium">Cores Personalizadas</Label>
+              <Label className="text-xs text-gray-600 font-medium flex items-center gap-2">
+                <Palette className="w-3 h-3" />
+                Cores dos Textos
+              </Label>
+              <p className="text-[10px] text-gray-400">
+                Personalize a cor de cada elemento de texto da sua página
+              </p>
               
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-500">Cor do Glow (Accent)</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={formData.primary_color || '#3b82f6'}
-                    onChange={(e) => onChange({ primary_color: e.target.value })}
-                    className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
-                  />
-                  <Input
-                    value={formData.primary_color || '#3b82f6'}
-                    onChange={(e) => onChange({ primary_color: e.target.value })}
-                    placeholder="#3b82f6"
-                    className="text-sm font-mono flex-1"
-                  />
-                </div>
-              </div>
+              <TextColorPicker
+                label="Etiqueta"
+                value={(formData.content as any)?.textColors?.label || formData.colors.text}
+                onChange={(color) => onChange({
+                  content: {
+                    ...(formData.content as any),
+                    textColors: {
+                      ...((formData.content as any)?.textColors || {}),
+                      label: color
+                    }
+                  }
+                })}
+                accentColor={formData.primary_color || '#3b82f6'}
+              />
 
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-500">Fundo Principal</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={formData.colors.background || '#0f172a'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, background: e.target.value } 
-                    })}
-                    className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
-                  />
-                  <Input
-                    value={formData.colors.background || '#0f172a'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, background: e.target.value } 
-                    })}
-                    placeholder="#0f172a"
-                    className="text-sm font-mono flex-1"
-                  />
-                </div>
-              </div>
+              <TextColorPicker
+                label="Headline"
+                value={(formData.content as any)?.textColors?.headline || formData.colors.text}
+                onChange={(color) => onChange({
+                  content: {
+                    ...(formData.content as any),
+                    textColors: {
+                      ...((formData.content as any)?.textColors || {}),
+                      headline: color
+                    }
+                  }
+                })}
+                accentColor={formData.primary_color || '#3b82f6'}
+              />
 
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-500">Fundo Secundário (Gradiente)</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={formData.colors.primary || '#1e293b'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, primary: e.target.value } 
-                    })}
-                    className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
-                  />
-                  <Input
-                    value={formData.colors.primary || '#1e293b'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, primary: e.target.value } 
-                    })}
-                    placeholder="#1e293b"
-                    className="text-sm font-mono flex-1"
-                  />
-                </div>
-              </div>
+              <TextColorPicker
+                label="Descrição"
+                value={(formData.content as any)?.textColors?.description || formData.colors.text}
+                onChange={(color) => onChange({
+                  content: {
+                    ...(formData.content as any),
+                    textColors: {
+                      ...((formData.content as any)?.textColors || {}),
+                      description: color
+                    }
+                  }
+                })}
+                accentColor={formData.primary_color || '#3b82f6'}
+              />
 
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-500">Cor do Texto</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={formData.colors.text || '#ffffff'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, text: e.target.value } 
-                    })}
-                    className="w-10 h-10 rounded-lg cursor-pointer border border-gray-200"
-                  />
-                  <Input
-                    value={formData.colors.text || '#ffffff'}
-                    onChange={(e) => onChange({ 
-                      colors: { ...formData.colors, text: e.target.value } 
-                    })}
-                    placeholder="#ffffff"
-                    className="text-sm font-mono flex-1"
-                  />
-                </div>
-              </div>
+              <TextColorPicker
+                label="Placeholders"
+                value={(formData.content as any)?.textColors?.placeholder || `${formData.colors.text}80`}
+                onChange={(color) => onChange({
+                  content: {
+                    ...(formData.content as any),
+                    textColors: {
+                      ...((formData.content as any)?.textColors || {}),
+                      placeholder: color
+                    }
+                  }
+                })}
+                accentColor={formData.primary_color || '#3b82f6'}
+              />
+
+              <TextColorPicker
+                label="Texto do Botão"
+                value={(formData.content as any)?.textColors?.button || '#ffffff'}
+                onChange={(color) => onChange({
+                  content: {
+                    ...(formData.content as any),
+                    textColors: {
+                      ...((formData.content as any)?.textColors || {}),
+                      button: color
+                    }
+                  }
+                })}
+                accentColor={formData.primary_color || '#3b82f6'}
+              />
             </div>
           </AccordionContent>
         </AccordionItem>

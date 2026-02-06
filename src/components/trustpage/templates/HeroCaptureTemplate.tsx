@@ -20,6 +20,14 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
   const accentColor = data.primary_color || "#3b82f6";
   const textColor = data.colors.text || "#ffffff";
   
+  // Custom text colors from content
+  const textColors = (data.content as any)?.textColors || {};
+  const labelColor = textColors.label || accentColor; // Label uses accent by default
+  const headlineColor = textColors.headline || textColor;
+  const descriptionColor = textColors.description || `${textColor}cc`;
+  const placeholderColor = textColors.placeholder || `${textColor}80`;
+  const buttonTextColor = textColors.button || '#ffffff';
+  
   // Check if background is a gradient
   const isGradientBg = bgStart.includes('linear-gradient') || bgStart.includes('radial-gradient');
 
@@ -292,7 +300,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                         className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
                         style={{
                           backgroundColor: `${accentColor}20`,
-                          color: accentColor,
+                          color: labelColor,
                           border: `1px solid ${accentColor}40`,
                         }}
                       >
@@ -302,7 +310,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                     <h1
                       className="font-extrabold leading-tight"
                       style={{ 
-                        color: textColor,
+                        color: headlineColor,
                         lineHeight: 1.15,
                         fontSize: isMobile ? `${headlineSizeMobile}rem` : `${headlineSizeDesktop}rem`,
                       }}
@@ -311,7 +319,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                     </h1>
                     <p
                       className="leading-relaxed text-sm md:text-base lg:text-lg"
-                      style={{ color: `${textColor}cc` }}
+                      style={{ color: descriptionColor }}
                     >
                       {data.description || "Descrição persuasiva sobre o que a pessoa vai ganhar ao se cadastrar agora."}
                     </p>
@@ -337,12 +345,10 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           style={{
                             backgroundColor: `${textColor}10`,
                             color: textColor,
-                            '--tw-placeholder-opacity': 1,
-                            '--placeholder-color': `${textColor}80`,
                           } as React.CSSProperties}
                         />
                         <style>{`
-                          input[placeholder="Seu nome"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                          input[placeholder="Seu nome"]::placeholder { color: ${placeholderColor} !important; opacity: 1 !important; }
                         `}</style>
                       </div>
                     )}
@@ -366,7 +372,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           } as React.CSSProperties}
                         />
                         <style>{`
-                          input[placeholder="Seu melhor e-mail"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                          input[placeholder="Seu melhor e-mail"]::placeholder { color: ${placeholderColor} !important; opacity: 1 !important; }
                         `}</style>
                       </div>
                     )}
@@ -389,7 +395,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           } as React.CSSProperties}
                         />
                         <style>{`
-                          input[placeholder="Seu telefone"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                          input[placeholder="Seu telefone"]::placeholder { color: ${placeholderColor} !important; opacity: 1 !important; }
                         `}</style>
                       </div>
                     )}
@@ -412,7 +418,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           } as React.CSSProperties}
                         />
                         <style>{`
-                          input[placeholder="Seu WhatsApp"]::placeholder { color: ${textColor}80 !important; opacity: 1 !important; }
+                          input[placeholder="Seu WhatsApp"]::placeholder { color: ${placeholderColor} !important; opacity: 1 !important; }
                         `}</style>
                       </div>
                     )}
@@ -423,7 +429,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                       className="w-full h-12 md:h-14 text-sm md:text-base font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
                       style={{
                         background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
-                        color: '#ffffff',
+                        color: buttonTextColor,
                         boxShadow: `0 10px 30px -10px ${accentColor}80`,
                       }}
                     >
