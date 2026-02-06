@@ -113,6 +113,17 @@ const TrustPageEditor = () => {
         const contentAny = page.content as any;
         const headlineSizeMobile = contentAny?.headline_size_mobile ?? 1.2;
         const headlineSizeDesktop = contentAny?.headline_size_desktop ?? 2.5;
+        const heroSizeMobile = contentAny?.hero_image_size_mobile ?? 100;
+        const heroSizeDesktop = contentAny?.hero_image_size_desktop ?? 100;
+
+        // Debug log to verify values are being loaded correctly
+        console.log('[TrustPageEditor] Loaded from DB:', {
+          slug: page.slug,
+          hero_image_size_mobile: heroSizeMobile,
+          hero_image_size_desktop: heroSizeDesktop,
+          headline_size_mobile: headlineSizeMobile,
+          headline_size_desktop: headlineSizeDesktop,
+        });
 
         setFormData({
           slug: page.slug,
@@ -124,8 +135,8 @@ const TrustPageEditor = () => {
           headline_size: 2,
           headline_size_mobile: headlineSizeMobile,
           headline_size_desktop: headlineSizeDesktop,
-          hero_image_size_mobile: contentAny?.hero_image_size_mobile ?? 100,
-          hero_image_size_desktop: contentAny?.hero_image_size_desktop ?? 100,
+          hero_image_size_mobile: heroSizeMobile,
+          hero_image_size_desktop: heroSizeDesktop,
           subheadline: page.subheadline || "",
           video_url: page.video_url || "",
           video_storage_path: page.video_storage_path || "",
