@@ -31,6 +31,13 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
   const heroImageSizeMobile = data.hero_image_size_mobile || 100;
   const heroImageSizeDesktop = data.hero_image_size_desktop || 100;
 
+  // IMPORTANT: avoid transform scale + overflow hidden (causes clipping). We scale by container height instead.
+  const heroScale = (isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100;
+  const heroContainerHeight = Math.round((isMobile ? 280 : 520) * heroScale);
+
+  // Background color used for vignette overlay (box-shadow inset). For gradients, fall back to a neutral fade.
+  const vignetteColor = isGradientBg ? "rgba(0,0,0,0.55)" : bgStart;
+
   // Form fields configuration
   const formFields = (data.content as any)?.formFields || {
     showName: true,
@@ -544,65 +551,55 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                   }}
                 />
 
-                {/* Main Image Container with Enhanced Multi-Directional Mask */}
-                <div 
-                  className="relative z-10 w-full flex items-center justify-center overflow-hidden"
-                  style={{
-                    // Reserve espaço no layout no mobile para que o scale não “estoure” para fora
-                    height: isMobile ? `${Math.round(280 * (heroImageSizeMobile / 100))}px` : undefined,
-                    // Fade MUITO sutil nas bordas (sem “cortar” a imagem)
-                    WebkitMaskImage:
-                      'radial-gradient(120% 120% at 50% 50%, black 92%, transparent 100%)',
-                    maskImage:
-                      'radial-gradient(120% 120% at 50% 50%, black 92%, transparent 100%)',
-                  }}
+                {/* Main Image Container (sem corte) */}
+                <div
+                  className="relative z-10 w-full flex items-center justify-center"
+                  style={{ height: `${heroContainerHeight}px` }}
                 >
-                  <div
-                    style={{
-                      transformOrigin: 'center center',
-                      transform: `scale(${(isMobile ? heroImageSizeMobile : heroImageSizeDesktop) / 100})`,
-                      // Edge fade em px (bem leve) para suavizar laterais/topo/base sem “comer” a imagem
-                      WebkitMaskImage: `
-                        linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%),
-                        linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%)
-                      `,
-                      WebkitMaskComposite: 'source-in',
-                      maskImage: `
-                        linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%),
-                        linear-gradient(to right, transparent 0, black 18px, black calc(100% - 18px), transparent 100%)
-                      `,
-                      maskComposite: 'intersect',
-                    }}
-                  >
+                  <div className="relative h-full w-full max-w-[560px] md:max-w-[620px] flex items-center justify-center">
                     <img
                       src={data.image_url}
                       alt="Hero"
-                      className="relative max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
+                      className="w-full h-full object-contain"
                       style={{
                         filter: `drop-shadow(0 0 80px ${accentColor}60) drop-shadow(0 30px 50px rgba(0,0,0,0.5))`,
+                      }}
+                    />
+
+                    {/* Overlay vignette: suaviza bordas sem cortar pixels da imagem */}
+                    <div
+                      className="absolute inset-0 pointer-events-none rounded-[48px]"
+                      style={{
+                        boxShadow: `inset 0 0 22px 16px ${vignetteColor}`,
                       }}
                     />
                   </div>
                 </div>
 
-
                 {/* Reflection Layer - Mirrored Image */}
-                <div 
+                <div
                   className="absolute z-[5] w-full flex justify-center -bottom-[18%] md:-bottom-[15%]"
                   style={{
-                    transform: 'scaleY(-1)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
-                    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)',
-                    filter: 'blur(4px)',
+                    transform: "scaleY(-1)",
+                    WebkitMaskImage:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)",
+                    maskImage:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%)",
+                    filter: "blur(4px)",
                     opacity: 0.35,
                   }}
                 >
-                  <img
-                    src={data.image_url}
-                    alt=""
-                    aria-hidden="true"
-                    className="max-w-full max-h-48 sm:max-h-60 md:max-h-80 lg:max-h-[420px] xl:max-h-[540px] object-contain"
-                  />
+                  <div
+                    className="relative h-full w-full max-w-[560px] md:max-w-[620px]"
+                    style={{ height: `${heroContainerHeight}px` }}
+                  >
+                    <img
+                      src={data.image_url}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </div>
 
                 {/* Ground Shadow - Elliptical for realism */}
