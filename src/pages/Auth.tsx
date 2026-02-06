@@ -128,7 +128,7 @@ const AuthPage = () => {
                   Crie sua conta grátis
                 </h1>
                 <p className="text-base sm:text-lg text-muted-foreground">
-                  Comece seu teste de <span className="font-semibold text-primary">14 dias</span>. Cancele a qualquer momento.
+                  Comece agora com o plano <span className="font-semibold text-primary">gratuito</span>. Sem cartão de crédito.
                 </p>
               </>
             ) : mode === "login" ? (
