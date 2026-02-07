@@ -80,6 +80,11 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
 
   const handleSelect = () => {
     if (selectedTemplate) {
+      // Quiz is blocked for free plan (same as cloner)
+      if (selectedTemplate === 'quiz' && isFreePlan) {
+        setShowUpgradeModal(true);
+        return;
+      }
       onSelect(selectedTemplate);
       onOpenChange(false);
       setSelectedTemplate(null);
@@ -130,19 +135,79 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Quiz Builder",
       description: "Crie funis de perguntas interativas para qualificar leads.",
       tags: ["Typeform Style", "Alta Conversão"],
+      isPremium: true, // Blocked for free plan
     },
   ];
 
   const TemplatesList = () => (
     <div className="grid grid-cols-1 gap-2 sm:gap-3 pb-2">
-      {templates.map((template) => (
-        <TemplateOption
-          key={template.id}
-          {...template}
-          isSelected={selectedTemplate === template.id}
-          onSelect={() => setSelectedTemplate(template.id)}
-        />
-      ))}
+      {templates.map((template) => {
+        const isLockedForFree = template.isPremium && isFreePlan;
+        return (
+          <button
+            key={template.id}
+            onClick={() => setSelectedTemplate(template.id)}
+            className={`group relative p-3 sm:p-4 rounded-xl border-2 transition-all text-left hover:shadow-md ${
+              selectedTemplate === template.id
+                ? "border-primary bg-primary/5 shadow-md"
+                : isLockedForFree
+                  ? "border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 dark:border-amber-800/50"
+                  : "border-border hover:border-primary/50"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors ${
+                  selectedTemplate === template.id
+                    ? "bg-primary text-primary-foreground"
+                    : isLockedForFree
+                      ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white"
+                      : "bg-primary/10 text-primary group-hover:bg-primary/20"
+                }`}
+              >
+                {template.icon}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-sm sm:text-base font-semibold text-foreground">{template.title}</h3>
+                  {isLockedForFree && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] sm:text-[10px] font-bold rounded-full uppercase">
+                      <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      Pro
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                  {template.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
+                  {template.tags.map((tag) => (
+                    <span key={tag} className="px-1.5 sm:px-2 py-0.5 bg-secondary/50 text-[10px] sm:text-xs rounded-full text-secondary-foreground">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {selectedTemplate === template.id && !isLockedForFree && (
+              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            )}
+
+            {isLockedForFree && (
+              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-500 flex items-center justify-center">
+                <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+              </div>
+            )}
+          </button>
+        );
+      })}
 
       {/* Divider */}
       <div className="relative py-1.5 sm:py-2">
