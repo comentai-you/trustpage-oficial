@@ -78,7 +78,7 @@ const PageClonerPage = () => {
         setProfile(data);
         
         // Check if free plan - cloner is blocked
-        const allowedPlans = ['essential', 'essential_yearly', 'pro', 'pro_yearly', 'elite'];
+        const allowedPlans = ['essential', 'essential_yearly', 'pro', 'pro_yearly'];
         if (!allowedPlans.includes(data.plan_type) || data.subscription_status !== 'active') {
           setPaywallReason('free_plan');
           setShowPaywall(true);
@@ -93,8 +93,7 @@ const PageClonerPage = () => {
           .eq("user_id", user.id);
 
         // Get max cloned pages for plan
-        const maxClones = data.plan_type === 'elite' ? 10 : 
-                          data.plan_type.includes('pro') ? 6 : 2;
+        const maxClones = data.plan_type.includes('pro') ? 6 : 1;
         
         if ((clonedCount || 0) >= maxClones) {
           setPaywallReason('limit_reached');
@@ -270,8 +269,8 @@ const PageClonerPage = () => {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {paywallReason === 'limit_reached'
-                    ? 'Pro: até 6 clones | Elite: até 10 clones'
-                    : 'R$ 39,90/mês ou R$ 19,90 no 1º mês'}
+                    ? 'Essencial: 1 clone | Pro: até 6 clones'
+                    : 'A partir de R$ 39,90/mês'}
                 </p>
               </div>
             </div>

@@ -95,7 +95,6 @@ const getMaxPages = (planType: string) => {
   switch (planType) {
     case 'pro':
     case 'pro_yearly':
-    case 'elite':
       return 20;
     case 'essential':
     case 'essential_yearly':
@@ -110,11 +109,9 @@ const getMaxClonedPages = (planType: string) => {
     case 'pro':
     case 'pro_yearly':
       return 6;
-    case 'elite':
-      return 10;
     case 'essential':
     case 'essential_yearly':
-      return 2;
+      return 1;
     default:
       return 0; // FREE plan - cloner blocked
   }

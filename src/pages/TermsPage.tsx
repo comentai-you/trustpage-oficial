@@ -97,7 +97,7 @@ const TermsPage = () => {
                   Para utilizar suas páginas em campanhas de tráfego pago, você DEVE:
                 </p>
                 <ol className="list-decimal list-inside mt-2 space-y-1">
-                  <li>Fazer upgrade para o <strong>Plano Pro ou Elite</strong></li>
+                  <li>Fazer upgrade para o <strong>Plano Pro</strong></li>
                   <li>Configurar um <strong>domínio próprio</strong> (ex: suapagina.com.br)</li>
                   <li>Usar o domínio próprio como destino dos anúncios</li>
                 </ol>

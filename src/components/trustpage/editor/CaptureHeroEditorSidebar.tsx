@@ -73,7 +73,7 @@ const desktopPercentToSize = (percent: number) => 1.5 + (percent / 100) * 2.5;
 
 const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: CaptureHeroEditorSidebarProps) => {
 
-  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly' || userPlan === 'elite';
+  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly';
 
   // Form fields configuration from content
   const formFields = (formData.content as any)?.formFields || {
