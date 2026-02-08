@@ -547,18 +547,10 @@ const HomePage = () => {
                   </div>
                 ) : (
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg text-muted-foreground line-through">R$ 39,90</span>
-                    </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ 19,90</span>
-                      <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                        -50% OFF
-                      </span>
+                      <span className="text-3xl sm:text-4xl font-extrabold text-primary">R$ 39,90</span>
+                      <span className="text-muted-foreground text-sm sm:text-base">/mês</span>
                     </div>
-                    <p className="text-sm text-amber-600 font-semibold mt-2 flex items-center gap-1">
-                      ⚡ Apenas no 1º mês • Depois R$ 39,90/mês
-                    </p>
                   </div>
                 )}
               </div>
