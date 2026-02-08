@@ -989,7 +989,7 @@ const SettingsPage = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">
-                        Plano {profile?.plan_type === 'pro' ? 'Pro' : profile?.plan_type === 'elite' ? 'Elite' : 'Essencial'} Ativo
+                        Plano {profile?.plan_type === 'pro' || profile?.plan_type === 'pro_yearly' ? 'Pro' : 'Essencial'} Ativo
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         Você tem acesso a todos os recursos do seu plano

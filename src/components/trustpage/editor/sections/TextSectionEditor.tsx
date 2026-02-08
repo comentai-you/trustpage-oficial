@@ -87,7 +87,7 @@ const TextSectionEditor = ({ data, onChange, accentColor = "#22c55e" }: TextSect
         .select('plan_type')
         .eq('id', user.id)
         .single();
-      setIsPro(profileData?.plan_type === 'pro' || profileData?.plan_type === 'elite');
+      setIsPro(profileData?.plan_type === 'pro' || profileData?.plan_type === 'pro_yearly');
     };
     checkPlan();
   }, [user]);

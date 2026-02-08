@@ -45,7 +45,7 @@ const BioEditorSidebar = ({ formData, onChange, userPlan = 'free' }: BioEditorSi
   const [uploadingThumbnail, setUploadingThumbnail] = useState<string | null>(null);
 
   // Check if user has PRO plan for AI features
-  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly' || userPlan === 'elite';
+  const isPro = userPlan === 'pro' || userPlan === 'pro_yearly';
 
   const content: BioLinkContent = {
     ...defaultBioContent,

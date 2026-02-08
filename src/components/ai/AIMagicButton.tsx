@@ -50,8 +50,8 @@ export const AIMagicButton = ({ fieldType, currentText, onSelect, className }: A
         return;
       }
 
-      // PRO plans: pro, elite
-      setIsPro(data?.plan_type === 'pro' || data?.plan_type === 'elite');
+      // PRO plans: pro, pro_yearly
+      setIsPro(data?.plan_type === 'pro' || data?.plan_type === 'pro_yearly');
     };
 
     checkPlan();
