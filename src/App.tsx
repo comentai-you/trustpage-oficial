@@ -35,6 +35,7 @@ import ClonedPageView from "./pages/ClonedPageView";
 import ClonedPageEditor from "./pages/ClonedPageEditor";
 import QuizEditor from "./pages/QuizEditor";
 import QuizView from "./pages/QuizView";
+import AffiliateProgramPage from "./pages/AffiliateProgramPage";
 
 const queryClient = new QueryClient();
 
@@ -169,6 +170,13 @@ const SystemRoutes = () => (
       </ProtectedRoute>
     } />
     
+    {/* Affiliate Program */}
+    <Route path="/affiliate-program" element={
+      <ProtectedRoute>
+        <AffiliateProgramPage />
+      </ProtectedRoute>
+    } />
+    
     {/* Public views */}
     <Route path="/c/:slug" element={<ClonedPageView />} />
     <Route path="/q/:slug" element={<QuizView />} />
@@ -190,6 +198,7 @@ const App = () => {
   // Isso evita 404 caso alguém acesse essas rotas em um domínio customizado.
   const FORCE_SYSTEM_PREFIXES = [
     "/admin",
+    "/affiliate-program",
     "/auth",
     "/blog",
     "/c",
