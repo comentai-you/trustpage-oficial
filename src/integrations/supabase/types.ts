@@ -41,6 +41,27 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_customers: {
+        Row: {
+          created_at: string
+          kiwify_customer_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          kiwify_customer_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          kiwify_customer_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           color: string | null
@@ -472,7 +493,6 @@ export type Database = {
           full_name: string | null
           id: string
           is_verified: boolean | null
-          kiwify_customer_id: string | null
           monthly_views: number
           monthly_views_reset_at: string | null
           plan_type: string
@@ -493,7 +513,6 @@ export type Database = {
           full_name?: string | null
           id: string
           is_verified?: boolean | null
-          kiwify_customer_id?: string | null
           monthly_views?: number
           monthly_views_reset_at?: string | null
           plan_type?: string
@@ -514,7 +533,6 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
-          kiwify_customer_id?: string | null
           monthly_views?: number
           monthly_views_reset_at?: string | null
           plan_type?: string
@@ -589,6 +607,42 @@ export type Database = {
         Update: {
           reason?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      subscription_audit_logs: {
+        Row: {
+          actor_type: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          new_plan_type: string | null
+          new_subscription_status: string | null
+          old_plan_type: string | null
+          old_subscription_status: string | null
+          target_user_id: string
+        }
+        Insert: {
+          actor_type: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_plan_type?: string | null
+          new_subscription_status?: string | null
+          old_plan_type?: string | null
+          old_subscription_status?: string | null
+          target_user_id: string
+        }
+        Update: {
+          actor_type?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_plan_type?: string | null
+          new_subscription_status?: string | null
+          old_plan_type?: string | null
+          old_subscription_status?: string | null
+          target_user_id?: string
         }
         Relationships: []
       }

@@ -88,20 +88,25 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
     setIsSubmitting(true);
 
     try {
-      // Save lead to database if we have a pageId
+      // Save lead via secure edge function if we have a pageId
       if (pageId) {
-        const { error } = await supabase
-          .from('leads')
-          .insert({
-            landing_page_id: pageId,
-            name: formData.name || null,
-            email: formData.email || null,
-            phone: formData.phone || null,
-            whatsapp: formData.whatsapp || null,
+        try {
+          const { error } = await supabase.functions.invoke('submit-lead', {
+            body: {
+              landing_page_id: pageId,
+              name: formData.name || null,
+              email: formData.email || null,
+              phone: formData.phone || null,
+              whatsapp: formData.whatsapp || null,
+            },
           });
 
-        if (error) {
-          console.error("Error saving lead:", error);
+          if (error) {
+            console.error("Error saving lead:", error);
+            // Don't block the user, continue with the flow
+          }
+        } catch (leadError) {
+          console.error("Error invoking submit-lead:", leadError);
           // Don't block the user, continue with the flow
         }
       }

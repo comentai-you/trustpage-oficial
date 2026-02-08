@@ -378,12 +378,15 @@ serve(async (req) => {
         throw new Error('Failed to update user plan');
       }
 
-      // Atualizar kiwify_customer_id se disponível
+      // Atualizar kiwify_customer_id no billing_customers (nova tabela segura)
       if (payload.Subscription?.id) {
         await supabase
-          .from('profiles')
-          .update({ kiwify_customer_id: payload.Subscription.id })
-          .eq('id', existingUser.id);
+          .from('billing_customers')
+          .upsert({ 
+            user_id: existingUser.id, 
+            kiwify_customer_id: payload.Subscription.id,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
       }
 
       console.log(`✅ User ${customerEmail} upgraded to ${newPlan}`);
@@ -442,12 +445,15 @@ serve(async (req) => {
           console.log(`✅ New user created with plan ${newPlan}`);
         }
 
-        // Salvar kiwify_customer_id
+        // Salvar kiwify_customer_id no billing_customers (nova tabela segura)
         if (payload.Subscription?.id) {
           await supabase
-            .from('profiles')
-            .update({ kiwify_customer_id: payload.Subscription.id })
-            .eq('id', newUserId);
+            .from('billing_customers')
+            .upsert({ 
+              user_id: newUserId, 
+              kiwify_customer_id: payload.Subscription.id,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
         }
       }
 
