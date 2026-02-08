@@ -1,10 +1,10 @@
-import { ArrowRight, DollarSign, Flame, Gift, Users, MessageCircle, AlertTriangle } from "lucide-react";
+import { ArrowRight, DollarSign, Flame, Gift, Users, MessageCircle, AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const AffiliateProgramPage = () => {
   const { user } = useAuth();
@@ -45,11 +45,46 @@ const AffiliateProgramPage = () => {
   ];
 
   return (
-    <DashboardLayout
-      avatarUrl={profile?.avatar_url}
-      fullName={profile?.full_name}
-    >
-      <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
+      {/* Header for non-logged users */}
+      {!user && (
+        <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-xl">TrustPage</span>
+            </Link>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" asChild>
+                <Link to="/auth">Entrar</Link>
+              </Button>
+              <Button asChild className="bg-gradient-to-r from-primary to-accent">
+                <Link to="/auth">Criar Conta</Link>
+              </Button>
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* CTA Banner for non-logged users */}
+      {!user && (
+        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-primary/20">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
+              <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+              <p className="text-sm sm:text-base">
+                <span className="font-semibold">Quer divulgar o TrustPage?</span>{" "}
+                <span className="text-muted-foreground">Crie sua conta grátis, conheça a ferramenta e comece a ganhar comissões!</span>
+              </p>
+              <Button size="sm" asChild className="flex-shrink-0">
+                <Link to="/auth">Criar Conta Grátis</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
         {/* Hero Section */}
         <section className="relative overflow-hidden py-16 sm:py-24">
           {/* Background decorations */}
@@ -220,8 +255,35 @@ const AffiliateProgramPage = () => {
             </div>
           </div>
         </section>
+
+        {/* Final CTA for non-logged users */}
+        {!user && (
+          <section className="py-12 border-t border-border">
+            <div className="container mx-auto px-4">
+              <div className="max-w-2xl mx-auto text-center">
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3">
+                  Primeiro, conheça o TrustPage!
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Crie sua conta grátis, explore as funcionalidades e depois comece a divulgar 
+                  com confiança para sua audiência.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button size="lg" asChild className="bg-gradient-to-r from-primary to-accent">
+                    <Link to="/auth">
+                      Criar Conta Grátis
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link to="/">Conhecer o TrustPage</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
-    </DashboardLayout>
   );
 };
 

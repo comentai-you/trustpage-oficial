@@ -170,12 +170,8 @@ const SystemRoutes = () => (
       </ProtectedRoute>
     } />
     
-    {/* Affiliate Program */}
-    <Route path="/affiliate-program" element={
-      <ProtectedRoute>
-        <AffiliateProgramPage />
-      </ProtectedRoute>
-    } />
+    {/* Affiliate Program - Public */}
+    <Route path="/affiliate-program" element={<AffiliateProgramPage />} />
     
     {/* Public views */}
     <Route path="/c/:slug" element={<ClonedPageView />} />
