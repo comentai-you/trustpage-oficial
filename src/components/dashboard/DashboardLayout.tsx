@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Plus, LogOut, User, CreditCard, BookOpen, MessageCircle } from "lucide-react";
+import { Sparkles, Plus, LogOut, User, CreditCard, BookOpen, MessageCircle, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -58,6 +58,27 @@ const DashboardLayout = ({
             </Link>
             
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Affiliate Program Button - Highlighted */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 sm:h-10 px-2 sm:px-3 bg-gradient-to-r from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20 text-green-600 hover:text-green-700 border border-green-500/30 font-medium"
+                      onClick={() => navigate("/affiliate-program")}
+                    >
+                      <DollarSign className="w-4 h-4 sm:mr-1.5" />
+                      <span className="hidden sm:inline">Ganhe Dinheiro</span>
+                      <span className="hidden sm:inline ml-1">💰</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Programa de Afiliados - Ganhe 30% de comissão</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               {/* WhatsApp Support Button */}
               <TooltipProvider>
                 <Tooltip>
