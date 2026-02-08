@@ -27,7 +27,7 @@ const AffiliateProgramPage = () => {
     {
       icon: DollarSign,
       title: "Comissão Recorrente",
-      description: "Ganhe 30% todo mês enquanto seu indicado estiver ativo. Construa renda passiva.",
+      description: "Ganhe 35% todo mês enquanto seu indicado estiver ativo. Construa renda passiva.",
       gradient: "from-green-500 to-emerald-600",
     },
     {
@@ -77,7 +77,7 @@ const AffiliateProgramPage = () => {
 
               {/* Subtitle */}
               <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-                Receba <span className="text-primary font-bold">30% de comissão recorrente</span> por cada indicação, 
+                Receba <span className="text-primary font-bold">35% de comissão recorrente</span> por cada indicação, 
                 ou seja, enquanto o usuário estiver pagando mensalmente você estará recebendo sua comissão.
               </p>
 
