@@ -484,14 +484,12 @@ const TrustPageDashboard = () => {
                     Desbloqueie <strong className="text-foreground">Domínio Próprio</strong> + até <strong className="text-foreground">5 páginas ativas</strong> e todos os benefícios do plano ESSENCIAL.
                   </p>
                   <p className="text-sm mt-1">
-                    <span className="text-muted-foreground line-through">R$ 39,90</span>
-                    <span className="text-primary font-bold ml-2">R$ 19,90</span>
-                    <span className="text-amber-600 text-xs ml-1">(1º mês)</span>
+                    <span className="text-primary font-bold">R$ 39,90/mês</span>
                   </p>
                 </div>
               </div>
               <a 
-                href="https://pay.kiwify.com.br/Vu0ULc6" 
+                href="https://pay.kiwify.com.br/P7MaOJK" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
