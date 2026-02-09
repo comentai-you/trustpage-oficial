@@ -36,6 +36,7 @@ import ClonedPageEditor from "./pages/ClonedPageEditor";
 import QuizEditor from "./pages/QuizEditor";
 import QuizView from "./pages/QuizView";
 import AffiliateProgramPage from "./pages/AffiliateProgramPage";
+import PreSellEditor from "./pages/PreSellEditor";
 
 const queryClient = new QueryClient();
 
@@ -170,6 +171,18 @@ const SystemRoutes = () => (
       </ProtectedRoute>
     } />
     
+    {/* Pre-sell Editor routes */}
+    <Route path="/presell/new" element={
+      <ProtectedRoute>
+        <PreSellEditor />
+      </ProtectedRoute>
+    } />
+    <Route path="/presell/edit/:id" element={
+      <ProtectedRoute>
+        <PreSellEditor />
+      </ProtectedRoute>
+    } />
+    
     {/* Affiliate Program - Public */}
     <Route path="/affiliate-program" element={<AffiliateProgramPage />} />
     
@@ -201,6 +214,7 @@ const App = () => {
     "/clonador",
     "/dashboard",
     "/leads",
+    "/presell",
     "/q",
     "/settings",
     "/subscription",

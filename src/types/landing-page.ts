@@ -7,7 +7,48 @@ export interface LandingPageColors {
 }
 
 export type PageTheme = 'dark' | 'light' | 'modern-gray';
-export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz';
+export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz' | 'presell';
+
+// Pre-sell (Anti-Block) specific types
+export type PresellMediaType = 'video' | 'image' | 'none';
+export type PresellButtonAnimation = 'pulse' | 'shake' | 'none';
+export type PresellBackgroundType = 'solid' | 'gradient';
+
+export interface PresellContent {
+  headline: string;
+  subheadline: string;
+  mediaType: PresellMediaType;
+  mediaUrl: string;
+  ctaText: string;
+  ctaUrl: string;
+  ctaColor: string;
+  ctaAnimation: PresellButtonAnimation;
+  ctaDelaySeconds: number;
+  backgroundColor: string;
+  backgroundType: PresellBackgroundType;
+  gradientStart: string;
+  gradientEnd: string;
+  textColor: string;
+  cardStyleEnabled: boolean;
+}
+
+export const defaultPresellContent: PresellContent = {
+  headline: 'Assista ao Vídeo Exclusivo',
+  subheadline: 'Descubra o método que está transformando vidas',
+  mediaType: 'video',
+  mediaUrl: '',
+  ctaText: 'ACESSAR O VÍDEO',
+  ctaUrl: '',
+  ctaColor: '#22C55E',
+  ctaAnimation: 'pulse',
+  ctaDelaySeconds: 0,
+  backgroundColor: '#000000',
+  backgroundType: 'solid',
+  gradientStart: '#1a1a2e',
+  gradientEnd: '#16213e',
+  textColor: '#FFFFFF',
+  cardStyleEnabled: false,
+};
 
 export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
   dark: {
