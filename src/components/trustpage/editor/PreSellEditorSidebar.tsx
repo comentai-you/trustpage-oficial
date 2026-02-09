@@ -1,4 +1,5 @@
-import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType } from "@/types/landing-page";
+import { useState } from "react";
+import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType, PresellButtonSize } from "@/types/landing-page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +18,10 @@ import {
   Clock,
   ImageIcon,
   Type,
-  Sparkles
+  Sparkles,
+  Upload,
+  X,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -34,6 +38,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface PreSellEditorSidebarProps {
   pageName: string;
@@ -52,6 +59,8 @@ const PreSellEditorSidebar = ({
   onSlugChange, 
   onContentChange 
 }: PreSellEditorSidebarProps) => {
+  const { user } = useAuth();
+  const [uploading, setUploading] = useState(false);
   
   const buttonColorOptions = [
     { name: 'Verde', value: '#22C55E' },
@@ -77,6 +86,40 @@ const PreSellEditorSidebar = ({
     { name: 'Cinza Claro', value: '#f3f4f6' },
     { name: 'Cinza Escuro', value: '#374151' },
   ];
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Selecione uma imagem válida");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const filePath = `${user.id}/presell/media_${Date.now()}.${file.name.split('.').pop()}`;
+      const { error } = await supabase.storage.from('uploads').upload(filePath, file);
+      if (error) throw error;
+      
+      const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
+      if (data?.publicUrl) {
+        onContentChange({ mediaUrl: data.publicUrl });
+        toast.success("Imagem enviada com sucesso!");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Erro ao enviar imagem");
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   return (
     <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
@@ -224,21 +267,62 @@ const PreSellEditorSidebar = ({
                 </Select>
               </div>
 
-              {content.mediaType !== 'none' && (
+              {content.mediaType === 'video' && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {content.mediaType === 'video' ? 'URL do Vídeo' : 'URL da Imagem'}
-                  </Label>
+                  <Label className="text-sm font-medium text-gray-700">URL do Vídeo</Label>
                   <Input
                     value={content.mediaUrl}
                     onChange={(e) => onContentChange({ mediaUrl: e.target.value })}
-                    placeholder={content.mediaType === 'video' ? 'https://youtube.com/...' : 'https://...'}
+                    placeholder="https://youtube.com/..."
                     className="bg-gray-50 border-gray-300 focus:border-primary"
                   />
-                  {content.mediaType === 'video' && (
-                    <p className="text-xs text-gray-500">
-                      Suporta YouTube, Vimeo e Panda Video
-                    </p>
+                  <p className="text-xs text-gray-500">
+                    Suporta YouTube, Vimeo e Panda Video
+                  </p>
+                </div>
+              )}
+
+              {content.mediaType === 'image' && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Imagem</Label>
+                  
+                  {content.mediaUrl ? (
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+                      <img 
+                        src={content.mediaUrl} 
+                        alt="Mídia" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onContentChange({ mediaUrl: '' })}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                      {uploading ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <span className="text-sm text-gray-500">Enviando...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 p-4">
+                          <Upload className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-500 text-center">Clique para enviar</span>
+                          <span className="text-xs text-gray-400">PNG, JPG até 5MB</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageUpload} 
+                        className="hidden" 
+                        disabled={uploading}
+                      />
+                    </label>
                   )}
                 </div>
               )}
@@ -293,6 +377,22 @@ const PreSellEditorSidebar = ({
                     />
                   ))}
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Tamanho do Botão</Label>
+                <Select 
+                  value={content.ctaSize || 'large'} 
+                  onValueChange={(value: PresellButtonSize) => onContentChange({ ctaSize: value })}
+                >
+                  <SelectTrigger className="bg-gray-50 border-gray-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Pequeno</SelectItem>
+                    <SelectItem value="medium">Médio</SelectItem>
+                    <SelectItem value="large">Grande</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

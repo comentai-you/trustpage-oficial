@@ -1,4 +1,4 @@
-import { PresellContent } from "@/types/landing-page";
+import { PresellContent, PresellButtonSize } from "@/types/landing-page";
 import { motion } from "framer-motion";
 import LegalFooter from "./LegalFooter";
 
@@ -20,6 +20,7 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
     ctaColor,
     ctaAnimation,
     ctaDelaySeconds,
+    ctaSize = 'large',
     backgroundColor,
     backgroundType,
     gradientStart,
@@ -67,6 +68,27 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
         return 'animate-[shake_0.5s_ease-in-out_infinite]';
       default:
         return '';
+    }
+  };
+
+  const getButtonSizeClasses = (size: PresellButtonSize, mobile: boolean) => {
+    if (mobile) {
+      switch (size) {
+        case 'small':
+          return 'px-4 py-2.5 text-sm';
+        case 'medium':
+          return 'px-5 py-3 text-base';
+        case 'large':
+          return 'px-6 py-4 text-base';
+      }
+    }
+    switch (size) {
+      case 'small':
+        return 'px-6 py-3 text-base';
+      case 'medium':
+        return 'px-8 py-4 text-lg';
+      case 'large':
+        return 'px-10 py-5 text-xl';
     }
   };
 
@@ -146,7 +168,7 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
                   inline-flex items-center justify-center
                   font-bold text-white rounded-xl
                   transition-all duration-300 hover:scale-105 hover:shadow-xl
-                  ${isMobile ? 'px-6 py-4 text-base' : 'px-10 py-5 text-lg'}
+                  ${getButtonSizeClasses(ctaSize, isMobile)}
                   ${getAnimationClass()}
                 `}
                 style={{ backgroundColor: ctaColor }}

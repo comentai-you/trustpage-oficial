@@ -13,6 +13,7 @@ export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz' | '
 export type PresellMediaType = 'video' | 'image' | 'none';
 export type PresellButtonAnimation = 'pulse' | 'shake' | 'none';
 export type PresellBackgroundType = 'solid' | 'gradient';
+export type PresellButtonSize = 'small' | 'medium' | 'large';
 
 export interface PresellContent {
   headline: string;
@@ -24,6 +25,7 @@ export interface PresellContent {
   ctaColor: string;
   ctaAnimation: PresellButtonAnimation;
   ctaDelaySeconds: number;
+  ctaSize: PresellButtonSize;
   backgroundColor: string;
   backgroundType: PresellBackgroundType;
   gradientStart: string;
@@ -42,6 +44,7 @@ export const defaultPresellContent: PresellContent = {
   ctaColor: '#22C55E',
   ctaAnimation: 'pulse',
   ctaDelaySeconds: 0,
+  ctaSize: 'large',
   backgroundColor: '#000000',
   backgroundType: 'solid',
   gradientStart: '#1a1a2e',
