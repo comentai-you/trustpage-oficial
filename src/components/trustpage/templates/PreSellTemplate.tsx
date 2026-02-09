@@ -75,20 +75,20 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
     if (mobile) {
       switch (size) {
         case 'small':
-          return 'px-4 py-2.5 text-sm';
+          return 'px-6 py-3 text-sm w-full';
         case 'medium':
-          return 'px-5 py-3 text-base';
+          return 'px-8 py-4 text-base w-full';
         case 'large':
-          return 'px-6 py-4 text-base';
+          return 'px-10 py-5 text-lg w-full';
       }
     }
     switch (size) {
       case 'small':
-        return 'px-6 py-3 text-base';
+        return 'px-10 py-4 text-lg';
       case 'medium':
-        return 'px-8 py-4 text-lg';
+        return 'px-14 py-5 text-xl min-w-[320px]';
       case 'large':
-        return 'px-10 py-5 text-xl';
+        return 'px-16 py-6 text-2xl min-w-[400px]';
     }
   };
 
