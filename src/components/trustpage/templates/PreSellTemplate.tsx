@@ -40,6 +40,10 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
   // Determine which background images to use (with fallback)
   const desktopBg = cookieBackgroundImageDesktop || cookieBackgroundImageUrl || '';
   const mobileBg = cookieBackgroundImageMobile || desktopBg; // Fallback to desktop if no mobile
+  
+  // For mockup previews, we need to use the correct image based on isMobile prop
+  // Media queries don't work inside scaled mockups, so we use the prop directly
+  const effectiveBackgroundUrl = isMobile ? mobileBg : desktopBg;
 
   // For preview, always show button. In real view, respect delay
   const showButton = isPreview || ctaDelaySeconds === 0;
@@ -124,32 +128,16 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
           }
         `}</style>
 
-        {/* Background Images with Blur - Responsive */}
-        {(desktopBg || mobileBg) ? (
-          <>
-            {/* Desktop Background - hidden on mobile */}
-            {desktopBg && (
-              <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden md:block"
-                style={{ 
-                  backgroundImage: `url(${desktopBg})`,
-                  filter: 'blur(8px)',
-                  transform: 'scale(1.05)',
-                }}
-              />
-            )}
-            {/* Mobile Background - hidden on desktop */}
-            {mobileBg && (
-              <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat md:hidden"
-                style={{ 
-                  backgroundImage: `url(${mobileBg})`,
-                  filter: 'blur(8px)',
-                  transform: 'scale(1.05)',
-                }}
-              />
-            )}
-          </>
+        {/* Background Image with Blur */}
+        {effectiveBackgroundUrl ? (
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ 
+              backgroundImage: `url(${effectiveBackgroundUrl})`,
+              filter: 'blur(8px)',
+              transform: 'scale(1.05)',
+            }}
+          />
         ) : (
           <div 
             className="absolute inset-0"
