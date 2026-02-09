@@ -79,10 +79,34 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (formFields.showEmail && !formData.email) {
-      toast.error("Por favor, preencha seu e-mail.");
+    // Validate ALL required fields based on which fields are enabled
+    const missingFields: string[] = [];
+    
+    if (formFields.showName && !formData.name.trim()) {
+      missingFields.push("nome");
+    }
+    if (formFields.showEmail && !formData.email.trim()) {
+      missingFields.push("e-mail");
+    }
+    if (formFields.showPhone && !formData.phone.trim()) {
+      missingFields.push("telefone");
+    }
+    if (formFields.showWhatsapp && !formData.whatsapp.trim()) {
+      missingFields.push("WhatsApp");
+    }
+
+    if (missingFields.length > 0) {
+      toast.error(`Por favor, preencha: ${missingFields.join(", ")}.`);
       return;
+    }
+
+    // Additional email format validation
+    if (formFields.showEmail && formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        toast.error("Por favor, insira um e-mail válido.");
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -346,6 +370,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu nome"
                           value={formData.name}
                           onChange={(e) => handleInputChange('name', e.target.value)}
+                          required
                           className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
@@ -369,7 +394,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu melhor e-mail"
                           value={formData.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}
-                          required={formFields.showEmail}
+                          required
                           className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
@@ -393,6 +418,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu telefone"
                           value={formData.phone}
                           onChange={(e) => handleInputChange('phone', e.target.value)}
+                          required
                           className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,
@@ -416,6 +442,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
                           placeholder="Seu WhatsApp"
                           value={formData.whatsapp}
                           onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                          required
                           className="pl-10 h-12 border-0 text-base placeholder:opacity-100"
                           style={{
                             backgroundColor: `${textColor}10`,

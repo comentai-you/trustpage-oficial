@@ -112,9 +112,22 @@ serve(async (req: Request): Promise<Response> => {
 
     const { landing_page_id, name, email, phone, whatsapp } = validation.data;
 
+    // Server-side validation: At least one contact field must be provided
+    const hasEmail = email && email.trim().length > 0;
+    const hasPhone = phone && phone.trim().length > 0;
+    const hasWhatsapp = whatsapp && whatsapp.trim().length > 0;
+    
+    if (!hasEmail && !hasPhone && !hasWhatsapp) {
+      console.log("No contact information provided");
+      return new Response(
+        JSON.stringify({ error: "At least one contact field (email, phone, or WhatsApp) is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Check for suspicious email patterns
-    if (email && suspiciousEmailPatterns.some((pattern) => pattern.test(email))) {
-      console.log(`Suspicious email pattern detected: ${email.substring(0, 10)}***`);
+    if (hasEmail && suspiciousEmailPatterns.some((pattern) => pattern.test(email!))) {
+      console.log(`Suspicious email pattern detected: ${email!.substring(0, 10)}***`);
       return new Response(
         JSON.stringify({ error: "Invalid email" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
