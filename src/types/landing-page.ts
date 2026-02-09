@@ -14,7 +14,7 @@ export type PresellMediaType = 'video' | 'image' | 'none';
 export type PresellButtonAnimation = 'pulse' | 'shake' | 'none';
 export type PresellBackgroundType = 'solid' | 'gradient';
 export type PresellButtonSize = 'small' | 'medium' | 'large';
-export type PresellLayoutType = 'default' | 'cookie-wall';
+export type PresellLayoutType = 'cookie-wall';
 export type CookieCardPosition = 'center' | 'bottom';
 export type CookieCardTheme = 'light' | 'dark';
 
@@ -46,11 +46,11 @@ export interface PresellContent {
 }
 
 export const defaultPresellContent: PresellContent = {
-  headline: 'Assista ao Vídeo Exclusivo',
-  subheadline: 'Descubra o método que está transformando vidas',
-  mediaType: 'image', // Changed from 'video' to 'image' as default
+  headline: 'Aviso de Privacidade',
+  subheadline: '',
+  mediaType: 'none',
   mediaUrl: '',
-  ctaText: 'ACESSAR O VÍDEO',
+  ctaText: 'Aceitar e Continuar',
   ctaUrl: '',
   ctaColor: '#22C55E',
   ctaAnimation: 'pulse',
@@ -63,13 +63,14 @@ export const defaultPresellContent: PresellContent = {
   textColor: '#FFFFFF',
   cardStyleEnabled: false,
   // Cookie Wall defaults
-  layoutType: 'default',
+  layoutType: 'cookie-wall',
   cookieBackgroundImageUrl: '',
   cookieBackgroundImageDesktop: '',
   cookieBackgroundImageMobile: '',
   cookieCardPosition: 'center',
   cookieCardTheme: 'light',
-  cookieBodyText: 'Este site utiliza cookies para garantir que você tenha a melhor experiência. Ao continuar, você concorda com nossa política de privacidade.',
+  cookieBodyText:
+    'Este site utiliza cookies para garantir que você tenha a melhor experiência. Ao continuar, você concorda com nossa política de privacidade.',
 };
 
 export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
@@ -279,7 +280,7 @@ export interface LandingPageFormData {
   google_tag_id: string;
   colors: LandingPageColors;
   primary_color: string;
-  content: SalesPageContent | BioLinkContent;
+  content: SalesPageContent | BioLinkContent | PresellContent;
   bioContent?: BioLinkContent;
   theme: PageTheme;
 }

@@ -86,8 +86,10 @@ const PreSellEditor = () => {
         // Load presell content from the content JSON
         const savedContent = page.content as unknown as PresellContent;
         if (savedContent) {
-          setContent({ ...defaultPresellContent, ...savedContent });
+          // Cookie Wall é o único tipo: sempre forçar
+          setContent({ ...defaultPresellContent, ...savedContent, layoutType: "cookie-wall" });
         }
+
         
         setIsLoading(false);
       }
@@ -97,8 +99,10 @@ const PreSellEditor = () => {
   }, [id, user, navigate, toast]);
 
   const handleContentChange = useCallback((updates: Partial<PresellContent>) => {
-    setContent((prev) => ({ ...prev, ...updates }));
+    // Cookie Wall é o único tipo: manter travado
+    setContent((prev) => ({ ...prev, ...updates, layoutType: "cookie-wall" }));
   }, []);
+
 
   const generateSlugFromName = (name: string): string => {
     return name
@@ -424,7 +428,7 @@ const PreSellEditor = () => {
           </div>
 
           {/* Desktop Preview Area */}
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-y-auto">
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-6 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-auto flex-col xl:flex-row">
             <PreSellIMacMockup content={content} ownerPlan={userPlan} />
             <PreSellIPhoneMockup content={content} ownerPlan={userPlan} />
           </div>
