@@ -24,10 +24,10 @@ const PreSellIMacMockup = ({ content, ownerPlan }: PreSellIMacMockupProps) => {
     : content.backgroundColor;
 
   return (
-    <div className="relative">
-      {/* iMac Frame */}
+    <div className="relative flex-shrink-0">
+      {/* iMac Frame - responsive sizing */}
       <div 
-        className="w-[520px] h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
+        className="w-[400px] h-[262px] xl:w-[520px] xl:h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
         style={{
           boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0,0,0,0.1)'
         }}
@@ -88,14 +88,14 @@ const PreSellIMacMockup = ({ content, ownerPlan }: PreSellIMacMockupProps) => {
       {/* iMac Stand */}
       <div className="flex flex-col items-center">
         {/* Chin */}
-        <div className="w-[520px] h-5 bg-gradient-to-b from-zinc-300 to-zinc-400 rounded-b-xl flex items-center justify-center">
-          <div className="w-10 h-1.5 bg-zinc-500/50 rounded-full" />
+        <div className="w-[400px] xl:w-[520px] h-4 xl:h-5 bg-gradient-to-b from-zinc-300 to-zinc-400 rounded-b-xl flex items-center justify-center">
+          <div className="w-8 xl:w-10 h-1 xl:h-1.5 bg-zinc-500/50 rounded-full" />
         </div>
         {/* Neck */}
-        <div className="w-20 h-12 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b" />
+        <div className="w-16 xl:w-20 h-10 xl:h-12 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b" />
         {/* Base */}
         <div 
-          className="w-32 h-2 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b-xl"
+          className="w-24 xl:w-32 h-1.5 xl:h-2 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b-xl"
           style={{
             boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
           }}

@@ -9,23 +9,24 @@ interface PreSellIPhoneMockupProps {
 }
 
 const PreSellIPhoneMockup = ({ content, ownerPlan, size = 'normal' }: PreSellIPhoneMockupProps) => {
+  // Responsive dimensions - smaller on medium screens, normal on xl+
   const dimensions = size === 'large' 
     ? { 
-        width: 'w-[340px]', 
-        height: 'h-[690px]', 
-        radius: 'rounded-[50px]', 
-        innerRadius: 'rounded-[42px]',
-        contentWidth: 320,
-        contentHeight: 650,
+        width: 'w-[280px] xl:w-[340px]', 
+        height: 'h-[568px] xl:h-[690px]', 
+        radius: 'rounded-[44px] xl:rounded-[50px]', 
+        innerRadius: 'rounded-[38px] xl:rounded-[42px]',
+        contentWidth: 260,
+        contentHeight: 530,
         viewportWidth: 393,
       }
     : { 
-        width: 'w-[280px]', 
-        height: 'h-[570px]', 
-        radius: 'rounded-[44px]', 
-        innerRadius: 'rounded-[38px]',
-        contentWidth: 260,
-        contentHeight: 530,
+        width: 'w-[220px] xl:w-[280px]', 
+        height: 'h-[448px] xl:h-[570px]', 
+        radius: 'rounded-[36px] xl:rounded-[44px]', 
+        innerRadius: 'rounded-[30px] xl:rounded-[38px]',
+        contentWidth: 200,
+        contentHeight: 410,
         viewportWidth: 393,
       };
 

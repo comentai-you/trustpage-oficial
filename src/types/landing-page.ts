@@ -48,7 +48,7 @@ export interface PresellContent {
 export const defaultPresellContent: PresellContent = {
   headline: 'Assista ao Vídeo Exclusivo',
   subheadline: 'Descubra o método que está transformando vidas',
-  mediaType: 'video',
+  mediaType: 'image', // Changed from 'video' to 'image' as default
   mediaUrl: '',
   ctaText: 'ACESSAR O VÍDEO',
   ctaUrl: '',

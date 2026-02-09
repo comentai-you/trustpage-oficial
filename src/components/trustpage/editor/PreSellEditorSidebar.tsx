@@ -11,7 +11,6 @@ import {
   Layers, 
   Settings, 
   FileText, 
-  Video, 
   MousePointer, 
   Palette, 
   Globe, 
@@ -357,29 +356,23 @@ const PreSellEditorSidebar = ({
           {/* Seção 3: Mídia - só aparece no modo Padrão */}
           {!isCookieWall && (
             <AccordionItem value="midia" className="border-b border-gray-200">
-              <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
-                <div className="flex items-center gap-2">
-                  <Video className="w-4 h-4 text-primary" />
-                  Mídia
-                </div>
-              </AccordionTrigger>
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-primary" />
+                Mídia
+              </div>
+            </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Tipo de Mídia</Label>
                   <Select 
-                    value={content.mediaType} 
+                    value={content.mediaType === 'video' ? 'image' : content.mediaType} 
                     onValueChange={(value: PresellMediaType) => onContentChange({ mediaType: value })}
                   >
                     <SelectTrigger className="bg-gray-50 border-gray-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="video">
-                        <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4" />
-                          Vídeo
-                        </div>
-                      </SelectItem>
                       <SelectItem value="image">
                         <div className="flex items-center gap-2">
                           <ImageIcon className="w-4 h-4" />
