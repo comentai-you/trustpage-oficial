@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType, PresellButtonSize } from "@/types/landing-page";
+import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType, PresellButtonSize, PresellLayoutType, CookieCardPosition, CookieCardTheme } from "@/types/landing-page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -21,7 +21,9 @@ import {
   Sparkles,
   Upload,
   X,
-  Loader2
+  Loader2,
+  Cookie,
+  LayoutTemplate
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -61,6 +63,9 @@ const PreSellEditorSidebar = ({
 }: PreSellEditorSidebarProps) => {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
+  const [uploadingBg, setUploadingBg] = useState(false);
+
+  const isCookieWall = content.layoutType === 'cookie-wall';
   
   const buttonColorOptions = [
     { name: 'Verde', value: '#22C55E' },
@@ -121,6 +126,40 @@ const PreSellEditorSidebar = ({
     }
   };
 
+  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Selecione uma imagem válida");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploadingBg(true);
+    try {
+      const filePath = `${user.id}/presell/bg_${Date.now()}.${file.name.split('.').pop()}`;
+      const { error } = await supabase.storage.from('uploads').upload(filePath, file);
+      if (error) throw error;
+      
+      const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
+      if (data?.publicUrl) {
+        onContentChange({ cookieBackgroundImageUrl: data.publicUrl });
+        toast.success("Print da página enviado!");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Erro ao enviar imagem");
+    } finally {
+      setUploadingBg(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
       {/* Navigation Icons */}
@@ -154,8 +193,60 @@ const PreSellEditorSidebar = ({
 
       {/* Accordion Sections */}
       <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={["config", "conteudo", "midia", "cta", "aparencia"]} className="w-full">
+        <Accordion type="multiple" defaultValue={["layout", "config", "conteudo", "midia", "cta", "aparencia", "cookie-config"]} className="w-full">
           
+          {/* Seção 0: Tipo de Layout */}
+          <AccordionItem value="layout" className="border-b border-gray-200">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+              <div className="flex items-center gap-2">
+                <LayoutTemplate className="w-4 h-4 text-primary" />
+                Tipo de Página
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => onContentChange({ layoutType: 'default' })}
+                  className={`p-4 rounded-lg border-2 transition-all text-center ${
+                    content.layoutType !== 'cookie-wall'
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-600" />
+                  <span className="text-sm font-medium">Padrão</span>
+                  <p className="text-xs text-gray-500 mt-1">Editor livre</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onContentChange({ 
+                    layoutType: 'cookie-wall',
+                    headline: 'Aviso de Privacidade',
+                    ctaText: 'Aceitar e Continuar',
+                    ctaColor: '#22C55E'
+                  })}
+                  className={`p-4 rounded-lg border-2 transition-all text-center ${
+                    content.layoutType === 'cookie-wall'
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <Cookie className="w-8 h-8 mx-auto mb-2 text-gray-600" />
+                  <span className="text-sm font-medium">Cookie Wall</span>
+                  <p className="text-xs text-gray-500 mt-1">Estilo LGPD</p>
+                </button>
+              </div>
+              {isCookieWall && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-800">
+                    <strong>💡 Dica:</strong> Faça um print da página de vendas e envie como fundo. O card de cookies ficará sobre a imagem borrada.
+                  </p>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
           {/* Seção 1: Configurações */}
           <AccordionItem value="config" className="border-b border-gray-200">
             <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
@@ -564,6 +655,128 @@ const PreSellEditorSidebar = ({
               </p>
             </AccordionContent>
           </AccordionItem>
+
+          {/* Seção Cookie Wall Config - só aparece se layoutType === 'cookie-wall' */}
+          {isCookieWall && (
+            <AccordionItem value="cookie-config" className="border-b border-gray-200">
+              <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+                <div className="flex items-center gap-2">
+                  <Cookie className="w-4 h-4 text-primary" />
+                  Configuração Cookie Wall
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                {/* Upload do Print da página */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Print da Página (Fundo)</Label>
+                  <p className="text-xs text-gray-500">
+                    Faça um print/screenshot da página de vendas oficial
+                  </p>
+                  
+                  {content.cookieBackgroundImageUrl ? (
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+                      <img 
+                        src={content.cookieBackgroundImageUrl} 
+                        alt="Fundo" 
+                        className="w-full h-full object-cover blur-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onContentChange({ cookieBackgroundImageUrl: '' })}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs bg-black/60 text-white px-3 py-1 rounded-full">
+                          Efeito blur aplicado
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                      {uploadingBg ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <span className="text-sm text-gray-500">Enviando...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 p-4">
+                          <Upload className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-500 text-center">Enviar print da página</span>
+                          <span className="text-xs text-gray-400">PNG, JPG até 5MB</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleBackgroundImageUpload} 
+                        className="hidden" 
+                        disabled={uploadingBg}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {/* Posição do Card */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Posição do Aviso</Label>
+                  <Select 
+                    value={content.cookieCardPosition || 'center'} 
+                    onValueChange={(value: CookieCardPosition) => onContentChange({ cookieCardPosition: value })}
+                  >
+                    <SelectTrigger className="bg-gray-50 border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="center">Centralizado (Modal)</SelectItem>
+                      <SelectItem value="bottom">Rodapé (Banner)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tema do Card */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Estilo do Card</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onContentChange({ cookieCardTheme: 'light' })}
+                      className={`p-3 rounded-lg border-2 transition-all text-center ${
+                        content.cookieCardTheme !== 'dark'
+                          ? 'border-primary bg-white ring-2 ring-primary/20'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-sm font-medium text-gray-900">Claro</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onContentChange({ cookieCardTheme: 'dark' })}
+                      className={`p-3 rounded-lg border-2 transition-all text-center ${
+                        content.cookieCardTheme === 'dark'
+                          ? 'border-primary bg-gray-800 ring-2 ring-primary/20'
+                          : 'border-gray-200 bg-gray-800 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-sm font-medium text-white">Escuro</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Texto do Corpo */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Texto do Aviso</Label>
+                  <Textarea
+                    value={content.cookieBodyText || ''}
+                    onChange={(e) => onContentChange({ cookieBodyText: e.target.value })}
+                    placeholder="Este site utiliza cookies..."
+                    className="bg-gray-50 border-gray-300 focus:border-primary min-h-[80px] resize-none"
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
 
         </Accordion>
       </div>
