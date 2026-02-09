@@ -725,7 +725,9 @@ const PreSellEditorSidebar = ({
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        {" "}
+                        {/* Adicionei pointer-events-none também por segurança */}
                         <span className="text-xs bg-black/60 text-white px-3 py-1 rounded-full">
                           ✓ Desktop configurado
                         </span>
@@ -790,7 +792,7 @@ const PreSellEditorSidebar = ({
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <span className="text-xs bg-black/60 text-white px-2 py-1 rounded-full text-center">
                           ✓ Mobile
                         </span>
