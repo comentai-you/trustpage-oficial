@@ -283,142 +283,146 @@ const PreSellEditorSidebar = ({
             </AccordionContent>
           </AccordionItem>
 
-          {/* Seção 2: Conteúdo Principal */}
-          <AccordionItem value="conteudo" className="border-b border-gray-200">
-            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                Conteúdo Principal
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Type className="w-4 h-4" />
-                  Headline (H1)
-                </Label>
-                <Textarea
-                  value={content.headline}
-                  onChange={(e) => onContentChange({ headline: e.target.value })}
-                  placeholder="Assista ao Vídeo Exclusivo"
-                  className="bg-gray-50 border-gray-300 focus:border-primary min-h-[80px] resize-none"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Subheadline (H2)</Label>
-                <Textarea
-                  value={content.subheadline}
-                  onChange={(e) => onContentChange({ subheadline: e.target.value })}
-                  placeholder="Descubra o método que está transformando vidas"
-                  className="bg-gray-50 border-gray-300 focus:border-primary min-h-[60px] resize-none"
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Seção 3: Mídia */}
-          <AccordionItem value="midia" className="border-b border-gray-200">
-            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
-              <div className="flex items-center gap-2">
-                <Video className="w-4 h-4 text-primary" />
-                Mídia
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Tipo de Mídia</Label>
-                <Select 
-                  value={content.mediaType} 
-                  onValueChange={(value: PresellMediaType) => onContentChange({ mediaType: value })}
-                >
-                  <SelectTrigger className="bg-gray-50 border-gray-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="video">
-                      <div className="flex items-center gap-2">
-                        <Video className="w-4 h-4" />
-                        Vídeo
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="image">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" />
-                        Imagem
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="none">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4" />
-                        Nenhum
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {content.mediaType === 'video' && (
+          {/* Seção 2: Conteúdo Principal - só aparece no modo Padrão */}
+          {!isCookieWall && (
+            <AccordionItem value="conteudo" className="border-b border-gray-200">
+              <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  Conteúdo Principal
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">URL do Vídeo</Label>
-                  <Input
-                    value={content.mediaUrl}
-                    onChange={(e) => onContentChange({ mediaUrl: e.target.value })}
-                    placeholder="https://youtube.com/..."
-                    className="bg-gray-50 border-gray-300 focus:border-primary"
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Type className="w-4 h-4" />
+                    Headline (H1)
+                  </Label>
+                  <Textarea
+                    value={content.headline}
+                    onChange={(e) => onContentChange({ headline: e.target.value })}
+                    placeholder="Assista ao Vídeo Exclusivo"
+                    className="bg-gray-50 border-gray-300 focus:border-primary min-h-[80px] resize-none"
                   />
-                  <p className="text-xs text-gray-500">
-                    Suporta YouTube, Vimeo e Panda Video
-                  </p>
                 </div>
-              )}
 
-              {content.mediaType === 'image' && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Imagem</Label>
-                  
-                  {content.mediaUrl ? (
-                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
-                      <img 
-                        src={content.mediaUrl} 
-                        alt="Mídia" 
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => onContentChange({ mediaUrl: '' })}
-                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
-                      {uploading ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                          <span className="text-sm text-gray-500">Enviando...</span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-2 p-4">
-                          <Upload className="w-8 h-8 text-gray-400" />
-                          <span className="text-sm text-gray-500 text-center">Clique para enviar</span>
-                          <span className="text-xs text-gray-400">PNG, JPG até 5MB</span>
-                        </div>
-                      )}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handleImageUpload} 
-                        className="hidden" 
-                        disabled={uploading}
-                      />
-                    </label>
-                  )}
+                  <Label className="text-sm font-medium text-gray-700">Subheadline (H2)</Label>
+                  <Textarea
+                    value={content.subheadline}
+                    onChange={(e) => onContentChange({ subheadline: e.target.value })}
+                    placeholder="Descubra o método que está transformando vidas"
+                    className="bg-gray-50 border-gray-300 focus:border-primary min-h-[60px] resize-none"
+                  />
                 </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* Seção 3: Mídia - só aparece no modo Padrão */}
+          {!isCookieWall && (
+            <AccordionItem value="midia" className="border-b border-gray-200">
+              <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+                <div className="flex items-center gap-2">
+                  <Video className="w-4 h-4 text-primary" />
+                  Mídia
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Tipo de Mídia</Label>
+                  <Select 
+                    value={content.mediaType} 
+                    onValueChange={(value: PresellMediaType) => onContentChange({ mediaType: value })}
+                  >
+                    <SelectTrigger className="bg-gray-50 border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="video">
+                        <div className="flex items-center gap-2">
+                          <Video className="w-4 h-4" />
+                          Vídeo
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="image">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4" />
+                          Imagem
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="none">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Nenhum
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {content.mediaType === 'video' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">URL do Vídeo</Label>
+                    <Input
+                      value={content.mediaUrl}
+                      onChange={(e) => onContentChange({ mediaUrl: e.target.value })}
+                      placeholder="https://youtube.com/..."
+                      className="bg-gray-50 border-gray-300 focus:border-primary"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Suporta YouTube, Vimeo e Panda Video
+                    </p>
+                  </div>
+                )}
+
+                {content.mediaType === 'image' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Imagem</Label>
+                    
+                    {content.mediaUrl ? (
+                      <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+                        <img 
+                          src={content.mediaUrl} 
+                          alt="Mídia" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onContentChange({ mediaUrl: '' })}
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                        {uploading ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            <span className="text-sm text-gray-500">Enviando...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 p-4">
+                            <Upload className="w-8 h-8 text-gray-400" />
+                            <span className="text-sm text-gray-500 text-center">Clique para enviar</span>
+                            <span className="text-xs text-gray-400">PNG, JPG até 5MB</span>
+                          </div>
+                        )}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleImageUpload} 
+                          className="hidden" 
+                          disabled={uploading}
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          )}
 
           {/* Seção 4: Botão de Ação (CTA) */}
           <AccordionItem value="cta" className="border-b border-gray-200">
@@ -533,42 +537,104 @@ const PreSellEditorSidebar = ({
             </AccordionContent>
           </AccordionItem>
 
-          {/* Seção 5: Aparência */}
-          <AccordionItem value="aparencia" className="border-b border-gray-200">
-            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-primary" />
-                Estilo (Aparência)
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Tipo de Fundo</Label>
-                <Select 
-                  value={content.backgroundType} 
-                  onValueChange={(value: PresellBackgroundType) => onContentChange({ backgroundType: value })}
-                >
-                  <SelectTrigger className="bg-gray-50 border-gray-300">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solid">Cor Sólida</SelectItem>
-                    <SelectItem value="gradient">Gradiente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {content.backgroundType === 'solid' ? (
+          {/* Seção 5: Aparência - só aparece no modo Padrão */}
+          {!isCookieWall && (
+            <AccordionItem value="aparencia" className="border-b border-gray-200">
+              <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-primary" />
+                  Estilo (Aparência)
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Cor de Fundo</Label>
+                  <Label className="text-sm font-medium text-gray-700">Tipo de Fundo</Label>
+                  <Select 
+                    value={content.backgroundType} 
+                    onValueChange={(value: PresellBackgroundType) => onContentChange({ backgroundType: value })}
+                  >
+                    <SelectTrigger className="bg-gray-50 border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="solid">Cor Sólida</SelectItem>
+                      <SelectItem value="gradient">Gradiente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {content.backgroundType === 'solid' ? (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Cor de Fundo</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {backgroundColorOptions.map((color) => (
+                        <button
+                          key={color.value}
+                          type="button"
+                          onClick={() => onContentChange({ backgroundColor: color.value })}
+                          className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                            content.backgroundColor === color.value
+                              ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' 
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Label className="text-xs text-gray-500">Custom:</Label>
+                      <input
+                        type="color"
+                        value={content.backgroundColor}
+                        onChange={(e) => onContentChange({ backgroundColor: e.target.value })}
+                        className="w-8 h-8 rounded cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Cor Inicial</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={content.gradientStart}
+                          onChange={(e) => onContentChange({ gradientStart: e.target.value })}
+                          className="w-10 h-10 rounded cursor-pointer"
+                        />
+                        <span className="text-xs font-mono text-gray-500">{content.gradientStart}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Cor Final</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={content.gradientEnd}
+                          onChange={(e) => onContentChange({ gradientEnd: e.target.value })}
+                          className="w-10 h-10 rounded cursor-pointer"
+                        />
+                        <span className="text-xs font-mono text-gray-500">{content.gradientEnd}</span>
+                      </div>
+                    </div>
+                    <div 
+                      className="h-8 rounded-md border"
+                      style={{ background: `linear-gradient(135deg, ${content.gradientStart} 0%, ${content.gradientEnd} 100%)` }}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Cor do Texto</Label>
                   <div className="flex flex-wrap gap-2">
-                    {backgroundColorOptions.map((color) => (
+                    {textColorOptions.map((color) => (
                       <button
                         key={color.value}
                         type="button"
-                        onClick={() => onContentChange({ backgroundColor: color.value })}
+                        onClick={() => onContentChange({ textColor: color.value })}
                         className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                          content.backgroundColor === color.value
+                          content.textColor === color.value
                             ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' 
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
@@ -577,84 +643,24 @@ const PreSellEditorSidebar = ({
                       />
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Label className="text-xs text-gray-500">Custom:</Label>
-                    <input
-                      type="color"
-                      value={content.backgroundColor}
-                      onChange={(e) => onContentChange({ backgroundColor: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer"
-                    />
-                  </div>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Cor Inicial</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={content.gradientStart}
-                        onChange={(e) => onContentChange({ gradientStart: e.target.value })}
-                        className="w-10 h-10 rounded cursor-pointer"
-                      />
-                      <span className="text-xs font-mono text-gray-500">{content.gradientStart}</span>
-                    </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" />
+                    <Label className="text-sm font-medium text-gray-700">Estilo Card (Caixa)</Label>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Cor Final</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={content.gradientEnd}
-                        onChange={(e) => onContentChange({ gradientEnd: e.target.value })}
-                        className="w-10 h-10 rounded cursor-pointer"
-                      />
-                      <span className="text-xs font-mono text-gray-500">{content.gradientEnd}</span>
-                    </div>
-                  </div>
-                  <div 
-                    className="h-8 rounded-md border"
-                    style={{ background: `linear-gradient(135deg, ${content.gradientStart} 0%, ${content.gradientEnd} 100%)` }}
+                  <Switch
+                    checked={content.cardStyleEnabled}
+                    onCheckedChange={(checked) => onContentChange({ cardStyleEnabled: checked })}
                   />
                 </div>
-              )}
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Cor do Texto</Label>
-                <div className="flex flex-wrap gap-2">
-                  {textColorOptions.map((color) => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() => onContentChange({ textColor: color.value })}
-                      className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                        content.textColor === color.value
-                          ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' 
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                      style={{ backgroundColor: color.value }}
-                      title={color.name}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-primary" />
-                  <Label className="text-sm font-medium text-gray-700">Estilo Card (Caixa)</Label>
-                </div>
-                <Switch
-                  checked={content.cardStyleEnabled}
-                  onCheckedChange={(checked) => onContentChange({ cardStyleEnabled: checked })}
-                />
-              </div>
-              <p className="text-xs text-gray-500">
-                Adiciona um fundo semi-transparente atrás do conteúdo
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+                <p className="text-xs text-gray-500">
+                  Adiciona um fundo semi-transparente atrás do conteúdo
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          )}
 
           {/* Seção Cookie Wall Config - só aparece se layoutType === 'cookie-wall' */}
           {isCookieWall && (
