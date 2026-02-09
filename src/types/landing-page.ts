@@ -37,7 +37,9 @@ export interface PresellContent {
   cardStyleEnabled: boolean;
   // Cookie Wall specific
   layoutType: PresellLayoutType;
-  cookieBackgroundImageUrl: string;
+  cookieBackgroundImageUrl: string; // legacy, keeping for backwards compat
+  cookieBackgroundImageDesktop: string;
+  cookieBackgroundImageMobile: string;
   cookieCardPosition: CookieCardPosition;
   cookieCardTheme: CookieCardTheme;
   cookieBodyText: string;
@@ -63,6 +65,8 @@ export const defaultPresellContent: PresellContent = {
   // Cookie Wall defaults
   layoutType: 'default',
   cookieBackgroundImageUrl: '',
+  cookieBackgroundImageDesktop: '',
+  cookieBackgroundImageMobile: '',
   cookieCardPosition: 'center',
   cookieCardTheme: 'light',
   cookieBodyText: 'Este site utiliza cookies para garantir que você tenha a melhor experiência. Ao continuar, você concorda com nossa política de privacidade.',
