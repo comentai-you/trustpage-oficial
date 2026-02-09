@@ -14,7 +14,8 @@ import {
 import { PUBLIC_PAGES_BASE_URL } from "@/lib/constants";
 import { defaultPresellContent, PresellContent } from "@/types/landing-page";
 import PreSellEditorSidebar from "@/components/trustpage/editor/PreSellEditorSidebar";
-import PreSellTemplate from "@/components/trustpage/templates/PreSellTemplate";
+import PreSellIMacMockup from "@/components/trustpage/editor/PreSellIMacMockup";
+import PreSellIPhoneMockup from "@/components/trustpage/editor/PreSellIPhoneMockup";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -416,17 +417,16 @@ const PreSellEditor = () => {
           </div>
 
           {/* Mobile Preview View */}
-          <div className={`lg:hidden flex-1 overflow-auto ${activeTab === "preview" ? "block" : "hidden"}`}>
-            <PreSellTemplate content={content} isMobile={true} isPreview={true} ownerPlan={userPlan} />
+          <div className={`lg:hidden flex-1 flex flex-col bg-gray-50 ${activeTab === "preview" ? "flex" : "hidden"}`}>
+            <div className="flex-1 overflow-auto flex items-center justify-center p-4">
+              <PreSellIPhoneMockup content={content} ownerPlan={userPlan} size="large" />
+            </div>
           </div>
 
           {/* Desktop Preview Area */}
-          <div className="hidden lg:flex flex-1 items-center justify-center p-8 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-auto">
-            <div className="w-full max-w-4xl h-[600px] rounded-2xl shadow-2xl overflow-hidden border border-gray-300">
-              <div className="w-full h-full overflow-auto">
-                <PreSellTemplate content={content} isMobile={false} isPreview={true} ownerPlan={userPlan} />
-              </div>
-            </div>
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-y-auto">
+            <PreSellIMacMockup content={content} ownerPlan={userPlan} />
+            <PreSellIPhoneMockup content={content} ownerPlan={userPlan} />
           </div>
         </div>
       </div>
