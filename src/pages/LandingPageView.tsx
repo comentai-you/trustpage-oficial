@@ -1,11 +1,12 @@
 import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, TemplateType } from "@/types/landing-page";
+import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, TemplateType, defaultPresellContent, PresellContent } from "@/types/landing-page";
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
 import HeroCaptureTemplate from "@/components/trustpage/templates/HeroCaptureTemplate";
 import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
+import PreSellTemplate from "@/components/trustpage/templates/PreSellTemplate";
 import ViewLimitOverlay from "@/components/ViewLimitOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -318,8 +319,16 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         }
 
         const colors = page.colors as unknown as LandingPageColors || defaultFormData.colors;
-        const content = (page.content ?? defaultSalesContent) as any;
         const templateType = (page.template_type as TemplateType) || 'vsl';
+
+        const content =
+          templateType === 'presell'
+            ? ({
+                ...defaultPresellContent,
+                ...((page.content ?? {}) as any),
+                layoutType: 'cookie-wall',
+              } as PresellContent)
+            : ((page.content ?? defaultSalesContent) as any);
 
         // Extract headline sizes from content JSON (where they are persisted)
         const headlineSizeMobile = content?.headline_size_mobile ?? 1.2;
@@ -449,17 +458,19 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
         style={{ backgroundColor: pageData.colors.background }}
       >
         {showViolationBar && <AdsViolationBar />}
-        <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
-          {pageData.template_type === 'sales' ? (
-            <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-          ) : pageData.template_type === 'bio' ? (
-            <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-          ) : pageData.template_type === 'capture-hero' ? (
-            <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
-          ) : (
-            <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-          )}
-        </div>
+          <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
+            {pageData.template_type === 'presell' ? (
+              <PreSellTemplate content={pageData.content as unknown as PresellContent} ownerPlan={ownerPlan} />
+            ) : pageData.template_type === 'sales' ? (
+              <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+            ) : pageData.template_type === 'bio' ? (
+              <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+            ) : pageData.template_type === 'capture-hero' ? (
+              <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
+            ) : (
+              <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+            )}
+          </div>
       </div>
     </PageOwnerProvider>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType, PresellButtonSize, PresellLayoutType, CookieCardPosition, CookieCardTheme } from "@/types/landing-page";
+import { PresellContent, PresellButtonAnimation, PresellMediaType, PresellBackgroundType, PresellButtonSize, CookieCardPosition, CookieCardTheme } from "@/types/landing-page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -65,7 +65,7 @@ const PreSellEditorSidebar = ({
   const [uploadingDesktop, setUploadingDesktop] = useState(false);
   const [uploadingMobile, setUploadingMobile] = useState(false);
 
-  const isCookieWall = content.layoutType === 'cookie-wall';
+  const isCookieWall = true;
   
   const buttonColorOptions = [
     { name: 'Verde', value: '#22C55E' },
@@ -238,46 +238,21 @@ const PreSellEditorSidebar = ({
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => onContentChange({ layoutType: 'default' })}
-                  className={`p-4 rounded-lg border-2 transition-all text-center ${
-                    content.layoutType !== 'cookie-wall'
-                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                  <span className="text-sm font-medium">Padrão</span>
-                  <p className="text-xs text-gray-500 mt-1">Editor livre</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onContentChange({ 
-                    layoutType: 'cookie-wall',
-                    headline: 'Aviso de Privacidade',
-                    ctaText: 'Aceitar e Continuar',
-                    ctaColor: '#22C55E'
-                  })}
-                  className={`p-4 rounded-lg border-2 transition-all text-center ${
-                    content.layoutType === 'cookie-wall'
-                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <Cookie className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                  <span className="text-sm font-medium">Cookie Wall</span>
-                  <p className="text-xs text-gray-500 mt-1">Estilo LGPD</p>
-                </button>
-              </div>
-              {isCookieWall && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-800">
-                    <strong>💡 Dica:</strong> Faça um print da página de vendas e envie como fundo. O card de cookies ficará sobre a imagem borrada.
-                  </p>
+              <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+                <div className="flex items-center gap-3">
+                  <Cookie className="w-6 h-6 text-primary" />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Cookie Wall</p>
+                    <p className="text-xs text-gray-500">Único tipo de página deste template</p>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-xs text-amber-800">
+                  <strong>💡 Dica:</strong> Faça um print da página de vendas e envie como fundo. O card de cookies ficará sobre a imagem borrada.
+                </p>
+              </div>
             </AccordionContent>
           </AccordionItem>
 
