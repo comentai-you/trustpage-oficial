@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle } from "lucide-react";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle, Shield } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -80,8 +80,8 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
 
   const handleSelect = () => {
     if (selectedTemplate) {
-      // Quiz is blocked for free plan (same as cloner)
-      if (selectedTemplate === 'quiz' && isFreePlan) {
+      // Quiz and Presell are blocked for free plan
+      if ((selectedTemplate === 'quiz' || selectedTemplate === 'presell') && isFreePlan) {
         setShowUpgradeModal(true);
         return;
       }
@@ -128,6 +128,14 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Página de Vendas",
       description: "Layout completo com vídeo, carrossel e múltiplos CTAs.",
       tags: ["Carrossel", "Multi CTA"],
+    },
+    {
+      id: "presell" as TemplateType,
+      icon: <Shield className="w-4 h-4 sm:w-5 sm:h-5" />,
+      title: "Pre-sell Anti-Bloqueio",
+      description: "Página de redirecionamento segura para anúncios.",
+      tags: ["Anti-Ban", "Redirect"],
+      isPremium: true, // Blocked for free plan
     },
     {
       id: "quiz" as TemplateType,

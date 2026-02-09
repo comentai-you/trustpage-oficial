@@ -375,11 +375,20 @@ const TrustPageDashboard = () => {
       navigate('/dashboard/quiz/new');
       return;
     }
+    // Pre-sell has its own editor
+    if (templateType === 'presell') {
+      navigate('/presell/new');
+      return;
+    }
     // All templates available for all plans - free plan has watermark + view limits
     navigate(`/new?type=${templateType}`);
   };
 
-  const handleEdit = (pageId: string) => {
+  const handleEdit = (pageId: string, templateType?: string | null) => {
+    if (templateType === 'presell') {
+      navigate(`/presell/edit/${pageId}`);
+      return;
+    }
     navigate(`/edit/${pageId}`);
   };
 
@@ -629,6 +638,7 @@ const TrustPageDashboard = () => {
                 imageUrl={page.image_url}
                 videoUrl={page.video_url}
                 coverImageUrl={page.cover_image_url}
+                templateType={page.template_type}
                 isTrialExpired={false}
                 customDomains={userDomains}
                 onEdit={handleEdit}

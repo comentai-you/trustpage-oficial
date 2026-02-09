@@ -30,9 +30,10 @@ interface PageCardProps {
   imageUrl?: string | null;
   videoUrl?: string | null;
   coverImageUrl?: string | null;
+  templateType?: string | null;
   isTrialExpired: boolean;
   customDomains?: UserDomain[];
-  onEdit: (id: string) => void;
+  onEdit: (id: string, templateType?: string | null) => void;
   onDelete: (id: string, name: string) => void;
   onCopyLink: (slug: string, customDomain?: string | null) => void;
   onShowAnalytics?: (id: string, name: string) => void;
@@ -81,6 +82,7 @@ const PageCard = ({
   imageUrl,
   videoUrl,
   coverImageUrl,
+  templateType,
   isTrialExpired,
   customDomains = [],
   onEdit,
@@ -179,7 +181,7 @@ const PageCard = ({
                 variant="default" 
                 size="sm" 
                 className="flex-1 h-9"
-                onClick={() => onEdit(id)}
+                onClick={() => onEdit(id, templateType)}
                 disabled={isTrialExpired}
               >
                 <Edit3 className="w-4 h-4 mr-2" />
