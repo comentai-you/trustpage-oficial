@@ -14,6 +14,9 @@ export type PresellMediaType = 'video' | 'image' | 'none';
 export type PresellButtonAnimation = 'pulse' | 'shake' | 'none';
 export type PresellBackgroundType = 'solid' | 'gradient';
 export type PresellButtonSize = 'small' | 'medium' | 'large';
+export type PresellLayoutType = 'default' | 'cookie-wall';
+export type CookieCardPosition = 'center' | 'bottom';
+export type CookieCardTheme = 'light' | 'dark';
 
 export interface PresellContent {
   headline: string;
@@ -32,6 +35,12 @@ export interface PresellContent {
   gradientEnd: string;
   textColor: string;
   cardStyleEnabled: boolean;
+  // Cookie Wall specific
+  layoutType: PresellLayoutType;
+  cookieBackgroundImageUrl: string;
+  cookieCardPosition: CookieCardPosition;
+  cookieCardTheme: CookieCardTheme;
+  cookieBodyText: string;
 }
 
 export const defaultPresellContent: PresellContent = {
@@ -51,6 +60,12 @@ export const defaultPresellContent: PresellContent = {
   gradientEnd: '#16213e',
   textColor: '#FFFFFF',
   cardStyleEnabled: false,
+  // Cookie Wall defaults
+  layoutType: 'default',
+  cookieBackgroundImageUrl: '',
+  cookieCardPosition: 'center',
+  cookieCardTheme: 'light',
+  cookieBodyText: 'Este site utiliza cookies para garantir que você tenha a melhor experiência. Ao continuar, você concorda com nossa política de privacidade.',
 };
 
 export const pageThemes: Record<PageTheme, { name: string; colors: LandingPageColors }> = {
