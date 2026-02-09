@@ -63,7 +63,8 @@ const PreSellEditorSidebar = ({
 }: PreSellEditorSidebarProps) => {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const [uploadingBg, setUploadingBg] = useState(false);
+  const [uploadingDesktop, setUploadingDesktop] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
 
   const isCookieWall = content.layoutType === 'cookie-wall';
   
@@ -126,7 +127,7 @@ const PreSellEditorSidebar = ({
     }
   };
 
-  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDesktopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
@@ -140,22 +141,56 @@ const PreSellEditorSidebar = ({
       return;
     }
 
-    setUploadingBg(true);
+    setUploadingDesktop(true);
     try {
-      const filePath = `${user.id}/presell/bg_${Date.now()}.${file.name.split('.').pop()}`;
+      const filePath = `${user.id}/presell/bg_desktop_${Date.now()}.${file.name.split('.').pop()}`;
       const { error } = await supabase.storage.from('uploads').upload(filePath, file);
       if (error) throw error;
       
       const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
       if (data?.publicUrl) {
-        onContentChange({ cookieBackgroundImageUrl: data.publicUrl });
-        toast.success("Print da página enviado!");
+        onContentChange({ cookieBackgroundImageDesktop: data.publicUrl });
+        toast.success("Imagem Desktop enviada!");
       }
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Erro ao enviar imagem");
     } finally {
-      setUploadingBg(false);
+      setUploadingDesktop(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleMobileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Selecione uma imagem válida");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploadingMobile(true);
+    try {
+      const filePath = `${user.id}/presell/bg_mobile_${Date.now()}.${file.name.split('.').pop()}`;
+      const { error } = await supabase.storage.from('uploads').upload(filePath, file);
+      if (error) throw error;
+      
+      const { data } = supabase.storage.from('uploads').getPublicUrl(filePath);
+      if (data?.publicUrl) {
+        onContentChange({ cookieBackgroundImageMobile: data.publicUrl });
+        toast.success("Imagem Mobile enviada!");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Erro ao enviar imagem");
+    } finally {
+      setUploadingMobile(false);
       e.target.value = '';
     }
   };
@@ -671,56 +706,131 @@ const PreSellEditorSidebar = ({
                   Configuração Cookie Wall
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-4">
-                {/* Upload do Print da página */}
+              <AccordionContent className="px-4 pb-4 space-y-5">
+                {/* Upload Desktop */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Print da Página (Fundo)</Label>
+                  <div className="flex items-center gap-2">
+                    <Monitor className="w-4 h-4 text-primary" />
+                    <Label className="text-sm font-medium text-gray-700">Print Desktop (PC)</Label>
+                  </div>
                   <p className="text-xs text-gray-500">
-                    Faça um print/screenshot da página de vendas oficial
+                    Recomendado: <strong>1920x1080px</strong> (proporção 16:9)
                   </p>
                   
-                  {content.cookieBackgroundImageUrl ? (
+                  {content.cookieBackgroundImageDesktop ? (
                     <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
                       <img 
-                        src={content.cookieBackgroundImageUrl} 
-                        alt="Fundo" 
+                        src={content.cookieBackgroundImageDesktop} 
+                        alt="Fundo Desktop" 
                         className="w-full h-full object-cover blur-sm"
                       />
                       <button
                         type="button"
-                        onClick={() => onContentChange({ cookieBackgroundImageUrl: '' })}
+                        onClick={() => onContentChange({ cookieBackgroundImageDesktop: '' })}
                         className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-xs bg-black/60 text-white px-3 py-1 rounded-full">
-                          Efeito blur aplicado
+                          ✓ Desktop configurado
                         </span>
                       </div>
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
-                      {uploadingBg ? (
+                      {uploadingDesktop ? (
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-8 h-8 animate-spin text-primary" />
                           <span className="text-sm text-gray-500">Enviando...</span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center gap-2 p-4">
-                          <Upload className="w-8 h-8 text-gray-400" />
-                          <span className="text-sm text-gray-500 text-center">Enviar print da página</span>
-                          <span className="text-xs text-gray-400">PNG, JPG até 5MB</span>
+                          <Monitor className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-500 text-center">Enviar print Desktop</span>
+                          <span className="text-xs text-primary font-medium">1920x1080px</span>
                         </div>
                       )}
                       <input 
                         type="file" 
                         accept="image/*" 
-                        onChange={handleBackgroundImageUpload} 
+                        onChange={handleDesktopImageUpload} 
                         className="hidden" 
-                        disabled={uploadingBg}
+                        disabled={uploadingDesktop}
                       />
                     </label>
+                  )}
+                </div>
+
+                {/* Upload Mobile */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-primary" />
+                      <Label className="text-sm font-medium text-gray-700">Print Mobile (Celular)</Label>
+                    </div>
+                    <div className="group relative">
+                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full cursor-help">?</span>
+                      <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                        <strong>💡 Dica:</strong> Abra o site do produto no seu celular, tire um print da primeira dobra e envie aqui. Isso aumenta a conversão em 30%!
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Recomendado: <strong>1080x1920px</strong> (proporção 9:16)
+                  </p>
+                  
+                  {content.cookieBackgroundImageMobile ? (
+                    <div className="relative w-full max-w-[180px] aspect-[9/16] rounded-lg overflow-hidden border border-gray-200">
+                      <img 
+                        src={content.cookieBackgroundImageMobile} 
+                        alt="Fundo Mobile" 
+                        className="w-full h-full object-cover blur-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onContentChange({ cookieBackgroundImageMobile: '' })}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs bg-black/60 text-white px-2 py-1 rounded-full text-center">
+                          ✓ Mobile
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full max-w-[180px] aspect-[9/16] border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                      {uploadingMobile ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          <span className="text-xs text-gray-500">Enviando...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 p-3">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                          <span className="text-xs text-gray-500 text-center">Print Mobile</span>
+                          <span className="text-xs text-primary font-medium">1080x1920</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleMobileImageUpload} 
+                        className="hidden" 
+                        disabled={uploadingMobile}
+                      />
+                    </label>
+                  )}
+
+                  {/* Alerta se só tem desktop */}
+                  {content.cookieBackgroundImageDesktop && !content.cookieBackgroundImageMobile && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs text-amber-800">
+                        <strong>⚠️ Atenção:</strong> Para melhor resultado em celulares, adicione também a versão mobile.
+                      </p>
+                    </div>
                   )}
                 </div>
 

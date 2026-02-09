@@ -29,11 +29,17 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
     cardStyleEnabled,
     // Cookie Wall
     layoutType = 'default',
-    cookieBackgroundImageUrl,
+    cookieBackgroundImageUrl, // legacy
+    cookieBackgroundImageDesktop = '',
+    cookieBackgroundImageMobile = '',
     cookieCardPosition = 'center',
     cookieCardTheme = 'light',
     cookieBodyText,
   } = content;
+
+  // Determine which background images to use (with fallback)
+  const desktopBg = cookieBackgroundImageDesktop || cookieBackgroundImageUrl || '';
+  const mobileBg = cookieBackgroundImageMobile || desktopBg; // Fallback to desktop if no mobile
 
   // For preview, always show button. In real view, respect delay
   const showButton = isPreview || ctaDelaySeconds === 0;
@@ -118,16 +124,32 @@ const PreSellTemplate = ({ content, isMobile = false, isPreview = false, ownerPl
           }
         `}</style>
 
-        {/* Background Image with Blur */}
-        {cookieBackgroundImageUrl ? (
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ 
-              backgroundImage: `url(${cookieBackgroundImageUrl})`,
-              filter: 'blur(8px)',
-              transform: 'scale(1.05)', // Prevent blur edges from showing
-            }}
-          />
+        {/* Background Images with Blur - Responsive */}
+        {(desktopBg || mobileBg) ? (
+          <>
+            {/* Desktop Background - hidden on mobile */}
+            {desktopBg && (
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden md:block"
+                style={{ 
+                  backgroundImage: `url(${desktopBg})`,
+                  filter: 'blur(8px)',
+                  transform: 'scale(1.05)',
+                }}
+              />
+            )}
+            {/* Mobile Background - hidden on desktop */}
+            {mobileBg && (
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat md:hidden"
+                style={{ 
+                  backgroundImage: `url(${mobileBg})`,
+                  filter: 'blur(8px)',
+                  transform: 'scale(1.05)',
+                }}
+              />
+            )}
+          </>
         ) : (
           <div 
             className="absolute inset-0"
