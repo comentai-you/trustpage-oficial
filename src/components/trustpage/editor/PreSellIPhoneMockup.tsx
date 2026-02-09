@@ -6,41 +6,52 @@ import { useEffect, useRef, useState } from "react";
 interface PreSellIPhoneMockupProps {
   content: PresellContent;
   ownerPlan?: string | null;
-  size?: "normal" | "large"; // Mantido para compatibilidade, mas ignorado internamente pela lógica responsiva
+  size?: "normal" | "large"; // Mantido para compatibilidade
 }
 
 const PreSellIPhoneMockup = ({ content, ownerPlan }: PreSellIPhoneMockupProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scaleFactor, setScaleFactor] = useState(1);
 
-  // DEFINIÇÃO FIXA: Vamos renderizar o iPhone SEMPRE na versão "Ideal/Large"
-  // E depois apenas dar zoom-out nele para caber na tela.
-  // Isso evita que os botões e a ilha dinâmica saiam do lugar.
+  // Dimensões base do iPhone 14/15 Pro (renderizado em tamanho "Large/Ideal")
   const BASE_DIMENSIONS = {
-    width: 340, // Largura base do iPhone renderizado
-    height: 690, // Altura base
-    contentWidth: 310, // Largura do conteúdo interno
-    viewportWidth: 393, // Largura lógica do iPhone 14/15 Pro
+    width: 340, // Largura externa do mockup
+    height: 690, // Altura externa do mockup
+    contentWidth: 310, // Largura da tela (conteúdo)
+    viewportWidth: 393, // Largura lógica do dispositivo
     radius: "rounded-[50px]",
     innerRadius: "rounded-[42px]",
   };
 
-  // Cálculo da escala do conteúdo interno (conteúdo HTML -> tela do iPhone)
+  // Escala do conteúdo HTML para caber na tela do iPhone
   const contentScale = BASE_DIMENSIONS.contentWidth / BASE_DIMENSIONS.viewportWidth;
 
-  // Efeito para calcular o Zoom do container externo
+  // Efeito para calcular o Zoom do mockup inteiro
   useEffect(() => {
     const updateScale = () => {
       if (containerRef.current) {
+        // Lê as dimensões do container pai (a área disponível na tela)
         const parentWidth = containerRef.current.offsetWidth;
-        // Calcula quanto precisamos encolher o iPhone de 340px para caber no pai
-        // Deixamos uma margem de segurança (0.9) para não colar nas bordas
-        const newScale = Math.min(parentWidth / BASE_DIMENSIONS.width, 1);
-        setScaleFactor(newScale);
+        const parentHeight = containerRef.current.offsetHeight;
+
+        // Calcula a escala necessária para caber na largura
+        // Deixa uma margem horizontal pequena (subtrai 20px)
+        const scaleX = (parentWidth - 20) / BASE_DIMENSIONS.width;
+
+        // Calcula a escala necessária para caber na altura
+        // Deixa uma margem vertical pequena (subtrai 20px)
+        const scaleY = (parentHeight - 20) / BASE_DIMENSIONS.height;
+
+        // Usa a MENOR escala para garantir que o iPhone caiba inteiro (sem cortar)
+        // Limita a escala máxima a 1 (não aumenta além do tamanho real)
+        const newScale = Math.min(scaleX, scaleY, 1);
+
+        // Garante que a escala não seja negativa ou zero
+        setScaleFactor(Math.max(newScale, 0.1));
       }
     };
 
-    // Observador para redimensionar em tempo real
+    // Observa mudanças no tamanho do container pai
     const resizeObserver = new ResizeObserver(() => updateScale());
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
@@ -57,27 +68,32 @@ const PreSellIPhoneMockup = ({ content, ownerPlan }: PreSellIPhoneMockupProps) =
   const textColor = content.textColor;
 
   return (
-    // Container Pai que ocupa 100% da largura disponível na sidebar
-    <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-hidden py-4">
-      {/* Wrapper de Escala: Aplica o Zoom para caber perfeitamente */}
+    // Container Pai: Ocupa todo o espaço disponível.
+    // MUDANÇA: Usei `flex items-center justify-center` para centralizar.
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center overflow-hidden relative p-4" // p-4 fornece a margem de segurança
+    >
+      {/* Wrapper de Escala: Aplica o Zoom calculado. */}
       <div
         style={{
           width: BASE_DIMENSIONS.width,
           height: BASE_DIMENSIONS.height,
           transform: `scale(${scaleFactor})`,
-          transformOrigin: "center center", // Zoom a partir do centro
+          transformOrigin: "center center", // Zoom a partir do centro exato
           transition: "transform 0.1s ease-out", // Suaviza o redimensionamento
         }}
-        className="relative flex-shrink-0"
+        // MUDANÇA: `flex-shrink-0` impede que o wrapper seja esmagado pelo flexbox do pai.
+        className="relative flex-shrink-0 shadow-2xl rounded-[50px]"
       >
         {/* iPhone Frame */}
         <div
-          className={`w-full h-full bg-gradient-to-b from-zinc-700 to-zinc-900 ${BASE_DIMENSIONS.radius} p-[12px] shadow-2xl relative`}
+          className={`w-full h-full bg-gradient-to-b from-zinc-700 to-zinc-900 ${BASE_DIMENSIONS.radius} p-[12px] relative`}
           style={{
             boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1) inset",
           }}
         >
-          {/* Side buttons (Posicionados fixos baseados no tamanho Base) */}
+          {/* Side buttons */}
           <div className="absolute left-[-2px] top-[80px] w-[3px] h-[25px] bg-zinc-600 rounded-l-sm" />
           <div className="absolute left-[-2px] top-[115px] w-[3px] h-[40px] bg-zinc-600 rounded-l-sm" />
           <div className="absolute left-[-2px] top-[165px] w-[3px] h-[40px] bg-zinc-600 rounded-l-sm" />
@@ -119,7 +135,7 @@ const PreSellIPhoneMockup = ({ content, ownerPlan }: PreSellIPhoneMockupProps) =
 
             {/* Content Scrollable Area */}
             <div
-              className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto iphone-presell-scroll pt-10" // pt-10 para compensar a status bar
+              className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto iphone-presell-scroll pt-10"
               style={{
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
@@ -135,7 +151,6 @@ const PreSellIPhoneMockup = ({ content, ownerPlan }: PreSellIPhoneMockupProps) =
                 `}
               </style>
 
-              {/* O ScaledViewport cuida de renderizar o conteúdo 393px dentro do nosso espaço */}
               <ScaledViewport viewportWidth={BASE_DIMENSIONS.viewportWidth} scale={contentScale}>
                 <div
                   className="w-full relative flex flex-col min-h-screen"
@@ -151,7 +166,7 @@ const PreSellIPhoneMockup = ({ content, ownerPlan }: PreSellIPhoneMockupProps) =
           </div>
         </div>
 
-        {/* Reflection / Glare (Efeito de Vidro) */}
+        {/* Reflection / Glare */}
         <div
           className={`absolute inset-0 ${BASE_DIMENSIONS.radius} pointer-events-none`}
           style={{
