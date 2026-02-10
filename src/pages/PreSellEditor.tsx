@@ -31,6 +31,7 @@ const PreSellEditor = () => {
   const [pageName, setPageName] = useState("");
   const [slug, setSlug] = useState("");
   const [content, setContent] = useState<PresellContent>(defaultPresellContent);
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!id);
   const [existingPageId, setExistingPageId] = useState<string | null>(null);
@@ -82,6 +83,7 @@ const PreSellEditor = () => {
         setExistingPageId(page.id);
         setPageName(page.page_name || "");
         setSlug(page.slug);
+        setCoverImageUrl(page.cover_image_url || "");
         
         // Load presell content from the content JSON
         const savedContent = page.content as unknown as PresellContent;
@@ -120,7 +122,7 @@ const PreSellEditor = () => {
   const performAutoSave = useCallback(async () => {
     if (!user || !existingPageId) return;
 
-    const currentData = JSON.stringify({ pageName, slug, content });
+    const currentData = JSON.stringify({ pageName, slug, content, coverImageUrl });
     if (currentData === lastDataRef.current) return;
     if (!pageName.trim()) return;
 
@@ -133,6 +135,7 @@ const PreSellEditor = () => {
         template_id: 1,
         template_type: "presell",
         page_name: pageName,
+        cover_image_url: coverImageUrl || null,
         content: content as unknown as Json,
         is_published: true,
         colors: {
@@ -159,7 +162,7 @@ const PreSellEditor = () => {
       console.error("Auto-save error:", error);
       setAutoSaveStatus("error");
     }
-  }, [user, existingPageId, pageName, slug, content]);
+  }, [user, existingPageId, pageName, slug, content, coverImageUrl]);
 
   // Trigger auto-save on data changes
   useEffect(() => {
@@ -178,12 +181,12 @@ const PreSellEditor = () => {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [pageName, slug, content, existingPageId, user, performAutoSave]);
+  }, [pageName, slug, content, coverImageUrl, existingPageId, user, performAutoSave]);
 
   // Initialize lastDataRef after loading
   useEffect(() => {
     if (!isLoading && existingPageId) {
-      lastDataRef.current = JSON.stringify({ pageName, slug, content });
+      lastDataRef.current = JSON.stringify({ pageName, slug, content, coverImageUrl });
     }
   }, [isLoading, existingPageId, pageName, slug, content]);
 
@@ -226,6 +229,7 @@ const PreSellEditor = () => {
         subheadline: content.subheadline,
         cta_text: content.ctaText,
         cta_url: content.ctaUrl,
+        cover_image_url: coverImageUrl || null,
         content: content as unknown as Json,
         is_published: true,
         colors: {
@@ -380,9 +384,11 @@ const PreSellEditor = () => {
             pageName={pageName}
             slug={slug}
             content={content}
+            coverImageUrl={coverImageUrl}
             onPageNameChange={setPageName}
             onSlugChange={setSlug}
             onContentChange={handleContentChange}
+            onCoverImageChange={setCoverImageUrl}
           />
         </div>
 
@@ -414,9 +420,11 @@ const PreSellEditor = () => {
               pageName={pageName}
               slug={slug}
               content={content}
+              coverImageUrl={coverImageUrl}
               onPageNameChange={setPageName}
               onSlugChange={setSlug}
               onContentChange={handleContentChange}
+              onCoverImageChange={setCoverImageUrl}
             />
           </div>
 
@@ -453,9 +461,11 @@ const PreSellEditor = () => {
               pageName={pageName}
               slug={slug}
               content={content}
+              coverImageUrl={coverImageUrl}
               onPageNameChange={setPageName}
               onSlugChange={setSlug}
               onContentChange={handleContentChange}
+              onCoverImageChange={setCoverImageUrl}
             />
           </div>
         </SheetContent>
