@@ -1,5 +1,6 @@
 import { PresellButtonSize, PresellContent } from "@/types/landing-page";
 import { motion } from "framer-motion";
+import { X } from "lucide-react";
 import LegalFooter from "../LegalFooter";
 import CookieWallBackground from "./CookieWallBackground";
 
@@ -166,12 +167,23 @@ const PreSellCookieWallTemplate = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className={`
+            relative
             ${cardBg} backdrop-blur-md rounded-2xl shadow-2xl
             ${cookieCardPosition === "bottom" ? "w-full" : "max-w-lg w-full"}
             ${cardPadding}
             border border-white/10
           `}
         >
+          {/* Close button (X) - redirects to CTA url */}
+          <a
+            href={isPreview ? "#" : ctaUrl}
+            onClick={(e) => isPreview && e.preventDefault()}
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isDarkTheme ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-400 hover:text-gray-700"}`}
+            title="Fechar"
+          >
+            <X className="w-4 h-4" />
+          </a>
+
           {/* Cookie Icon */}
           <div className={`flex items-center gap-3 mb-4 ${cookieCardPosition === "bottom" && deviceMode !== "mobile" ? "flex-row" : ""}`}>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkTheme ? "bg-primary/20" : "bg-primary/10"}`}>
