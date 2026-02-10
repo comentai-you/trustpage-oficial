@@ -5,7 +5,6 @@ import {
   PresellMediaType,
   PresellBackgroundType,
   PresellButtonSize,
-  PresellLayoutType,
   CookieCardPosition,
   CookieCardTheme,
 } from "@/types/landing-page";
@@ -17,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Home,
   Monitor,
-  Layers,
   Settings,
   FileText,
   MousePointer,
@@ -31,7 +29,6 @@ import {
   X,
   Loader2,
   Cookie,
-  LayoutTemplate,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -206,9 +203,6 @@ const PreSellEditorSidebar = ({
           <div className="w-10 h-10 rounded-lg bg-primary/10 border-2 border-primary flex items-center justify-center">
             <Monitor className="w-5 h-5 text-primary" />
           </div>
-          <div className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-colors">
-            <Layers className="w-5 h-5 text-gray-600" />
-          </div>
         </div>
       </div>
 
@@ -230,60 +224,15 @@ const PreSellEditorSidebar = ({
           defaultValue={["layout", "config", "conteudo", "midia", "cta", "aparencia", "cookie-config"]}
           className="w-full"
         >
-          {/* Seção 0: Tipo de Layout */}
-          <AccordionItem value="layout" className="border-b border-gray-200">
-            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="w-4 h-4 text-primary" />
-                Tipo de Página
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => onContentChange({ layoutType: "default" })}
-                  className={`p-4 rounded-lg border-2 transition-all text-center ${
-                    content.layoutType !== "cookie-wall"
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                  <span className="text-sm font-medium">Padrão</span>
-                  <p className="text-xs text-gray-500 mt-1">Editor livre</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onContentChange({
-                      layoutType: "cookie-wall",
-                      headline: "Aviso de Privacidade",
-                      ctaText: "Aceitar e Continuar",
-                      ctaColor: "#22C55E",
-                    })
-                  }
-                  className={`p-4 rounded-lg border-2 transition-all text-center ${
-                    content.layoutType === "cookie-wall"
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <Cookie className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-                  <span className="text-sm font-medium">Cookie Wall</span>
-                  <p className="text-xs text-gray-500 mt-1">Estilo LGPD</p>
-                </button>
-              </div>
-              {isCookieWall && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-800">
-                    <strong>💡 Dica:</strong> Faça um print da página de vendas e envie como fundo. O card de cookies
-                    ficará sobre a imagem borrada.
-                  </p>
-                </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
+          {/* Dica Cookie Wall */}
+          <div className="px-4 py-3">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs text-amber-800">
+                <strong>💡 Dica:</strong> Faça um print da página de vendas e envie como fundo. O card de cookies
+                ficará sobre a imagem borrada.
+              </p>
+            </div>
+          </div>
 
           {/* Seção 1: Configurações */}
           <AccordionItem value="config" className="border-b border-gray-200">
@@ -677,7 +626,7 @@ const PreSellEditorSidebar = ({
 
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-primary" />
+                    <Cookie className="w-4 h-4 text-primary" />
                     <Label className="text-sm font-medium text-gray-700">Estilo Card (Caixa)</Label>
                   </div>
                   <Switch
