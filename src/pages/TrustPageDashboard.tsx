@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, BarChart3, Copy, Trash2, MoreVertical, Globe, HelpCircle } from "lucide-react";
+import { Plus, Sparkles, Crown, Loader2, Scale, ExternalLink, Eye, FileText, Shield, Mail, AlertTriangle, X, Copy, Trash2, MoreVertical, Globe, HelpCircle, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,10 +15,9 @@ import PageCard from "@/components/dashboard/PageCard";
 import QuizCard from "@/components/dashboard/QuizCard";
 import TemplateSelectionModal from "@/components/TemplateSelectionModal";
 import OnboardingModal from "@/components/OnboardingModal";
-import TrafficSourcesChart from "@/components/dashboard/TrafficSourcesChart";
 import { TemplateType } from "@/types/landing-page";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getPublicPageUrl, getClonedPageUrl, getQuizPublicUrl, PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
@@ -132,7 +131,6 @@ const TrustPageDashboard = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userDomains, setUserDomains] = useState<UserDomain[]>([]);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string; name: string; type: 'page' | 'cloned' | 'quiz' }>({ open: false, id: '', name: '', type: 'page' });
-  const [analyticsDialog, setAnalyticsDialog] = useState<{ open: boolean; pageId: string; pageName: string }>({ open: false, pageId: '', pageName: '' });
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -412,9 +410,8 @@ const TrustPageDashboard = () => {
   };
 
 
-  const handleShowAnalytics = (pageId: string, pageName: string) => {
-    setAnalyticsDialog({ open: true, pageId, pageName });
-  };
+
+
 
   const getLegalPageIcon = (slug: string) => {
     switch (slug) {
@@ -559,6 +556,29 @@ const TrustPageDashboard = () => {
           />
         </div>
 
+        {/* Analytics Section */}
+        <Card 
+          className="mb-6 sm:mb-8 cursor-pointer hover:border-primary/40 transition-colors group"
+          onClick={() => navigate("/analytics")}
+        >
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Analytics Avançado</h3>
+                  <p className="text-sm text-muted-foreground">Veja visitas, fontes de tráfego, dispositivos e mais</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="hidden sm:flex">
+                Ver Analytics
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Pages Section */}
         <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground">Suas Páginas</h2>
@@ -652,7 +672,6 @@ const TrustPageDashboard = () => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onCopyLink={handleCopyLink}
-                onShowAnalytics={handleShowAnalytics}
               />
             ))}
 
@@ -919,26 +938,8 @@ const TrustPageDashboard = () => {
         variant="destructive"
       />
 
-      {/* Analytics Dialog */}
-      <Dialog 
-        open={analyticsDialog.open} 
-        onOpenChange={(open) => setAnalyticsDialog({ ...analyticsDialog, open })}
-      >
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-primary" />
-              Analytics: {analyticsDialog.pageName}
-            </DialogTitle>
-          </DialogHeader>
-          {analyticsDialog.open && (
-            <TrafficSourcesChart 
-              pageId={analyticsDialog.pageId} 
-              pageName={analyticsDialog.pageName} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+
+
 
       {user && (
         <OnboardingModal

@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Trash2, BarChart3, Edit3, HelpCircle, Globe, Image as ImageIcon } from "lucide-react";
+import { ExternalLink, Copy, Trash2, Edit3, HelpCircle, Globe, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,11 +115,6 @@ const QuizCard = ({
                 {primaryDomain ? `${primaryDomain}/q/${slug}` : `${PUBLIC_PAGES_DOMAIN}/q/${slug}`}
               </p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span className="font-medium">{views || 0} views</span>
-                </span>
-                <span>•</span>
                 <span>{formattedDate}</span>
               </div>
             </div>
