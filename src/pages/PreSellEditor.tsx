@@ -435,14 +435,10 @@ const PreSellEditor = () => {
             </div>
           </div>
 
-          {/* Desktop Preview Area */}
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-6 p-4 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-hidden">
-            <div className="flex-1 h-full max-w-[560px]">
-              <PreSellIMacMockup content={content} ownerPlan={userPlan} />
-            </div>
-            <div className="w-[280px] h-full flex-shrink-0">
-              <PreSellIPhoneMockup content={content} ownerPlan={userPlan} />
-            </div>
+          {/* Desktop Preview Area (Canvas) - Fixed, centered, with internal scroll if needed */}
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-y-auto">
+            <PreSellIMacMockup content={content} ownerPlan={userPlan} />
+            <PreSellIPhoneMockup content={content} ownerPlan={userPlan} />
           </div>
         </div>
       </div>
