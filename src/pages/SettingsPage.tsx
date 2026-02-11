@@ -968,7 +968,7 @@ const SettingsPage = () => {
                         Plano Gratuito
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Você está usando o plano gratuito com 1 Bio Link e Pixel liberado. Faça upgrade para desbloquear páginas VSL, domínio próprio e mais!
+                        Você está no plano gratuito com Bio Link e Landing Page. Faça upgrade para desbloquear VSL, Quiz, Clonador, domínio próprio e mais!
                       </p>
                       <Button 
                         className="gradient-button text-primary-foreground border-0 w-full sm:w-auto"
