@@ -437,7 +437,7 @@ const PreSellEditor = () => {
 
           {/* Desktop Preview Area (Canvas) - Fixed mockups, scrollable container */}
           <div className="hidden lg:block flex-1 min-h-0 overflow-y-auto bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100">
-            <div className="min-h-full flex items-center justify-center gap-8 p-8">
+            <div className="min-h-[900px] flex items-center justify-center gap-8 p-8">
               <div className="shrink-0">
                 <PreSellIMacMockup content={content} ownerPlan={userPlan} />
               </div>
