@@ -238,64 +238,123 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Benefits Section — Free vs PRO */}
       <section className="py-16 sm:py-24 bg-background relative">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-10 sm:mb-16">
             <span className="inline-block px-3 sm:px-4 py-2 bg-primary/10 rounded-full text-primary font-semibold text-xs sm:text-sm mb-4">
-              Por que TrustPage?
+              Comece grátis, escale quando quiser
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4">
-              Tudo que você precisa para <span className="gradient-text">vender mais</span>
+              Grátis para começar, <span className="gradient-text">PRO para escalar</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Recursos poderosos projetados para maximizar suas conversões
+              Crie sua primeira página sem pagar nada. Desbloqueie ferramentas avançadas quando estiver pronto para crescer.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {/* Card 1 - VSL */}
-            <div className="card-3d p-6 sm:p-8 space-y-3 sm:space-y-4">
-              <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                <Video className="w-6 sm:w-7 h-6 sm:h-7 text-white" />
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+            {/* Column 1 — FREE */}
+            <div className="bg-card rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border shadow-elevated">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-emerald-600" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground">Grátis para Sempre</h3>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground">Vídeo VSL Integrado</h3>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Player de vídeo com capa personalizada e botão de play pulsante. Sem distrações do YouTube.
-              </p>
-              <div className="flex items-center gap-2 text-primary font-medium text-sm sm:text-base">
-                <span>Saiba mais</span>
-                <ArrowRight className="w-4 h-4" />
+
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <LinkIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Link na Bio</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Reúna todos os seus links em uma página profissional</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Magnet className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Landing Page</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Crie páginas de captura e vendas do zero</p>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="mt-6 pt-5 border-t border-border space-y-2">
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 flex-shrink-0" /> Limite de 1.000 views/mês
+                </p>
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 flex-shrink-0" /> Marca d'água "Criado com TrustPage"
+                </p>
               </div>
             </div>
 
-            {/* Card 2 - Payment */}
-            <div className="card-3d p-6 sm:p-8 space-y-3 sm:space-y-4">
-              <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-                <CreditCard className="w-6 sm:w-7 h-6 sm:h-7 text-white" />
+            {/* Column 2 — PRO (Locked) */}
+            <div className="relative bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-primary/30 shadow-elevated">
+              <div className="absolute -top-3 right-4">
+                <span className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                  🔒 PRO
+                </span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground">Pagamento Direto</h3>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Integre Hotmart, Kiwify, Eduzz ou qualquer plataforma. Link direto para o checkout.
-              </p>
-              <div className="flex items-center gap-2 text-primary font-medium text-sm sm:text-base">
-                <span>Saiba mais</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </div>
 
-            {/* Card 3 - Speed */}
-            <div className="card-3d p-6 sm:p-8 space-y-3 sm:space-y-4 sm:col-span-2 md:col-span-1">
-              <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                <Zap className="w-6 sm:w-7 h-6 sm:h-7 text-white" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground">Desbloqueie com PRO</h3>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground">Carregamento Relâmpago</h3>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Páginas ultra-rápidas otimizadas para mobile. Não perca vendas por lentidão.
-              </p>
-              <div className="flex items-center gap-2 text-primary font-medium text-sm sm:text-base">
-                <span>Saiba mais</span>
-                <ArrowRight className="w-4 h-4" />
+
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Copy className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Clonador de Páginas</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Clone qualquer página de vendas e substitua os links</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <HelpCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Quiz Interativo</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Funis de perguntas para qualificar e engajar leads</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Shield className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Pre-sell Anti-Bloqueio</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Cookie Wall que protege seus anúncios de bloqueio</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Video className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm sm:text-base">Templates de Alta Conversão</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">VSL, Advertorial e templates prontos para vender</p>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="mt-6">
+                <Link to="/auth">
+                  <Button className="w-full gradient-button font-bold text-sm sm:text-base py-5 group">
+                    Desbloquear Tudo
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
