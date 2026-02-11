@@ -80,8 +80,9 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
 
   const handleSelect = () => {
     if (selectedTemplate) {
-      // Quiz and Presell are blocked for free plan
-      if ((selectedTemplate === 'quiz' || selectedTemplate === 'presell') && isFreePlan) {
+      // Premium templates blocked for free plan (VSL, Sales, Quiz, Presell)
+      const premiumTemplates: TemplateType[] = ['vsl', 'sales', 'quiz', 'presell'];
+      if (premiumTemplates.includes(selectedTemplate) && isFreePlan) {
         setShowUpgradeModal(true);
         return;
       }
@@ -121,6 +122,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "VSL Focada",
       description: "Ideal para PLR e Infoprodutos. Foco total no vídeo.",
       tags: ["Vídeo Central", "Timer CTA"],
+      isPremium: true,
     },
     {
       id: "sales" as TemplateType,
@@ -128,6 +130,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Página de Vendas",
       description: "Layout completo com vídeo, carrossel e múltiplos CTAs.",
       tags: ["Carrossel", "Multi CTA"],
+      isPremium: true,
     },
     {
       id: "presell" as TemplateType,
@@ -135,7 +138,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Pre-sell Anti-Bloqueio",
       description: "Página de redirecionamento segura para anúncios.",
       tags: ["Anti-Ban", "Redirect"],
-      isPremium: true, // Blocked for free plan
+      isPremium: true,
     },
     {
       id: "quiz" as TemplateType,
@@ -143,7 +146,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Quiz Builder",
       description: "Crie funis de perguntas interativas para qualificar leads.",
       tags: ["Typeform Style", "Alta Conversão"],
-      isPremium: true, // Blocked for free plan
+      isPremium: true,
     },
   ];
 

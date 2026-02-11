@@ -380,7 +380,6 @@ const TrustPageDashboard = () => {
       navigate('/presell/new');
       return;
     }
-    // All templates available for all plans - free plan has watermark + view limits
     navigate(`/new?type=${templateType}`);
   };
 
@@ -456,7 +455,7 @@ const TrustPageDashboard = () => {
               <div className="flex items-center gap-2 sm:gap-3 text-center sm:text-left">
                 <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-primary flex-shrink-0" />
                 <p className="text-xs sm:text-sm font-medium text-foreground">
-                  Você está no plano Gratuito. Faça upgrade para desbloquear VSLs, delay no botão e mais!
+                  Você está no plano Gratuito. Desbloqueie VSL, Quiz, Clonador e mais!
                 </p>
               </div>
               <Button 
