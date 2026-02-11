@@ -23,7 +23,7 @@ const ReviewTechTemplate = ({ content, isMobile, isPreview }: Props) => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900" style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif", backgroundColor: content.backgroundColor || '#F9FAFB', color: content.bodyTextColor || '#111827' }}>
       {/* Urgency Bar */}
       {content.urgencyBarEnabled && (
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-2 px-4 text-xs sm:text-sm font-medium">
@@ -54,7 +54,7 @@ const ReviewTechTemplate = ({ content, isMobile, isPreview }: Props) => {
         </div>
 
         {/* Headline */}
-        <h1 className={`font-extrabold text-gray-900 leading-tight mb-3 ${isMobile ? 'text-2xl' : 'text-3xl lg:text-4xl'}`}>
+        <h1 className={`font-extrabold leading-tight mb-3 ${isMobile ? 'text-2xl' : 'text-3xl lg:text-4xl'}`} style={{ color: content.headlineColor || '#111827' }}>
           {content.headline}
         </h1>
         <p className={`text-gray-500 mb-6 ${isMobile ? 'text-sm' : 'text-base lg:text-lg'}`}>

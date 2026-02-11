@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import AdvertorialRichEditor from "@/components/trustpage/editor/AdvertorialRichEditor";
 import { Button } from "@/components/ui/button";
 import {
   Home,
@@ -137,6 +138,83 @@ const AdvertorialEditorSidebar = ({
             </AccordionContent>
           </AccordionItem>
 
+          {/* Theme Customization */}
+          <AccordionItem value="customization" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><Palette className="w-4 h-4" /> Personalizar Cores</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-4">
+              {/* Presets */}
+              <div>
+                <Label className="text-xs mb-2 block">Estilos Prontos</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    { id: 'default', label: 'Padrão', colors: ['#FFFFFF', '#111827', '#DC2626'] },
+                    { id: 'dark', label: 'Dark', colors: ['#1F2937', '#F9FAFB', '#3B82F6'] },
+                    { id: 'warm', label: 'Warm', colors: ['#FFFBEB', '#78350F', '#D97706'] },
+                    { id: 'ocean', label: 'Ocean', colors: ['#F0F9FF', '#0C4A6E', '#0EA5E9'] },
+                    { id: 'forest', label: 'Forest', colors: ['#F0FDF4', '#14532D', '#22C55E'] },
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => {
+                        const presets: Record<string, Partial<typeof content>> = {
+                          default: { themePreset: 'default', headlineColor: '#111827', bodyTextColor: '#374151', backgroundColor: '#FFFFFF', accentColor: '#DC2626' },
+                          dark: { themePreset: 'dark', headlineColor: '#F9FAFB', bodyTextColor: '#D1D5DB', backgroundColor: '#1F2937', accentColor: '#3B82F6' },
+                          warm: { themePreset: 'warm', headlineColor: '#78350F', bodyTextColor: '#92400E', backgroundColor: '#FFFBEB', accentColor: '#D97706' },
+                          ocean: { themePreset: 'ocean', headlineColor: '#0C4A6E', bodyTextColor: '#164E63', backgroundColor: '#F0F9FF', accentColor: '#0EA5E9' },
+                          forest: { themePreset: 'forest', headlineColor: '#14532D', bodyTextColor: '#166534', backgroundColor: '#F0FDF4', accentColor: '#22C55E' },
+                        };
+                        onContentChange(presets[preset.id] || {});
+                      }}
+                      className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ${
+                        content.themePreset === preset.id ? 'border-primary' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex gap-0.5">
+                        {preset.colors.map((c, i) => (
+                          <div key={i} className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                      <span className="text-[9px] text-gray-500">{preset.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Individual Colors */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[10px]">Título</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="color" value={content.headlineColor} onChange={(e) => onContentChange({ headlineColor: e.target.value, themePreset: 'custom' })} className="w-7 h-7 rounded border cursor-pointer" />
+                    <span className="text-[10px] text-gray-400">{content.headlineColor}</span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Texto</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="color" value={content.bodyTextColor} onChange={(e) => onContentChange({ bodyTextColor: e.target.value, themePreset: 'custom' })} className="w-7 h-7 rounded border cursor-pointer" />
+                    <span className="text-[10px] text-gray-400">{content.bodyTextColor}</span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Fundo</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="color" value={content.backgroundColor} onChange={(e) => onContentChange({ backgroundColor: e.target.value, themePreset: 'custom' })} className="w-7 h-7 rounded border cursor-pointer" />
+                    <span className="text-[10px] text-gray-400">{content.backgroundColor}</span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Destaque</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="color" value={content.accentColor} onChange={(e) => onContentChange({ accentColor: e.target.value, themePreset: 'custom' })} className="w-7 h-7 rounded border cursor-pointer" />
+                    <span className="text-[10px] text-gray-400">{content.accentColor}</span>
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
           {/* Content */}
           <AccordionItem value="content" className="border rounded-lg px-3">
             <AccordionTrigger className="text-sm font-semibold py-3">
@@ -164,15 +242,14 @@ const AdvertorialEditorSidebar = ({
                 <Input value={content.publishDate} onChange={(e) => onContentChange({ publishDate: e.target.value })} placeholder="Ex: 10 de fevereiro de 2026" className="mt-1" />
               </div>
               <div>
-                <Label className="text-xs">Corpo do Texto (HTML)</Label>
-                <Textarea
-                  value={content.bodyHtml}
-                  onChange={(e) => onContentChange({ bodyHtml: e.target.value })}
-                  rows={6}
-                  className="mt-1 font-mono text-xs"
-                  placeholder="<p>Seu texto aqui...</p>"
-                />
-                <p className="text-[10px] text-gray-400 mt-1">Use tags &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt; para formatar.</p>
+                <Label className="text-xs">Corpo do Texto</Label>
+                <div className="mt-1 border rounded-md overflow-hidden">
+                  <AdvertorialRichEditor
+                    value={content.bodyHtml}
+                    onChange={(html) => onContentChange({ bodyHtml: html })}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">Use a barra de ferramentas para formatar títulos, negrito, links e mais.</p>
               </div>
               {/* CTA */}
               <div className="pt-2 border-t border-gray-100">
@@ -206,7 +283,7 @@ const AdvertorialEditorSidebar = ({
                 value={content.coverImageUrl}
                 onChange={(url) => onContentChange({ coverImageUrl: url })}
                 label="Imagem de Capa"
-                hint="Imagem principal do artigo"
+                hint="Tamanho sugerido: 1200 x 630px (16:9)"
                 aspectRatio="video"
               />
               <div>
@@ -217,7 +294,7 @@ const AdvertorialEditorSidebar = ({
                     if (url && content.theme === 'portal-news') setShowLogoWarning(true);
                   }}
                   label="Foto do Autor"
-                  hint="Foto circular ao lado do nome"
+                  hint="Tamanho sugerido: 200 x 200px (quadrado)"
                 />
                 {showLogoWarning && content.theme === 'portal-news' && (
                   <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg mt-2 text-xs text-amber-700">
@@ -231,7 +308,7 @@ const AdvertorialEditorSidebar = ({
                 <Label className="text-xs font-semibold mb-2 block">Imagens do Corpo</Label>
                 {(content.bodyImages || []).map((img, i) => (
                   <div key={i} className="mb-2">
-                    <ImageUpload
+                     <ImageUpload
                       value={img}
                       onChange={(url) => {
                         const newImages = [...(content.bodyImages || [])];
@@ -239,6 +316,7 @@ const AdvertorialEditorSidebar = ({
                         onContentChange({ bodyImages: newImages });
                       }}
                       label={`Imagem ${i + 1}`}
+                      hint="Tamanho sugerido: 800 x 500px"
                       aspectRatio="video"
                     />
                     <Button variant="ghost" size="sm" className="text-xs text-red-500 mt-1" onClick={() => {

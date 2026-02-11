@@ -224,25 +224,8 @@ const StatsBar = ({
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {/* Total Views */}
-        <Card className="overflow-hidden border-0 shadow-card hover-lift">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground font-medium">Visualizações</p>
-                <p className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                  {totalViews.toLocaleString('pt-BR')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Leads - Clickable */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {/* Leads - Clickable */}
         <Card 
           className="overflow-hidden border-0 shadow-card hover-lift cursor-pointer group"
           onClick={() => navigate("/leads")}

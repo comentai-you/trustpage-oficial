@@ -15,7 +15,7 @@ const StoryBlogTemplate = ({ content, isMobile, isPreview }: Props) => {
   const viewerCount = Math.floor(Math.random() * 200) + 150;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'Georgia', 'Times New Roman', serif", backgroundColor: content.backgroundColor || '#FFFFFF', color: content.bodyTextColor || '#111827' }}>
       {/* Urgency Bar */}
       {content.urgencyBarEnabled && (
         <div className="bg-gray-900 text-white text-center py-2 px-4 text-xs sm:text-sm font-medium">
@@ -32,7 +32,7 @@ const StoryBlogTemplate = ({ content, isMobile, isPreview }: Props) => {
 
       <article className="max-w-3xl mx-auto px-4 py-10">
         {/* Title */}
-        <h1 className={`font-bold text-center leading-tight mb-4 ${isMobile ? 'text-2xl' : 'text-3xl lg:text-5xl'}`}>
+        <h1 className={`font-bold text-center leading-tight mb-4 ${isMobile ? 'text-2xl' : 'text-3xl lg:text-5xl'}`} style={{ color: content.headlineColor || '#111827' }}>
           {content.headline}
         </h1>
         {content.subheadline && (
