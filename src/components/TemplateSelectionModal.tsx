@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle, Shield } from "lucide-react";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle, Shield, Newspaper } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
   const handleSelect = () => {
     if (selectedTemplate) {
       // Premium templates blocked for free plan (VSL, Sales, Quiz, Presell)
-      const premiumTemplates: TemplateType[] = ['vsl', 'sales', 'quiz', 'presell'];
+      const premiumTemplates: TemplateType[] = ['vsl', 'sales', 'quiz', 'presell', 'advertorial'];
       if (premiumTemplates.includes(selectedTemplate) && isFreePlan) {
         setShowUpgradeModal(true);
         return;
@@ -146,6 +146,14 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Quiz Builder",
       description: "Crie funis de perguntas interativas para qualificar leads.",
       tags: ["Typeform Style", "Alta Conversão"],
+      isPremium: true,
+    },
+    {
+      id: "advertorial" as TemplateType,
+      icon: <Newspaper className="w-4 h-4 sm:w-5 sm:h-5" />,
+      title: "Advertorial",
+      description: "Crie páginas estilo artigo, notícia ou review de alta conversão.",
+      tags: ["News", "Blog", "Review"],
       isPremium: true,
     },
   ];

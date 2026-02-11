@@ -37,6 +37,7 @@ import QuizEditor from "./pages/QuizEditor";
 import QuizView from "./pages/QuizView";
 import AffiliateProgramPage from "./pages/AffiliateProgramPage";
 import PreSellEditor from "./pages/PreSellEditor";
+import AdvertorialEditor from "./pages/AdvertorialEditor";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +184,18 @@ const SystemRoutes = () => (
       </ProtectedRoute>
     } />
     
+    {/* Advertorial Editor routes */}
+    <Route path="/advertorial/new" element={
+      <ProtectedRoute>
+        <AdvertorialEditor />
+      </ProtectedRoute>
+    } />
+    <Route path="/advertorial/edit/:id" element={
+      <ProtectedRoute>
+        <AdvertorialEditor />
+      </ProtectedRoute>
+    } />
+    
     {/* Affiliate Program - Public */}
     <Route path="/affiliate-program" element={<AffiliateProgramPage />} />
     
@@ -215,6 +228,7 @@ const App = () => {
     "/dashboard",
     "/leads",
     "/presell",
+    "/advertorial",
     "/q",
     "/settings",
     "/subscription",

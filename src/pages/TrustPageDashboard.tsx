@@ -380,12 +380,21 @@ const TrustPageDashboard = () => {
       navigate('/presell/new');
       return;
     }
+    // Advertorial has its own editor
+    if (templateType === 'advertorial') {
+      navigate('/advertorial/new');
+      return;
+    }
     navigate(`/new?type=${templateType}`);
   };
 
   const handleEdit = (pageId: string, templateType?: string | null) => {
     if (templateType === 'presell') {
       navigate(`/presell/edit/${pageId}`);
+      return;
+    }
+    if (templateType === 'advertorial') {
+      navigate(`/advertorial/edit/${pageId}`);
       return;
     }
     navigate(`/edit/${pageId}`);

@@ -1,0 +1,368 @@
+import { useState } from "react";
+import {
+  AdvertorialContent,
+  AdvertorialTheme,
+  FakeComment,
+  ComparisonProduct,
+} from "@/types/advertorial";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Home,
+  Type,
+  ImageIcon,
+  Palette,
+  MessageCircle,
+  RotateCcw,
+  AlertTriangle,
+  Star,
+  Plus,
+  Trash2,
+  Newspaper,
+  BookOpen,
+  Monitor,
+  Globe,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+import ImageUpload from "@/components/trustpage/ImageUpload";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface AdvertorialEditorSidebarProps {
+  pageName: string;
+  slug: string;
+  content: AdvertorialContent;
+  onPageNameChange: (name: string) => void;
+  onSlugChange: (slug: string) => void;
+  onContentChange: (content: Partial<AdvertorialContent>) => void;
+}
+
+const themeOptions: { id: AdvertorialTheme; label: string; icon: React.ReactNode; desc: string }[] = [
+  { id: 'portal-news', label: 'Portal News', icon: <Newspaper className="w-4 h-4" />, desc: 'Estilo G1/CNN' },
+  { id: 'story-blog', label: 'Story Blog', icon: <BookOpen className="w-4 h-4" />, desc: 'Estilo Medium' },
+  { id: 'review-tech', label: 'Review Tech', icon: <Monitor className="w-4 h-4" />, desc: 'Comparativo' },
+];
+
+const AdvertorialEditorSidebar = ({
+  pageName,
+  slug,
+  content,
+  onPageNameChange,
+  onSlugChange,
+  onContentChange,
+}: AdvertorialEditorSidebarProps) => {
+  const [showLogoWarning, setShowLogoWarning] = useState(false);
+
+  const updateComment = (index: number, updates: Partial<FakeComment>) => {
+    const newComments = [...content.fakeComments];
+    newComments[index] = { ...newComments[index], ...updates };
+    onContentChange({ fakeComments: newComments });
+  };
+
+  const addComment = () => {
+    onContentChange({
+      fakeComments: [
+        ...content.fakeComments,
+        { name: 'Novo Usuário', text: 'Ótimo artigo!', timeAgo: '1 hora', likes: 12 },
+      ],
+    });
+  };
+
+  const removeComment = (index: number) => {
+    onContentChange({ fakeComments: content.fakeComments.filter((_, i) => i !== index) });
+  };
+
+  const updateProduct = (index: number, updates: Partial<ComparisonProduct>) => {
+    const newProducts = [...content.comparisonProducts];
+    newProducts[index] = { ...newProducts[index], ...updates };
+    onContentChange({ comparisonProducts: newProducts });
+  };
+
+  return (
+    <div className="w-full lg:w-80 h-full bg-white border-r border-gray-200 overflow-y-auto">
+      <div className="p-4">
+        {/* Back link */}
+        <Link to="/dashboard" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
+          <Home className="w-4 h-4" /> Dashboard
+        </Link>
+
+        <Accordion type="multiple" defaultValue={["page", "theme", "content", "images"]} className="space-y-1">
+          {/* Page Settings */}
+          <AccordionItem value="page" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><Globe className="w-4 h-4" /> Configurações</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-4">
+              <div>
+                <Label className="text-xs">Nome da Página</Label>
+                <Input value={pageName} onChange={(e) => onPageNameChange(e.target.value)} placeholder="Meu advertorial" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">URL (slug)</Label>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-xs text-gray-400 whitespace-nowrap">{PUBLIC_PAGES_DOMAIN}/p/</span>
+                  <Input value={slug} onChange={(e) => onSlugChange(e.target.value)} placeholder="meu-artigo" className="flex-1" />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Theme Selector */}
+          <AccordionItem value="theme" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><Palette className="w-4 h-4" /> Tema (Layout)</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-4">
+              {themeOptions.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => onContentChange({ theme: t.id })}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                    content.theme === t.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${content.theme === t.id ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    {t.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{t.label}</p>
+                    <p className="text-xs text-gray-400">{t.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Content */}
+          <AccordionItem value="content" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><Type className="w-4 h-4" /> Conteúdo</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-4">
+              <div>
+                <Label className="text-xs">Manchete (Headline)</Label>
+                <Textarea value={content.headline} onChange={(e) => onContentChange({ headline: e.target.value })} rows={2} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Subtítulo</Label>
+                <Input value={content.subheadline} onChange={(e) => onContentChange({ subheadline: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Nome do Autor</Label>
+                <Input value={content.authorName} onChange={(e) => onContentChange({ authorName: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Bio do Autor</Label>
+                <Textarea value={content.authorBio} onChange={(e) => onContentChange({ authorBio: e.target.value })} rows={2} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Data (vazio = data de hoje)</Label>
+                <Input value={content.publishDate} onChange={(e) => onContentChange({ publishDate: e.target.value })} placeholder="Ex: 10 de fevereiro de 2026" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Corpo do Texto (HTML)</Label>
+                <Textarea
+                  value={content.bodyHtml}
+                  onChange={(e) => onContentChange({ bodyHtml: e.target.value })}
+                  rows={6}
+                  className="mt-1 font-mono text-xs"
+                  placeholder="<p>Seu texto aqui...</p>"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Use tags &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt; para formatar.</p>
+              </div>
+              {/* CTA */}
+              <div className="pt-2 border-t border-gray-100">
+                <Label className="text-xs font-semibold">Botão CTA</Label>
+                <div className="space-y-2 mt-2">
+                  <Input value={content.ctaText} onChange={(e) => onContentChange({ ctaText: e.target.value })} placeholder="Texto do botão" />
+                  <Input value={content.ctaUrl} onChange={(e) => onContentChange({ ctaUrl: e.target.value })} placeholder="https://link-do-produto.com" />
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs">Cor</Label>
+                    <input type="color" value={content.ctaColor} onChange={(e) => onContentChange({ ctaColor: e.target.value })} className="w-8 h-8 rounded border cursor-pointer" />
+                  </div>
+                </div>
+              </div>
+              {/* Nav Categories (Portal News) */}
+              {content.theme === 'portal-news' && (
+                <div className="pt-2 border-t border-gray-100">
+                  <Label className="text-xs">Categoria Principal</Label>
+                  <Input value={content.newsCategory} onChange={(e) => onContentChange({ newsCategory: e.target.value })} className="mt-1" />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Images */}
+          <AccordionItem value="images" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><ImageIcon className="w-4 h-4" /> Imagens</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-4">
+              <ImageUpload
+                value={content.coverImageUrl}
+                onChange={(url) => onContentChange({ coverImageUrl: url })}
+                label="Imagem de Capa"
+                hint="Imagem principal do artigo"
+                aspectRatio="video"
+              />
+              <div>
+                <ImageUpload
+                  value={content.authorImageUrl}
+                  onChange={(url) => {
+                    onContentChange({ authorImageUrl: url });
+                    if (url && content.theme === 'portal-news') setShowLogoWarning(true);
+                  }}
+                  label="Foto do Autor"
+                  hint="Foto circular ao lado do nome"
+                />
+                {showLogoWarning && content.theme === 'portal-news' && (
+                  <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg mt-2 text-xs text-amber-700">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>O uso de marcas registradas de terceiros sem autorização é de responsabilidade do usuário.</span>
+                  </div>
+                )}
+              </div>
+              {/* Body Images */}
+              <div>
+                <Label className="text-xs font-semibold mb-2 block">Imagens do Corpo</Label>
+                {(content.bodyImages || []).map((img, i) => (
+                  <div key={i} className="mb-2">
+                    <ImageUpload
+                      value={img}
+                      onChange={(url) => {
+                        const newImages = [...(content.bodyImages || [])];
+                        newImages[i] = url;
+                        onContentChange({ bodyImages: newImages });
+                      }}
+                      label={`Imagem ${i + 1}`}
+                      aspectRatio="video"
+                    />
+                    <Button variant="ghost" size="sm" className="text-xs text-red-500 mt-1" onClick={() => {
+                      onContentChange({ bodyImages: content.bodyImages.filter((_, j) => j !== i) });
+                    }}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Remover
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => onContentChange({ bodyImages: [...(content.bodyImages || []), ''] })}>
+                  <Plus className="w-3 h-3 mr-1" /> Adicionar Imagem
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Toggles / Special Components */}
+          <AccordionItem value="toggles" className="border rounded-lg px-3">
+            <AccordionTrigger className="text-sm font-semibold py-3">
+              <span className="flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Componentes</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pb-4">
+              {/* Urgency Bar */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Barra de Urgência</Label>
+                <Switch checked={content.urgencyBarEnabled} onCheckedChange={(v) => onContentChange({ urgencyBarEnabled: v })} />
+              </div>
+              {content.urgencyBarEnabled && (
+                <Input value={content.urgencyBarText} onChange={(e) => onContentChange({ urgencyBarText: e.target.value })} placeholder="Use {count} para número" className="text-xs" />
+              )}
+
+              {/* Back Redirect */}
+              <div className="flex items-center justify-between">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Label className="text-xs flex items-center gap-1 cursor-help">
+                      <RotateCcw className="w-3 h-3" /> Back Redirect
+                    </Label>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Ao clicar em "voltar" no navegador, redireciona para a URL definida ao invés de sair da página.
+                  </TooltipContent>
+                </Tooltip>
+                <Switch checked={content.backRedirectEnabled} onCheckedChange={(v) => onContentChange({ backRedirectEnabled: v })} />
+              </div>
+              {content.backRedirectEnabled && (
+                <Input value={content.backRedirectUrl} onChange={(e) => onContentChange({ backRedirectUrl: e.target.value })} placeholder="URL de redirecionamento" className="text-xs" />
+              )}
+
+              {/* Fake Comments */}
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Comentários Fake</Label>
+                <Switch checked={content.fakeCommentsEnabled} onCheckedChange={(v) => onContentChange({ fakeCommentsEnabled: v })} />
+              </div>
+              {content.fakeCommentsEnabled && (
+                <div className="space-y-3 pl-1">
+                  {content.fakeComments.map((c, i) => (
+                    <div key={i} className="p-2 border rounded-lg space-y-1.5 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <Input value={c.name} onChange={(e) => updateComment(i, { name: e.target.value })} className="h-7 text-xs flex-1 mr-1" placeholder="Nome" />
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400" onClick={() => removeComment(i)}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <Textarea value={c.text} onChange={(e) => updateComment(i, { text: e.target.value })} rows={1} className="text-xs" placeholder="Comentário" />
+                      <div className="flex gap-2">
+                        <Input value={c.timeAgo} onChange={(e) => updateComment(i, { timeAgo: e.target.value })} className="h-7 text-xs flex-1" placeholder="2 horas" />
+                        <Input type="number" value={c.likes} onChange={(e) => updateComment(i, { likes: Number(e.target.value) })} className="h-7 text-xs w-16" placeholder="Likes" />
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={addComment}>
+                    <Plus className="w-3 h-3 mr-1" /> Adicionar Comentário
+                  </Button>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Comparison Table (Review Tech only) */}
+          {content.theme === 'review-tech' && (
+            <AccordionItem value="comparison" className="border rounded-lg px-3">
+              <AccordionTrigger className="text-sm font-semibold py-3">
+                <span className="flex items-center gap-2"><Star className="w-4 h-4" /> Tabela Comparativa</span>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="text-xs">Ativar Comparação</Label>
+                  <Switch checked={content.comparisonEnabled} onCheckedChange={(v) => onContentChange({ comparisonEnabled: v })} />
+                </div>
+                {content.comparisonEnabled && content.comparisonProducts.map((product, i) => (
+                  <div key={i} className={`p-3 rounded-lg border-2 space-y-2 ${product.isWinner ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
+                    <Input value={product.name} onChange={(e) => updateProduct(i, { name: e.target.value })} className="h-8 text-xs font-semibold" placeholder="Nome do produto" />
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs w-12">Nota:</Label>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button key={s} onClick={() => updateProduct(i, { rating: s })}>
+                            <Star className={`w-4 h-4 ${s <= product.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-green-600">Prós (um por linha)</Label>
+                      <Textarea value={product.pros.join('\n')} onChange={(e) => updateProduct(i, { pros: e.target.value.split('\n').filter(Boolean) })} rows={2} className="text-xs mt-0.5" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-red-500">Contras (um por linha)</Label>
+                      <Textarea value={product.cons.join('\n')} onChange={(e) => updateProduct(i, { cons: e.target.value.split('\n').filter(Boolean) })} rows={2} className="text-xs mt-0.5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch checked={product.isWinner} onCheckedChange={(v) => updateProduct(i, { isWinner: v })} />
+                      <Label className="text-xs">Vencedor</Label>
+                    </div>
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          )}
+        </Accordion>
+      </div>
+    </div>
+  );
+};
+
+export default AdvertorialEditorSidebar;
