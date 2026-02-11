@@ -42,6 +42,13 @@ export interface AdvertorialContent {
   // Portal News specific
   newsCategory: string;
   navCategories: string[];
+  // Theme Customization
+  themePreset: string;
+  headlineColor: string;
+  bodyTextColor: string;
+  backgroundColor: string;
+  accentColor: string;
+  fontFamily: string;
 }
 
 export const defaultAdvertorialContent: AdvertorialContent = {
@@ -75,4 +82,10 @@ export const defaultAdvertorialContent: AdvertorialContent = {
   ],
   newsCategory: 'Saúde',
   navCategories: ['Política', 'Economia', 'Saúde', 'Tecnologia', 'Esportes'],
+  themePreset: 'default',
+  headlineColor: '#111827',
+  bodyTextColor: '#374151',
+  backgroundColor: '#FFFFFF',
+  accentColor: '#DC2626',
+  fontFamily: 'sans-serif',
 };

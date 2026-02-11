@@ -144,8 +144,7 @@ const TrustPageDashboard = () => {
   const totalStandardPages = regularPages.length + quizzes.length;
   const hasReachedLimit = totalStandardPages >= maxPages;
 
-  // Calculate total views (only from regular pages)
-  const totalViews = regularPages.reduce((sum, page) => sum + (page.views || 0), 0);
+  const totalViews = 0; // Views are now in Analytics page
 
   useEffect(() => {
     if (user) {
@@ -768,10 +767,6 @@ const TrustPageDashboard = () => {
                             Fonte: {new URL(page.source_url).hostname}
                           </p>
                           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Eye className="w-3 h-3" />
-                              {page.views}
-                            </span>
                             <span>{formatDate(page.updated_at)}</span>
                           </div>
                         </div>

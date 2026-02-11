@@ -15,10 +15,10 @@ const PortalNewsTemplate = ({ content, isMobile, isPreview }: Props) => {
   const viewerCount = Math.floor(Math.random() * 200) + 150;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900" style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+    <div className="min-h-screen" style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", backgroundColor: content.backgroundColor || '#FFFFFF', color: content.bodyTextColor || '#111827' }}>
       {/* Urgency Bar */}
       {content.urgencyBarEnabled && (
-        <div className="bg-red-600 text-white text-center py-2 px-4 text-xs sm:text-sm font-medium animate-pulse">
+        <div className="text-white text-center py-2 px-4 text-xs sm:text-sm font-medium animate-pulse" style={{ backgroundColor: content.accentColor || '#DC2626' }}>
           {content.urgencyBarText.replace('{count}', String(viewerCount))}
         </div>
       )}
@@ -41,18 +41,18 @@ const PortalNewsTemplate = ({ content, isMobile, isPreview }: Props) => {
           )}
         </div>
         {/* Red accent bar */}
-        <div className="h-1 bg-red-600" />
+        <div className="h-1" style={{ backgroundColor: content.accentColor || '#DC2626' }} />
       </header>
 
       {/* Category breadcrumb */}
       <div className="max-w-4xl mx-auto px-4 pt-4">
-        <span className="text-xs font-bold text-red-600 uppercase tracking-wider">{content.newsCategory}</span>
+        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: content.accentColor || '#DC2626' }}>{content.newsCategory}</span>
       </div>
 
       {/* Article */}
       <article className={`max-w-4xl mx-auto px-4 pb-12 ${isMobile ? '' : 'lg:px-8'}`}>
         {/* Headline */}
-        <h1 className={`font-extrabold text-gray-900 leading-tight mt-3 mb-3 ${isMobile ? 'text-2xl' : 'text-2xl lg:text-4xl'}`}>
+        <h1 className={`font-extrabold leading-tight mt-3 mb-3 ${isMobile ? 'text-2xl' : 'text-2xl lg:text-4xl'}`} style={{ color: content.headlineColor || '#111827' }}>
           {content.headline}
         </h1>
         <p className={`text-gray-600 mb-4 ${isMobile ? 'text-sm' : 'text-base lg:text-lg'}`}>

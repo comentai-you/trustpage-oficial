@@ -18,6 +18,7 @@ interface PageOption {
   page_name: string | null;
   slug: string;
   template_type: string;
+  source: 'landing' | 'cloned';
 }
 
 interface VisitRow {
@@ -51,15 +52,16 @@ const AnalyticsPage = () => {
   useEffect(() => {
     if (!user) return;
     const fetchPages = async () => {
-      const [{ data: lp }, { data: prof }] = await Promise.all([
+      const [{ data: lp }, { data: cp }, { data: prof }] = await Promise.all([
         supabase.from("landing_pages").select("id, page_name, slug, template_type").eq("user_id", user.id).order("updated_at", { ascending: false }),
+        supabase.from("cloned_pages").select("id, page_name, slug").eq("user_id", user.id).order("updated_at", { ascending: false }),
         supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle(),
       ]);
-      setPages(lp || []);
+      const landingPages: PageOption[] = (lp || []).map(p => ({ ...p, source: 'landing' as const }));
+      const clonedPages: PageOption[] = (cp || []).map(p => ({ ...p, template_type: 'cloned', source: 'cloned' as const }));
+      setPages([...landingPages, ...clonedPages]);
       setProfile(prof);
-      if (lp && lp.length > 0) {
-        setSelectedPageId("all");
-      }
+      setSelectedPageId("all");
     };
     fetchPages();
   }, [user]);
@@ -207,7 +209,9 @@ const AnalyticsPage = () => {
               <SelectContent>
                 <SelectItem value="all">Todas as páginas</SelectItem>
                 {pages.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.page_name || p.slug}</SelectItem>
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.source === 'cloned' ? '🔗 ' : ''}{p.page_name || p.slug}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
