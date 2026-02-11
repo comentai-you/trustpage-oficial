@@ -131,8 +131,11 @@ const PreSellCookieWallTemplate = ({
   const backgroundForceDevice =
     deviceMode === "mobile" ? "mobile" : deviceMode === "desktop" ? "desktop" : undefined;
 
+  // Em preview (mockups), usamos altura fixa para não depender de 100vh do navegador real
+  const minHeightClass = isPreview ? "min-h-[800px]" : "min-h-screen";
+
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className={`${minHeightClass} flex flex-col relative overflow-hidden`}>
       {/* Add custom shake keyframes */}
       <style>{`
         @keyframes shake {
