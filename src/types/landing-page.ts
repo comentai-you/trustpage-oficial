@@ -7,7 +7,7 @@ export interface LandingPageColors {
 }
 
 export type PageTheme = 'dark' | 'light' | 'modern-gray';
-export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz' | 'presell';
+export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz' | 'presell' | 'advertorial';
 
 // Pre-sell (Anti-Block) specific types
 export type PresellMediaType = 'video' | 'image' | 'none';

@@ -1,12 +1,14 @@
 import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { LandingPageFormData, defaultFormData, LandingPageColors, defaultSalesContent, TemplateType, defaultPresellContent, PresellContent } from "@/types/landing-page";
+import { AdvertorialContent, defaultAdvertorialContent } from "@/types/advertorial";
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
 import HeroCaptureTemplate from "@/components/trustpage/templates/HeroCaptureTemplate";
 import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
 import PreSellTemplate from "@/components/trustpage/templates/PreSellTemplate";
+import AdvertorialTemplate from "@/components/trustpage/templates/advertorial/AdvertorialTemplate";
 import ViewLimitOverlay from "@/components/ViewLimitOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -328,7 +330,9 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
                 ...((page.content ?? {}) as any),
                 layoutType: 'cookie-wall',
               } as PresellContent)
-            : ((page.content ?? defaultSalesContent) as any);
+            : templateType === 'advertorial'
+              ? ({ ...defaultAdvertorialContent, ...((page.content ?? {}) as any) } as AdvertorialContent)
+              : ((page.content ?? defaultSalesContent) as any);
 
         // Extract headline sizes from content JSON (where they are persisted)
         const headlineSizeMobile = content?.headline_size_mobile ?? 1.2;
@@ -461,6 +465,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
             {pageData.template_type === 'presell' ? (
               <PreSellTemplate content={pageData.content as unknown as PresellContent} ownerPlan={ownerPlan} />
+            ) : pageData.template_type === 'advertorial' ? (
+              <AdvertorialTemplate content={pageData.content as unknown as AdvertorialContent} isMobile={isMobile} ownerPlan={ownerPlan} />
             ) : pageData.template_type === 'sales' ? (
               <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
             ) : pageData.template_type === 'bio' ? (
