@@ -34,7 +34,7 @@ const PreSellIPhoneMockup = ({ content, ownerPlan, size = "normal" }: PreSellIPh
   const textColor = content.textColor;
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       {/* iPhone Frame */}
       <div
         className={`${dimensions.width} ${dimensions.height} bg-gradient-to-b from-zinc-700 to-zinc-900 ${dimensions.radius} p-[10px] shadow-2xl`}
