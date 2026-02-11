@@ -556,7 +556,7 @@ const HomePage = () => {
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground text-sm sm:text-base">Link na Bio, VSL, Vendas e Captura</span>
+                      <span className="text-foreground text-sm sm:text-base">Link na Bio e Landing Page</span>
                     </li>
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -565,6 +565,14 @@ const HomePage = () => {
                     <li className="flex items-start gap-2 sm:gap-3">
                       <Check className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <span className="text-muted-foreground text-sm sm:text-base">Marca d'água obrigatória</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <X className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground/60 line-through text-sm sm:text-base">Clonador, Quiz, Pre-sell</span>
+                    </li>
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <X className="w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground/60 line-through text-sm sm:text-base">Templates de Alta Conversão (VSL, etc.)</span>
                     </li>
                   </ul>
 
