@@ -19,7 +19,7 @@ const PreSellIMacMockup = ({ content, ownerPlan }: PreSellIMacMockupProps) => {
       : content.backgroundColor;
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       {/* iMac Frame */}
       <div
         className="w-[520px] h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
