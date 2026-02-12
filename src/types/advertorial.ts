@@ -48,6 +48,7 @@ export interface AdvertorialContent {
   bodyTextColor: string;
   backgroundColor: string;
   accentColor: string;
+  headerColor: string;
   fontFamily: string;
 }
 
@@ -87,5 +88,6 @@ export const defaultAdvertorialContent: AdvertorialContent = {
   bodyTextColor: '#374151',
   backgroundColor: '#FFFFFF',
   accentColor: '#DC2626',
+  headerColor: '#1a237e',
   fontFamily: 'sans-serif',
 };

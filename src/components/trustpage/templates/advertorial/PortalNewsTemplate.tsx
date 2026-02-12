@@ -24,7 +24,7 @@ const PortalNewsTemplate = ({ content, isMobile, isPreview }: Props) => {
       )}
 
       {/* Header */}
-      <header className="bg-[#1a237e] text-white">
+      <header className="text-white" style={{ backgroundColor: content.headerColor || '#1a237e' }}>
         <div className={`max-w-6xl mx-auto px-4 py-3 flex items-center justify-between ${isMobile ? '' : 'lg:px-8'}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center font-bold text-sm">N</div>

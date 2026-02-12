@@ -159,11 +159,11 @@ const AdvertorialEditorSidebar = ({
                       key={preset.id}
                       onClick={() => {
                         const presets: Record<string, Partial<typeof content>> = {
-                          default: { themePreset: 'default', headlineColor: '#111827', bodyTextColor: '#374151', backgroundColor: '#FFFFFF', accentColor: '#DC2626' },
-                          dark: { themePreset: 'dark', headlineColor: '#F9FAFB', bodyTextColor: '#D1D5DB', backgroundColor: '#1F2937', accentColor: '#3B82F6' },
-                          warm: { themePreset: 'warm', headlineColor: '#78350F', bodyTextColor: '#92400E', backgroundColor: '#FFFBEB', accentColor: '#D97706' },
-                          ocean: { themePreset: 'ocean', headlineColor: '#0C4A6E', bodyTextColor: '#164E63', backgroundColor: '#F0F9FF', accentColor: '#0EA5E9' },
-                          forest: { themePreset: 'forest', headlineColor: '#14532D', bodyTextColor: '#166534', backgroundColor: '#F0FDF4', accentColor: '#22C55E' },
+                          default: { themePreset: 'default', headlineColor: '#111827', bodyTextColor: '#374151', backgroundColor: '#FFFFFF', accentColor: '#DC2626', headerColor: '#1a237e' },
+                          dark: { themePreset: 'dark', headlineColor: '#F9FAFB', bodyTextColor: '#D1D5DB', backgroundColor: '#1F2937', accentColor: '#3B82F6', headerColor: '#1e293b' },
+                          warm: { themePreset: 'warm', headlineColor: '#78350F', bodyTextColor: '#92400E', backgroundColor: '#FFFBEB', accentColor: '#D97706', headerColor: '#78350F' },
+                          ocean: { themePreset: 'ocean', headlineColor: '#0C4A6E', bodyTextColor: '#164E63', backgroundColor: '#F0F9FF', accentColor: '#0EA5E9', headerColor: '#0C4A6E' },
+                          forest: { themePreset: 'forest', headlineColor: '#14532D', bodyTextColor: '#166534', backgroundColor: '#F0FDF4', accentColor: '#22C55E', headerColor: '#14532D' },
                         };
                         onContentChange(presets[preset.id] || {});
                       }}
@@ -211,6 +211,15 @@ const AdvertorialEditorSidebar = ({
                     <span className="text-[10px] text-gray-400">{content.accentColor}</span>
                   </div>
                 </div>
+                {content.theme === 'portal-news' && (
+                  <div>
+                    <Label className="text-[10px]">Cabeçalho</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input type="color" value={content.headerColor || '#1a237e'} onChange={(e) => onContentChange({ headerColor: e.target.value, themePreset: 'custom' })} className="w-7 h-7 rounded border cursor-pointer" />
+                      <span className="text-[10px] text-gray-400">{content.headerColor || '#1a237e'}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </AccordionContent>
           </AccordionItem>
