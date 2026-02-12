@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import AdsViolationBar from "@/components/AdsViolationBar";
 import { PageOwnerProvider } from "@/contexts/PageOwnerContext";
 import { useTrackPageVisit } from "@/hooks/useTrackPageVisit";
+import { useBackRedirect } from "@/hooks/useBackRedirect";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
@@ -374,6 +375,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           primary_color: page.primary_color || '#8B5CF6',
           content,
           theme: 'dark',
+          back_redirect_enabled: (page as any).back_redirect_enabled ?? false,
+          back_redirect_url: (page as any).back_redirect_url || '',
         });
       } catch (error) {
         console.error("Error fetching page:", error);
@@ -455,13 +458,18 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
     );
   }
 
+  // Back Redirect - only on published pages (not in editor)
+  useBackRedirect(
+    pageData?.back_redirect_enabled ?? false,
+    pageData?.back_redirect_url ?? ''
+  );
+
   return (
     <PageOwnerProvider ownerId={pageOwnerId}>
       <div 
         className="min-h-screen"
         style={{ backgroundColor: pageData.colors.background }}
       >
-        {showViolationBar && <AdsViolationBar />}
           <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
             {pageData.template_type === 'presell' ? (
               <PreSellTemplate content={pageData.content as unknown as PresellContent} ownerPlan={ownerPlan} />

@@ -81,6 +81,8 @@ const AdvertorialEditor = () => {
         page_name: pageName,
         content: content as unknown as Json,
         is_published: true,
+        back_redirect_enabled: content.backRedirectEnabled || false,
+        back_redirect_url: content.backRedirectUrl || null,
         colors: { primary: content.ctaColor, background: '#ffffff', text: '#111827', buttonBg: content.ctaColor, buttonText: '#FFFFFF' } as unknown as Json,
       }).eq("id", existingPageId);
       if (error) { setAutoSaveStatus("error"); return; }
@@ -120,6 +122,8 @@ const AdvertorialEditor = () => {
         cta_url: content.ctaUrl,
         content: content as unknown as Json,
         is_published: true,
+        back_redirect_enabled: content.backRedirectEnabled || false,
+        back_redirect_url: content.backRedirectUrl || null,
         colors: { primary: content.ctaColor, background: '#ffffff', text: '#111827', buttonBg: content.ctaColor, buttonText: '#FFFFFF' } as unknown as Json,
       };
       if (existingPageId) {

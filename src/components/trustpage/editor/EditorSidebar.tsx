@@ -5,7 +5,8 @@ import { InputWithAI } from "@/components/ui/input-with-ai";
 import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3, Smartphone, MonitorPlay } from "lucide-react";
+import { Home, Monitor, Layers, Settings, FileText, Video, MousePointer, Palette, Globe, Lightbulb, Clock, ImageIcon, BarChart3, Smartphone, MonitorPlay, RotateCcw } from "lucide-react";
+import BackRedirectSection from "./BackRedirectSection";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 import { Link } from "react-router-dom";
 import {
@@ -443,7 +444,15 @@ const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarP
             </AccordionContent>
           </AccordionItem>
 
-          {/* Seção 6: Rastreamento */}
+          {/* Seção 6: Retenção & Redirecionamento */}
+          <BackRedirectSection
+            enabled={(formData as any).back_redirect_enabled || false}
+            url={(formData as any).back_redirect_url || ''}
+            onEnabledChange={(v) => onChange({ back_redirect_enabled: v } as any)}
+            onUrlChange={(v) => onChange({ back_redirect_url: v } as any)}
+          />
+
+          {/* Seção 7: Rastreamento */}
           <AccordionItem value="tracking" className="border-b border-gray-200">
             <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
               <div className="flex items-center gap-2">

@@ -201,6 +201,8 @@ export type Database = {
       }
       landing_pages: {
         Row: {
+          back_redirect_enabled: boolean | null
+          back_redirect_url: string | null
           colors: Json | null
           content: Json | null
           cover_image_url: string | null
@@ -231,6 +233,8 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           colors?: Json | null
           content?: Json | null
           cover_image_url?: string | null
@@ -261,6 +265,8 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           colors?: Json | null
           content?: Json | null
           cover_image_url?: string | null

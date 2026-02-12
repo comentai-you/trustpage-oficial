@@ -138,6 +138,8 @@ const PreSellEditor = () => {
         cover_image_url: coverImageUrl || null,
         content: content as unknown as Json,
         is_published: true,
+        back_redirect_enabled: (content as any).backRedirectEnabled || false,
+        back_redirect_url: (content as any).backRedirectUrl || null,
         colors: {
           primary: content.ctaColor,
           background: content.backgroundColor,
@@ -232,6 +234,8 @@ const PreSellEditor = () => {
         cover_image_url: coverImageUrl || null,
         content: content as unknown as Json,
         is_published: true,
+        back_redirect_enabled: (content as any).backRedirectEnabled || false,
+        back_redirect_url: (content as any).backRedirectUrl || null,
         colors: {
           primary: content.ctaColor,
           background: content.backgroundColor,
