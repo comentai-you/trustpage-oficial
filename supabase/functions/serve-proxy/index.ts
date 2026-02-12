@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
     const { data: page, error: dbError } = await supabase
       .from('cloned_pages')
-      .select('source_url, links, head_code, is_published')
+      .select('source_url, links, head_code, is_published, back_redirect_enabled, back_redirect_url')
       .eq('slug', slug)
       .eq('is_published', true)
       .maybeSingle();
@@ -315,6 +315,41 @@ Deno.serve(async (req) => {
         html = `${html}\n${page.head_code}`;
       }
       console.log('[serve-proxy] Injected custom head code');
+    }
+
+    // F. Inject back redirect script if enabled
+    if (page.back_redirect_enabled && page.back_redirect_url) {
+      const backRedirectScript = `
+<script>
+(function(){
+  var redirectUrl = ${JSON.stringify(page.back_redirect_url)};
+  var activated = false;
+  function activate(){
+    if(activated) return;
+    activated = true;
+    history.pushState(null,"",location.href);
+    history.pushState(null,"",location.href);
+  }
+  function onInteraction(){
+    activate();
+    window.removeEventListener("click",onInteraction);
+    window.removeEventListener("scroll",onInteraction);
+    window.removeEventListener("touchstart",onInteraction);
+  }
+  window.addEventListener("click",onInteraction,{passive:true});
+  window.addEventListener("scroll",onInteraction,{passive:true});
+  window.addEventListener("touchstart",onInteraction,{passive:true});
+  window.addEventListener("popstate",function(){
+    if(activated) window.location.href = redirectUrl;
+  });
+})();
+</script>`;
+      if (html.toLowerCase().includes('</body>')) {
+        html = html.replace(/<\/body>/i, `${backRedirectScript}\n</body>`);
+      } else {
+        html += backRedirectScript;
+      }
+      console.log('[serve-proxy] Injected back redirect script');
     }
 
     console.log(`[serve-proxy] Returning modified HTML (${html.length} bytes)`);

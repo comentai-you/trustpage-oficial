@@ -156,6 +156,8 @@ export type Database = {
       }
       cloned_pages: {
         Row: {
+          back_redirect_enabled: boolean | null
+          back_redirect_url: string | null
           created_at: string
           head_code: string | null
           html_content: string
@@ -170,6 +172,8 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           created_at?: string
           head_code?: string | null
           html_content: string
@@ -184,6 +188,8 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           created_at?: string
           head_code?: string | null
           html_content?: string

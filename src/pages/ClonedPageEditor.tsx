@@ -27,6 +27,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { PUBLIC_PAGES_BASE_URL } from "@/lib/constants";
+import BackRedirectSection from "@/components/trustpage/editor/BackRedirectSection";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Accordion } from "@/components/ui/accordion";
 
 interface ReplacedLink {
   original: string;
@@ -72,6 +75,8 @@ const ClonedPageEditor = () => {
   const [headCode, setHeadCode] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [globalLinkReplace, setGlobalLinkReplace] = useState("");
+  const [backRedirectEnabled, setBackRedirectEnabled] = useState(false);
+  const [backRedirectUrl, setBackRedirectUrl] = useState("");
 
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
@@ -97,7 +102,7 @@ const ClonedPageEditor = () => {
         // Fetch cloned page
         const { data: pageResult, error: pageError } = await supabase
           .from("cloned_pages")
-          .select("id, slug, page_name, source_url, head_code, links, is_published, views")
+          .select("id, slug, page_name, source_url, head_code, links, is_published, views, back_redirect_enabled, back_redirect_url")
           .eq("id", id)
           .eq("user_id", user.id)
           .single();
@@ -131,6 +136,8 @@ const ClonedPageEditor = () => {
         setLinks(parsedLinks);
         setHeadCode(pageResult.head_code || "");
         setIsPublished(pageResult.is_published);
+        setBackRedirectEnabled(pageResult.back_redirect_enabled || false);
+        setBackRedirectUrl(pageResult.back_redirect_url || "");
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Erro ao carregar a página");
@@ -226,6 +233,8 @@ const ClonedPageEditor = () => {
           links: validLinks as any,
           is_published: true,
           html_content: "", // Clear old HTML content - not used in proxy mode
+          back_redirect_enabled: backRedirectEnabled,
+          back_redirect_url: backRedirectUrl || null,
         })
         .eq("id", pageData.id);
 
@@ -527,6 +536,21 @@ const ClonedPageEditor = () => {
                   </div>
                 </TabsContent>
               </Tabs>
+
+              {/* Back Redirect Section */}
+              <div className="border-t">
+                <TooltipProvider>
+                  <Accordion type="single" collapsible>
+                    <BackRedirectSection
+                      enabled={backRedirectEnabled}
+                      url={backRedirectUrl}
+                      onEnabledChange={setBackRedirectEnabled}
+                      onUrlChange={setBackRedirectUrl}
+                      asAccordion={true}
+                    />
+                  </Accordion>
+                </TooltipProvider>
+              </div>
             </CardContent>
           </Card>
         </div>
