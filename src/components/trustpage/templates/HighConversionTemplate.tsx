@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { LandingPageFormData } from "@/types/landing-page";
 import { Play, Maximize2 } from "lucide-react";
 import LegalFooter from "./LegalFooter";
@@ -263,7 +264,10 @@ const HighConversionTemplate = ({
     setIsVideoPlaying(true);
   };
 
+  const { trackCtaClick } = useCtaTracking();
+
   const handleCtaClick = () => {
+    trackCtaClick();
     if (data.cta_url) {
       window.open(data.cta_url, '_blank');
     }

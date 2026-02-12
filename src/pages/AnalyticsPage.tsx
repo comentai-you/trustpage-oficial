@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Users, Smartphone, Monitor, Tablet, TrendingUp, Calendar, Loader2, Globe } from "lucide-react";
+import { ArrowLeft, Eye, Users, Smartphone, Monitor, Tablet, TrendingUp, Calendar, Loader2, Globe, MousePointerClick, Percent } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,6 +34,10 @@ interface TrackingRow {
   viewed_at: string;
 }
 
+interface CtaClickRow {
+  created_at: string;
+}
+
 const COLORS = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#EC4899', '#6366F1', '#14B8A6'];
 
 const AnalyticsPage = () => {
@@ -45,6 +49,7 @@ const AnalyticsPage = () => {
   const [dateRange, setDateRange] = useState<string>("30");
   const [visits, setVisits] = useState<VisitRow[]>([]);
   const [tracking, setTracking] = useState<TrackingRow[]>([]);
+  const [ctaClicks, setCtaClicks] = useState<CtaClickRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null);
 
@@ -106,13 +111,27 @@ const AnalyticsPage = () => {
         trackingQuery = trackingQuery.in("page_id", pageIds);
       }
 
-      const [{ data: vData }, { data: tData }] = await Promise.all([
+      // Fetch CTA clicks
+      let ctaQuery = supabase
+        .from("cta_clicks")
+        .select("created_at")
+        .gte("created_at", sinceISO);
+
+      if (selectedPageId !== "all") {
+        ctaQuery = ctaQuery.eq("page_id", selectedPageId);
+      } else {
+        ctaQuery = ctaQuery.in("page_id", pageIds);
+      }
+
+      const [{ data: vData }, { data: tData }, { data: cData }] = await Promise.all([
         visitsQuery,
         trackingQuery,
+        ctaQuery,
       ]);
 
       setVisits(vData || []);
       setTracking(tData || []);
+      setCtaClicks(cData || []);
       setLoading(false);
     };
     fetchData();
@@ -120,10 +139,12 @@ const AnalyticsPage = () => {
 
   // KPIs
   const totalVisits = visits.length;
+  const totalCtaClicks = ctaClicks.length;
+  const ctr = totalVisits > 0 ? ((totalCtaClicks / totalVisits) * 100).toFixed(1) : '0.0';
   const uniqueVisitors = useMemo(() => {
-    const fps = new Set(tracking.map(t => t.viewer_fingerprint).filter(Boolean));
-    return fps.size;
-  }, [tracking]);
+    const ips = new Set(visits.map(v => v.ip_hash).filter(Boolean));
+    return ips.size || new Set(tracking.map(t => t.viewer_fingerprint).filter(Boolean)).size;
+  }, [visits, tracking]);
 
   // Daily line chart
   const dailyData = useMemo(() => {
@@ -271,13 +292,11 @@ const AnalyticsPage = () => {
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
+                      <MousePointerClick className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground font-medium">Média/dia</p>
-                      <p className="text-2xl font-bold text-foreground">
-                        {parseInt(dateRange) > 0 ? Math.round(totalVisits / parseInt(dateRange)) : 0}
-                      </p>
+                      <p className="text-xs text-muted-foreground font-medium">Cliques CTA</p>
+                      <p className="text-2xl font-bold text-foreground">{totalCtaClicks.toLocaleString("pt-BR")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -287,11 +306,11 @@ const AnalyticsPage = () => {
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                      <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-warning" />
+                      <Percent className="w-5 h-5 sm:w-6 sm:h-6 text-warning" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground font-medium">Fontes</p>
-                      <p className="text-2xl font-bold text-foreground">{sourceTable.length}</p>
+                      <p className="text-xs text-muted-foreground font-medium">CTR</p>
+                      <p className="text-2xl font-bold text-foreground">{ctr}%</p>
                     </div>
                   </div>
                 </CardContent>

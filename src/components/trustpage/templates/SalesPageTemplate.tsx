@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { LandingPageFormData, SalesPageContent } from "@/types/landing-page";
 import { SectionBuilderContent } from "@/types/section-builder";
 import { DynamicSectionsRenderer } from "./section-renderers";
@@ -139,7 +140,10 @@ const SalesPageTemplate = ({
     }
   };
 
+  const { trackCtaClick } = useCtaTracking();
+
   const handleCtaClick = () => {
+    trackCtaClick();
     if (data.cta_url) {
       window.open(data.cta_url, '_blank');
     }
