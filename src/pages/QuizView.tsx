@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { QuizQuestion } from "@/types/quiz";
 import { cn } from "@/lib/utils";
+import { useBackRedirect } from "@/hooks/useBackRedirect";
 
 interface QuizData {
   id: string;
@@ -15,6 +16,8 @@ interface QuizData {
   questions: QuizQuestion[];
   redirect_url: string | null;
   primary_color: string;
+  back_redirect_enabled: boolean;
+  back_redirect_url: string;
 }
 
 interface QuizViewProps {
@@ -34,6 +37,12 @@ const QuizView = ({ slugOverride }: QuizViewProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
+  // Back Redirect - only on published quiz view
+  useBackRedirect(
+    quiz?.back_redirect_enabled ?? false,
+    quiz?.back_redirect_url ?? ''
+  );
+
   useEffect(() => {
     if (slug) {
       fetchQuiz();
@@ -44,7 +53,7 @@ const QuizView = ({ slugOverride }: QuizViewProps) => {
     try {
       const { data, error } = await supabase
         .from("quizzes")
-        .select("id, title, description, questions, redirect_url, primary_color, views")
+        .select("id, title, description, questions, redirect_url, primary_color, views, back_redirect_enabled, back_redirect_url")
         .eq("slug", slug)
         .eq("is_published", true)
         .single();
