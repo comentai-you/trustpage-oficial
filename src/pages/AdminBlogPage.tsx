@@ -128,6 +128,8 @@ const AdminBlogPage = () => {
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const POSTS_PER_PAGE = 10;
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -200,6 +202,19 @@ const AdminBlogPage = () => {
     if (filterCategory === "uncategorized") return !post.category_id;
     return post.category_id === filterCategory;
   });
+
+  // Pagination
+  const totalFilteredPosts = filteredPosts?.length || 0;
+  const totalPages = Math.ceil(totalFilteredPosts / POSTS_PER_PAGE);
+  const paginatedPosts = filteredPosts?.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  );
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterCategory]);
 
   // Core save function (reusable for both save and publish)
   const savePostToDb = async (post: Partial<BlogPost>, publish: boolean = false): Promise<string | null> => {
@@ -1223,9 +1238,17 @@ const AdminBlogPage = () => {
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-            ) : filteredPosts && filteredPosts.length > 0 ? (
-              <div className="grid gap-4">
-                {filteredPosts.map((post) => (
+            ) : paginatedPosts && paginatedPosts.length > 0 ? (
+              <div className="space-y-4">
+                {/* Results info */}
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>
+                    Mostrando {((currentPage - 1) * POSTS_PER_PAGE) + 1}–{Math.min(currentPage * POSTS_PER_PAGE, totalFilteredPosts)} de {totalFilteredPosts} artigos
+                  </span>
+                </div>
+
+                <div className="grid gap-4">
+                {paginatedPosts.map((post) => (
                   <Card key={post.id} className="overflow-hidden">
                     <div className="flex flex-col md:flex-row">
                       {post.cover_image_url && (
@@ -1306,6 +1329,53 @@ const AdminBlogPage = () => {
                     </div>
                   </Card>
                 ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Anterior
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                        // Show first, last, current, and neighbors
+                        const show = page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
+                        const showEllipsis = page === 2 && currentPage > 3 || page === totalPages - 1 && currentPage < totalPages - 2;
+                        
+                        if (!show && !showEllipsis) return null;
+                        if (!show && showEllipsis) {
+                          return <span key={page} className="px-1 text-muted-foreground">...</span>;
+                        }
+                        
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            className="w-9 h-9"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Próximo
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <Card className="text-center py-16">
