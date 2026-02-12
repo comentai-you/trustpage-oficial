@@ -795,6 +795,8 @@ export type Database = {
       get_published_page_by_owner_and_slug: {
         Args: { owner_id: string; page_slug: string }
         Returns: {
+          back_redirect_enabled: boolean
+          back_redirect_url: string
           colors: Json
           content: Json
           cover_image_url: string
@@ -826,6 +828,8 @@ export type Database = {
       get_published_page_by_slug: {
         Args: { page_slug: string }
         Returns: {
+          back_redirect_enabled: boolean
+          back_redirect_url: string
           colors: Json
           content: Json
           cover_image_url: string
