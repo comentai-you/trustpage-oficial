@@ -29,6 +29,7 @@ import {
   X,
   Loader2,
   Cookie,
+  RotateCcw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -709,6 +710,42 @@ const PreSellEditorSidebar = ({
               </AccordionContent>
             </AccordionItem>
           )}
+
+          {/* Seção: Retenção & Redirecionamento */}
+          <AccordionItem value="back-redirect" className="border-b border-gray-200">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 text-sm font-semibold text-gray-900">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="w-4 h-4 text-primary" />
+                Retenção & Redirecionamento
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <RotateCcw className="w-4 h-4" />
+                  Ativar Back Redirect
+                </Label>
+                <Switch
+                  checked={(content as any).backRedirectEnabled || false}
+                  onCheckedChange={(v) => onContentChange({ backRedirectEnabled: v } as any)}
+                />
+              </div>
+              {(content as any).backRedirectEnabled && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-gray-600">URL de Destino</Label>
+                  <Input
+                    value={(content as any).backRedirectUrl || ''}
+                    onChange={(e) => onContentChange({ backRedirectUrl: e.target.value } as any)}
+                    placeholder="Ex: https://wa.me/seunumero ou https://seusite.com/promocao"
+                    className="bg-gray-50 border-gray-300 focus:border-primary text-sm"
+                  />
+                  <p className="text-[10px] text-gray-400">
+                    Ao clicar em "voltar" no navegador, redireciona para esta URL.
+                  </p>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
 
           {/* Seção Cookie Wall Config - só aparece se layoutType === 'cookie-wall' */}
           {isCookieWall && (

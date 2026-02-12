@@ -283,6 +283,8 @@ export interface LandingPageFormData {
   content: SalesPageContent | BioLinkContent | PresellContent;
   bioContent?: BioLinkContent;
   theme: PageTheme;
+  back_redirect_enabled: boolean;
+  back_redirect_url: string;
 }
 
 export const defaultFormData: LandingPageFormData = {
@@ -322,7 +324,9 @@ export const defaultFormData: LandingPageFormData = {
   },
   primary_color: '#8B5CF6',
   content: defaultSalesContent,
-  theme: 'dark'
+  theme: 'dark',
+  back_redirect_enabled: false,
+  back_redirect_url: '',
 };
 
 export const templates = [
