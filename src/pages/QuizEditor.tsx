@@ -15,6 +15,9 @@ import { QuizQuestion, QuizOption } from "@/types/quiz";
 import { getQuizPublicUrl } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import ImageUpload from "@/components/trustpage/ImageUpload";
+import BackRedirectSection from "@/components/trustpage/editor/BackRedirectSection";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Accordion } from "@/components/ui/accordion";
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -48,6 +51,8 @@ const QuizEditor = () => {
   const [redirectUrl, setRedirectUrl] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#8B5CF6");
   const [isPublished, setIsPublished] = useState(false);
+  const [backRedirectEnabled, setBackRedirectEnabled] = useState(false);
+  const [backRedirectUrl, setBackRedirectUrl] = useState("");
   const [questions, setQuestions] = useState<QuizQuestion[]>([defaultQuestion()]);
 
   useEffect(() => {
@@ -79,6 +84,8 @@ const QuizEditor = () => {
         setRedirectUrl(data.redirect_url || "");
         setPrimaryColor(data.primary_color || "#8B5CF6");
         setIsPublished(data.is_published || false);
+        setBackRedirectEnabled((data as any).back_redirect_enabled || false);
+        setBackRedirectUrl((data as any).back_redirect_url || "");
         // Parse questions from JSONB
         const parsedQuestions = data.questions as unknown;
         if (Array.isArray(parsedQuestions) && parsedQuestions.length > 0) {
@@ -125,6 +132,8 @@ const QuizEditor = () => {
         redirect_url: redirectUrl.trim() || null,
         primary_color: primaryColor,
         is_published: isPublished,
+        back_redirect_enabled: backRedirectEnabled,
+        back_redirect_url: backRedirectUrl || null,
         questions: JSON.parse(JSON.stringify(questions)),
       };
 
@@ -582,6 +591,21 @@ const QuizEditor = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Retenção & Redirecionamento */}
+                    <div className="border-t border-border pt-6">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-4">Retenção</h4>
+                    </div>
+                    <TooltipProvider>
+                      <Accordion type="single" collapsible>
+                        <BackRedirectSection
+                          enabled={backRedirectEnabled}
+                          url={backRedirectUrl}
+                          onEnabledChange={setBackRedirectEnabled}
+                          onUrlChange={setBackRedirectUrl}
+                        />
+                      </Accordion>
+                    </TooltipProvider>
                   </CardContent>
                 </Card>
               </TabsContent>

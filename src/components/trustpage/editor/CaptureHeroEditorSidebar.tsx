@@ -17,6 +17,7 @@ import ImageUpload from "@/components/trustpage/ImageUpload";
 import LeadMagnetUpload from "./LeadMagnetUpload";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import TextColorPicker from "./TextColorPicker";
+import BackRedirectSection from "./BackRedirectSection";
 
 interface CaptureHeroEditorSidebarProps {
   formData: LandingPageFormData;
@@ -668,6 +669,14 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
             </div>
           </AccordionContent>
         </AccordionItem>
+
+        {/* Seção: Retenção & Redirecionamento */}
+        <BackRedirectSection
+          enabled={formData.back_redirect_enabled || false}
+          url={formData.back_redirect_url || ''}
+          onEnabledChange={(v) => onChange({ back_redirect_enabled: v })}
+          onUrlChange={(v) => onChange({ back_redirect_url: v })}
+        />
       </Accordion>
     </aside>
   );

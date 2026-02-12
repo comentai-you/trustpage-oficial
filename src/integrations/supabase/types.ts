@@ -558,6 +558,8 @@ export type Database = {
       }
       quizzes: {
         Row: {
+          back_redirect_enabled: boolean | null
+          back_redirect_url: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -574,6 +576,8 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -590,6 +594,8 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          back_redirect_enabled?: boolean | null
+          back_redirect_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
