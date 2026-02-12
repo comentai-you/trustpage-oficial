@@ -205,6 +205,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cta_clicks: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_hash: string | null
+          page_id: string
+          page_type: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_hash?: string | null
+          page_id: string
+          page_type?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_hash?: string | null
+          page_id?: string
+          page_type?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       landing_pages: {
         Row: {
           back_redirect_enabled: boolean | null

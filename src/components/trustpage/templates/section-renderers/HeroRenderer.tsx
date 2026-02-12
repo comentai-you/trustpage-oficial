@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { HeroSection } from "@/types/section-builder";
 import { Play, Shield, Clock, Check, ArrowRight, Image as ImageIcon } from "lucide-react";
 import ImageCarousel from "../ImageCarousel";
@@ -52,7 +53,10 @@ const HeroRenderer = ({
     }
   };
 
+  const { trackCtaClick } = useCtaTracking();
+
   const handleCtaClick = () => {
+    trackCtaClick();
     const url = data.ctaUrl || ctaUrl;
     if (url) window.open(url, '_blank');
   };

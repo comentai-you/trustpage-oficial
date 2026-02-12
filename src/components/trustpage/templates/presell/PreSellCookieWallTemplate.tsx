@@ -1,4 +1,5 @@
 import { PresellButtonSize, PresellContent } from "@/types/landing-page";
+import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import LegalFooter from "../LegalFooter";
@@ -39,6 +40,8 @@ const PreSellCookieWallTemplate = ({
     cookieBodyText,
     backgroundColor,
   } = content;
+
+  const { trackCtaClick } = useCtaTracking();
 
   const deviceMode: DeviceMode =
     typeof isMobile === "boolean" ? (isMobile ? "mobile" : "desktop") : "auto";
@@ -180,7 +183,7 @@ const PreSellCookieWallTemplate = ({
           {/* Close button (X) - redirects to CTA url */}
           <a
             href={isPreview ? "#" : ctaUrl}
-            onClick={(e) => isPreview && e.preventDefault()}
+            onClick={(e) => { if (isPreview) { e.preventDefault(); } else { trackCtaClick(); } }}
             className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isDarkTheme ? "hover:bg-white/10 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-400 hover:text-gray-700"}`}
             title="Fechar"
           >
@@ -217,7 +220,7 @@ const PreSellCookieWallTemplate = ({
             >
               <a
                 href={isPreview ? "#" : ctaUrl}
-                onClick={(e) => isPreview && e.preventDefault()}
+                onClick={(e) => { if (isPreview) { e.preventDefault(); } else { trackCtaClick(); } }}
                 className={`
                   inline-flex items-center justify-center
                   font-bold text-white rounded-xl

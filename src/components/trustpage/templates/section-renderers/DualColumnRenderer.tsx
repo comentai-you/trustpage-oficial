@@ -1,4 +1,5 @@
 import { DualColumnSection } from "@/types/section-builder";
+import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { ArrowRight, Image as ImageIcon } from "lucide-react";
 
 interface DualColumnRendererProps {
@@ -17,7 +18,10 @@ const DualColumnRenderer = ({
   isMobile = false 
 }: DualColumnRendererProps) => {
   
+  const { trackCtaClick } = useCtaTracking();
+
   const handleCtaClick = () => {
+    trackCtaClick();
     if (data.ctaUrl) window.open(data.ctaUrl, '_blank');
   };
 

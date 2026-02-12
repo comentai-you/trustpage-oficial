@@ -17,6 +17,7 @@ import AdsViolationBar from "@/components/AdsViolationBar";
 import { PageOwnerProvider } from "@/contexts/PageOwnerContext";
 import { useTrackPageVisit } from "@/hooks/useTrackPageVisit";
 import { useBackRedirect } from "@/hooks/useBackRedirect";
+import { CtaTrackingProvider } from "@/contexts/CtaTrackingContext";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
@@ -466,26 +467,28 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
 
   return (
     <PageOwnerProvider ownerId={pageOwnerId}>
-      <div 
-        className="min-h-screen"
-        style={{ backgroundColor: pageData.colors.background }}
-      >
-          <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
-            {pageData.template_type === 'presell' ? (
-              <PreSellTemplate content={pageData.content as unknown as PresellContent} ownerPlan={ownerPlan} />
-            ) : pageData.template_type === 'advertorial' ? (
-              <AdvertorialTemplate content={pageData.content as unknown as AdvertorialContent} isMobile={isMobile} ownerPlan={ownerPlan} />
-            ) : pageData.template_type === 'sales' ? (
-              <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-            ) : pageData.template_type === 'bio' ? (
-              <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-            ) : pageData.template_type === 'capture-hero' ? (
-              <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
-            ) : (
-              <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
-            )}
-          </div>
-      </div>
+      <CtaTrackingProvider pageId={currentPageId} pageType="landing">
+        <div 
+          className="min-h-screen"
+          style={{ backgroundColor: pageData.colors.background }}
+        >
+            <div className={`${showViolationBar ? "pt-[100px] sm:pt-[80px]" : ""}`}>
+              {pageData.template_type === 'presell' ? (
+                <PreSellTemplate content={pageData.content as unknown as PresellContent} ownerPlan={ownerPlan} />
+              ) : pageData.template_type === 'advertorial' ? (
+                <AdvertorialTemplate content={pageData.content as unknown as AdvertorialContent} isMobile={isMobile} ownerPlan={ownerPlan} />
+              ) : pageData.template_type === 'sales' ? (
+                <SalesPageTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+              ) : pageData.template_type === 'bio' ? (
+                <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+              ) : pageData.template_type === 'capture-hero' ? (
+                <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
+              ) : (
+                <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
+              )}
+            </div>
+        </div>
+      </CtaTrackingProvider>
     </PageOwnerProvider>
   );
 };
