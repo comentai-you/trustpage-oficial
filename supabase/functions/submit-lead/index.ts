@@ -29,8 +29,8 @@ const hashString = (str: string): string => {
 
 // In-memory rate limiting per IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 10; // Max 10 leads per IP per minute
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 10;
 
 const checkRateLimit = (ipHash: string): { allowed: boolean; remaining: number } => {
   const now = Date.now();
@@ -56,6 +56,20 @@ const suspiciousEmailPatterns = [
   /^no-?reply@/i,
   /@(tempmail|guerrillamail|10minutemail|mailinator|throwaway)\./i,
 ];
+
+// Fire webhook asynchronously (never blocks response)
+async function fireWebhook(webhookUrl: string, leadData: Record<string, unknown>) {
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "lead.created", data: leadData }),
+    });
+    console.log(`Webhook fired to ${webhookUrl} — status: ${res.status}`);
+  } catch (err) {
+    console.error(`Webhook failed for ${webhookUrl}:`, err);
+  }
+}
 
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -140,7 +154,6 @@ serve(async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify landing page exists, is published, and owner has active subscription
-    // using the database function
     const { data: canSubmit, error: checkError } = await supabase.rpc("can_submit_lead", {
       target_page_id: landing_page_id,
     });
@@ -179,6 +192,30 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     console.log(`Lead submitted for page ${landing_page_id}`);
+
+    // --- Webhook: fire-and-forget ---
+    const { data: pageData } = await supabase
+      .from("landing_pages")
+      .select("webhook_enabled, webhook_url")
+      .eq("id", landing_page_id)
+      .maybeSingle();
+
+    if (pageData?.webhook_enabled && pageData?.webhook_url) {
+      // Extract utm_source from referer or body (passed from client)
+      const utmSource = body.utm_source || null;
+
+      const webhookPayload: Record<string, unknown> = {
+        data_hora: new Date().toISOString(),
+        origem: utmSource,
+      };
+      if (name) webhookPayload.name = name;
+      if (hasEmail) webhookPayload.email = email!.toLowerCase().trim();
+      if (hasPhone) webhookPayload.phone = phone;
+      if (hasWhatsapp) webhookPayload.whatsapp = whatsapp;
+
+      // Don't await — fire and forget
+      fireWebhook(pageData.webhook_url, webhookPayload).catch(() => {});
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: "Lead submitted successfully" }),

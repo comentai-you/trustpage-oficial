@@ -269,6 +269,8 @@ export type Database = {
           video_storage_path: string | null
           video_url: string | null
           views: number | null
+          webhook_enabled: boolean | null
+          webhook_url: string | null
           whatsapp_number: string | null
         }
         Insert: {
@@ -301,6 +303,8 @@ export type Database = {
           video_storage_path?: string | null
           video_url?: string | null
           views?: number | null
+          webhook_enabled?: boolean | null
+          webhook_url?: string | null
           whatsapp_number?: string | null
         }
         Update: {
@@ -333,6 +337,8 @@ export type Database = {
           video_storage_path?: string | null
           video_url?: string | null
           views?: number | null
+          webhook_enabled?: boolean | null
+          webhook_url?: string | null
           whatsapp_number?: string | null
         }
         Relationships: []

@@ -157,8 +157,10 @@ const TrustPageEditor = () => {
           primary_color: page.primary_color || "#8B5CF6",
           content,
           theme: "dark",
-          back_redirect_enabled: (page as any).back_redirect_enabled ?? false,
+        back_redirect_enabled: (page as any).back_redirect_enabled ?? false,
           back_redirect_url: (page as any).back_redirect_url || '',
+          webhook_enabled: (page as any).webhook_enabled ?? false,
+          webhook_url: (page as any).webhook_url || '',
         });
         setIsLoading(false);
       }
@@ -279,6 +281,8 @@ const TrustPageEditor = () => {
         is_published: true,
         back_redirect_enabled: formData.back_redirect_enabled,
         back_redirect_url: formData.back_redirect_url || null,
+        webhook_enabled: formData.webhook_enabled || false,
+        webhook_url: formData.webhook_url || null,
       };
 
       const { error } = await supabase.from("landing_pages").update(pageData).eq("id", existingPageId);
@@ -407,6 +411,8 @@ const TrustPageEditor = () => {
         is_published: true,
         back_redirect_enabled: formData.back_redirect_enabled,
         back_redirect_url: formData.back_redirect_url || null,
+        webhook_enabled: formData.webhook_enabled || false,
+        webhook_url: formData.webhook_url || null,
       };
 
       if (existingPageId) {
