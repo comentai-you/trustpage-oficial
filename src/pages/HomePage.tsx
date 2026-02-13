@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon, LinkIcon, Magnet, ShoppingBag, HelpCircle, Copy } from "lucide-react";
+import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon, LinkIcon, Magnet, ShoppingBag, HelpCircle, Copy, Newspaper, Cookie } from "lucide-react";
 import { useState } from "react";
 import FAQSection from "@/components/FAQSection";
 
@@ -343,7 +343,7 @@ const HomePage = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground text-sm sm:text-base">Templates de Alta Conversão</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">VSL, Advertorial e templates prontos para vender</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">VSL, Advertorial, Pre-sell e templates prontos para vender</p>
                   </div>
                 </li>
               </ul>
@@ -375,7 +375,7 @@ const HomePage = () => {
               Tudo que você precisa, <span className="gradient-text">em um só lugar</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              6 tipos de páginas para todas as suas necessidades de marketing digital
+              8 tipos de páginas para todas as suas necessidades de marketing digital
             </p>
           </div>
 
@@ -432,6 +432,28 @@ const HomePage = () => {
               <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Quiz Interativo</h3>
               <p className="text-sm text-muted-foreground">
                 Funis de perguntas estilo Typeform para qualificar leads.
+              </p>
+            </div>
+
+            {/* Advertorial */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Newspaper className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Advertorial</h3>
+              <p className="text-sm text-muted-foreground">
+                Páginas estilo artigo jornalístico, blog ou review para vender sem parecer anúncio.
+              </p>
+            </div>
+
+            {/* Pre-sell Cookie Wall */}
+            <div className="bg-card rounded-xl p-5 sm:p-6 border border-border hover:border-primary/50 transition-all hover:shadow-lg group">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Cookie className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pre-sell de Cookies</h3>
+              <p className="text-sm text-muted-foreground">
+                Cookie Wall anti-bloqueio que protege seus anúncios e aumenta conversões.
               </p>
             </div>
 
