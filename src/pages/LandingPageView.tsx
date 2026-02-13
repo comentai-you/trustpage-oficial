@@ -384,6 +384,8 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           theme: 'dark',
           back_redirect_enabled: (page as any).back_redirect_enabled ?? false,
           back_redirect_url: (page as any).back_redirect_url || '',
+          webhook_enabled: false,
+          webhook_url: '',
         });
       } catch (error) {
         console.error("Error fetching page:", error);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
@@ -9,8 +10,10 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
 import { 
-  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown, Palette
+  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown, Palette, Webhook, Send, Loader2
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import CoverImageUpload from "./CoverImageUpload";
 import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 import ImageUpload from "@/components/trustpage/ImageUpload";
@@ -677,8 +680,117 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
           onEnabledChange={(v) => onChange({ back_redirect_enabled: v })}
           onUrlChange={(v) => onChange({ back_redirect_url: v })}
         />
+
+        {/* Webhook / Integrations Section */}
+        <WebhookSection formData={formData} onChange={onChange} />
       </Accordion>
     </aside>
+  );
+};
+
+/* ---- Webhook sub-component ---- */
+const WebhookSection = ({ formData, onChange }: { formData: LandingPageFormData; onChange: (d: Partial<LandingPageFormData>) => void }) => {
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleTestWebhook = async () => {
+    const url = formData.webhook_url?.trim();
+    if (!url) {
+      toast.error("Preencha a URL do Webhook antes de testar.");
+      return;
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      toast.error("URL inválida. Verifique e tente novamente.");
+      return;
+    }
+
+    setIsTesting(true);
+    try {
+      const testPayload = {
+        event: "lead.test",
+        data: {
+          name: "Lead de Teste",
+          email: "teste@exemplo.com",
+          phone: "(11) 99999-9999",
+          whatsapp: "(11) 99999-9999",
+          data_hora: new Date().toISOString(),
+          origem: "teste",
+        },
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(testPayload),
+        mode: "no-cors",
+      });
+
+      // no-cors returns opaque response, so we can't check status reliably
+      toast.success("Payload de teste enviado! Verifique sua ferramenta externa.");
+    } catch (err) {
+      console.error("Webhook test error:", err);
+      toast.error("Falha ao enviar teste. Verifique a URL.");
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  return (
+    <AccordionItem value="webhook">
+      <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Webhook className="w-4 h-4 text-primary" />
+          Integrações & Automação
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="px-4 pb-4 space-y-4">
+        <p className="text-xs text-gray-500">
+          Envie os dados dos leads automaticamente para ferramentas externas (Typebot, n8n, Zapier, etc).
+        </p>
+
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2">
+            <Webhook className="w-4 h-4 text-gray-600" />
+            <Label className="text-sm text-gray-700">Ativar Webhook</Label>
+          </div>
+          <Switch
+            checked={formData.webhook_enabled || false}
+            onCheckedChange={(checked) => onChange({ webhook_enabled: checked })}
+          />
+        </div>
+
+        {formData.webhook_enabled && (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600">URL do Webhook (POST)</Label>
+              <Input
+                value={formData.webhook_url || ""}
+                onChange={(e) => onChange({ webhook_url: e.target.value })}
+                placeholder="https://hooks.zapier.com/..."
+                className="text-sm font-mono"
+                type="url"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Os dados do lead serão enviados via POST em JSON para esta URL.
+              </p>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={handleTestWebhook}
+              disabled={isTesting}
+            >
+              {isTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+              {isTesting ? "Enviando..." : "Enviar Teste"}
+            </Button>
+          </div>
+        )}
+      </AccordionContent>
+    </AccordionItem>
   );
 };
 

@@ -122,6 +122,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
               email: formData.email || null,
               phone: formData.phone || null,
               whatsapp: formData.whatsapp || null,
+              utm_source: new URLSearchParams(window.location.search).get('utm_source') || null,
             },
           });
 

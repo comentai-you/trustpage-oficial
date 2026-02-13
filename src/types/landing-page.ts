@@ -285,6 +285,8 @@ export interface LandingPageFormData {
   theme: PageTheme;
   back_redirect_enabled: boolean;
   back_redirect_url: string;
+  webhook_enabled: boolean;
+  webhook_url: string;
 }
 
 export const defaultFormData: LandingPageFormData = {
@@ -327,6 +329,8 @@ export const defaultFormData: LandingPageFormData = {
   theme: 'dark',
   back_redirect_enabled: false,
   back_redirect_url: '',
+  webhook_enabled: false,
+  webhook_url: '',
 };
 
 export const templates = [
