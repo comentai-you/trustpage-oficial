@@ -105,6 +105,12 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
   // Track page visit with detailed analytics
   useTrackPageVisit({ pageId: currentPageId || '' });
 
+  // Back Redirect - only on published pages (not in editor)
+  useBackRedirect(
+    pageData?.back_redirect_enabled ?? false,
+    pageData?.back_redirect_url ?? ''
+  );
+
   const isLegalPage = useMemo(() => {
     if (!slug) return false;
     return LEGAL_SLUGS.has(String(slug).toLowerCase());
@@ -458,12 +464,6 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
       </PageOwnerProvider>
     );
   }
-
-  // Back Redirect - only on published pages (not in editor)
-  useBackRedirect(
-    pageData?.back_redirect_enabled ?? false,
-    pageData?.back_redirect_url ?? ''
-  );
 
   return (
     <PageOwnerProvider ownerId={pageOwnerId}>
