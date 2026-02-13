@@ -5,25 +5,30 @@ import { Button } from "@/components/ui/button";
 // Bio Link images
 import templateBio1 from "@/assets/template-bio-1.png";
 import templateBio2 from "@/assets/template-bio-2.png";
+import templateBioPronta from "@/assets/template-bio-pronta.png";
 
 // Captura images
 import templateCaptura1 from "@/assets/template-captura-1.png";
 import templateCaptura2 from "@/assets/template-captura-2.png";
 import templateCaptura3 from "@/assets/template-captura-3.png";
+import templateCapturaPronta from "@/assets/template-captura-pronta.png";
 
 // Página de Vendas images
 import templateVendas1 from "@/assets/template-vendas-1.png";
 import templateVendas2 from "@/assets/template-vendas-2.png";
 import templateVendas3 from "@/assets/template-vendas-3.png";
+import templateVendasPronta from "@/assets/template-vendas-pronta.png";
 
 // VSL images
 import templateVsl1 from "@/assets/template-vsl-1.png";
 import templateVsl2 from "@/assets/template-vsl-2.png";
 import templateVsl3 from "@/assets/template-vsl-3.png";
+import templateVslPronta from "@/assets/template-vsl-pronta.png";
 
 // Pre-sell images
 import templatePresell1 from "@/assets/template-presell-1.png";
 import templatePresell2 from "@/assets/template-presell-2.png";
+import templatePresellPronta from "@/assets/template-presell-pronta.png";
 
 // Quiz images
 import templateQuiz1 from "@/assets/template-quiz-1.png";
@@ -47,6 +52,8 @@ interface TemplateSectionProps {
   description: string;
   features: string[];
   images: ShowcaseImage[];
+  readyPageImage?: ShowcaseImage;
+  competitorPrice?: { name: string; price: string };
   reversed?: boolean;
   bgClass?: string;
 }
@@ -59,10 +66,11 @@ const TemplateSection = ({
   description,
   features,
   images,
+  readyPageImage,
+  competitorPrice,
   reversed = false,
   bgClass = "bg-background",
 }: TemplateSectionProps) => {
-  // Split title by highlighted word
   const parts = title.split(highlightedWord);
 
   return (
@@ -83,6 +91,15 @@ const TemplateSection = ({
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             {description}
           </p>
+
+          {/* Competitor price tag */}
+          {competitorPrice && (
+            <div className="mt-4 inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-4 py-2">
+              <span className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-medium">
+                💸 Concorrentes cobram <span className="font-bold line-through">{competitorPrice.price}</span>/mês ({competitorPrice.name})
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Features */}
@@ -103,17 +120,10 @@ const TemplateSection = ({
             {images.map((img, i) => (
               <div key={i} className="space-y-3" style={{ direction: "ltr" }}>
                 <div className="bg-card rounded-2xl border border-border shadow-elevated overflow-hidden p-2 sm:p-3 hover:shadow-lg transition-shadow">
-                  <img
-                    src={img.src}
-                    alt={img.alt}
-                    className="w-full rounded-xl"
-                    loading="lazy"
-                  />
+                  <img src={img.src} alt={img.alt} className="w-full rounded-xl" loading="lazy" />
                 </div>
                 {img.caption && (
-                  <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">
-                    {img.caption}
-                  </p>
+                  <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">{img.caption}</p>
                 )}
               </div>
             ))}
@@ -122,42 +132,43 @@ const TemplateSection = ({
 
         {images.length === 3 && (
           <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-            {/* First image full width */}
             <div className="space-y-3">
               <div className="bg-card rounded-2xl border border-border shadow-elevated overflow-hidden p-2 sm:p-3 hover:shadow-lg transition-shadow max-w-4xl mx-auto">
-                <img
-                  src={images[0].src}
-                  alt={images[0].alt}
-                  className="w-full rounded-xl"
-                  loading="lazy"
-                />
+                <img src={images[0].src} alt={images[0].alt} className="w-full rounded-xl" loading="lazy" />
               </div>
               {images[0].caption && (
-                <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">
-                  {images[0].caption}
-                </p>
+                <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">{images[0].caption}</p>
               )}
             </div>
-            {/* Two images side by side */}
             <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
               {images.slice(1).map((img, i) => (
                 <div key={i} className="space-y-3">
                   <div className="bg-card rounded-2xl border border-border shadow-elevated overflow-hidden p-2 sm:p-3 hover:shadow-lg transition-shadow">
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="w-full rounded-xl"
-                      loading="lazy"
-                    />
+                    <img src={img.src} alt={img.alt} className="w-full rounded-xl" loading="lazy" />
                   </div>
                   {img.caption && (
-                    <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">
-                      {img.caption}
-                    </p>
+                    <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium">{img.caption}</p>
                   )}
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Ready Page Preview */}
+        {readyPageImage && (
+          <div className="mt-10 sm:mt-14 max-w-4xl mx-auto">
+            <div className="text-center mb-4">
+              <span className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                ✨ Resultado Final — Página Publicada
+              </span>
+            </div>
+            <div className="bg-card rounded-2xl border-2 border-emerald-500/30 shadow-elevated overflow-hidden p-2 sm:p-3 hover:shadow-lg transition-shadow">
+              <img src={readyPageImage.src} alt={readyPageImage.alt} className="w-full rounded-xl" loading="lazy" />
+            </div>
+            {readyPageImage.caption && (
+              <p className="text-center text-xs sm:text-sm text-muted-foreground font-medium mt-3">{readyPageImage.caption}</p>
+            )}
           </div>
         )}
       </div>
@@ -181,18 +192,16 @@ const TemplateShowcaseSections = () => {
           "Links com destaque e thumbnails",
           "Temas e cores customizáveis",
         ]}
+        competitorPrice={{ name: "Linktree Pro / Sacolinha", price: "R$ 60,00" }}
         images={[
-          {
-            src: templateBio1,
-            alt: "Editor do Link na Bio do TrustPage — configuração de perfil, avatar e redes sociais",
-            caption: "Editor completo com preview em tempo real",
-          },
-          {
-            src: templateBio2,
-            alt: "Editor do Link na Bio do TrustPage — redes sociais e links configurados",
-            caption: "Redes sociais e links personalizados",
-          },
+          { src: templateBio1, alt: "Editor do Link na Bio do TrustPage — configuração de perfil, avatar e redes sociais", caption: "Editor completo com preview em tempo real" },
+          { src: templateBio2, alt: "Editor do Link na Bio do TrustPage — redes sociais e links configurados", caption: "Redes sociais e links personalizados" },
         ]}
+        readyPageImage={{
+          src: templateBioPronta,
+          alt: "Página Link na Bio do TrustPage publicada — resultado final com avatar, redes sociais e links",
+          caption: "Sua página pronta e publicada — pronta para compartilhar nas redes sociais",
+        }}
         bgClass="bg-muted/30"
       />
 
@@ -209,23 +218,17 @@ const TemplateShowcaseSections = () => {
           "Imagem de produto ajustável",
           "Webhook para automações externas",
         ]}
+        competitorPrice={{ name: "RD Station Light", price: "R$ 69,00" }}
         images={[
-          {
-            src: templateCaptura1,
-            alt: "Editor de Página de Captura do TrustPage — configuração de slug, headline e imagem de capa",
-            caption: "Configurações da página e preview desktop + mobile",
-          },
-          {
-            src: templateCaptura2,
-            alt: "Editor de Página de Captura do TrustPage — campos do formulário e conteúdo",
-            caption: "Campos do formulário e conteúdo personalizáveis",
-          },
-          {
-            src: templateCaptura3,
-            alt: "Editor de Página de Captura do TrustPage — isca digital e upload de arquivo",
-            caption: "Isca digital com entrega automática de arquivo",
-          },
+          { src: templateCaptura1, alt: "Editor de Página de Captura do TrustPage — configuração de slug, headline e imagem de capa", caption: "Configurações da página e preview desktop + mobile" },
+          { src: templateCaptura2, alt: "Editor de Página de Captura do TrustPage — campos do formulário e conteúdo", caption: "Campos do formulário e conteúdo personalizáveis" },
+          { src: templateCaptura3, alt: "Editor de Página de Captura do TrustPage — isca digital e upload de arquivo", caption: "Isca digital com entrega automática de arquivo" },
         ]}
+        readyPageImage={{
+          src: templateCapturaPronta,
+          alt: "Página de Captura do TrustPage publicada — formulário de e-book com imagem de produto",
+          caption: "Página de captura publicada — formulário inteligente com design profissional",
+        }}
         bgClass="bg-background"
       />
 
@@ -242,23 +245,17 @@ const TemplateShowcaseSections = () => {
           "Preview desktop e mobile em tempo real",
           "Cérebro IA para copywriting",
         ]}
+        competitorPrice={{ name: "GreatPages / Klickpages", price: "R$ 67,90 a R$ 157,00" }}
         images={[
-          {
-            src: templateVendas1,
-            alt: "Editor de Página de Vendas do TrustPage — temas profissionais e Section Builder",
-            caption: "Temas profissionais e Section Builder com drag & drop",
-          },
-          {
-            src: templateVendas2,
-            alt: "Editor de Página de Vendas do TrustPage — headline, subheadline e preview",
-            caption: "Edição de headline com preview em tempo real",
-          },
-          {
-            src: templateVendas3,
-            alt: "Editor de Página de Vendas do TrustPage — modal de adicionar seção com 14+ blocos",
-            caption: "14+ tipos de seções para montar sua página",
-          },
+          { src: templateVendas1, alt: "Editor de Página de Vendas do TrustPage — temas profissionais e Section Builder", caption: "Temas profissionais e Section Builder com drag & drop" },
+          { src: templateVendas2, alt: "Editor de Página de Vendas do TrustPage — headline, subheadline e preview", caption: "Edição de headline com preview em tempo real" },
+          { src: templateVendas3, alt: "Editor de Página de Vendas do TrustPage — modal de adicionar seção com 14+ blocos", caption: "14+ tipos de seções para montar sua página" },
         ]}
+        readyPageImage={{
+          src: templateVendasPronta,
+          alt: "Página de Vendas do TrustPage publicada — layout completo com vídeo, CTA e prova social",
+          caption: "Página de vendas pronta — layout profissional de alta conversão",
+        }}
         bgClass="bg-muted/30"
       />
 
@@ -275,23 +272,17 @@ const TemplateShowcaseSections = () => {
           "Temas Dark, Light e Modern Gray",
           "5 cores de botão prontas",
         ]}
+        competitorPrice={{ name: "VTurb / TurboCloud", price: "R$ 97,00" }}
         images={[
-          {
-            src: templateVsl1,
-            alt: "Editor VSL do TrustPage — configuração de página, slug e headline",
-            caption: "Configurações da página com preview em tempo real",
-          },
-          {
-            src: templateVsl2,
-            alt: "Editor VSL do TrustPage — vídeo, orientação e botão CTA com delay",
-            caption: "Vídeo com CTA inteligente que aparece após % assistido",
-          },
-          {
-            src: templateVsl3,
-            alt: "Editor VSL do TrustPage — temas, cores de botão e aparência",
-            caption: "Temas e cores personalizáveis para cada nicho",
-          },
+          { src: templateVsl1, alt: "Editor VSL do TrustPage — configuração de página, slug e headline", caption: "Configurações da página com preview em tempo real" },
+          { src: templateVsl2, alt: "Editor VSL do TrustPage — vídeo, orientação e botão CTA com delay", caption: "Vídeo com CTA inteligente que aparece após % assistido" },
+          { src: templateVsl3, alt: "Editor VSL do TrustPage — temas, cores de botão e aparência", caption: "Temas e cores personalizáveis para cada nicho" },
         ]}
+        readyPageImage={{
+          src: templateVslPronta,
+          alt: "Página VSL do TrustPage publicada — vídeo de vendas com CTA e timer",
+          caption: "Página VSL publicada — foco total na conversão com CTA estratégico",
+        }}
         bgClass="bg-background"
       />
 
@@ -308,18 +299,16 @@ const TemplateShowcaseSections = () => {
           "Estilo claro ou escuro",
           "Texto do aviso editável",
         ]}
+        competitorPrice={{ name: "Cloaker / Ferramentas Black", price: "R$ 97,00" }}
         images={[
-          {
-            src: templatePresell1,
-            alt: "Editor Pre-sell do TrustPage — configuração Cookie Wall com prints desktop e mobile",
-            caption: "Configuração do Cookie Wall com preview em tempo real",
-          },
-          {
-            src: templatePresell2,
-            alt: "Editor Pre-sell do TrustPage — posição do aviso e estilo do card",
-            caption: "Posição, estilo e texto do aviso personalizáveis",
-          },
+          { src: templatePresell1, alt: "Editor Pre-sell do TrustPage — configuração Cookie Wall com prints desktop e mobile", caption: "Configuração do Cookie Wall com preview em tempo real" },
+          { src: templatePresell2, alt: "Editor Pre-sell do TrustPage — posição do aviso e estilo do card", caption: "Posição, estilo e texto do aviso personalizáveis" },
         ]}
+        readyPageImage={{
+          src: templatePresellPronta,
+          alt: "Página Pre-sell do TrustPage publicada — Cookie Wall com aviso de privacidade sobre página de vendas",
+          caption: "Pre-sell publicada — Cookie Wall profissional simulando aviso LGPD",
+        }}
         bgClass="bg-muted/30"
       />
 
@@ -336,17 +325,10 @@ const TemplateShowcaseSections = () => {
           "Redirecionamento final configurável",
           "Design mobile-first com transições suaves",
         ]}
+        competitorPrice={{ name: "Typeform / Quizur Pro", price: "R$ 89,00" }}
         images={[
-          {
-            src: templateQuiz1,
-            alt: "Editor de Quiz do TrustPage — perguntas, opções de resposta e imagem",
-            caption: "Editor de perguntas com opções e imagens",
-          },
-          {
-            src: templateQuiz2,
-            alt: "Visualização pública do Quiz do TrustPage — tela inicial com botão começar",
-            caption: "Visualização pública do quiz com design limpo",
-          },
+          { src: templateQuiz1, alt: "Editor de Quiz do TrustPage — perguntas, opções de resposta e imagem", caption: "Editor de perguntas com opções e imagens" },
+          { src: templateQuiz2, alt: "Visualização pública do Quiz do TrustPage — tela inicial com botão começar", caption: "Visualização pública do quiz com design limpo" },
         ]}
         bgClass="bg-background"
       />
@@ -364,17 +346,10 @@ const TemplateShowcaseSections = () => {
           "Preview em tempo real (Desktop/Mobile)",
           "Back Redirect para retenção",
         ]}
+        competitorPrice={{ name: "SuperLinks / Atomicat", price: "R$ 47,00" }}
         images={[
-          {
-            src: templateClonador1,
-            alt: "Editor de Página Clonada do TrustPage — substituição de links e preview",
-            caption: "Substituição global de links com preview em tempo real",
-          },
-          {
-            src: templateClonador2,
-            alt: "Editor de Página Clonada do TrustPage — scripts do head e retenção",
-            caption: "Scripts de rastreamento e Back Redirect",
-          },
+          { src: templateClonador1, alt: "Editor de Página Clonada do TrustPage — substituição de links e preview", caption: "Substituição global de links com preview em tempo real" },
+          { src: templateClonador2, alt: "Editor de Página Clonada do TrustPage — scripts do head e retenção", caption: "Scripts de rastreamento e Back Redirect" },
         ]}
         bgClass="bg-muted/30"
       />
