@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Trash2, Edit3, HelpCircle, Globe, Image as ImageIcon } from "lucide-react";
+import { ExternalLink, Copy, Trash2, Edit3, HelpCircle, Globe, Image as ImageIcon, Link2, Instagram, Film, MessageCircle, Facebook, Youtube } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { PUBLIC_PAGES_DOMAIN, getQuizPublicUrl } from "@/lib/constants";
@@ -33,8 +37,16 @@ interface QuizCardProps {
   customDomains?: UserDomain[];
   onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
-  onCopyLink: (slug: string, customDomain?: string | null) => void;
 }
+
+const UTM_OPTIONS = [
+  { label: 'Link Limpo', icon: Link2, utm: '' },
+  { label: 'Instagram', icon: Instagram, utm: 'utm_source=instagram&utm_medium=bio' },
+  { label: 'TikTok', icon: Film, utm: 'utm_source=tiktok&utm_medium=video' },
+  { label: 'WhatsApp', icon: MessageCircle, utm: 'utm_source=whatsapp&utm_medium=message' },
+  { label: 'Facebook', icon: Facebook, utm: 'utm_source=facebook&utm_medium=cpc' },
+  { label: 'YouTube', icon: Youtube, utm: 'utm_source=youtube&utm_medium=video' },
+];
 
 const QuizCard = ({
   id,
@@ -48,19 +60,14 @@ const QuizCard = ({
   customDomains = [],
   onEdit,
   onDelete,
-  onCopyLink,
 }: QuizCardProps) => {
   const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'short',
   });
 
-  // Filter only verified domains
   const verifiedDomains = customDomains.filter(d => d.verified);
   const primaryDomain = verifiedDomains.find(d => d.is_primary)?.domain || verifiedDomains[0]?.domain;
-  const hasCustomDomains = verifiedDomains.length > 0;
-
-  // Display name prioritizes page_name, falls back to title
   const displayName = pageName || title || 'Quiz sem nome';
 
   const handleViewPage = (domain?: string | null) => {
@@ -69,6 +76,19 @@ const QuizCard = ({
       return;
     }
     window.open(getQuizPublicUrl(slug, domain), "_blank");
+  };
+
+  const handleCopyWithUtm = (domain: string | null, utmString: string, sourceName: string) => {
+    const baseUrl = getQuizPublicUrl(slug, domain);
+    const finalUrl = utmString
+      ? `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${utmString}`
+      : baseUrl;
+    navigator.clipboard.writeText(finalUrl);
+    toast.success(
+      sourceName === 'Link Limpo'
+        ? 'Link copiado!'
+        : `Link rastreável do ${sourceName} copiado!`
+    );
   };
 
   return (
@@ -95,7 +115,6 @@ const QuizCard = ({
                 </span>
               </div>
             )}
-            {/* Quiz badge */}
             <div className="absolute bottom-1.5 left-1.5">
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/90 text-primary-foreground">
                 Quiz
@@ -138,7 +157,8 @@ const QuizCard = ({
             <TooltipContent>Editar quiz</TooltipContent>
           </Tooltip>
 
-          {hasCustomDomains ? (
+          {/* View page */}
+          {verifiedDomains.length > 0 ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="h-9 w-9">
@@ -161,12 +181,7 @@ const QuizCard = ({
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => handleViewPage(null)}
-                >
+                <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => handleViewPage(null)}>
                   <ExternalLink className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
@@ -174,41 +189,50 @@ const QuizCard = ({
             </Tooltip>
           )}
 
-          {hasCustomDomains ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9">
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onCopyLink(slug, null)}>
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar {PUBLIC_PAGES_DOMAIN}/q/{slug}
-                </DropdownMenuItem>
-                {verifiedDomains.map((d) => (
-                  <DropdownMenuItem key={d.domain} onClick={() => onCopyLink(slug, d.domain)}>
+          {/* Copy link with UTM cascade */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="h-9 w-9">
+                <Copy className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[200px]">
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Globe className="w-4 h-4 mr-2" />
+                  {PUBLIC_PAGES_DOMAIN}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {UTM_OPTIONS.map((opt) => (
+                      <DropdownMenuItem key={opt.label} onClick={() => handleCopyWithUtm(null, opt.utm, opt.label)}>
+                        <opt.icon className="w-4 h-4 mr-2" />
+                        {opt.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              {verifiedDomains.map((d) => (
+                <DropdownMenuSub key={d.domain}>
+                  <DropdownMenuSubTrigger>
                     <Globe className="w-4 h-4 mr-2" />
-                    Copiar {d.domain}/q/{slug}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-9 w-9"
-                  onClick={() => onCopyLink(slug, null)}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copiar link</TooltipContent>
-            </Tooltip>
-          )}
+                    {d.domain}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {UTM_OPTIONS.map((opt) => (
+                        <DropdownMenuItem key={opt.label} onClick={() => handleCopyWithUtm(d.domain, opt.utm, opt.label)}>
+                          <opt.icon className="w-4 h-4 mr-2" />
+                          {opt.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Tooltip>
             <TooltipTrigger asChild>
