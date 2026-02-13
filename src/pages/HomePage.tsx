@@ -605,6 +605,111 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Value Stack Section */}
+      <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
+        <div className="absolute top-10 right-0 w-80 h-80 bg-red-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-10 sm:mb-14">
+            <span className="inline-block px-3 sm:px-4 py-2 bg-red-500/10 rounded-full text-red-600 dark:text-red-400 font-semibold text-xs sm:text-sm mb-4">
+              💰 Ancoragem de Preço
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4 px-4">
+              Você poderia pagar <span className="text-red-500 line-through">R$ 766,00</span> por mês...
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+              ...ou ter <span className="text-foreground font-bold">TUDO ISSO</span> liberado no TrustPage pelo preço de uma pizza. 🍕
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            {/* Lado Esquerdo — O Jeito Caro */}
+            <div className="bg-card rounded-2xl border border-red-500/30 p-6 sm:p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl" />
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <span className="text-red-500">❌</span> O Jeito Antigo (Tudo Separado)
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  { tool: "Criador de Landing Page", ref: "GreatPages / Klickpages", price: "R$ 67,90 a R$ 157,00" },
+                  { tool: "Hospedagem de VSL", ref: "VTurb / TurboCloud", price: "R$ 97,00" },
+                  { tool: "Ferramenta de Quiz", ref: "Typeform / Quizur Pro", price: "R$ 89,00" },
+                  { tool: "Clonador de Páginas", ref: "SuperLinks / Atomicat", price: "R$ 47,00" },
+                  { tool: "Link na Bio Profissional", ref: "Linktree Pro / Sacolinha", price: "R$ 60,00" },
+                  { tool: "Rastreamento (Analytics)", ref: "Voluum / Bemob", price: "R$ 240,00" },
+                  { tool: "Presell & Anti-Bloqueio", ref: "Cloaker / Black Tools", price: "R$ 97,00" },
+                  { tool: "Captura de Leads (CRM)", ref: "RD Station Light", price: "R$ 69,00" },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start justify-between gap-3 pb-3 border-b border-border last:border-0 last:pb-0">
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">{item.tool}</p>
+                      <p className="text-xs text-muted-foreground">{item.ref}</p>
+                    </div>
+                    <span className="text-sm font-bold text-red-500 whitespace-nowrap line-through">{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 pt-4 border-t-2 border-red-500/30 flex justify-between items-center">
+                <span className="font-bold text-foreground">Custo Total Mensal:</span>
+                <span className="text-xl sm:text-2xl font-black text-red-500">~R$ 766,90/mês</span>
+              </div>
+            </div>
+
+            {/* Lado Direito — O Jeito TrustPage */}
+            <div className="bg-gradient-to-br from-emerald-500/5 to-primary/5 rounded-2xl border-2 border-emerald-500/40 p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl" />
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                  <span className="text-emerald-500">✅</span> O Jeito TrustPage (Tudo Incluído)
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    "Landing Pages ilimitadas",
+                    "Hospedagem de VSL inclusa",
+                    "Quiz Interativo incluso",
+                    "Clonador de Páginas incluso",
+                    "Link na Bio Profissional incluso",
+                    "Analytics Avançado com UTM incluso",
+                    "Pre-sell Anti-Bloqueio incluso",
+                    "Captura de Leads com CRM incluso",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm font-medium text-foreground">
+                      <Check className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-8 pt-4 border-t-2 border-emerald-500/30">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-1">Tudo isso por apenas</p>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-4xl sm:text-5xl font-black gradient-text">R$ 39,90</span>
+                    <span className="text-muted-foreground font-medium">/mês</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">ou R$ 37,49/mês no plano anual</p>
+                </div>
+                <Link to="/auth" className="block mt-4">
+                  <Button size="lg" className="w-full gradient-button font-bold text-base group">
+                    Economize R$ 726/mês — Começar Agora
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Final argument */}
+          <div className="text-center mt-10 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground italic">
+              "O TrustPage não é um custo. É uma economia imediata de R$ 700+ no seu bolso todo mês. Cancele todas as outras ferramentas e fique só com a gente — o TrustPage sai de graça e você ainda lucra."
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-primary/5 rounded-full blur-3xl" />
