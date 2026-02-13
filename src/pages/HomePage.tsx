@@ -6,6 +6,7 @@ import { useState } from "react";
 import FAQSection from "@/components/FAQSection";
 import analyticsDashboardImg from "@/assets/analytics-dashboard.png";
 import utmLinksMenuImg from "@/assets/utm-links-menu.png";
+import TemplateShowcaseSections from "@/components/marketing/TemplateShowcaseSections";
 
 // Links reais do Kiwify
 const CHECKOUT_URLS = {
@@ -486,6 +487,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Template Showcase Sections - detailed per template */}
+      <TemplateShowcaseSections />
 
       {/* UTM Tracking & Analytics Section */}
       <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
