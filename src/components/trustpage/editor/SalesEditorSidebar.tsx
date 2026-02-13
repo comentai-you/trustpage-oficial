@@ -13,7 +13,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images, Settings, Phone } from "lucide-react";
+import { Palette, Layout, Star, MessageSquare, DollarSign, Upload, Image, Video, X, Loader2, HelpCircle, Plus, Trash2, Images, Settings, Phone, Globe } from "lucide-react";
+import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -308,6 +309,24 @@ const SalesEditorSidebar = ({ formData, onChange }: SalesEditorSidebarProps) => 
                 placeholder="Minha Página de Vendas"
                 className="text-sm"
               />
+            </div>
+
+            {/* Slug Input */}
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-600 flex items-center gap-1">
+                <Globe className="w-3 h-3" />
+                Nome do Link (Slug)
+              </Label>
+              <Input
+                value={formData.slug}
+                onChange={(e) => onChange({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                placeholder="meu-link"
+                className="text-sm"
+              />
+              <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-md">
+                <span className="font-medium">Preview:</span>
+                <span className="text-primary font-mono">{PUBLIC_PAGES_DOMAIN}/p/{formData.slug || 'seu-link'}</span>
+              </div>
             </div>
             
             <div className="space-y-2">
