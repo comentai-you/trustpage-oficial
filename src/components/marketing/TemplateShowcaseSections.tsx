@@ -19,6 +19,19 @@ import templateVendas3 from "@/assets/template-vendas-3.png";
 // VSL images
 import templateVsl1 from "@/assets/template-vsl-1.png";
 import templateVsl2 from "@/assets/template-vsl-2.png";
+import templateVsl3 from "@/assets/template-vsl-3.png";
+
+// Pre-sell images
+import templatePresell1 from "@/assets/template-presell-1.png";
+import templatePresell2 from "@/assets/template-presell-2.png";
+
+// Quiz images
+import templateQuiz1 from "@/assets/template-quiz-1.png";
+import templateQuiz2 from "@/assets/template-quiz-2.png";
+
+// Clonador images
+import templateClonador1 from "@/assets/template-clonador-1.png";
+import templateClonador2 from "@/assets/template-clonador-2.png";
 
 interface ShowcaseImage {
   src: string;
@@ -259,8 +272,8 @@ const TemplateShowcaseSections = () => {
         features={[
           "Suporte a YouTube, Vimeo e Panda",
           "CTA com delay por % do vídeo",
-          "Orientação horizontal e vertical",
-          "Preview desktop e mobile",
+          "Temas Dark, Light e Modern Gray",
+          "5 cores de botão prontas",
         ]}
         images={[
           {
@@ -273,15 +286,107 @@ const TemplateShowcaseSections = () => {
             alt: "Editor VSL do TrustPage — vídeo, orientação e botão CTA com delay",
             caption: "Vídeo com CTA inteligente que aparece após % assistido",
           },
+          {
+            src: templateVsl3,
+            alt: "Editor VSL do TrustPage — temas, cores de botão e aparência",
+            caption: "Temas e cores personalizáveis para cada nicho",
+          },
         ]}
         bgClass="bg-background"
       />
 
-      {/* CTA between sections */}
-      <div className="py-10 sm:py-14 bg-muted/30 text-center">
+      {/* Pre-sell de Cookies */}
+      <TemplateSection
+        badge="🍪 Pre-sell Anti-Bloqueio"
+        badgeColor="bg-red-500/10 text-red-600 dark:text-red-400"
+        title="Cookie Wall que protege seus anúncios"
+        highlightedWord="protege seus anúncios"
+        description="Simule um aviso de privacidade (LGPD) sobre a página de vendas real. O visitante clica em 'Aceitar' e é redirecionado ao seu link de destino."
+        features={[
+          "Background desktop e mobile separados",
+          "Posição centralizada ou inferior",
+          "Estilo claro ou escuro",
+          "Texto do aviso editável",
+        ]}
+        images={[
+          {
+            src: templatePresell1,
+            alt: "Editor Pre-sell do TrustPage — configuração Cookie Wall com prints desktop e mobile",
+            caption: "Configuração do Cookie Wall com preview em tempo real",
+          },
+          {
+            src: templatePresell2,
+            alt: "Editor Pre-sell do TrustPage — posição do aviso e estilo do card",
+            caption: "Posição, estilo e texto do aviso personalizáveis",
+          },
+        ]}
+        bgClass="bg-muted/30"
+      />
+
+      {/* Quiz Interativo */}
+      <TemplateSection
+        badge="❓ Quiz Interativo"
+        badgeColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        title="Funis de Quiz para qualificar leads"
+        highlightedWord="qualificar leads"
+        description="Crie quizzes estilo Typeform com perguntas, imagens e opções de resposta. No final, redirecione o lead para seu checkout ou grupo."
+        features={[
+          "Perguntas com imagem opcional",
+          "Opções de resposta com emojis",
+          "Redirecionamento final configurável",
+          "Design mobile-first com transições suaves",
+        ]}
+        images={[
+          {
+            src: templateQuiz1,
+            alt: "Editor de Quiz do TrustPage — perguntas, opções de resposta e imagem",
+            caption: "Editor de perguntas com opções e imagens",
+          },
+          {
+            src: templateQuiz2,
+            alt: "Visualização pública do Quiz do TrustPage — tela inicial com botão começar",
+            caption: "Visualização pública do quiz com design limpo",
+          },
+        ]}
+        bgClass="bg-background"
+      />
+
+      {/* Clonador de Páginas */}
+      <TemplateSection
+        badge="✨ Clonador de Páginas"
+        badgeColor="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        title="Clone qualquer página em segundos"
+        highlightedWord="qualquer página"
+        description="Cole a URL de qualquer página de vendas, clone com 1 clique e substitua todos os links para o seu checkout. Inclui suporte a Pixel e Back Redirect."
+        features={[
+          "Substituição global de links",
+          "Scripts do Head (Pixel/GTM)",
+          "Preview em tempo real (Desktop/Mobile)",
+          "Back Redirect para retenção",
+        ]}
+        images={[
+          {
+            src: templateClonador1,
+            alt: "Editor de Página Clonada do TrustPage — substituição de links e preview",
+            caption: "Substituição global de links com preview em tempo real",
+          },
+          {
+            src: templateClonador2,
+            alt: "Editor de Página Clonada do TrustPage — scripts do head e retenção",
+            caption: "Scripts de rastreamento e Back Redirect",
+          },
+        ]}
+        bgClass="bg-muted/30"
+      />
+
+      {/* CTA final */}
+      <div className="py-10 sm:py-14 bg-background text-center">
         <div className="container mx-auto px-4 sm:px-6">
-          <p className="text-lg sm:text-xl font-bold text-foreground mb-4">
-            Ainda tem mais! 🚀 Advertorial, Pre-sell, Quiz e Clonador em breve aqui.
+          <p className="text-lg sm:text-xl font-bold text-foreground mb-2">
+            Tudo isso em uma única plataforma. 🚀
+          </p>
+          <p className="text-sm sm:text-base text-muted-foreground mb-6">
+            Comece grátis e desbloqueie templates avançados quando estiver pronto.
           </p>
           <Link to="/auth">
             <Button size="lg" className="gradient-button font-bold px-8 group">
