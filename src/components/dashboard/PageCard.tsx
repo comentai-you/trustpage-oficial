@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Trash2, Edit3, Play, Image as ImageIcon, Globe } from "lucide-react";
+import { ExternalLink, Copy, Trash2, Edit3, Play, Image as ImageIcon, Globe, Instagram, Film, MessageCircle, Facebook, Youtube, Link2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { PUBLIC_PAGES_DOMAIN, getPublicPageUrl } from "@/lib/constants";
@@ -35,8 +39,6 @@ interface PageCardProps {
   customDomains?: UserDomain[];
   onEdit: (id: string, templateType?: string | null) => void;
   onDelete: (id: string, name: string) => void;
-  onCopyLink: (slug: string, customDomain?: string | null) => void;
-  
 }
 
 // Extract YouTube video ID and generate thumbnail
@@ -87,7 +89,6 @@ const PageCard = ({
   customDomains = [],
   onEdit,
   onDelete,
-  onCopyLink,
 }: PageCardProps) => {
   const thumbnail = getThumbnail(coverImageUrl, videoUrl, imageUrl);
   const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
@@ -106,6 +107,28 @@ const PageCard = ({
       return;
     }
     window.open(getPublicPageUrl(slug, domain), "_blank");
+  };
+
+  const UTM_OPTIONS = [
+    { label: 'Link Limpo', icon: Link2, utm: '' },
+    { label: 'Instagram', icon: Instagram, utm: 'utm_source=instagram&utm_medium=bio' },
+    { label: 'TikTok', icon: Film, utm: 'utm_source=tiktok&utm_medium=video' },
+    { label: 'WhatsApp', icon: MessageCircle, utm: 'utm_source=whatsapp&utm_medium=message' },
+    { label: 'Facebook', icon: Facebook, utm: 'utm_source=facebook&utm_medium=cpc' },
+    { label: 'YouTube', icon: Youtube, utm: 'utm_source=youtube&utm_medium=video' },
+  ];
+
+  const handleCopyWithUtm = (domain: string | null, utmString: string, sourceName: string) => {
+    const baseUrl = getPublicPageUrl(slug, domain);
+    const finalUrl = utmString
+      ? `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${utmString}`
+      : baseUrl;
+    navigator.clipboard.writeText(finalUrl);
+    toast.success(
+      sourceName === 'Link Limpo'
+        ? 'Link copiado!'
+        : `Link rastreável do ${sourceName} copiado!`
+    );
   };
 
   return (
@@ -220,41 +243,49 @@ const PageCard = ({
             </Tooltip>
           )}
 
-          {hasCustomDomains ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9">
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onCopyLink(slug, null)}>
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar {PUBLIC_PAGES_DOMAIN}/p/{slug}
-                </DropdownMenuItem>
-                {verifiedDomains.map((d) => (
-                  <DropdownMenuItem key={d.domain} onClick={() => onCopyLink(slug, d.domain)}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="h-9 w-9">
+                <Copy className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[200px]">
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Globe className="w-4 h-4 mr-2" />
+                  {PUBLIC_PAGES_DOMAIN}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {UTM_OPTIONS.map((opt) => (
+                      <DropdownMenuItem key={opt.label} onClick={() => handleCopyWithUtm(null, opt.utm, opt.label)}>
+                        <opt.icon className="w-4 h-4 mr-2" />
+                        {opt.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              {verifiedDomains.map((d) => (
+                <DropdownMenuSub key={d.domain}>
+                  <DropdownMenuSubTrigger>
                     <Globe className="w-4 h-4 mr-2" />
-                    Copiar {d.domain}/p/{slug}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-9 w-9"
-                  onClick={() => onCopyLink(slug, null)}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copiar link</TooltipContent>
-            </Tooltip>
-          )}
+                    {d.domain}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {UTM_OPTIONS.map((opt) => (
+                        <DropdownMenuItem key={opt.label} onClick={() => handleCopyWithUtm(d.domain, opt.utm, opt.label)}>
+                          <opt.icon className="w-4 h-4 mr-2" />
+                          {opt.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Tooltip>
             <TooltipTrigger asChild>

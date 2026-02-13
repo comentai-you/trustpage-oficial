@@ -670,7 +670,7 @@ const TrustPageDashboard = () => {
                 customDomains={userDomains}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onCopyLink={handleCopyLink}
+                
               />
             ))}
 
@@ -689,7 +689,7 @@ const TrustPageDashboard = () => {
                 customDomains={userDomains}
                 onEdit={handleEditQuiz}
                 onDelete={handleDeleteQuiz}
-                onCopyLink={handleCopyQuizLink}
+                
               />
             ))}
           </div>
