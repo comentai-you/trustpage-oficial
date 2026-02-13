@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon, LinkIcon, Magnet, ShoppingBag, HelpCircle, Copy, Newspaper, Cookie } from "lucide-react";
+import { Play, Video, CreditCard, Zap, ArrowRight, CheckCircle2, Sparkles, Check, Clock, Menu, X, Shield, HeadphonesIcon, LinkIcon, Magnet, ShoppingBag, HelpCircle, Copy, Newspaper, Cookie, BarChart3, Target, MousePointerClick } from "lucide-react";
 import { useState } from "react";
 import FAQSection from "@/components/FAQSection";
+import analyticsDashboardImg from "@/assets/analytics-dashboard.png";
+import utmLinksMenuImg from "@/assets/utm-links-menu.png";
 
 // Links reais do Kiwify
 const CHECKOUT_URLS = {
@@ -481,6 +483,86 @@ const HomePage = () => {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* UTM Tracking & Analytics Section */}
+      <section className="py-16 sm:py-24 bg-background relative overflow-hidden">
+        <div className="absolute top-10 left-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-10 sm:mb-16">
+            <span className="inline-block px-3 sm:px-4 py-2 bg-emerald-500/10 rounded-full text-emerald-600 dark:text-emerald-400 font-semibold text-xs sm:text-sm mb-4">
+              📊 Rastreamento Inteligente
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-3 sm:mb-4">
+              Saiba <span className="gradient-text">exatamente</span> de onde vem cada visita
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+              Com links UTM automáticos e analytics avançado, você descobre qual rede social traz mais resultado — sem adivinhar.
+            </p>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mb-10 sm:mb-14">
+            <div className="bg-card rounded-xl p-5 border border-border text-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Target className="w-6 h-6 text-primary" />
+              </div>
+              <h4 className="font-bold text-foreground mb-1 text-sm sm:text-base">Links UTM com 1 clique</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">Copie links prontos para Instagram, TikTok, WhatsApp e mais.</p>
+            </div>
+            <div className="bg-card rounded-xl p-5 border border-border text-center">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                <BarChart3 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h4 className="font-bold text-foreground mb-1 text-sm sm:text-base">Analytics em Tempo Real</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">Visitas, dispositivos, origens de tráfego e evolução diária.</p>
+            </div>
+            <div className="bg-card rounded-xl p-5 border border-border text-center">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+                <MousePointerClick className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h4 className="font-bold text-foreground mb-1 text-sm sm:text-base">Cliques no CTA & CTR</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">Meça a taxa de conversão real de cada página.</p>
+            </div>
+          </div>
+
+          {/* Screenshots */}
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto items-center">
+            {/* UTM Links Menu */}
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl border border-border shadow-elevated overflow-hidden p-3 sm:p-4">
+                <img
+                  src={utmLinksMenuImg}
+                  alt="Menu de links UTM do TrustPage — copie links com rastreamento para Instagram, TikTok, WhatsApp, Facebook e YouTube"
+                  className="w-full rounded-xl"
+                  loading="lazy"
+                />
+              </div>
+              <div className="text-center px-2">
+                <p className="font-semibold text-foreground text-sm sm:text-base">Copie links já rastreados</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Escolha o domínio e a origem — o UTM é adicionado automaticamente.</p>
+              </div>
+            </div>
+
+            {/* Analytics Dashboard */}
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl border border-border shadow-elevated overflow-hidden p-3 sm:p-4">
+                <img
+                  src={analyticsDashboardImg}
+                  alt="Dashboard de Analytics Avançado do TrustPage — visitas, dispositivos, origens de tráfego e evolução diária"
+                  className="w-full rounded-xl"
+                  loading="lazy"
+                />
+              </div>
+              <div className="text-center px-2">
+                <p className="font-semibold text-foreground text-sm sm:text-base">Veja de onde vem cada visita</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Descubra quais redes sociais e campanhas trazem mais tráfego.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
