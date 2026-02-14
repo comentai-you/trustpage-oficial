@@ -1,5 +1,13 @@
 import { AdvertorialContent } from "@/types/advertorial";
 import { Star, ThumbsUp, MessageCircle, Share2, Clock, Eye } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
+
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'b', 'i', 's', 'mark', 'ul', 'ol', 'li', 'blockquote', 'a', 'span', 'div', 'br', 'img', 'video', 'iframe'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class', 'src', 'alt', 'width', 'height', 'frameborder', 'allowfullscreen'],
+  });
+};
 import AdvertorialCTA from "./AdvertorialCTA";
 import FakeCommentsSection from "./FakeCommentsSection";
 import AdvertorialDisclaimer from "./AdvertorialDisclaimer";
@@ -87,7 +95,7 @@ const PortalNewsTemplate = ({ content, isMobile, isPreview }: Props) => {
         {/* Body */}
         <div
           className={`prose prose-gray max-w-none mb-8 ${isMobile ? 'prose-sm' : 'prose-base lg:prose-lg'}`}
-          dangerouslySetInnerHTML={{ __html: content.bodyHtml }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.bodyHtml) }}
         />
 
         {/* Body Images */}

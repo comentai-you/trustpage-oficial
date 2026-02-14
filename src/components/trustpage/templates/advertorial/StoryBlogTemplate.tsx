@@ -1,5 +1,13 @@
 import { AdvertorialContent } from "@/types/advertorial";
 import { Clock } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
+
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'b', 'i', 's', 'mark', 'ul', 'ol', 'li', 'blockquote', 'a', 'span', 'div', 'br', 'img', 'video', 'iframe'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'style', 'class', 'src', 'alt', 'width', 'height', 'frameborder', 'allowfullscreen'],
+  });
+};
 import AdvertorialCTA from "./AdvertorialCTA";
 import FakeCommentsSection from "./FakeCommentsSection";
 import AdvertorialDisclaimer from "./AdvertorialDisclaimer";
@@ -69,7 +77,7 @@ const StoryBlogTemplate = ({ content, isMobile, isPreview }: Props) => {
         <div
           className={`prose prose-lg max-w-none mb-10 ${isMobile ? 'prose-base' : ''}`}
           style={{ fontFamily: "'Georgia', 'Times New Roman', serif", lineHeight: 1.9 }}
-          dangerouslySetInnerHTML={{ __html: content.bodyHtml }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.bodyHtml) }}
         />
 
         {/* Body Images */}
