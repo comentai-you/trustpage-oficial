@@ -313,7 +313,7 @@ serve(async (req) => {
           throw new Error('Failed to deactivate subscription');
         }
 
-        console.log(`✅ Subscription canceled for ${customerEmail}`);
+        console.log(`✅ Subscription canceled for user ${existingUser.id}`);
         
         return new Response(
           JSON.stringify({
@@ -325,7 +325,7 @@ serve(async (req) => {
         );
       }
 
-      console.log(`ℹ️ User ${customerEmail} not found - ignoring cancellation`);
+      console.log(`ℹ️ User not found - ignoring cancellation`);
       return new Response(
         JSON.stringify({ success: true, message: 'User not found - cancellation ignored' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -392,7 +392,7 @@ serve(async (req) => {
           }, { onConflict: 'user_id' });
       }
 
-      console.log(`✅ User ${customerEmail} upgraded to ${newPlan}`);
+      console.log(`✅ User ${existingUser.id} upgraded to ${newPlan}`);
 
       return new Response(
         JSON.stringify({
@@ -408,7 +408,7 @@ serve(async (req) => {
       // ═══════════════════════════════════════
       // CENÁRIO 2: Novo usuário (checkout first)
       // ═══════════════════════════════════════
-      console.log(`📝 Creating new user: ${customerEmail}`);
+      console.log(`📝 Creating new user (email redacted)`);
 
       const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
         customerEmail,
