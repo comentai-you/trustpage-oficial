@@ -244,19 +244,22 @@ serve(async (req) => {
       );
     }
 
-    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-
-    // ═══════════════════════════════════════════
-    // PROCESSAMENTO DO EVENTO
-    // ═══════════════════════════════════════════
-    
-    // Extrair dados essenciais
-    const orderStatus = payload.order_status?.toLowerCase();
-    const customerEmail = payload.Customer?.email?.toLowerCase().trim();
-    const customerName = payload.Customer?.full_name || 'Cliente';
+    // Log sanitized payload (redact PII)
+    const sanitizedPayload = {
+      order_id: payload.order_id,
+      order_status: payload.order_status,
+      product_id: payload.product_id,
+      product_name: payload.product_name,
+      checkout_link: payload.checkout_link,
+      Customer: {
+        email: customerEmail ? customerEmail.substring(0, 3) + '***' : '[missing]',
+        full_name: '[redacted]',
+      },
+      Subscription: payload.Subscription ? { id: payload.Subscription.id, status: payload.Subscription.status } : undefined,
+    };
+    console.log('📦 Payload (sanitized):', JSON.stringify(sanitizedPayload, null, 2));
 
     console.log('📊 Order Status:', orderStatus);
-    console.log('📧 Customer Email:', customerEmail);
 
     // Validar email
     if (!customerEmail) {
