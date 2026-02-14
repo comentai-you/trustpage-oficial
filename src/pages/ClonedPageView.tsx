@@ -95,7 +95,7 @@ const ClonedPageView = () => {
       srcDoc={htmlContent || ''}
       title="Página Clonada"
       // Permissões para o site funcionar (Checkout, Vídeos, Scripts)
-      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
+      sandbox="allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
       style={{
         position: "fixed",
         top: 0,
