@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle, Shield, Newspaper } from "lucide-react";
+import { Play, ShoppingBag, Sparkles, LinkIcon, Magnet, Copy, Lock, Crown, HelpCircle, Shield, Newspaper, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
 
   const handleSelect = () => {
     if (selectedTemplate) {
-      // Premium templates blocked for free plan (VSL, Sales, Quiz, Presell)
+      // Premium templates blocked for free plan (VSL, Sales, Quiz, Presell) — capture-hero is allowed
       const premiumTemplates: TemplateType[] = ['vsl', 'sales', 'quiz', 'presell', 'advertorial'];
       if (premiumTemplates.includes(selectedTemplate) && isFreePlan) {
         setShowUpgradeModal(true);
@@ -115,6 +115,7 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
       title: "Página de Captura",
       description: "Visual premium para E-books, Iscas e Lançamentos.",
       tags: ["Alta Conversão", "Lead Magnet"],
+      freeNotice: "Plano Free: Você pode capturar leads ilimitados. O acesso aos dados completos requer o Plano Essencial ou PRO.",
     },
     {
       id: "vsl" as TemplateType,
@@ -208,6 +209,16 @@ const TemplateSelectionModal = ({ open, onOpenChange, onSelect, isFreePlan = fal
                     </span>
                   ))}
                 </div>
+
+                {/* Free plan notice for capture-hero */}
+                {(template as any).freeNotice && isFreePlan && selectedTemplate === template.id && (
+                  <div className="mt-2 flex items-start gap-1.5 px-2.5 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-[10px] sm:text-xs text-amber-700 dark:text-amber-300 leading-tight">
+                      {(template as any).freeNotice}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
