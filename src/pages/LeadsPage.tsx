@@ -13,7 +13,9 @@ import {
   FileText,
   ArrowLeft,
   Filter,
-  ChevronDown
+  ChevronDown,
+  Lock,
+  Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +72,7 @@ interface LandingPage {
 interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
+  plan_type: string;
 }
 
 const LeadsPage = () => {
@@ -100,7 +103,7 @@ const LeadsPage = () => {
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("full_name, avatar_url")
+        .select("full_name, avatar_url, plan_type")
         .eq("id", user!.id)
         .maybeSingle();
       setProfile(data);
@@ -243,6 +246,10 @@ const LeadsPage = () => {
   };
 
   const handleExportCSV = () => {
+    if (isFreePlan) {
+      toast.error("Exportação disponível a partir do Plano Essencial");
+      return;
+    }
     if (filteredLeads.length === 0) {
       toast.error("Nenhum lead para exportar");
       return;
@@ -277,6 +284,8 @@ const LeadsPage = () => {
   const formatDate = (dateStr: string) => {
     return format(new Date(dateStr), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
   };
+
+  const isFreePlan = profile?.plan_type === 'free';
 
   return (
     <DashboardLayout avatarUrl={profile?.avatar_url} fullName={profile?.full_name}>
@@ -410,6 +419,25 @@ const LeadsPage = () => {
           </div>
         )}
 
+        {/* Free plan banner */}
+        {isFreePlan && leads.length > 0 && (
+          <div className="mb-4 flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Dados de leads bloqueados</p>
+              <p className="text-xs text-muted-foreground">
+                No Plano Free, os dados dos leads ficam ocultos. Faça upgrade para o Plano Essencial ou PRO para acessar nome, email e telefone.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => navigate('/assinatura')} className="flex-shrink-0 gap-1.5">
+              <Crown className="w-3.5 h-3.5" />
+              Upgrade
+            </Button>
+          </div>
+        )}
+
         {/* Leads Table */}
         <Card className="border-0 shadow-card overflow-hidden">
           <CardContent className="p-0">
@@ -460,12 +488,12 @@ const LeadsPage = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          <div className="font-medium text-foreground">
+                          <div className={`font-medium text-foreground ${isFreePlan ? 'blur-sm select-none' : ''}`}>
                             {lead.name || <span className="text-muted-foreground">Não informado</span>}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex flex-col gap-1">
+                          <div className={`flex flex-col gap-1 ${isFreePlan ? 'blur-sm select-none pointer-events-none' : ''}`}>
                             {lead.email && (
                               <div className="flex items-center gap-1.5 text-sm">
                                 <Mail className="w-3.5 h-3.5 text-muted-foreground" />
