@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
       // Only replace absolute URLs
       if (!(v.startsWith('http://') || v.startsWith('https://') || v.startsWith('//'))) return false;
 
-      // Skip same-origin links (internal site navigation)
+      // Skip same-origin links (internal site navigation, legal pages, etc.)
       try {
         const u = new URL(v, siteOrigin);
         if (u.origin === new URL(siteOrigin).origin) return false;
@@ -229,9 +229,20 @@ Deno.serve(async (req) => {
         return false;
       }
 
-      // Skip known non-CTA external links (social media profiles, CDNs, feeds, oembed)
-      const skipPatterns = /\.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|xml|rss|json)\b|\/feed\/?$|oembed|fonts\.|cdn\.|googleapis|gstatic|wp-content\/|wp-includes\//i;
-      if (skipPatterns.test(v)) return false;
+      // Skip asset/resource URLs (images, videos, fonts, stylesheets, scripts, feeds)
+      const assetPatterns = /\.(css|js|png|jpg|jpeg|gif|svg|webp|avif|bmp|ico|woff|woff2|ttf|otf|eot|mp4|webm|ogg|avi|mov|mp3|wav|flac|aac|pdf|zip|rar|xml|rss|json|map)\b/i;
+      if (assetPatterns.test(v)) return false;
+
+      // Skip CDNs, font providers, WordPress internals, social embeds, video platforms
+      const skipDomains = /(fonts\.|cdn\.|cdnjs\.|unpkg\.|jsdelivr\.|googleapis|gstatic|wp-content\/|wp-includes\/|gravatar|youtube\.com\/embed|player\.vimeo|wistia|dailymotion|facebook\.com\/plugins|instagram\.com\/embed|twitter\.com\/widgets|platform\.|schema\.org|w3\.org|creativecommons\.org)/i;
+      if (skipDomains.test(v)) return false;
+
+      // Skip social media profile links
+      const socialProfiles = /(facebook\.com|instagram\.com|twitter\.com|x\.com|linkedin\.com|tiktok\.com|pinterest\.com|threads\.net|t\.me|wa\.me|api\.whatsapp\.com)\//i;
+      if (socialProfiles.test(v)) return false;
+
+      // Skip feeds, oembed, sitemaps
+      if (/\/feed\/?$|oembed|sitemap|\.xml\b/i.test(v)) return false;
 
       return true;
     };
@@ -240,9 +251,13 @@ Deno.serve(async (req) => {
       let out = inputHtml;
       let replaced = 0;
 
-      // Replace destination-carrying attributes, but SKIP <base> and <link> tags
-      const attrRe = /<(?!base\b|link\b)[a-z][a-z0-9]*\b[^>]*?\b(href|action|formaction|data-href|data-url|data-link)\s*=\s*(["'])([^"']+)(\2)[^>]*>/gi;
-      out = out.replace(attrRe, (fullTag) => {
+      // Replace destination-carrying attributes in CTA-like tags only
+      // SKIP: <base>, <link>, <img>, <video>, <source>, <iframe>, <script>, <style>, <meta>, <embed>, <object>
+      const nonCtaTags = /^(?:base|link|img|video|source|iframe|script|style|meta|embed|object)$/i;
+      const tagRe = /<([a-z][a-z0-9]*)\b([^>]*?)\/?\s*>/gi;
+      out = out.replace(tagRe, (fullTag, tagName, attrs) => {
+        // Skip non-CTA tags entirely
+        if (nonCtaTags.test(tagName)) return fullTag;
         // Within the matched tag, replace only the URL attribute values
         return fullTag.replace(/((?:href|action|formaction|data-href|data-url|data-link)\s*=\s*)(["'])([^"']+)(\2)/gi, (attrMatch, prefix, quote, value, endQuote) => {
           if (shouldReplaceUrlGlobally(value, siteOrigin)) {
