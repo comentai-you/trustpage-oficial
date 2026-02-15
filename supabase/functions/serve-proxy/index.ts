@@ -316,7 +316,95 @@ Deno.serve(async (req) => {
       console.log('[serve-proxy] No links array configured for this page');
     }
 
-    // D. Remove tracking scripts from original page FIRST (security/privacy measure)
+    // D. Fix lazy-loaded images/videos (LiteSpeed, WP Rocket, etc.)
+    // These plugins replace src with data-src and use JS to swap them.
+    // Since JS lazy loaders don't work reliably inside sandboxed iframes,
+    // we restore the real src so images/videos load immediately.
+    
+    // Fix <img> tags: move data-src → src, data-srcset → srcset, data-sizes → sizes
+    html = html.replace(/<img\b[^>]*>/gi, (imgTag) => {
+      let tag = imgTag;
+      
+      // Extract data-src value
+      const dataSrcMatch = tag.match(/\bdata-src\s*=\s*["']([^"']+)["']/i);
+      if (dataSrcMatch) {
+        const realSrc = dataSrcMatch[1];
+        // Replace placeholder src with real src
+        tag = tag.replace(/\bsrc\s*=\s*["'][^"']*["']/i, `src="${realSrc}"`);
+        // Remove data-src attribute
+        tag = tag.replace(/\s*\bdata-src\s*=\s*["'][^"']*["']/gi, '');
+      }
+      
+      // Fix data-srcset → srcset
+      const dataSrcsetMatch = tag.match(/\bdata-srcset\s*=\s*["']([^"']+)["']/i);
+      if (dataSrcsetMatch) {
+        const realSrcset = dataSrcsetMatch[1];
+        tag = tag.replace(/\s*\bdata-srcset\s*=\s*["'][^"']*["']/gi, '');
+        // Add or replace srcset
+        if (/\bsrcset\s*=/i.test(tag)) {
+          tag = tag.replace(/\bsrcset\s*=\s*["'][^"']*["']/i, `srcset="${realSrcset}"`);
+        } else if (/\/\s*>$/.test(tag)) {
+          tag = tag.replace(/\/\s*>$/, `srcset="${realSrcset}" />`);
+        } else {
+          tag = tag.replace(/>$/, ` srcset="${realSrcset}">`);
+        }
+      }
+      
+      // Fix data-sizes → sizes
+      const dataSizesMatch = tag.match(/\bdata-sizes\s*=\s*["']([^"']+)["']/i);
+      if (dataSizesMatch) {
+        const realSizes = dataSizesMatch[1];
+        tag = tag.replace(/\s*\bdata-sizes\s*=\s*["'][^"']*["']/gi, '');
+        if (/\bsizes\s*=/i.test(tag)) {
+          tag = tag.replace(/\bsizes\s*=\s*["'][^"']*["']/i, `sizes="${realSizes}"`);
+        } else if (/\/\s*>$/.test(tag)) {
+          tag = tag.replace(/\/\s*>$/, `sizes="${realSizes}" />`);
+        } else {
+          tag = tag.replace(/>$/, ` sizes="${realSizes}">`);
+        }
+      }
+      
+      // Remove data-lazyloaded attribute
+      tag = tag.replace(/\s*\bdata-lazyloaded\s*=\s*["'][^"']*["']/gi, '');
+      
+      return tag;
+    });
+
+    // Fix <video>/<source> tags: move data-src → src
+    html = html.replace(/<(?:video|source)\b[^>]*>/gi, (videoTag) => {
+      let tag = videoTag;
+      const dataSrcMatch = tag.match(/\bdata-src\s*=\s*["']([^"']+)["']/i);
+      if (dataSrcMatch) {
+        const realSrc = dataSrcMatch[1];
+        if (/\bsrc\s*=/i.test(tag)) {
+          tag = tag.replace(/\bsrc\s*=\s*["'][^"']*["']/i, `src="${realSrc}"`);
+        } else {
+          tag = tag.replace(/>$/, ` src="${realSrc}">`);
+        }
+        tag = tag.replace(/\s*\bdata-src\s*=\s*["'][^"']*["']/gi, '');
+      }
+      return tag;
+    });
+
+    // Fix <iframe> embeds (YouTube, Vimeo, etc.): move data-src → src
+    html = html.replace(/<iframe\b[^>]*>/gi, (iframeTag) => {
+      let tag = iframeTag;
+      const dataSrcMatch = tag.match(/\bdata-src\s*=\s*["']([^"']+)["']/i);
+      if (dataSrcMatch) {
+        const realSrc = dataSrcMatch[1];
+        if (/\bsrc\s*=/i.test(tag)) {
+          tag = tag.replace(/\bsrc\s*=\s*["'][^"']*["']/i, `src="${realSrc}"`);
+        } else {
+          tag = tag.replace(/>$/, ` src="${realSrc}">`);
+        }
+        tag = tag.replace(/\s*\bdata-src\s*=\s*["'][^"']*["']/gi, '');
+      }
+      return tag;
+    });
+
+    console.log('[serve-proxy] Fixed lazy-loaded media elements');
+
+    // E. Remove tracking scripts from original page FIRST (security/privacy measure)
     // This ensures the cloned page uses YOUR pixels, not the original owner's
     // Also remove meta CSP that could block injected pixels/tags inside srcDoc.
     html = html.replace(/<meta[^>]+http-equiv=["']content-security-policy["'][^>]*>/gi, '');
