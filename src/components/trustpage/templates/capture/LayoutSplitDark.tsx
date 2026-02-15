@@ -60,7 +60,7 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
       }}
     >
       <div
-        className={`relative z-10 w-full flex flex-1 ${isMobile ? 'flex-col' : 'flex-row'}`}
+        className={`relative z-10 w-full flex ${fullHeight ? 'flex-1' : ''} ${isMobile ? 'flex-col' : 'flex-row'}`}
       >
         {/* Left: Content centered (no image) */}
         <div
