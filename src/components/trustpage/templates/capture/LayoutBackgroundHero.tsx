@@ -6,6 +6,7 @@ import CaptureFormInputs from "./CaptureFormInputs";
 import CaptureSuccessScreen from "./CaptureSuccessScreen";
 import { useCaptureForm } from "./useCaptureForm";
 import { extractCaptureData } from "./captureDataHelpers";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
   data: LandingPageFormData;
@@ -20,7 +21,14 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
   const { formData, isSubmitting, isSuccess, isDownloading, handleInputChange, handleSubmit, handleDownload } =
     useCaptureForm({ pageId, ctaUrl: data.cta_url, formFields: d.formFields, magnetConfig: d.magnetConfig });
 
-  const hasImage = !!data.image_url;
+  const deviceIsMobile = useIsMobile();
+  const effectiveIsMobile = isMobile ?? deviceIsMobile;
+
+  // Background images: desktop and mobile from content, fallback to image_url
+  const bgImageDesktop = (data.content as any)?.bgHeroImageDesktop || data.image_url || '';
+  const bgImageMobile = (data.content as any)?.bgHeroImageMobile || bgImageDesktop;
+  const bgImage = effectiveIsMobile ? bgImageMobile : bgImageDesktop;
+  const hasImage = !!bgImage;
 
   return (
     <div
@@ -30,11 +38,15 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
         backgroundColor: d.bgStart.includes('linear') ? '#111827' : d.bgStart,
       }}
     >
-      {/* Background image */}
+      {/* Background image - covers 100% */}
       {hasImage && (
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${data.image_url})` }}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
         />
       )}
 
