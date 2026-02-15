@@ -9,6 +9,16 @@ export interface LandingPageColors {
 export type PageTheme = 'dark' | 'light' | 'modern-gray';
 export type TemplateType = 'vsl' | 'sales' | 'bio' | 'capture-hero' | 'quiz' | 'presell' | 'advertorial';
 
+// Capture page structural layouts
+export type CaptureLayoutId = 'classic' | 'split-dark' | 'minimalist-center' | 'background-hero';
+
+export interface CaptureLayoutOption {
+  id: CaptureLayoutId;
+  name: string;
+  description: string;
+  icon: string; // emoji
+}
+
 // Pre-sell (Anti-Block) specific types
 export type PresellMediaType = 'video' | 'image' | 'none';
 export type PresellButtonAnimation = 'pulse' | 'shake' | 'none';
@@ -285,6 +295,7 @@ export interface LandingPageFormData {
   theme: PageTheme;
   back_redirect_enabled: boolean;
   back_redirect_url: string;
+  capture_layout_id: CaptureLayoutId;
   webhook_enabled: boolean;
   webhook_url: string;
 }
@@ -329,6 +340,7 @@ export const defaultFormData: LandingPageFormData = {
   theme: 'dark',
   back_redirect_enabled: false,
   back_redirect_url: '',
+  capture_layout_id: 'classic',
   webhook_enabled: false,
   webhook_url: '',
 };

@@ -5,7 +5,7 @@ import { AdvertorialContent, defaultAdvertorialContent } from "@/types/advertori
 import HighConversionTemplate from "@/components/trustpage/templates/HighConversionTemplate";
 import SalesPageTemplate from "@/components/trustpage/templates/SalesPageTemplate";
 import BioLinkTemplate from "@/components/trustpage/templates/BioLinkTemplate";
-import HeroCaptureTemplate from "@/components/trustpage/templates/HeroCaptureTemplate";
+import CaptureRenderer from "@/components/trustpage/templates/capture/CaptureRenderer";
 import LegalPageTemplate from "@/components/trustpage/templates/LegalPageTemplate";
 import PreSellTemplate from "@/components/trustpage/templates/PreSellTemplate";
 import AdvertorialTemplate from "@/components/trustpage/templates/advertorial/AdvertorialTemplate";
@@ -386,6 +386,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           back_redirect_url: (page as any).back_redirect_url || '',
           webhook_enabled: false,
           webhook_url: '',
+          capture_layout_id: (content?.capture_layout_id as any) || 'classic',
         });
       } catch (error) {
         console.error("Error fetching page:", error);
@@ -484,7 +485,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
               ) : pageData.template_type === 'bio' ? (
                 <BioLinkTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
               ) : pageData.template_type === 'capture-hero' ? (
-                <HeroCaptureTemplate data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
+                <CaptureRenderer data={pageData} isMobile={isMobile} pageId={currentPageId || undefined} fullHeight ownerPlan={ownerPlan} />
               ) : (
                 <HighConversionTemplate data={pageData} isMobile={isMobile} ownerPlan={ownerPlan} />
               )}

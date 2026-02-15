@@ -3,14 +3,14 @@ import { Input } from "@/components/ui/input";
 import { InputWithAI } from "@/components/ui/input-with-ai";
 import { Label } from "@/components/ui/label";
 import { TextareaWithAI } from "@/components/ui/textarea-with-ai";
-import { LandingPageFormData } from "@/types/landing-page";
+import { LandingPageFormData, CaptureLayoutId } from "@/types/landing-page";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { 
   Accordion, AccordionContent, AccordionItem, AccordionTrigger 
 } from "@/components/ui/accordion";
 import { 
-  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown, Palette, Webhook, Send, Loader2
+  Type, Image, MousePointerClick, Sparkles, BarChart3, Globe, FormInput, Gift, Link, FileDown, Palette, Webhook, Send, Loader2, LayoutGrid
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -140,7 +140,58 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["config", "content", "glow", "image", "magnet", "form"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["layout", "config", "content", "glow", "image", "magnet", "form"]} className="w-full">
+        
+        {/* Layout Gallery Section */}
+        <AccordionItem value="layout">
+          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <LayoutGrid className="w-4 h-4 text-primary" />
+              Galeria de Layouts
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-3">
+            <p className="text-xs text-gray-500">
+              Escolha a estrutura visual da sua página. Os textos e dados são preservados.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { id: 'classic' as CaptureLayoutId, name: 'Padrão', emoji: '🎯', desc: 'Neon + Hero flutuante', colors: ['#0f172a', '#3b82f6'] },
+                { id: 'split-dark' as CaptureLayoutId, name: 'Split Dark', emoji: '🔮', desc: 'Tela dividida + Vidro', colors: ['#0f172a', '#1e293b'] },
+                { id: 'minimalist-center' as CaptureLayoutId, name: 'Minimalista', emoji: '✨', desc: 'Clean, centralizado', colors: ['#f8fafc', '#e2e8f0'] },
+                { id: 'background-hero' as CaptureLayoutId, name: 'Background Hero', emoji: '🏔️', desc: 'Imagem full + overlay', colors: ['#111827', '#374151'] },
+              ]).map((layout) => {
+                const isActive = (formData.capture_layout_id || 'classic') === layout.id;
+                return (
+                  <button
+                    key={layout.id}
+                    type="button"
+                    onClick={() => onChange({ capture_layout_id: layout.id })}
+                    className={`relative p-3 rounded-xl border-2 transition-all text-left ${
+                      isActive
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div
+                      className="w-full h-10 rounded-lg mb-2 flex items-center justify-center text-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${layout.colors[0]}, ${layout.colors[1]})`,
+                      }}
+                    >
+                      {layout.emoji}
+                    </div>
+                    <span className="text-xs font-semibold block">{layout.name}</span>
+                    <span className="text-[10px] text-gray-400 block leading-tight">{layout.desc}</span>
+                    {isActive && (
+                      <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
         
         {/* Page Configuration Section */}
         <AccordionItem value="config">

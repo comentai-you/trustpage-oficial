@@ -161,6 +161,7 @@ const TrustPageEditor = () => {
           back_redirect_url: (page as any).back_redirect_url || '',
           webhook_enabled: (page as any).webhook_enabled ?? false,
           webhook_url: (page as any).webhook_url || '',
+          capture_layout_id: (contentAny?.capture_layout_id as any) || 'classic',
         });
         setIsLoading(false);
       }
@@ -252,6 +253,7 @@ const TrustPageEditor = () => {
         hero_image_size_desktop: formData.hero_image_size_desktop,
         google_tag_id: formData.google_tag_id,
         video_orientation: formData.video_orientation,
+        capture_layout_id: formData.capture_layout_id,
       };
 
       const pageData = {
@@ -382,6 +384,7 @@ const TrustPageEditor = () => {
         hero_image_size_mobile: formData.hero_image_size_mobile,
         hero_image_size_desktop: formData.hero_image_size_desktop,
         video_orientation: formData.video_orientation,
+        capture_layout_id: formData.capture_layout_id,
       };
 
       const pageData = {
