@@ -2,7 +2,7 @@ import { LandingPageFormData } from "@/types/landing-page";
 import HighConversionTemplate from "../templates/HighConversionTemplate";
 import SalesPageTemplate from "../templates/SalesPageTemplate";
 import BioLinkTemplate from "../templates/BioLinkTemplate";
-import HeroCaptureTemplate from "../templates/HeroCaptureTemplate";
+import CaptureRenderer from "../templates/capture/CaptureRenderer";
 import ScaledViewport from "./ScaledViewport";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 
@@ -82,7 +82,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   ) : isBioPage ? (
                     <BioLinkTemplate data={formData} isMobile={false} fullHeight={false} />
                   ) : isCaptureHero ? (
-                    <HeroCaptureTemplate data={formData} isMobile={false} fullHeight={false} />
+                    <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
                   ) : (
                     <HighConversionTemplate data={formData} isMobile={false} fullHeight={false} />
                   )}
