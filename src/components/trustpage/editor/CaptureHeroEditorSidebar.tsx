@@ -81,8 +81,9 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
   const currentLayout: CaptureLayoutId = formData.capture_layout_id || 'classic';
   
   // Layout-specific flags
-  const showHeroImage = currentLayout === 'classic' || currentLayout === 'background-hero';
+  const showHeroImage = currentLayout === 'classic';
   const showProfileImage = currentLayout === 'minimalist-center';
+  const showBgHeroImage = currentLayout === 'background-hero';
   const hideImageSection = currentLayout === 'split-dark';
 
   // Form fields configuration from content
@@ -541,77 +542,135 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
           </AccordionItem>
         )}
 
-        {/* Hero Image Section (Classic & Background Hero only) */}
+        {/* Background Hero Image Section (desktop + mobile uploads) */}
+        {showBgHeroImage && (
+          <AccordionItem value="image">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Image className="w-4 h-4 text-primary" />
+                Imagem de Fundo
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium mb-1">🖼️ Imagem de Fundo Full-Screen</p>
+                <p className="text-xs text-blue-600">
+                  A imagem cobre 100% da tela com um overlay escuro por cima. Use imagens de alta resolução para melhor resultado.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600 font-medium flex items-center gap-2">
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
+                  Desktop
+                </Label>
+                <p className="text-[10px] text-gray-400">Tamanho ideal: <span className="font-semibold">1920×1080px</span> (16:9, paisagem)</p>
+                <ImageUpload
+                  value={(formData.content as any)?.bgHeroImageDesktop || formData.image_url || ''}
+                  onChange={(url) => {
+                    onChange({
+                      image_url: url,
+                      content: {
+                        ...(formData.content as any),
+                        bgHeroImageDesktop: url,
+                      }
+                    });
+                  }}
+                  label="Imagem Desktop"
+                  hint="Paisagem, alta resolução - até 5MB"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600 font-medium flex items-center gap-2">
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
+                  Mobile
+                </Label>
+                <p className="text-[10px] text-gray-400">Tamanho ideal: <span className="font-semibold">1080×1920px</span> (9:16, retrato)</p>
+                <ImageUpload
+                  value={(formData.content as any)?.bgHeroImageMobile || ''}
+                  onChange={(url) => {
+                    onChange({
+                      content: {
+                        ...(formData.content as any),
+                        bgHeroImageMobile: url,
+                      }
+                    });
+                  }}
+                  label="Imagem Mobile (opcional)"
+                  hint="Retrato, alta resolução - até 5MB"
+                />
+                <p className="text-[10px] text-gray-400">
+                  Se não informada, a imagem Desktop será usada em ambos.
+                </p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Hero Image Section (Classic only) */}
         {showHeroImage && (
           <AccordionItem value="image">
             <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Image className="w-4 h-4 text-primary" />
-                {currentLayout === 'background-hero' ? 'Imagem de Fundo' : 'Imagem Hero'}
+                Imagem Hero
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 space-y-4">
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-xs text-blue-800 font-medium mb-1">📐 Tamanho recomendado:</p>
                 <p className="text-xs text-blue-600">
-                  {currentLayout === 'background-hero' ? (
-                    <>• Use uma imagem de alta resolução <span className="font-semibold">1920x1080px</span> ou maior<br/>• Ela será usada como fundo da página inteira</>
-                  ) : (
-                    <>• Desktop: <span className="font-mono font-semibold">800x600px</span> ou maior<br/>• Use imagem <span className="font-semibold">PNG sem fundo</span> para efeito flutuante</>
-                  )}
+                  • Desktop: <span className="font-mono font-semibold">800x600px</span> ou maior<br/>
+                  • Use imagem <span className="font-semibold">PNG sem fundo</span> para efeito flutuante
                 </p>
               </div>
               <ImageUpload
                 value={formData.image_url || ''}
                 onChange={(url) => onChange({ image_url: url })}
-                label={currentLayout === 'background-hero' ? 'Imagem de Fundo' : 'Imagem Principal (Hero)'}
-                hint={currentLayout === 'background-hero' ? 'Imagem de alta resolução - até 5MB' : 'PNG transparente recomendado - até 5MB'}
+                label="Imagem Principal (Hero)"
+                hint="PNG transparente recomendado - até 5MB"
               />
 
-              {/* Hero Image Size (only for classic) */}
-              {currentLayout === 'classic' && (
-                <>
-                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
-                        Tamanho Mobile
-                      </Label>
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                        {formData.hero_image_size_mobile || 100}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[formData.hero_image_size_mobile || 100]}
-                      onValueChange={(value) => onChange({ hero_image_size_mobile: value[0] })}
-                      min={50}
-                      max={150}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
+              <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                    <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
+                    Tamanho Mobile
+                  </Label>
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                    {formData.hero_image_size_mobile || 100}%
+                  </span>
+                </div>
+                <Slider
+                  value={[formData.hero_image_size_mobile || 100]}
+                  onValueChange={(value) => onChange({ hero_image_size_mobile: value[0] })}
+                  min={50}
+                  max={150}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
 
-                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
-                        Tamanho Desktop
-                      </Label>
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                        {formData.hero_image_size_desktop || 100}%
-                      </span>
-                    </div>
-                    <Slider
-                      value={[formData.hero_image_size_desktop || 100]}
-                      onValueChange={(value) => onChange({ hero_image_size_desktop: value[0] })}
-                      min={50}
-                      max={150}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                </>
-              )}
+              <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                    <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
+                    Tamanho Desktop
+                  </Label>
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                    {formData.hero_image_size_desktop || 100}%
+                  </span>
+                </div>
+                <Slider
+                  value={[formData.hero_image_size_desktop || 100]}
+                  onValueChange={(value) => onChange({ hero_image_size_desktop: value[0] })}
+                  min={50}
+                  max={150}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
             </AccordionContent>
           </AccordionItem>
         )}
