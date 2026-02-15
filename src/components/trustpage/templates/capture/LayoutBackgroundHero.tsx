@@ -25,7 +25,7 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
   const effectiveIsMobile = isMobile ?? deviceIsMobile;
 
   // Background images: desktop and mobile from content, fallback to image_url
-  const bgImageDesktop = (data.content as any)?.bgHeroImageDesktop || data.image_url || '';
+  const bgImageDesktop = (data.content as any)?.bgHeroImageDesktop || '';
   const bgImageMobile = (data.content as any)?.bgHeroImageMobile || bgImageDesktop;
   const bgImage = effectiveIsMobile ? bgImageMobile : bgImageDesktop;
   const hasImage = !!bgImage;

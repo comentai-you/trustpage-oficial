@@ -22,20 +22,19 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
 
   return (
     <div
-      className="relative w-full overflow-x-hidden"
+      className="relative w-full overflow-x-hidden flex flex-col"
       style={{
         background: d.isGradientBg ? d.bgStart : d.bgStart,
         minHeight: fullHeight ? '100vh' : 'auto',
       }}
     >
       <div
-        className={`relative z-10 w-full flex ${isMobile ? 'flex-col' : 'flex-row'}`}
-        style={{ minHeight: fullHeight ? '100vh' : 'auto' }}
+        className={`relative z-10 w-full flex flex-1 ${isMobile ? 'flex-col' : 'flex-row'}`}
+        style={{ minHeight: fullHeight ? 'calc(100vh - 60px)' : 'auto' }}
       >
         {/* Left: Content centered (no image) */}
         <div
           className={`flex flex-col items-center justify-center text-center ${isMobile ? 'w-full px-5 py-8' : 'w-1/2 px-10 py-16'}`}
-          style={{ background: d.isGradientBg ? d.bgStart : d.bgStart }}
         >
           {data.subheadline && (
             <span
@@ -70,9 +69,6 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
         {/* Right: Glassmorphism Form */}
         <div
           className={`flex items-center justify-center ${isMobile ? 'w-full px-5 py-8' : 'w-1/2 px-10 py-16'}`}
-          style={{
-            background: `linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.9) 100%)`,
-          }}
         >
           <div
             className="w-full max-w-md rounded-2xl p-6 md:p-8"
@@ -136,7 +132,9 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
         </div>
       </div>
 
-      <LegalFooter textColor={d.textColor} showWatermark={true} ownerPlan={ownerPlan} />
+      <div className="relative z-10">
+        <LegalFooter textColor={d.textColor} showWatermark={true} ownerPlan={ownerPlan} />
+      </div>
     </div>
   );
 };
