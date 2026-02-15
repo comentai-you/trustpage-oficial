@@ -74,7 +74,8 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
                   className="w-full relative" 
                   style={{ 
                     backgroundColor: formData.colors.background,
-                    minHeight: isCaptureHero ? `${Math.ceil(screenHeight / scale)}px` : 'auto',
+                    background: formData.colors.background,
+                    minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(screenHeight / scale)}px` : 'auto',
                   }}
                 >
                   {isSalesPage ? (

@@ -111,7 +111,8 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
                 className="w-full relative flex flex-col" 
                 style={{ 
                   backgroundColor: formData.colors.background,
-                  minHeight: isCaptureHero ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
+                  background: formData.colors.background,
+                  minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
                   alignItems: 'stretch',
                 }}
               >
