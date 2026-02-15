@@ -65,7 +65,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
           className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`}
           style={{
             boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset',
-            backgroundColor: formData.colors.background
+            background: formData.colors.background
           }}
         >
           {/* Status Bar */}
@@ -95,7 +95,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              backgroundColor: formData.colors.background,
+              background: formData.colors.background,
               overflowX: 'hidden',
             }}
           >
@@ -110,7 +110,6 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
               <div 
                 className="w-full relative flex flex-col" 
                 style={{ 
-                  backgroundColor: formData.colors.background,
                   background: formData.colors.background,
                   minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
                   alignItems: 'stretch',

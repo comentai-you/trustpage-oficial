@@ -39,7 +39,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
           {/* Screen */}
           <div 
             className="w-full h-full bg-white rounded-md overflow-hidden relative"
-            style={{ backgroundColor: formData.colors.background }}
+            style={{ background: formData.colors.background }}
           >
             {/* Browser chrome */}
             <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
@@ -59,7 +59,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                backgroundColor: formData.colors.background
+                background: formData.colors.background
               }}
             >
               <style>
@@ -72,8 +72,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
                 <div 
                   className="w-full relative" 
-                  style={{ 
-                    backgroundColor: formData.colors.background,
+                    style={{ 
                     background: formData.colors.background,
                     minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(screenHeight / scale)}px` : 'auto',
                   }}
