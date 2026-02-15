@@ -68,7 +68,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
             className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
             style={{
               backgroundColor: `${d.accentColor}12`,
-              color: d.accentColor,
+              color: d.labelColor,
               border: `1px solid ${d.accentColor}30`,
             }}
           >
@@ -120,7 +120,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
                 formData={formData}
                 onInputChange={handleInputChange}
                 textColor={cardTextColor}
-                placeholderColor={d.placeholderColor}
+                placeholderColor={isLightTheme || !d.isGradientBg ? d.placeholderColor : '#9ca3af'}
                 inputBgColor="#f9fafb"
                 inputBorderColor="#e5e7eb"
                 variant={isMobile ? 'default' : 'horizontal'}
