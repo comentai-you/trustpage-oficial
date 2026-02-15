@@ -1,6 +1,6 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2, ImageIcon } from "lucide-react";
+import { ArrowRight, Loader2, User } from "lucide-react";
 import LegalFooter from "../LegalFooter";
 import CaptureFormInputs from "./CaptureFormInputs";
 import CaptureSuccessScreen from "./CaptureSuccessScreen";
@@ -20,15 +20,19 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
   const { formData, isSubmitting, isSuccess, isDownloading, handleInputChange, handleSubmit, handleDownload } =
     useCaptureForm({ pageId, ctaUrl: data.cta_url, formFields: d.formFields, magnetConfig: d.magnetConfig });
 
-  // Light backgrounds for this layout
-  const bgColor = d.isGradientBg ? d.bgStart : '#f8fafc';
-  const cardTextColor = '#1f2937';
+  // Use theme colors - light themes use their own bg, dark themes use a light fallback
+  const isLightTheme = !d.isGradientBg && (d.bgStart === '#ffffff' || d.bgStart === '#f8fafc' || d.bgStart === '#fffbeb' || d.bgStart === '#ecfdf5' || d.bgStart === '#fdf2f8' || d.bgStart === '#f0f9ff' || d.bgStart.startsWith('#f') || d.bgStart.startsWith('#e'));
+  const bgColor = d.isGradientBg ? d.bgStart : isLightTheme ? d.bgStart : '#f8fafc';
+  const bgGradient = d.isGradientBg ? d.bgStart : isLightTheme ? `linear-gradient(180deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)` : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`;
+  const headlineColor = isLightTheme || !d.isGradientBg ? (d.isGradientBg ? d.headlineColor : (isLightTheme ? d.headlineColor : '#111827')) : d.headlineColor;
+  const descColor = isLightTheme || !d.isGradientBg ? (d.isGradientBg ? d.descriptionColor : (isLightTheme ? d.descriptionColor : '#6b7280')) : d.descriptionColor;
+  const cardTextColor = isLightTheme ? d.textColor : '#1f2937';
 
   return (
     <div
       className="relative w-full overflow-x-hidden"
       style={{
-        background: d.isGradientBg ? d.bgStart : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`,
+        background: bgGradient,
         minHeight: fullHeight ? '100vh' : 'auto',
       }}
     >
@@ -36,22 +40,25 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
         className="relative z-10 w-full flex flex-col items-center justify-center px-4 py-12 md:py-20"
         style={{ minHeight: fullHeight ? '100vh' : 'auto' }}
       >
-        {/* Small icon/image at top */}
-        {data.image_url ? (
+        {/* Profile photo (round, like bio link) */}
+        {data.profile_image_url ? (
           <div className="mb-6">
             <img
-              src={data.image_url}
-              alt="Hero"
-              className="w-20 h-20 md:w-28 md:h-28 object-contain rounded-xl"
-              style={{ filter: `drop-shadow(0 4px 20px ${d.accentColor}30)` }}
+              src={data.profile_image_url}
+              alt="Perfil"
+              className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4"
+              style={{
+                borderColor: `${d.accentColor}40`,
+                boxShadow: `0 4px 20px ${d.accentColor}20`,
+              }}
             />
           </div>
         ) : (
           <div
-            className="mb-6 w-16 h-16 rounded-2xl flex items-center justify-center"
-            style={{ backgroundColor: `${d.accentColor}15` }}
+            className="mb-6 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: `${d.accentColor}15`, border: `2px dashed ${d.accentColor}40` }}
           >
-            <ImageIcon className="w-8 h-8" style={{ color: d.accentColor }} />
+            <User className="w-8 h-8" style={{ color: d.accentColor }} />
           </div>
         )}
 
@@ -73,7 +80,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
         <h1
           className="font-extrabold leading-tight text-center max-w-2xl mb-3"
           style={{
-            color: d.isGradientBg ? d.headlineColor : '#111827',
+            color: headlineColor,
             fontSize: isMobile ? `${d.headlineSizeMobile}rem` : `${d.headlineSizeDesktop}rem`,
             lineHeight: 1.15,
           }}
@@ -84,7 +91,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
         {data.description && (
           <p
             className="text-center max-w-lg mb-8 text-sm md:text-base"
-            style={{ color: d.isGradientBg ? d.descriptionColor : '#6b7280' }}
+            style={{ color: descColor }}
           >
             {data.description}
           </p>
