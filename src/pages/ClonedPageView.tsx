@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
 // Supabase Edge Function URL for proxy
@@ -7,9 +7,10 @@ const PROXY_URL = `https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/serve-p
 
 const ClonedPageView = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -21,20 +22,15 @@ const ClonedPageView = () => {
         
         const response = await fetch(`${PROXY_URL}?slug=${encodeURIComponent(slug)}`);
         
-        // Check for errors
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.error || `Erro ${response.status}`);
         }
         
-        // Get HTML content as text
-        // Note: Supabase returns text/plain for HTML (by design limitation)
-        // so we fetch and use srcDoc to render
         const html = await response.text();
         
         // Validate that it looks like HTML
         if (!html.includes('<!') && !html.includes('<html') && !html.includes('<head')) {
-          // Might be an error JSON
           try {
             const parsed = JSON.parse(html);
             throw new Error(parsed.error || 'Página não encontrada');
@@ -43,7 +39,18 @@ const ClonedPageView = () => {
           }
         }
         
-        setHtmlContent(html);
+        // Create a Blob URL with text/html MIME type
+        // This makes the iframe load the HTML as a real page with a proper origin,
+        // allowing images, videos, and embeds to load correctly.
+        const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        // Revoke previous blob URL if any
+        if (blobUrlRef.current) {
+          URL.revokeObjectURL(blobUrlRef.current);
+        }
+        blobUrlRef.current = url;
+        setBlobUrl(url);
       } catch (err) {
         console.error('[ClonedPageView] Error:', err);
         setError(err instanceof Error ? err.message : 'Erro ao carregar página');
@@ -53,9 +60,16 @@ const ClonedPageView = () => {
     };
 
     fetchPage();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
   }, [slug]);
 
-  // If no slug, show 404
   if (!slug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -67,7 +81,6 @@ const ClonedPageView = () => {
     );
   }
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -76,7 +89,6 @@ const ClonedPageView = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -88,14 +100,13 @@ const ClonedPageView = () => {
     );
   }
 
-  // Render via srcDoc - this bypasses Supabase's text/plain Content-Type limitation
-  // The browser will render the HTML correctly inside the iframe
+  // Render via Blob URL - this gives the iframe a proper origin
+  // so images, videos, and embeds load correctly (unlike srcDoc which has null origin)
   return (
     <iframe
-      srcDoc={htmlContent || ''}
+      src={blobUrl || ''}
       title="Página Clonada"
-      // Permissões para o site funcionar (Checkout, Vídeos, Scripts)
-      sandbox="allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation"
       style={{
         position: "fixed",
         top: 0,
