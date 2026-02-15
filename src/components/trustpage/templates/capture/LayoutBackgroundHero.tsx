@@ -71,7 +71,7 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
             className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-5"
             style={{
               backgroundColor: `${d.accentColor}25`,
-              color: hasImage ? '#ffffff' : d.labelColor,
+              color: d.labelColor,
               border: `1px solid ${d.accentColor}50`,
               backdropFilter: 'blur(8px)',
             }}
@@ -127,7 +127,7 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
                 formData={formData}
                 onInputChange={handleInputChange}
                 textColor={hasImage ? '#ffffff' : d.textColor}
-                placeholderColor={hasImage ? 'rgba(255,255,255,0.5)' : d.placeholderColor}
+                placeholderColor={d.placeholderColor}
                 inputBgColor={hasImage ? 'rgba(255,255,255,0.1)' : `${d.accentColor}08`}
                 inputBorderColor={hasImage ? 'rgba(255,255,255,0.2)' : `${d.accentColor}20`}
               />
