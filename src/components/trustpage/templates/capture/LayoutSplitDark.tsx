@@ -1,6 +1,6 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2, ImageIcon } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import LegalFooter from "../LegalFooter";
 import CaptureFormInputs from "./CaptureFormInputs";
 import CaptureSuccessScreen from "./CaptureSuccessScreen";
@@ -32,14 +32,14 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
         className={`relative z-10 w-full flex ${isMobile ? 'flex-col' : 'flex-row'}`}
         style={{ minHeight: fullHeight ? '100vh' : 'auto' }}
       >
-        {/* Left: Content + Image */}
+        {/* Left: Content centered (no image) */}
         <div
-          className={`flex flex-col justify-center ${isMobile ? 'w-full px-5 py-8' : 'w-1/2 px-10 py-16'}`}
+          className={`flex flex-col items-center justify-center text-center ${isMobile ? 'w-full px-5 py-8' : 'w-1/2 px-10 py-16'}`}
           style={{ background: d.isGradientBg ? d.bgStart : d.bgStart }}
         >
           {data.subheadline && (
             <span
-              className="inline-block self-start px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
+              className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
               style={{
                 backgroundColor: `${d.accentColor}20`,
                 color: d.labelColor,
@@ -60,27 +60,11 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
             {data.headline || "Sua Headline Impactante Vai Aqui"}
           </h1>
           <p
-            className="leading-relaxed text-sm md:text-base lg:text-lg mb-6"
+            className="leading-relaxed text-sm md:text-base lg:text-lg mb-6 max-w-md"
             style={{ color: d.descriptionColor }}
           >
             {data.description || "Descrição persuasiva sobre o que a pessoa vai ganhar ao se cadastrar agora."}
           </p>
-
-          {/* Hero Image floating */}
-          {data.image_url ? (
-            <div className="relative flex justify-center">
-              <div
-                className="absolute w-48 h-48 rounded-full blur-[80px] opacity-30"
-                style={{ backgroundColor: d.accentColor }}
-              />
-              <img
-                src={data.image_url}
-                alt="Hero"
-                className="relative z-10 max-h-64 object-contain drop-shadow-2xl"
-                style={{ filter: `drop-shadow(0 0 40px ${d.accentColor}40)` }}
-              />
-            </div>
-          ) : null}
         </div>
 
         {/* Right: Glassmorphism Form */}

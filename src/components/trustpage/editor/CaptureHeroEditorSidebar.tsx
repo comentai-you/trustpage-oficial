@@ -78,6 +78,12 @@ const desktopPercentToSize = (percent: number) => 1.5 + (percent / 100) * 2.5;
 const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: CaptureHeroEditorSidebarProps) => {
 
   const isPro = userPlan === 'pro' || userPlan === 'pro_yearly';
+  const currentLayout: CaptureLayoutId = formData.capture_layout_id || 'classic';
+  
+  // Layout-specific flags
+  const showHeroImage = currentLayout === 'classic' || currentLayout === 'background-hero';
+  const showProfileImage = currentLayout === 'minimalist-center';
+  const hideImageSection = currentLayout === 'split-dark';
 
   // Form fields configuration from content
   const formFields = (formData.content as any)?.formFields || {
@@ -394,27 +400,31 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
             <div className="space-y-2">
               <Label className="text-xs text-gray-600">Temas Pré-definidos</Label>
               <div className="grid grid-cols-2 gap-2">
-                {glowPresets.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => handlePresetSelect(preset)}
-                    className={`relative p-3 rounded-lg border-2 transition-all ${
-                      currentPreset?.id === preset.id 
-                        ? 'border-primary ring-2 ring-primary/20' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    style={{ backgroundColor: preset.bg }}
-                  >
-                    <div 
-                      className="w-full h-6 rounded-md mb-2"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${preset.accent}60, ${preset.bgSecondary})`,
-                        boxShadow: `0 0 15px ${preset.accent}40`
-                      }}
-                    />
-                    <span className="text-xs text-white/80">{preset.name}</span>
-                  </button>
-                ))}
+                {glowPresets.map((preset) => {
+                  const isGradientPreset = preset.bg.includes('linear-gradient') || preset.bg.includes('radial-gradient');
+                  const isLightPreset = !isGradientPreset && (preset.bg === '#ffffff' || preset.bg === '#f8fafc' || preset.bg === '#fffbeb' || preset.bg === '#ecfdf5' || preset.bg === '#fdf2f8' || preset.bg === '#f0f9ff');
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() => handlePresetSelect(preset)}
+                      className={`relative p-3 rounded-lg border-2 transition-all ${
+                        currentPreset?.id === preset.id 
+                          ? 'border-primary ring-2 ring-primary/20' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={{ background: isGradientPreset ? preset.bg : preset.bg }}
+                    >
+                      <div 
+                        className="w-full h-6 rounded-md mb-2"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${preset.accent}60, ${preset.bgSecondary})`,
+                          boxShadow: `0 0 15px ${preset.accent}40`
+                        }}
+                      />
+                      <span className="text-xs" style={{ color: preset.text }}>{preset.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -505,72 +515,106 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
           </AccordionContent>
         </AccordionItem>
 
-        {/* Hero Image Section */}
-        <AccordionItem value="image">
-          <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Image className="w-4 h-4 text-primary" />
-              Imagem Hero
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 space-y-4">
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-blue-800 font-medium mb-1">📐 Tamanho recomendado:</p>
-              <p className="text-xs text-blue-600">
-                • Desktop: <span className="font-mono font-semibold">800x600px</span> ou maior<br/>
-                • Use imagem <span className="font-semibold">PNG sem fundo</span> para efeito flutuante
-              </p>
-            </div>
-            <ImageUpload
-              value={formData.image_url || ''}
-              onChange={(url) => onChange({ image_url: url })}
-              label="Imagem Principal (Hero)"
-              hint="PNG transparente recomendado - até 5MB"
-            />
-
-            {/* Hero Image Size Mobile */}
-            <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
-                  Tamanho Mobile
-                </Label>
-                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                  {formData.hero_image_size_mobile || 100}%
-                </span>
+        {/* Profile Image Section (Minimalist layout) */}
+        {showProfileImage && (
+          <AccordionItem value="image">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Image className="w-4 h-4 text-primary" />
+                Foto de Perfil
               </div>
-              <Slider
-                value={[formData.hero_image_size_mobile || 100]}
-                onValueChange={(value) => onChange({ hero_image_size_mobile: value[0] })}
-                min={50}
-                max={150}
-                step={5}
-                className="w-full"
-              />
-            </div>
-
-            {/* Hero Image Size Desktop */}
-            <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
-                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
-                  Tamanho Desktop
-                </Label>
-                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                  {formData.hero_image_size_desktop || 100}%
-                </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium mb-1">📷 Foto de Perfil</p>
+                <p className="text-xs text-blue-600">
+                  Use uma foto quadrada sua. Ela será exibida em formato redondo no topo da página.
+                </p>
               </div>
-              <Slider
-                value={[formData.hero_image_size_desktop || 100]}
-                onValueChange={(value) => onChange({ hero_image_size_desktop: value[0] })}
-                min={50}
-                max={150}
-                step={5}
-                className="w-full"
+              <ImageUpload
+                value={formData.profile_image_url || ''}
+                onChange={(url) => onChange({ profile_image_url: url })}
+                label="Foto de Perfil"
+                hint="Imagem quadrada recomendada - até 5MB"
               />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Hero Image Section (Classic & Background Hero only) */}
+        {showHeroImage && (
+          <AccordionItem value="image">
+            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Image className="w-4 h-4 text-primary" />
+                {currentLayout === 'background-hero' ? 'Imagem de Fundo' : 'Imagem Hero'}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium mb-1">📐 Tamanho recomendado:</p>
+                <p className="text-xs text-blue-600">
+                  {currentLayout === 'background-hero' ? (
+                    <>• Use uma imagem de alta resolução <span className="font-semibold">1920x1080px</span> ou maior<br/>• Ela será usada como fundo da página inteira</>
+                  ) : (
+                    <>• Desktop: <span className="font-mono font-semibold">800x600px</span> ou maior<br/>• Use imagem <span className="font-semibold">PNG sem fundo</span> para efeito flutuante</>
+                  )}
+                </p>
+              </div>
+              <ImageUpload
+                value={formData.image_url || ''}
+                onChange={(url) => onChange({ image_url: url })}
+                label={currentLayout === 'background-hero' ? 'Imagem de Fundo' : 'Imagem Principal (Hero)'}
+                hint={currentLayout === 'background-hero' ? 'Imagem de alta resolução - até 5MB' : 'PNG transparente recomendado - até 5MB'}
+              />
+
+              {/* Hero Image Size (only for classic) */}
+              {currentLayout === 'classic' && (
+                <>
+                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">📱</span>
+                        Tamanho Mobile
+                      </Label>
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                        {formData.hero_image_size_mobile || 100}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[formData.hero_image_size_mobile || 100]}
+                      onValueChange={(value) => onChange({ hero_image_size_mobile: value[0] })}
+                      min={50}
+                      max={150}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                        <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">🖥️</span>
+                        Tamanho Desktop
+                      </Label>
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                        {formData.hero_image_size_desktop || 100}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[formData.hero_image_size_desktop || 100]}
+                      onValueChange={(value) => onChange({ hero_image_size_desktop: value[0] })}
+                      min={50}
+                      max={150}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Lead Magnet / CTA Section */}
         <AccordionItem value="magnet">
