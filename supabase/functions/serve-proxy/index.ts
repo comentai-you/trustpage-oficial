@@ -12,8 +12,7 @@ interface ReplacedLink {
   new: string;
 }
 
-const GLOBAL_REPLACE_MARKERS = new Set(["__GLOBAL__", "*", "__ALL__"]);
-const CHECKOUT_HINT_RE = /(checkout|pay\.|pagamento|compra|comprar|carrinho|cart|order|pedido|hotmart|kiwify|monetizze|eduzz|perfectpay|braip)/i;
+// Global replace markers removed - system now uses exact match only
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -189,10 +188,8 @@ Deno.serve(async (req) => {
       html = `<head>${baseTag}</head>\n${html}`;
     }
 
-    // C. Swap links (checkout/affiliate links replacement)
+    // C. Swap links — EXACT MATCH ONLY (De → Para)
     // links is a JSONB array: [{ original, new }] OR legacy format [{ href, newHref }]
-    // Note: some clients may accidentally store JSON as a string in jsonb.
-    // We defensively parse it here.
     const rawLinks = (page as unknown as { links?: unknown }).links;
     let linksValue: unknown = rawLinks;
     if (typeof linksValue === 'string') {
@@ -208,110 +205,19 @@ Deno.serve(async (req) => {
       new?: string;
       href?: string;
       newHref?: string;
-      mode?: string;
     }
-
-    const shouldReplaceUrlGlobally = (value: string, siteOrigin: string): boolean => {
-      const v = (value || '').trim();
-      if (!v) return false;
-      if (v.startsWith('#')) return false;
-      const lower = v.toLowerCase();
-      if (lower.startsWith('mailto:') || lower.startsWith('tel:') || lower.startsWith('javascript:')) return false;
-
-      // Only replace absolute URLs
-      if (!(v.startsWith('http://') || v.startsWith('https://') || v.startsWith('//'))) return false;
-
-      // Skip same-origin links (internal site navigation, legal pages, etc.)
-      try {
-        const u = new URL(v, siteOrigin);
-        if (u.origin === new URL(siteOrigin).origin) return false;
-      } catch {
-        return false;
-      }
-
-      // Skip asset/resource URLs (images, videos, fonts, stylesheets, scripts, feeds)
-      const assetPatterns = /\.(css|js|png|jpg|jpeg|gif|svg|webp|avif|bmp|ico|woff|woff2|ttf|otf|eot|mp4|webm|ogg|avi|mov|mp3|wav|flac|aac|pdf|zip|rar|xml|rss|json|map)\b/i;
-      if (assetPatterns.test(v)) return false;
-
-      // Skip CDNs, font providers, WordPress internals, social embeds, video platforms
-      const skipDomains = /(fonts\.|cdn\.|cdnjs\.|unpkg\.|jsdelivr\.|googleapis|gstatic|wp-content\/|wp-includes\/|gravatar|youtube\.com\/embed|player\.vimeo|wistia|dailymotion|facebook\.com\/plugins|instagram\.com\/embed|twitter\.com\/widgets|platform\.|schema\.org|w3\.org|creativecommons\.org)/i;
-      if (skipDomains.test(v)) return false;
-
-      // Skip social media profile links
-      const socialProfiles = /(facebook\.com|instagram\.com|twitter\.com|x\.com|linkedin\.com|tiktok\.com|pinterest\.com|threads\.net|t\.me|wa\.me|api\.whatsapp\.com)\//i;
-      if (socialProfiles.test(v)) return false;
-
-      // Skip feeds, oembed, sitemaps
-      if (/\/feed\/?$|oembed|sitemap|\.xml\b/i.test(v)) return false;
-
-      return true;
-    };
-
-    const applyGlobalReplace = (inputHtml: string, newUrl: string, siteOrigin: string) => {
-      let out = inputHtml;
-      let replaced = 0;
-
-      // Replace destination-carrying attributes in CTA-like tags only
-      // SKIP: <base>, <link>, <img>, <video>, <source>, <iframe>, <script>, <style>, <meta>, <embed>, <object>
-      const nonCtaTags = /^(?:base|link|img|video|source|iframe|script|style|meta|embed|object)$/i;
-      const tagRe = /<([a-z][a-z0-9]*)\b([^>]*?)\/?\s*>/gi;
-      out = out.replace(tagRe, (fullTag, tagName, attrs) => {
-        // Skip non-CTA tags entirely
-        if (nonCtaTags.test(tagName)) return fullTag;
-        // Within the matched tag, replace only the URL attribute values
-        return fullTag.replace(/((?:href|action|formaction|data-href|data-url|data-link)\s*=\s*)(["'])([^"']+)(\2)/gi, (attrMatch, prefix, quote, value, endQuote) => {
-          if (shouldReplaceUrlGlobally(value, siteOrigin)) {
-            replaced++;
-            return `${prefix}${quote}${newUrl}${endQuote}`;
-          }
-          return attrMatch;
-        });
-      });
-
-      // Replace URLs embedded inside onclick="..."
-      const onclickRe = /(\bonclick\s*=\s*)(["'])([\s\S]*?)(\2)/gi;
-      out = out.replace(onclickRe, (match, prefix, quote, content, endQuote) => {
-        if (!content) return match;
-        const updated = content.replace(/https?:\/\/[^'"\s]+/gi, (url: string) =>
-          shouldReplaceUrlGlobally(url, siteOrigin) ? newUrl : url
-        );
-        if (updated !== content) {
-          replaced++;
-          return `${prefix}${quote}${updated}${endQuote}`;
-        }
-        return match;
-      });
-
-      return { html: out, replaced };
-    };
 
     if (linksValue && Array.isArray(linksValue)) {
       const linksData = linksValue as LinkReplacement[];
       let replacedCount = 0;
 
-      // Global mode: replace checkout/button destinations broadly.
-      const globalRule = linksData.find((l) => {
-        const original = (l.original || l.href || '').trim();
-        return (l.mode && l.mode.toLowerCase() === 'global') || GLOBAL_REPLACE_MARKERS.has(original);
-      });
-
-      if (globalRule) {
-        const globalNew = (globalRule.new || globalRule.newHref || '').trim();
-        if (globalNew) {
-          const { html: updated, replaced } = applyGlobalReplace(html, globalNew, targetOrigin);
-          html = updated;
-          replacedCount += replaced;
-          console.log(`[serve-proxy] Global replace applied (${replaced} replacements)`);
-        }
-      }
-
-      // Exact replacements (original -> new)
       linksData.forEach((link) => {
         const originalUrl = (link.original || link.href || '').trim();
         const newUrl = (link.new || link.newHref || '').trim();
 
         if (!originalUrl || !newUrl || originalUrl === newUrl) return;
-        if (GLOBAL_REPLACE_MARKERS.has(originalUrl)) return; // handled above
+        // Skip legacy global markers — they no longer apply
+        if (['__GLOBAL__', '*', '__ALL__'].includes(originalUrl)) return;
 
         const variants = [originalUrl];
         if (originalUrl.includes('&')) variants.push(originalUrl.replace(/&/g, '&amp;'));
@@ -319,7 +225,7 @@ Deno.serve(async (req) => {
         variants.forEach((variant) => {
           const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-          // Replace in common attributes (href/action/formaction/data-*)
+          // Replace in href/action/formaction/data-* attributes
           html = html.replace(
             new RegExp(`(\\b(?:href|action|formaction|data-href|data-url|data-link)\\s*=\\s*["'])${escaped}(["'])`, 'gi'),
             `$1${newUrl}$2`,
@@ -332,7 +238,7 @@ Deno.serve(async (req) => {
         replacedCount++;
       });
 
-      console.log(`[serve-proxy] Replaced ${replacedCount} links`);
+      console.log(`[serve-proxy] Exact-match replaced ${replacedCount} link rules`);
     } else {
       console.log('[serve-proxy] No links array configured for this page');
     }

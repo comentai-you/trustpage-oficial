@@ -9,11 +9,12 @@ import {
   Wand2,
   CheckCircle2,
   Edit3,
-  Replace,
   Eye,
-  Plus,
   Trash2,
   RefreshCw,
+  Radar,
+  ArrowRight,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,13 +31,12 @@ import { PUBLIC_PAGES_BASE_URL } from "@/lib/constants";
 import BackRedirectSection from "@/components/trustpage/editor/BackRedirectSection";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Accordion } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 interface ReplacedLink {
   original: string;
   new: string;
 }
-
-const GLOBAL_REPLACE_MARKER = "__GLOBAL__";
 
 interface ClonedPageData {
   id: string;
@@ -59,6 +59,31 @@ interface UserProfile {
 // Supabase Edge Function URL for proxy
 const PROXY_URL = `https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/serve-proxy`;
 
+/** Parse HTML and extract unique <a href="..."> links, filtering out noise */
+function extractLinksFromHtml(html: string): string[] {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const anchors = doc.querySelectorAll("a[href]");
+  const seen = new Set<string>();
+  const results: string[] = [];
+
+  const skipPatterns = /\.(css|js|png|jpg|jpeg|gif|svg|webp|avif|bmp|ico|woff|woff2|ttf|otf|mp4|webm|ogg|mp3|wav|pdf|zip|rar|xml)\b/i;
+
+  anchors.forEach((a) => {
+    const href = a.getAttribute("href")?.trim();
+    if (!href) return;
+    if (href.startsWith("#")) return;
+    if (href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("javascript:") || href.startsWith("whatsapp:")) return;
+    if (skipPatterns.test(href)) return;
+    // Deduplicate
+    if (seen.has(href)) return;
+    seen.add(href);
+    results.push(href);
+  });
+
+  return results;
+}
+
 const ClonedPageEditor = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -74,15 +99,20 @@ const ClonedPageEditor = () => {
   const [links, setLinks] = useState<ReplacedLink[]>([]);
   const [headCode, setHeadCode] = useState("");
   const [isPublished, setIsPublished] = useState(false);
-  const [globalLinkReplace, setGlobalLinkReplace] = useState("");
   const [backRedirectEnabled, setBackRedirectEnabled] = useState(false);
   const [backRedirectUrl, setBackRedirectUrl] = useState("");
 
   const [activeTab, setActiveTab] = useState("links");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
-  const [previewKey, setPreviewKey] = useState(0); // For forcing iframe refresh
+  const [previewKey, setPreviewKey] = useState(0);
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
+
+  // Link Radar state
+  const [detectedLinks, setDetectedLinks] = useState<string[]>([]);
+  const [radarLoading, setRadarLoading] = useState(false);
+  const [radarScanned, setRadarScanned] = useState(false);
+  const [linkFilter, setLinkFilter] = useState("");
 
   // Fetch profile and page data
   useEffect(() => {
@@ -90,7 +120,6 @@ const ClonedPageEditor = () => {
       if (!user || !id) return;
 
       try {
-        // Fetch profile
         const { data: profileData } = await supabase
           .from("profiles")
           .select("plan_type, subscription_status, full_name, avatar_url")
@@ -99,7 +128,6 @@ const ClonedPageEditor = () => {
 
         setProfile(profileData);
 
-        // Fetch cloned page
         const { data: pageResult, error: pageError } = await supabase
           .from("cloned_pages")
           .select("id, slug, page_name, source_url, head_code, links, is_published, views, back_redirect_enabled, back_redirect_url")
@@ -115,7 +143,6 @@ const ClonedPageEditor = () => {
           return;
         }
 
-        // Convert links from old format to new format if needed
         let parsedLinks: ReplacedLink[] = [];
         if (pageResult.links && Array.isArray(pageResult.links)) {
           parsedLinks = (
@@ -123,9 +150,9 @@ const ClonedPageEditor = () => {
           )
             .map((l) => ({
               original: l.original || l.href || "",
-              new: l.new || l.newHref || l.original || l.href || "",
+              new: l.new || l.newHref || "",
             }))
-            .filter((l) => l.original);
+            .filter((l) => l.original && !['__GLOBAL__', '*', '__ALL__'].includes(l.original));
         }
 
         setPageData({
@@ -150,7 +177,7 @@ const ClonedPageEditor = () => {
     fetchData();
   }, [user, id, navigate]);
 
-  // Fetch preview HTML (using srcDoc approach to bypass Supabase text/plain limitation)
+  // Fetch preview HTML
   const fetchPreviewHtml = useCallback(async () => {
     if (!pageData?.slug || !isPublished) return;
     
@@ -168,15 +195,49 @@ const ClonedPageEditor = () => {
     }
   }, [pageData?.slug, isPublished]);
 
-  // Fetch preview when published or previewKey changes
   useEffect(() => {
     if (isPublished && pageData?.slug) {
       fetchPreviewHtml();
     }
   }, [isPublished, pageData?.slug, previewKey, fetchPreviewHtml]);
 
-  const handleAddLink = () => {
-    setLinks((prev) => [...prev, { original: "", new: "" }]);
+  // ── Link Radar: fetch original page HTML and extract links ──
+  const handleScanLinks = useCallback(async () => {
+    if (!pageData?.source_url) return;
+    setRadarLoading(true);
+    try {
+      // Fetch original page via proxy (without link replacements — we use source_url directly is not possible due to CORS, so we use the proxy which applies replacements, but we parse pre-replacement from original)
+      // Actually, we fetch the source directly via our proxy by slug, but we need raw HTML.
+      // Better approach: fetch the source_url via a lightweight edge function or just use the proxy response (which has base tag but links are original if no rules set yet)
+      // Simplest: fetch the page source through our proxy — if no link rules are saved, the HTML will have original links
+      // For reliability, let's just fetch the source page through our existing proxy
+      const response = await fetch(`${PROXY_URL}?slug=${encodeURIComponent(pageData.slug)}`);
+      if (!response.ok) throw new Error("Erro ao buscar página");
+      const html = await response.text();
+      const foundLinks = extractLinksFromHtml(html);
+      setDetectedLinks(foundLinks);
+      setRadarScanned(true);
+      if (foundLinks.length === 0) {
+        toast.info("Nenhum link externo encontrado na página.");
+      } else {
+        toast.success(`${foundLinks.length} links encontrados!`);
+      }
+    } catch (error) {
+      console.error("Scan error:", error);
+      toast.error("Erro ao escanear links da página.");
+    } finally {
+      setRadarLoading(false);
+    }
+  }, [pageData?.source_url, pageData?.slug]);
+
+  const handleAddLinkFromRadar = (originalUrl: string) => {
+    // Check if already mapped
+    if (links.some((l) => l.original === originalUrl)) {
+      toast.info("Este link já está na lista de substituições.");
+      return;
+    }
+    setLinks((prev) => [...prev, { original: originalUrl, new: "" }]);
+    toast.success("Link adicionado! Cole o link de destino.");
   };
 
   const handleRemoveLink = (index: number) => {
@@ -185,24 +246,6 @@ const ClonedPageEditor = () => {
 
   const handleLinkChange = (index: number, field: "original" | "new", value: string) => {
     setLinks((prev) => prev.map((link, i) => (i === index ? { ...link, [field]: value } : link)));
-  };
-
-  const handleGlobalReplace = () => {
-    if (!globalLinkReplace.trim()) return;
-
-    const target = globalLinkReplace.trim();
-
-    // If user hasn't configured specific originals yet, enable GLOBAL mode.
-    // This matches the UI promise: replace all checkout/button destinations automatically.
-    if (links.length === 0) {
-      setLinks([{ original: GLOBAL_REPLACE_MARKER, new: target }]);
-      toast.success("Substituição global ativada! (links/botões serão redirecionados)");
-      return;
-    }
-
-    // Otherwise, just set the same destination for all existing rules.
-    setLinks((prev) => prev.map((link) => ({ ...link, new: target })));
-    toast.success("Todos os destinos foram atualizados!");
   };
 
   const handleRefreshPreview = () => {
@@ -221,8 +264,7 @@ const ClonedPageEditor = () => {
     setSaving(true);
 
     try {
-      // Filter out empty links and convert to JSON-compatible format
-      const validLinks = links.filter((l) => l.original.trim()).map((l) => ({ original: l.original, new: l.new }));
+      const validLinks = links.filter((l) => l.original.trim() && l.new.trim()).map((l) => ({ original: l.original, new: l.new }));
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await supabase
@@ -232,7 +274,7 @@ const ClonedPageEditor = () => {
           head_code: headCode || null,
           links: validLinks as any,
           is_published: true,
-          html_content: "", // Clear old HTML content - not used in proxy mode
+          html_content: "",
           back_redirect_enabled: backRedirectEnabled,
           back_redirect_url: backRedirectUrl || null,
         })
@@ -241,10 +283,7 @@ const ClonedPageEditor = () => {
       if (error) throw error;
 
       setIsPublished(true);
-
-      // Refresh preview to show updated changes
       handleRefreshPreview();
-
       toast.success("Página salva e publicada! As alterações já estão ativas.");
     } catch (error) {
       console.error("Save error:", error);
@@ -258,6 +297,15 @@ const ClonedPageEditor = () => {
     if (!pageData?.slug) return "";
     return `${PUBLIC_PAGES_BASE_URL}/c/${pageData.slug}`;
   };
+
+  // Filter detected links
+  const filteredDetectedLinks = detectedLinks.filter((url) => {
+    if (!linkFilter.trim()) return true;
+    return url.toLowerCase().includes(linkFilter.toLowerCase());
+  });
+
+  // Links already mapped (to grey them out in radar)
+  const mappedOriginals = new Set(links.map((l) => l.original));
 
   if (loading) {
     return (
@@ -423,6 +471,13 @@ const ClonedPageEditor = () => {
                     Links
                   </TabsTrigger>
                   <TabsTrigger
+                    value="radar"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3"
+                  >
+                    <Radar className="w-4 h-4 mr-2" />
+                    Radar
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="code"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-3"
                   >
@@ -431,94 +486,173 @@ const ClonedPageEditor = () => {
                   </TabsTrigger>
                 </TabsList>
 
+                {/* ─── Tab: Links (Mapeamentos De → Para) ─── */}
                 <TabsContent value="links" className="m-0">
                   <ScrollArea style={{ height: "calc(100vh - 580px)", minHeight: "250px" }}>
                     <div className="p-4 space-y-4">
-                      {/* Global Replace */}
-                      <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                        <Label className="text-xs font-medium flex items-center gap-2">
-                          <Replace className="w-3 h-3" />
-                          Substituição Global
-                        </Label>
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="https://seu-checkout.com/pagar"
-                            value={globalLinkReplace}
-                            onChange={(e) => setGlobalLinkReplace(e.target.value)}
-                            className="text-sm"
-                          />
-                          <Button size="sm" onClick={handleGlobalReplace}>
-                            Aplicar
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Se não houver regras abaixo, isso ativa o modo GLOBAL (troca links/botões de checkout automaticamente).
-                        </p>
-                      </div>
-
-                      {/* Link Replacements */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between">
+                        <div>
                           <Label className="text-sm font-medium">Substituições de Links</Label>
-                          <Button size="sm" variant="outline" onClick={handleAddLink}>
-                            <Plus className="w-3 h-3 mr-1" />
-                            Adicionar
+                          <p className="text-xs text-muted-foreground mt-0.5">Mapeamento exato: De → Para</p>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => setLinks((prev) => [...prev, { original: "", new: "" }])}>
+                          + Manual
+                        </Button>
+                      </div>
+
+                      {links.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
+                          <Link2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                          <p>Nenhuma substituição configurada.</p>
+                          <p className="text-xs mt-1">
+                            Use a aba <strong>Radar</strong> para detectar os links da página ou adicione manualmente.
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="mt-3"
+                            onClick={() => setActiveTab("radar")}
+                          >
+                            <Radar className="w-3.5 h-3.5 mr-1" />
+                            Abrir Radar de Links
                           </Button>
                         </div>
-
-                        {links.length === 0 ? (
-                          <div className="text-center py-6 text-muted-foreground text-sm">
-                            <p>Nenhuma substituição configurada.</p>
-                            <p className="text-xs mt-1">Adicione links para trocar checkouts, WhatsApp, etc.</p>
-                          </div>
-                        ) : (
-                          links.map((link, index) => (
-                            <div key={index} className="border rounded-lg p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  Substituição #{index + 1}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                                  onClick={() => handleRemoveLink(index)}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <div>
-                                <Label className="text-xs text-muted-foreground">Link Original</Label>
-                                <Input
-                                  placeholder="https://checkout-produtor.com/..."
-                                  value={link.original === GLOBAL_REPLACE_MARKER ? "(GLOBAL)" : link.original}
-                                  onChange={(e) => handleLinkChange(index, "original", e.target.value)}
-                                  className="text-sm mt-1"
-                                  disabled={link.original === GLOBAL_REPLACE_MARKER}
-                                />
-                                {link.original === GLOBAL_REPLACE_MARKER && (
-                                  <p className="text-[11px] text-muted-foreground mt-1">
-                                    Modo GLOBAL: o proxy tentará substituir automaticamente links/botões de checkout.
-                                  </p>
-                                )}
-                              </div>
-                              <div>
-                                <Label className="text-xs text-muted-foreground">Novo Link</Label>
-                                <Input
-                                  placeholder="https://seu-link-afiliado.com/..."
-                                  value={link.new}
-                                  onChange={(e) => handleLinkChange(index, "new", e.target.value)}
-                                  className="text-sm mt-1"
-                                />
-                              </div>
+                      ) : (
+                        links.map((link, index) => (
+                          <div key={index} className="border rounded-lg p-3 space-y-2 bg-background">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                #{index + 1}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                onClick={() => handleRemoveLink(index)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
                             </div>
-                          ))
-                        )}
-                      </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">De (Link Original)</Label>
+                              <Input
+                                placeholder="https://checkout-produtor.com/..."
+                                value={link.original}
+                                onChange={(e) => handleLinkChange(index, "original", e.target.value)}
+                                className="text-sm mt-1 font-mono text-xs"
+                              />
+                            </div>
+                            <div className="flex items-center justify-center">
+                              <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Para (Seu Link)</Label>
+                              <Input
+                                placeholder="https://seu-link-afiliado.com/..."
+                                value={link.new}
+                                onChange={(e) => handleLinkChange(index, "new", e.target.value)}
+                                className="text-sm mt-1"
+                              />
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </ScrollArea>
                 </TabsContent>
 
+                {/* ─── Tab: Radar de Links ─── */}
+                <TabsContent value="radar" className="m-0">
+                  <ScrollArea style={{ height: "calc(100vh - 580px)", minHeight: "250px" }}>
+                    <div className="p-4 space-y-4">
+                      <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Radar className="w-5 h-5 text-primary" />
+                          <div>
+                            <p className="text-sm font-medium">Radar de Links</p>
+                            <p className="text-xs text-muted-foreground">
+                              Escaneia a página e detecta todos os links clicáveis para você escolher quais substituir.
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={handleScanLinks}
+                          disabled={radarLoading}
+                          className="w-full"
+                          variant={radarScanned ? "outline" : "default"}
+                        >
+                          {radarLoading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Radar className="w-4 h-4 mr-2" />
+                          )}
+                          {radarScanned ? "Escanear Novamente" : "Escanear Links da Página"}
+                        </Button>
+                      </div>
+
+                      {radarScanned && detectedLinks.length > 0 && (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                placeholder="Filtrar links..."
+                                value={linkFilter}
+                                onChange={(e) => setLinkFilter(e.target.value)}
+                                className="pl-8 text-sm h-8"
+                              />
+                            </div>
+                            <Badge variant="secondary" className="shrink-0">
+                              {filteredDetectedLinks.length} links
+                            </Badge>
+                          </div>
+
+                          <div className="space-y-2">
+                            {filteredDetectedLinks.map((url, i) => {
+                              const alreadyMapped = mappedOriginals.has(url);
+                              return (
+                                <div
+                                  key={i}
+                                  className={`flex items-center gap-2 p-2 rounded-lg border text-xs ${
+                                    alreadyMapped ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800" : "bg-background hover:bg-muted/50"
+                                  }`}
+                                >
+                                  <span className="flex-1 font-mono break-all text-[11px] leading-relaxed">
+                                    {url}
+                                  </span>
+                                  {alreadyMapped ? (
+                                    <Badge variant="outline" className="shrink-0 text-green-600 border-green-300 text-[10px]">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Mapeado
+                                    </Badge>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="shrink-0 h-7 text-xs"
+                                      onClick={() => handleAddLinkFromRadar(url)}
+                                    >
+                                      + Substituir
+                                    </Button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+
+                      {radarScanned && detectedLinks.length === 0 && (
+                        <div className="text-center py-6 text-muted-foreground text-sm">
+                          <p>Nenhum link externo encontrado.</p>
+                          <p className="text-xs mt-1">A página pode não ter links de botão ou CTA.</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* ─── Tab: Código ─── */}
                 <TabsContent value="code" className="m-0 p-4">
                   <div className="space-y-4">
                     <div>
