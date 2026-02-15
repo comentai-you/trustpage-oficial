@@ -20,6 +20,37 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
   const { formData, isSubmitting, isSuccess, isDownloading, handleInputChange, handleSubmit, handleDownload } =
     useCaptureForm({ pageId, ctaUrl: data.cta_url, formFields: d.formFields, magnetConfig: d.magnetConfig });
 
+  // Detect if theme is light to adapt form styling
+  const isLightTheme = !d.isGradientBg && (
+    d.bgStart === '#ffffff' || d.bgStart === '#f8fafc' || d.bgStart === '#fffbeb' ||
+    d.bgStart === '#ecfdf5' || d.bgStart === '#fdf2f8' || d.bgStart === '#f0f9ff' ||
+    d.bgStart.startsWith('#f') || d.bgStart.startsWith('#e')
+  );
+
+  // Form card styling adapts to theme
+  const formCardStyle: React.CSSProperties = isLightTheme
+    ? {
+        backgroundColor: 'rgba(0,0,0,0.04)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        border: '1px solid rgba(0,0,0,0.08)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+      }
+    : {
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+      };
+
+  // Form text colors adapt to theme
+  const formTextColor = isLightTheme ? d.textColor : '#ffffff';
+  const formHeadingColor = isLightTheme ? d.headlineColor : '#ffffff';
+  const formInputBg = isLightTheme ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.08)';
+  const formInputBorder = isLightTheme ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
+  const formSecurityTextColor = isLightTheme ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)';
+
   return (
     <div
       className="relative w-full overflow-x-hidden flex flex-col"
@@ -30,7 +61,6 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
     >
       <div
         className={`relative z-10 w-full flex flex-1 ${isMobile ? 'flex-col' : 'flex-row'}`}
-        style={{ minHeight: fullHeight ? 'calc(100vh - 60px)' : 'auto' }}
       >
         {/* Left: Content centered (no image) */}
         <div
@@ -72,18 +102,12 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
         >
           <div
             className="w-full max-w-md rounded-2xl p-6 md:p-8"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.06)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              border: `1px solid rgba(255,255,255,0.1)`,
-              boxShadow: `0 25px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)`,
-            }}
+            style={formCardStyle}
           >
             {isSuccess ? (
               <CaptureSuccessScreen
                 accentColor={d.accentColor}
-                textColor="#ffffff"
+                textColor={formTextColor}
                 isDownloading={isDownloading}
                 onDownload={handleDownload}
               />
@@ -91,7 +115,7 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
               <form onSubmit={handleSubmit} className="space-y-4">
                 <h2
                   className="text-xl font-bold text-center mb-2"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: formHeadingColor }}
                 >
                   Preencha para acessar
                 </h2>
@@ -99,10 +123,10 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
                   formFields={d.formFields}
                   formData={formData}
                   onInputChange={handleInputChange}
-                  textColor="#ffffff"
-                  placeholderColor="rgba(255,255,255,0.5)"
-                  inputBgColor="rgba(255,255,255,0.08)"
-                  inputBorderColor="rgba(255,255,255,0.15)"
+                  textColor={formTextColor}
+                  placeholderColor={d.placeholderColor}
+                  inputBgColor={formInputBg}
+                  inputBorderColor={formInputBorder}
                 />
                 <Button
                   type="submit"
@@ -123,7 +147,7 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
                     </>
                   )}
                 </Button>
-                <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="text-center text-xs" style={{ color: formSecurityTextColor }}>
                   🔒 Seus dados estão 100% seguros
                 </p>
               </form>
@@ -132,9 +156,7 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
         </div>
       </div>
 
-      <div className="relative z-10">
-        <LegalFooter textColor={d.textColor} showWatermark={true} ownerPlan={ownerPlan} />
-      </div>
+      <LegalFooter textColor={d.textColor} showWatermark={true} ownerPlan={ownerPlan} />
     </div>
   );
 };
