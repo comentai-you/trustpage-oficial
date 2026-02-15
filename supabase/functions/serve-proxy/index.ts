@@ -211,48 +211,54 @@ Deno.serve(async (req) => {
       mode?: string;
     }
 
-    const shouldReplaceUrlGlobally = (value: string, targetOriginForCheck: string): boolean => {
+    const shouldReplaceUrlGlobally = (value: string, siteOrigin: string): boolean => {
       const v = (value || '').trim();
       if (!v) return false;
       if (v.startsWith('#')) return false;
       const lower = v.toLowerCase();
       if (lower.startsWith('mailto:') || lower.startsWith('tel:') || lower.startsWith('javascript:')) return false;
 
-      // Replace only links that look like checkout/compra/pagamento or known checkout providers.
-      if (CHECKOUT_HINT_RE.test(v)) return true;
+      // Only replace absolute URLs
+      if (!(v.startsWith('http://') || v.startsWith('https://') || v.startsWith('//'))) return false;
 
-      // If it's an absolute URL and points outside the origin, it could still be a checkout.
-      // Keep this conservative (require hint) to avoid breaking nav/social links.
+      // Skip same-origin links (internal site navigation)
       try {
-        const u = new URL(v);
-        if (u.origin !== targetOriginForCheck && CHECKOUT_HINT_RE.test(u.hostname)) return true;
+        const u = new URL(v, siteOrigin);
+        if (u.origin === new URL(siteOrigin).origin) return false;
       } catch {
-        // not an absolute URL
+        return false;
       }
 
-      return false;
+      // Skip known non-CTA external links (social media profiles, CDNs, feeds, oembed)
+      const skipPatterns = /\.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|xml|rss|json)\b|\/feed\/?$|oembed|fonts\.|cdn\.|googleapis|gstatic|wp-content\/|wp-includes\//i;
+      if (skipPatterns.test(v)) return false;
+
+      return true;
     };
 
-    const applyGlobalReplace = (inputHtml: string, newUrl: string, targetOriginForCheck: string) => {
+    const applyGlobalReplace = (inputHtml: string, newUrl: string, siteOrigin: string) => {
       let out = inputHtml;
       let replaced = 0;
 
-      // Replace common destination-carrying attributes
-      const attrRe = /(\b(?:href|action|formaction|data-href|data-url|data-link)\s*=\s*)(["'])([^"']+)(\2)/gi;
-      out = out.replace(attrRe, (match, prefix, quote, value, endQuote) => {
-        if (shouldReplaceUrlGlobally(value, targetOriginForCheck)) {
-          replaced++;
-          return `${prefix}${quote}${newUrl}${endQuote}`;
-        }
-        return match;
+      // Replace destination-carrying attributes, but SKIP <base> and <link> tags
+      const attrRe = /<(?!base\b|link\b)[a-z][a-z0-9]*\b[^>]*?\b(href|action|formaction|data-href|data-url|data-link)\s*=\s*(["'])([^"']+)(\2)[^>]*>/gi;
+      out = out.replace(attrRe, (fullTag) => {
+        // Within the matched tag, replace only the URL attribute values
+        return fullTag.replace(/((?:href|action|formaction|data-href|data-url|data-link)\s*=\s*)(["'])([^"']+)(\2)/gi, (attrMatch, prefix, quote, value, endQuote) => {
+          if (shouldReplaceUrlGlobally(value, siteOrigin)) {
+            replaced++;
+            return `${prefix}${quote}${newUrl}${endQuote}`;
+          }
+          return attrMatch;
+        });
       });
 
       // Replace URLs embedded inside onclick="..."
       const onclickRe = /(\bonclick\s*=\s*)(["'])([\s\S]*?)(\2)/gi;
       out = out.replace(onclickRe, (match, prefix, quote, content, endQuote) => {
-        if (!content || !CHECKOUT_HINT_RE.test(content)) return match;
+        if (!content) return match;
         const updated = content.replace(/https?:\/\/[^'"\s]+/gi, (url: string) =>
-          shouldReplaceUrlGlobally(url, targetOriginForCheck) ? newUrl : url
+          shouldReplaceUrlGlobally(url, siteOrigin) ? newUrl : url
         );
         if (updated !== content) {
           replaced++;
