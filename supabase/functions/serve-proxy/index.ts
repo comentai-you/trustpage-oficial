@@ -25,8 +25,9 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const slug = url.searchParams.get('slug');
     
-    if (!slug) {
-      console.log('[serve-proxy] No slug provided');
+    // Validate slug: only allow alphanumeric, hyphens, underscores (max 100 chars)
+    if (!slug || !/^[a-zA-Z0-9_-]{1,100}$/.test(slug)) {
+      console.log('[serve-proxy] Invalid or missing slug');
       return new Response(
         JSON.stringify({ error: 'Slug not found' }), 
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -72,6 +73,34 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Page not found' }), 
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate source_url is a valid HTTP(S) URL (prevent SSRF with non-HTTP protocols)
+    let sourceUrl: URL;
+    try {
+      sourceUrl = new URL(page.source_url);
+      if (!['http:', 'https:'].includes(sourceUrl.protocol)) {
+        console.error('[serve-proxy] Invalid source URL protocol:', sourceUrl.protocol);
+        return new Response(
+          JSON.stringify({ error: 'Invalid source URL' }), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // Block internal/private IPs
+      const hostname = sourceUrl.hostname.toLowerCase();
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0' || hostname.startsWith('10.') || hostname.startsWith('192.168.') || hostname.startsWith('172.') || hostname.endsWith('.internal')) {
+        console.error('[serve-proxy] Blocked internal URL:', hostname);
+        return new Response(
+          JSON.stringify({ error: 'Invalid source URL' }), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch {
+      console.error('[serve-proxy] Malformed source URL:', page.source_url);
+      return new Response(
+        JSON.stringify({ error: 'Invalid source URL' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -309,10 +338,12 @@ Deno.serve(async (req) => {
     // E. Inject custom head scripts (Pixel, GTM, etc.) AFTER removing original tracking
     // This ensures user's pixels are not accidentally removed
     if (page.head_code && page.head_code.trim()) {
+      // Limit head_code size to prevent abuse (max 10KB)
+      const sanitizedHeadCode = page.head_code.trim().slice(0, 10240);
       if (html.toLowerCase().includes('</head>')) {
-        html = html.replace(/<\/head>/i, `${page.head_code}\n</head>`);
+        html = html.replace(/<\/head>/i, `${sanitizedHeadCode}\n</head>`);
       } else {
-        html = `${html}\n${page.head_code}`;
+        html = `${html}\n${sanitizedHeadCode}`;
       }
       console.log('[serve-proxy] Injected custom head code');
     }
@@ -364,6 +395,9 @@ Deno.serve(async (req) => {
         'X-Frame-Options': 'ALLOWALL',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Content-Security-Policy': "frame-ancestors *; default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;",
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer-when-downgrade',
       },
     });
 
