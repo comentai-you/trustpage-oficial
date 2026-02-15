@@ -566,10 +566,9 @@ const CaptureHeroEditorSidebar = ({ formData, onChange, userPlan = 'free' }: Cap
                 </Label>
                 <p className="text-[10px] text-gray-400">Tamanho ideal: <span className="font-semibold">1920×1080px</span> (16:9, paisagem)</p>
                 <ImageUpload
-                  value={(formData.content as any)?.bgHeroImageDesktop || formData.image_url || ''}
+                  value={(formData.content as any)?.bgHeroImageDesktop || ''}
                   onChange={(url) => {
                     onChange({
-                      image_url: url,
                       content: {
                         ...(formData.content as any),
                         bgHeroImageDesktop: url,
