@@ -49,7 +49,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
                 {/* CORREÇÃO AQUI: Forçando a altura do viewport simulado */}
                 <div className="w-full" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-                  <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
+                  <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
                 </div>
               </ScaledViewport>
             </div>

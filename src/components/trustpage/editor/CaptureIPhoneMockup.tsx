@@ -91,7 +91,7 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
               {/* CORREÇÃO AQUI: Forçando a altura base e permitindo expansão segura */}
               <div className="w-full" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-                <CaptureRenderer data={formData} isMobile={true} fullHeight={true} />
+                <CaptureRenderer data={formData} isMobile={true} fullHeight={false} />
               </div>
             </ScaledViewport>
           </div>
