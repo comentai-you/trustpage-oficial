@@ -20,27 +20,49 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
   const { formData, isSubmitting, isSuccess, isDownloading, handleInputChange, handleSubmit, handleDownload } =
     useCaptureForm({ pageId, ctaUrl: data.cta_url, formFields: d.formFields, magnetConfig: d.magnetConfig });
 
-  // Use theme colors - light themes use their own bg, dark themes use a light fallback
-  const isLightTheme = !d.isGradientBg && (d.bgStart === '#ffffff' || d.bgStart === '#f8fafc' || d.bgStart === '#fffbeb' || d.bgStart === '#ecfdf5' || d.bgStart === '#fdf2f8' || d.bgStart === '#f0f9ff' || d.bgStart.startsWith('#f') || d.bgStart.startsWith('#e'));
-  const bgColor = d.isGradientBg ? d.bgStart : isLightTheme ? d.bgStart : '#f8fafc';
-  const bgGradient = d.isGradientBg ? d.bgStart : isLightTheme ? `linear-gradient(180deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)` : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`;
+  const isLightTheme =
+    !d.isGradientBg &&
+    (d.bgStart === "#ffffff" ||
+      d.bgStart === "#f8fafc" ||
+      d.bgStart === "#fffbeb" ||
+      d.bgStart === "#ecfdf5" ||
+      d.bgStart === "#fdf2f8" ||
+      d.bgStart === "#f0f9ff" ||
+      d.bgStart.startsWith("#f") ||
+      d.bgStart.startsWith("#e"));
+  const bgColor = d.isGradientBg ? d.bgStart : isLightTheme ? d.bgStart : "#f8fafc";
+  const bgGradient = d.isGradientBg
+    ? d.bgStart
+    : isLightTheme
+      ? `linear-gradient(180deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)`
+      : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`;
   const hasCustomHeadline = !!(data.content as any)?.textColors?.headline;
   const hasCustomDesc = !!(data.content as any)?.textColors?.description;
-  const headlineColor = hasCustomHeadline ? d.headlineColor : (isLightTheme || d.isGradientBg ? d.headlineColor : '#111827');
-  const descColor = hasCustomDesc ? d.descriptionColor : (isLightTheme || d.isGradientBg ? d.descriptionColor : '#6b7280');
-  const cardTextColor = isLightTheme ? d.textColor : '#1f2937';
+  const headlineColor = hasCustomHeadline
+    ? d.headlineColor
+    : isLightTheme || d.isGradientBg
+      ? d.headlineColor
+      : "#111827";
+  const descColor = hasCustomDesc
+    ? d.descriptionColor
+    : isLightTheme || d.isGradientBg
+      ? d.descriptionColor
+      : "#6b7280";
+  const cardTextColor = isLightTheme ? d.textColor : "#1f2937";
 
   return (
     <div
-      className="relative w-full overflow-x-hidden"
+      // 🔥 MUDANÇA 1: "flex flex-col min-h-full" na raiz para que o gradiente envolva tudo (conteúdo + rodapé)
+      className="relative w-full overflow-x-hidden flex flex-col min-h-full"
       style={{
         background: bgGradient,
-        minHeight: fullHeight ? '100vh' : '100%',
+        minHeight: fullHeight ? "100vh" : "100%",
       }}
     >
       <div
-        className="relative z-10 w-full flex flex-col items-center justify-center px-4 py-12 md:py-20"
-        style={{ minHeight: fullHeight ? '100vh' : 'auto' }}
+        // 🔥 MUDANÇA 2: Adicionado flex-1 aqui. Substituímos o "minHeight: 100vh" que forçava um buraco por "flex-1",
+        // que estica naturalmente e empurra o rodapé pro fundo da página, sem quebrar o fundo.
+        className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-4 py-12 md:py-20"
       >
         {/* Profile photo (round, like bio link) */}
         {data.profile_image_url ? (
@@ -91,10 +113,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
         </h1>
 
         {data.description && (
-          <p
-            className="text-center max-w-lg mb-8 text-sm md:text-base"
-            style={{ color: descColor }}
-          >
+          <p className="text-center max-w-lg mb-8 text-sm md:text-base" style={{ color: descColor }}>
             {data.description}
           </p>
         )}
@@ -103,9 +122,9 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
         <div
           className="w-full max-w-xl rounded-2xl p-6 md:p-8"
           style={{
-            backgroundColor: '#ffffff',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
-            border: '1px solid rgba(0,0,0,0.06)',
+            backgroundColor: "#ffffff",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
+            border: "1px solid rgba(0,0,0,0.06)",
           }}
         >
           {isSuccess ? (
@@ -122,10 +141,10 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
                 formData={formData}
                 onInputChange={handleInputChange}
                 textColor={cardTextColor}
-                placeholderColor={isLightTheme || !d.isGradientBg ? d.placeholderColor : '#9ca3af'}
+                placeholderColor={isLightTheme || !d.isGradientBg ? d.placeholderColor : "#9ca3af"}
                 inputBgColor="#f9fafb"
                 inputBorderColor="#e5e7eb"
-                variant={isMobile ? 'default' : 'horizontal'}
+                variant={isMobile ? "default" : "horizontal"}
               />
               <Button
                 type="submit"
@@ -146,15 +165,13 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
                   </>
                 )}
               </Button>
-              <p className="text-center text-xs text-gray-400">
-                🔒 Seus dados estão 100% seguros
-              </p>
+              <p className="text-center text-xs text-gray-400">🔒 Seus dados estão 100% seguros</p>
             </form>
           )}
         </div>
       </div>
 
-      <LegalFooter textColor={d.isGradientBg ? d.textColor : '#6b7280'} showWatermark={true} ownerPlan={ownerPlan} />
+      <LegalFooter textColor={d.isGradientBg ? d.textColor : "#6b7280"} showWatermark={true} ownerPlan={ownerPlan} />
     </div>
   );
 };
