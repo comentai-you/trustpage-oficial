@@ -1,6 +1,7 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import CaptureRenderer from "../templates/capture/CaptureRenderer";
 import ScaledViewport from "./ScaledViewport";
+import { extractCaptureData } from "../templates/capture/captureDataHelpers";
 
 interface CaptureIPhoneMockupProps {
   formData: LandingPageFormData;
@@ -31,14 +32,44 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
 
   const scale = dimensions.contentWidth / dimensions.viewportWidth;
 
-  const bg = formData.colors?.background || "#0f172a";
+  // 🔥 O SEGREDO: Extraímos a cor exata do Tema atual para o fundo do celular
+  const d = extractCaptureData(formData);
+  const layoutId = formData.capture_layout_id || "classic";
+
+  let containerBgStyle: React.CSSProperties = {};
+  if (layoutId === "minimalist-center") {
+    const isLightTheme =
+      !d.isGradientBg &&
+      (d.bgStart === "#ffffff" ||
+        d.bgStart === "#f8fafc" ||
+        d.bgStart === "#fffbeb" ||
+        d.bgStart === "#ecfdf5" ||
+        d.bgStart === "#fdf2f8" ||
+        d.bgStart === "#f0f9ff" ||
+        d.bgStart.startsWith("#f") ||
+        d.bgStart.startsWith("#e"));
+    containerBgStyle.background = d.isGradientBg
+      ? d.bgStart
+      : isLightTheme
+        ? `linear-gradient(180deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)`
+        : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`;
+  } else if (layoutId === "split-dark") {
+    containerBgStyle.background = d.bgStart;
+  } else if (layoutId === "background-hero") {
+    containerBgStyle.backgroundColor = d.bgStart.includes("linear") ? "#111827" : d.bgStart;
+  } else {
+    containerBgStyle.background = d.isGradientBg
+      ? d.bgStart
+      : `linear-gradient(135deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)`;
+  }
+
   const statusBarColor = formData.colors?.text || "#ffffff";
 
   return (
     <div className="relative">
       {/* iPhone Frame */}
       <div
-        className={`${dimensions.width} ${dimensions.height} bg-gradient-to-b from-zinc-700 to-zinc-900 ${dimensions.radius} p-[10px] shadow-2xl`}
+        className={`${dimensions.width} ${dimensions.height} bg-gradient-to-b from-zinc-700 to-zinc-900 ${dimensions.radius} p-[10px] shadow-2xl relative`}
         style={{ boxShadow: "0 30px 60px -15px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
       >
         {/* Side buttons */}
@@ -52,8 +83,8 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
           <div className="w-[6px] h-[6px] bg-zinc-800 rounded-full mr-[25px]" />
         </div>
 
-        {/* Screen */}
-        <div className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`} style={{ background: bg }}>
+        {/* APLICAMOS A COR DO TEMA AQUI NO FUNDO DA TELA */}
+        <div className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`} style={containerBgStyle}>
           {/* Status Bar */}
           <div
             className="absolute top-0 left-0 right-0 h-8 flex items-end justify-between px-5 pb-1 text-[9px] font-semibold z-10"
@@ -75,7 +106,7 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
             </div>
           </div>
 
-          {/* Content (AGORA COM ROLAGEM) */}
+          {/* Content */}
           <div
             className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden capture-iphone-scroll"
             style={{
