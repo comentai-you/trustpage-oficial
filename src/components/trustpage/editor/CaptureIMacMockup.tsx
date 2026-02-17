@@ -14,11 +14,10 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const scale = screenWidth / viewportWidth;
 
   const d = extractCaptureData(formData);
-  // 🔥 MÁGICA DA COR: Pegamos a cor FINAL (de baixo) do tema.
-  // Assim, se a página acabar, o fundo se camufla perfeitamente sem criar linha/costura.
-  const mockupBg = d.isGradientBg ? d.bgEnd : d.bgStart;
+  // Usamos a cor inicial apenas para evitar flash preto, mas o layout vai cobrir 100%
+  const fallbackBg = d.bgStart.includes("linear") ? "#111827" : d.bgStart;
 
-  // Altura Virtual para impedir o bug do 100vh
+  // Altura exata da tela útil do iMac
   const virtualHeight = 312 / scale;
 
   return (
@@ -29,8 +28,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
         style={{ boxShadow: "0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)" }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          {/* Fundo dinâmico aplicado na tela do iMac */}
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ backgroundColor: mockupBg }}>
+          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ backgroundColor: fallbackBg }}>
             {/* Browser chrome */}
             <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5 z-10 relative">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
@@ -43,17 +41,23 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Scroll Area (Limpo e funcionando) */}
+            {/* Scroll Area */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll relative"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                {/* Aqui está a correção final: fullHeight={false} mata o vácuo de uma vez por todas */}
+                {/* 🔥 O ESTICADOR MÁGICO: Força o layout e o gradiente a preencherem o vazio */}
                 <div
-                  style={{ minHeight: `${virtualHeight}px`, display: "flex", flexDirection: "column", width: "100%" }}
+                  className="mockup-stretcher"
+                  style={{ display: "grid", minHeight: `${virtualHeight}px`, width: "100%" }}
                 >
+                  <style>{`
+                    .mockup-stretcher > * { min-height: 100% !important; height: 100%; }
+                    .mockup-stretcher > * > * { min-height: 100% !important; }
+                  `}</style>
+
                   <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
                 </div>
               </ScaledViewport>
