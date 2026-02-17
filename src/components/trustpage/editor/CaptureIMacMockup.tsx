@@ -12,9 +12,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const viewportWidth = 1280;
   const scale = screenWidth / viewportWidth;
 
-  // Resolve background: gradient string or solid color
   const bg = formData.colors.background || '#0f172a';
-  const isGradient = bg.includes('gradient');
 
   return (
     <div className="relative">
@@ -24,7 +22,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
         style={{ boxShadow: '0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)' }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: 'transparent' }}>
+          <div className="w-full h-full rounded-md overflow-hidden relative">
             {/* Browser chrome */}
             <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
@@ -37,13 +35,18 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Content area — background matches theme */}
+            {/* Scrollable content area with theme background */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-hidden"
-              style={{ background: isGradient ? bg : bg }}
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
+              style={{
+                background: bg,
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
             >
+              <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
+                <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
               </ScaledViewport>
             </div>
           </div>
