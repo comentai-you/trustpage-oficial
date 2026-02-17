@@ -13,46 +13,52 @@ interface CaptureRendererProps {
 }
 
 const CaptureRenderer = ({ data, isMobile, fullHeight, pageId, ownerPlan }: CaptureRendererProps) => {
-  const layoutId: CaptureLayoutId = data.capture_layout_id || 'classic';
+  const layoutId: CaptureLayoutId = data.capture_layout_id || "classic";
+
+  // 🔥 O SEGREDO ESTÁ AQUI:
+  // Se não temos um 'pageId', significa que a página está sendo vista no Editor (Mockup).
+  // Ao forçar o fullHeight como 'false' aqui, nós impedimos os layouts de usarem '100vh' (Altura do seu monitor real),
+  // o que corta instantaneamente o espaço gigante fantasma abaixo do rodapé!
+  const safeFullHeight = pageId ? fullHeight : false;
 
   switch (layoutId) {
-    case 'split-dark':
+    case "split-dark":
       return (
         <LayoutSplitDark
           data={data}
           isMobile={isMobile}
-          fullHeight={fullHeight}
+          fullHeight={safeFullHeight}
           pageId={pageId}
           ownerPlan={ownerPlan}
         />
       );
-    case 'minimalist-center':
+    case "minimalist-center":
       return (
         <LayoutMinimalistCenter
           data={data}
           isMobile={isMobile}
-          fullHeight={fullHeight}
+          fullHeight={safeFullHeight}
           pageId={pageId}
           ownerPlan={ownerPlan}
         />
       );
-    case 'background-hero':
+    case "background-hero":
       return (
         <LayoutBackgroundHero
           data={data}
           isMobile={isMobile}
-          fullHeight={fullHeight}
+          fullHeight={safeFullHeight}
           pageId={pageId}
           ownerPlan={ownerPlan}
         />
       );
-    case 'classic':
+    case "classic":
     default:
       return (
         <HeroCaptureTemplate
           data={data}
           isMobile={isMobile}
-          fullHeight={fullHeight}
+          fullHeight={safeFullHeight}
           pageId={pageId}
           ownerPlan={ownerPlan}
         />
