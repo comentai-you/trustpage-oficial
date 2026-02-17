@@ -244,6 +244,13 @@ const TrustPageEditor = () => {
         return;
       }
 
+      // Check slug uniqueness across all page types
+      const isUnique = await checkSlugUniqueness(slug, existingPageId);
+      if (!isUnique) {
+        setAutoSaveStatus("error");
+        return;
+      }
+
       // Include headline sizes and hero image sizes in the content JSON for persistence
       const contentWithSizes = {
         ...(formData.content as any),
@@ -345,6 +352,49 @@ const TrustPageEditor = () => {
       .substring(0, 40);
   };
 
+  // Check if slug is unique across all page types for the current user
+  const checkSlugUniqueness = async (slug: string, currentPageId?: string | null): Promise<boolean> => {
+    if (!user) return false;
+
+    // Check landing_pages
+    const { data: lpData } = await supabase
+      .from("landing_pages")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("slug", slug);
+    
+    const lpConflict = (lpData || []).filter(p => p.id !== currentPageId);
+    if (lpConflict.length > 0) return false;
+
+    // Check cloned_pages
+    const { data: cpData } = await supabase
+      .from("cloned_pages")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("slug", slug);
+    
+    if ((cpData || []).length > 0) return false;
+
+    // Check quizzes
+    const { data: qData } = await supabase
+      .from("quizzes")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("slug", slug);
+    
+    if ((qData || []).length > 0) return false;
+
+    // Check reserved_slugs
+    const { data: rsData } = await supabase
+      .from("reserved_slugs")
+      .select("slug")
+      .eq("slug", slug);
+    
+    if ((rsData || []).length > 0) return false;
+
+    return true;
+  };
+
   const handleSave = async () => {
     lastSavedSlugRef.current = null;
 
@@ -374,8 +424,18 @@ const TrustPageEditor = () => {
         slug = generateSlugFromName(formData.page_name);
       }
 
-      // Check availability logic omitted for brevity, keeping existing save logic...
-      // (Mantive a lógica original de salvamento para focar no layout)
+      // Validate slug uniqueness
+      const isUnique = await checkSlugUniqueness(slug, existingPageId);
+      if (!isUnique) {
+        toast({
+          title: "Slug já em uso",
+          description: "Já existe uma página com esse slug na sua conta. Escolha outro nome.",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
       // Include headline sizes and hero image sizes in the content JSON for persistence
       const contentWithSizes = {
         ...(formData.content as any),

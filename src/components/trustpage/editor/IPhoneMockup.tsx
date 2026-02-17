@@ -90,31 +90,29 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
           </div>
           
           {/* Content - scaled to fit properly */}
-          <div 
-            className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto iphone-scroll"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              background: formData.colors.background,
-              overflowX: 'hidden',
-            }}
-          >
-            <style>
-              {`
-                .iphone-scroll::-webkit-scrollbar {
-                  display: none;
-                }
-              `}
-            </style>
-            <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              <div 
-                className="w-full relative flex flex-col" 
-                style={{ 
-                  background: formData.colors.background,
-                  minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
-                  alignItems: 'stretch',
-                }}
-              >
+            <div 
+              className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto iphone-scroll"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                overflowX: 'hidden',
+              }}
+            >
+              <style>
+                {`
+                  .iphone-scroll::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}
+              </style>
+              <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
+                <div 
+                  className="w-full relative flex flex-col" 
+                  style={{ 
+                    minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(dimensions.contentHeight / scale)}px` : 'auto',
+                    alignItems: 'stretch',
+                  }}
+                >
                 {isSalesPage ? (
                   <SalesPageTemplate data={formData} isMobile={true} fullHeight={false} />
                 ) : isBioPage ? (

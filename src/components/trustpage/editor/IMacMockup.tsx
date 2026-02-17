@@ -59,7 +59,6 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                background: formData.colors.background
               }}
             >
               <style>
@@ -72,8 +71,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
                 <div 
                   className="w-full relative" 
-                    style={{ 
-                    background: formData.colors.background,
+                  style={{ 
                     minHeight: (isCaptureHero && formData.capture_layout_id !== 'split-dark') ? `${Math.ceil(screenHeight / scale)}px` : 'auto',
                   }}
                 >
