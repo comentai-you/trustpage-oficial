@@ -273,7 +273,7 @@ const HeroCaptureTemplate = ({ data, isMobile, fullHeight, pageId, ownerPlan }: 
       style={{
         background: isGradientBg ? bgStart : `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd}20 100%)`,
         backgroundColor: isGradientBg ? undefined : bgStart,
-        minHeight: fullHeight ? '100vh' : 'auto',
+        minHeight: fullHeight ? '100vh' : '100%',
       }}
     >
       {/* Background Glow Effects */}

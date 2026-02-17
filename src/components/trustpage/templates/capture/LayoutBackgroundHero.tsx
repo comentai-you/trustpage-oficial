@@ -34,7 +34,7 @@ const LayoutBackgroundHero = ({ data, isMobile, fullHeight, pageId, ownerPlan }:
     <div
       className="relative w-full overflow-x-hidden"
       style={{
-        minHeight: fullHeight ? '100vh' : 'auto',
+        minHeight: fullHeight ? '100vh' : '100%',
         backgroundColor: d.bgStart.includes('linear') ? '#111827' : d.bgStart,
       }}
     >
