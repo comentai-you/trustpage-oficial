@@ -13,29 +13,63 @@ interface CaptureRendererProps {
 }
 
 const CaptureRenderer = ({ data, isMobile, fullHeight, pageId, ownerPlan }: CaptureRendererProps) => {
-  const layoutId: CaptureLayoutId = data.capture_layout_id || 'classic';
+  const layoutId: CaptureLayoutId = data.capture_layout_id || "classic";
+
+  // 🔥 O SEGREDO ESTÁ AQUI: Detecção de Mockup
+  // Se não recebemos um pageId, significa que estamos dentro do editor do Lovable (Mockup).
+  // Nesse caso, forçamos o fullHeight para FALSE para impedir que a página crie o "buraco infinito" do tamanho do seu monitor.
+  const isMockup = !pageId;
+  const safeFullHeight = isMockup ? false : fullHeight;
 
   const content = (() => {
     switch (layoutId) {
-      case 'split-dark':
-        return <LayoutSplitDark data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
-      case 'minimalist-center':
-        return <LayoutMinimalistCenter data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
-      case 'background-hero':
-        return <LayoutBackgroundHero data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
-      case 'classic':
+      case "split-dark":
+        return (
+          <LayoutSplitDark
+            data={data}
+            isMobile={isMobile}
+            fullHeight={safeFullHeight}
+            pageId={pageId}
+            ownerPlan={ownerPlan}
+          />
+        );
+      case "minimalist-center":
+        return (
+          <LayoutMinimalistCenter
+            data={data}
+            isMobile={isMobile}
+            fullHeight={safeFullHeight}
+            pageId={pageId}
+            ownerPlan={ownerPlan}
+          />
+        );
+      case "background-hero":
+        return (
+          <LayoutBackgroundHero
+            data={data}
+            isMobile={isMobile}
+            fullHeight={safeFullHeight}
+            pageId={pageId}
+            ownerPlan={ownerPlan}
+          />
+        );
+      case "classic":
       default:
-        return <HeroCaptureTemplate data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
+        return (
+          <HeroCaptureTemplate
+            data={data}
+            isMobile={isMobile}
+            fullHeight={safeFullHeight}
+            pageId={pageId}
+            ownerPlan={ownerPlan}
+          />
+        );
     }
   })();
 
-  return (
-    <div className="min-h-full flex flex-col">
-      <div className="flex-1 flex flex-col">
-        {content}
-      </div>
-    </div>
-  );
+  // 🔥 CORREÇÃO 2: Removidos os wrappers "min-h-full" e "flex-1" que forçavam o estiramento.
+  // Agora a página acaba exatamente onde o rodapé acaba!
+  return <div className="w-full relative">{content}</div>;
 };
 
 export default CaptureRenderer;
