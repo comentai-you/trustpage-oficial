@@ -1,73 +1,41 @@
-import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ScaledViewportProps {
+  children: React.ReactNode;
   viewportWidth: number;
   scale: number;
-  children: ReactNode;
 }
 
-const ScaledViewport = ({ viewportWidth, scale, children }: ScaledViewportProps) => {
-  const supportsZoom = useMemo(() => {
-    return (
-      typeof CSS !== "undefined" &&
-      typeof CSS.supports === "function" &&
-      CSS.supports("zoom", "1")
-    );
-  }, []);
+const ScaledViewport = ({ children, viewportWidth, scale }: ScaledViewportProps) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [wrapperHeight, setWrapperHeight] = useState<number | string>("100%");
 
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [contentHeight, setContentHeight] = useState(0);
+  useEffect(() => {
+    if (!contentRef.current) return;
 
-  useLayoutEffect(() => {
-    if (supportsZoom) return;
+    // O "Sniper" que vigia a altura da página real e encolhe o espaço vazio
+    const observer = new ResizeObserver(() => {
+      if (contentRef.current) {
+        const realHeight = contentRef.current.scrollHeight;
+        setWrapperHeight(realHeight * scale);
+      }
+    });
 
-    const el = contentRef.current;
-    if (!el) return;
+    observer.observe(contentRef.current);
 
-    const update = () => {
-      setContentHeight(el.scrollHeight);
-    };
-
-    update();
-
-    const ro = new ResizeObserver(() => update());
-    ro.observe(el);
-
-    return () => ro.disconnect();
-  }, [supportsZoom]);
-
-  if (supportsZoom) {
-    return (
-      <div
-        style={{
-          width: `${viewportWidth}px`,
-          zoom: scale,
-          overflow: 'hidden',
-          minHeight: `${Math.ceil(1 / scale * 100)}%`,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
+    return () => observer.disconnect();
+  }, [scale]);
 
   return (
-    <div
-      style={{
-        width: `${viewportWidth * scale}px`,
-        height: `${contentHeight * scale}px`,
-        position: "relative",
-      }}
-    >
+    // Essa div de fora é a que esconde o buraco gigante
+    <div style={{ height: wrapperHeight, overflow: "hidden" }}>
+      {/* Essa div de dentro é a que encolhe a página */}
       <div
         ref={contentRef}
         style={{
           width: `${viewportWidth}px`,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
-          position: "absolute",
-          top: 0,
-          left: 0,
         }}
       >
         {children}
