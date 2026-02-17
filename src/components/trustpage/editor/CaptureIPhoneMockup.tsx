@@ -55,18 +55,17 @@ const CaptureIPhoneMockup = ({ formData, size = 'normal' }: CaptureIPhoneMockupP
             </div>
           </div>
 
-          {/* Scrollable content with theme background */}
+          {/* Scrollable content */}
           <div
             className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden capture-iphone-scroll"
             style={{
-              background: bg,
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
             }}
           >
             <style>{`.capture-iphone-scroll::-webkit-scrollbar { display: none; }`}</style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              <CaptureRenderer data={formData} isMobile={true} fullHeight={false} />
+              <CaptureRenderer data={formData} isMobile={true} fullHeight={true} />
             </ScaledViewport>
           </div>
         </div>

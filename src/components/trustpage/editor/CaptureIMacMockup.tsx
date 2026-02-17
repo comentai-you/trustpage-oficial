@@ -35,18 +35,17 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Scrollable content area with theme background */}
+            {/* Scrollable content area */}
             <div
               className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
               style={{
-                background: bg,
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
               }}
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
+                <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
               </ScaledViewport>
             </div>
           </div>
