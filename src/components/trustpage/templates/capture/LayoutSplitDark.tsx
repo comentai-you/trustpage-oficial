@@ -56,7 +56,7 @@ const LayoutSplitDark = ({ data, isMobile, fullHeight, pageId, ownerPlan }: Prop
       className="relative w-full overflow-x-hidden flex flex-col"
       style={{
         background: d.isGradientBg ? d.bgStart : d.bgStart,
-        minHeight: fullHeight ? '100vh' : 'auto',
+        minHeight: fullHeight ? '100vh' : '100%',
       }}
     >
       <div

@@ -65,7 +65,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
           className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`}
           style={{
             boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset',
-            background: formData.colors.background
+            background: 'transparent'
           }}
         >
           {/* Status Bar */}

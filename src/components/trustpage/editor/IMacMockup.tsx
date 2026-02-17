@@ -37,9 +37,9 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
         {/* Screen bezel */}
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
           {/* Screen */}
-          <div 
-            className="w-full h-full bg-white rounded-md overflow-hidden relative"
-            style={{ background: formData.colors.background }}
+           <div 
+            className="w-full h-full rounded-md overflow-hidden relative"
+            style={{ background: 'transparent' }}
           >
             {/* Browser chrome */}
             <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">

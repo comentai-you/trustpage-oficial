@@ -24,8 +24,10 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
   const isLightTheme = !d.isGradientBg && (d.bgStart === '#ffffff' || d.bgStart === '#f8fafc' || d.bgStart === '#fffbeb' || d.bgStart === '#ecfdf5' || d.bgStart === '#fdf2f8' || d.bgStart === '#f0f9ff' || d.bgStart.startsWith('#f') || d.bgStart.startsWith('#e'));
   const bgColor = d.isGradientBg ? d.bgStart : isLightTheme ? d.bgStart : '#f8fafc';
   const bgGradient = d.isGradientBg ? d.bgStart : isLightTheme ? `linear-gradient(180deg, ${d.bgStart} 0%, ${d.bgEnd} 100%)` : `linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)`;
-  const headlineColor = isLightTheme || !d.isGradientBg ? (d.isGradientBg ? d.headlineColor : (isLightTheme ? d.headlineColor : '#111827')) : d.headlineColor;
-  const descColor = isLightTheme || !d.isGradientBg ? (d.isGradientBg ? d.descriptionColor : (isLightTheme ? d.descriptionColor : '#6b7280')) : d.descriptionColor;
+  const hasCustomHeadline = !!(data.content as any)?.textColors?.headline;
+  const hasCustomDesc = !!(data.content as any)?.textColors?.description;
+  const headlineColor = hasCustomHeadline ? d.headlineColor : (isLightTheme || d.isGradientBg ? d.headlineColor : '#111827');
+  const descColor = hasCustomDesc ? d.descriptionColor : (isLightTheme || d.isGradientBg ? d.descriptionColor : '#6b7280');
   const cardTextColor = isLightTheme ? d.textColor : '#1f2937';
 
   return (
@@ -33,7 +35,7 @@ const LayoutMinimalistCenter = ({ data, isMobile, fullHeight, pageId, ownerPlan 
       className="relative w-full overflow-x-hidden"
       style={{
         background: bgGradient,
-        minHeight: fullHeight ? '100vh' : 'auto',
+        minHeight: fullHeight ? '100vh' : '100%',
       }}
     >
       <div
