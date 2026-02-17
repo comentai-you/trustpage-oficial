@@ -13,18 +13,18 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const scale = screenWidth / viewportWidth;
 
   // Resolve background: gradient string or solid color
-  const bg = formData.colors.background || '#0f172a';
-  const isGradient = bg.includes('gradient');
+  const bg = formData.colors?.background || "#0f172a";
+  const isGradient = bg.includes("gradient");
 
   return (
     <div className="relative">
       {/* iMac Frame */}
       <div
         className="w-[520px] h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
-        style={{ boxShadow: '0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)' }}
+        style={{ boxShadow: "0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)" }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: 'transparent' }}>
+          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: "transparent" }}>
             {/* Browser chrome */}
             <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
@@ -37,11 +37,16 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Content area — background matches theme */}
+            {/* Content area — background matches theme (AGORA COM ROLAGEM) */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-hidden"
-              style={{ background: isGradient ? bg : bg }}
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
+              style={{
+                background: isGradient ? bg : bg,
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
             >
+              <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
                 <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
               </ScaledViewport>
@@ -58,7 +63,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
         <div className="w-20 h-12 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b" />
         <div
           className="w-32 h-2 bg-gradient-to-b from-zinc-400 to-zinc-500 rounded-b-xl"
-          style={{ boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}
+          style={{ boxShadow: "0 4px 10px rgba(0,0,0,0.2)" }}
         />
       </div>
     </div>
