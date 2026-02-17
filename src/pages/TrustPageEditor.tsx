@@ -29,6 +29,8 @@ import CaptureHeroEditorSidebar from "@/components/trustpage/editor/CaptureHeroE
 import SectionBuilderSidebar from "@/components/trustpage/editor/SectionBuilderSidebar";
 import IMacMockup from "@/components/trustpage/editor/IMacMockup";
 import IPhoneMockup from "@/components/trustpage/editor/IPhoneMockup";
+import CaptureIMacMockup from "@/components/trustpage/editor/CaptureIMacMockup";
+import CaptureIPhoneMockup from "@/components/trustpage/editor/CaptureIPhoneMockup";
 import MobileEditorControls from "@/components/trustpage/editor/MobileEditorControls";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -693,14 +695,27 @@ const TrustPageEditor = () => {
             {/* Mobile Preview View */}
             <div className={`lg:hidden flex-1 flex flex-col bg-gray-50 ${activeTab === "preview" ? "flex" : "hidden"}`}>
               <div className="flex-1 overflow-auto flex items-center justify-center p-4">
-                <IPhoneMockup formData={formData} size="large" />
+                {formData.template_type === 'capture-hero' ? (
+                  <CaptureIPhoneMockup formData={formData} size="large" />
+                ) : (
+                  <IPhoneMockup formData={formData} size="large" />
+                )}
               </div>
             </div>
 
             {/* Desktop Preview Area (Canvas) - Fixed, centered, with internal scroll if needed */}
             <div className="hidden lg:flex flex-1 items-center justify-center gap-8 p-8 h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-y-auto">
-              <IMacMockup formData={formData} />
-              <IPhoneMockup formData={formData} />
+              {formData.template_type === 'capture-hero' ? (
+                <>
+                  <CaptureIMacMockup formData={formData} />
+                  <CaptureIPhoneMockup formData={formData} />
+                </>
+              ) : (
+                <>
+                  <IMacMockup formData={formData} />
+                  <IPhoneMockup formData={formData} />
+                </>
+              )}
             </div>
           </div>
         </div>
