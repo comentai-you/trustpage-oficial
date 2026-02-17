@@ -15,49 +15,27 @@ interface CaptureRendererProps {
 const CaptureRenderer = ({ data, isMobile, fullHeight, pageId, ownerPlan }: CaptureRendererProps) => {
   const layoutId: CaptureLayoutId = data.capture_layout_id || 'classic';
 
-  switch (layoutId) {
-    case 'split-dark':
-      return (
-        <LayoutSplitDark
-          data={data}
-          isMobile={isMobile}
-          fullHeight={fullHeight}
-          pageId={pageId}
-          ownerPlan={ownerPlan}
-        />
-      );
-    case 'minimalist-center':
-      return (
-        <LayoutMinimalistCenter
-          data={data}
-          isMobile={isMobile}
-          fullHeight={fullHeight}
-          pageId={pageId}
-          ownerPlan={ownerPlan}
-        />
-      );
-    case 'background-hero':
-      return (
-        <LayoutBackgroundHero
-          data={data}
-          isMobile={isMobile}
-          fullHeight={fullHeight}
-          pageId={pageId}
-          ownerPlan={ownerPlan}
-        />
-      );
-    case 'classic':
-    default:
-      return (
-        <HeroCaptureTemplate
-          data={data}
-          isMobile={isMobile}
-          fullHeight={fullHeight}
-          pageId={pageId}
-          ownerPlan={ownerPlan}
-        />
-      );
-  }
+  const content = (() => {
+    switch (layoutId) {
+      case 'split-dark':
+        return <LayoutSplitDark data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
+      case 'minimalist-center':
+        return <LayoutMinimalistCenter data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
+      case 'background-hero':
+        return <LayoutBackgroundHero data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
+      case 'classic':
+      default:
+        return <HeroCaptureTemplate data={data} isMobile={isMobile} fullHeight={fullHeight} pageId={pageId} ownerPlan={ownerPlan} />;
+    }
+  })();
+
+  return (
+    <div className="min-h-full flex flex-col">
+      <div className="flex-1 flex flex-col">
+        {content}
+      </div>
+    </div>
+  );
 };
 
 export default CaptureRenderer;
