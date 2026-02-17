@@ -1,7 +1,6 @@
 import { LandingPageFormData } from "@/types/landing-page";
 import CaptureRenderer from "../templates/capture/CaptureRenderer";
 import ScaledViewport from "./ScaledViewport";
-import { extractCaptureData } from "../templates/capture/captureDataHelpers";
 
 interface CaptureIPhoneMockupProps {
   formData: LandingPageFormData;
@@ -31,21 +30,17 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
         };
 
   const scale = dimensions.contentWidth / dimensions.viewportWidth;
-
-  const d = extractCaptureData(formData);
-  // Fundo do mockup: cor FINAL do gradiente para mistura perfeita
-  const mockupBg = d.isGradientBg ? d.bgEnd : d.bgStart;
+  const isCaptureHero = true; // Sempre true
   const statusBarColor = formData.colors?.text || "#ffffff";
 
-  // Altura da tela útil para matar o vácuo
-  const virtualHeight = (dimensions.contentHeight - 32) / scale;
-
   return (
-    <div className="relative shrink-0">
+    <div className="relative">
       {/* iPhone Frame */}
       <div
-        className={`${dimensions.width} ${dimensions.height} bg-gradient-to-b from-zinc-700 to-zinc-900 ${dimensions.radius} p-[10px] shadow-2xl relative`}
-        style={{ boxShadow: "0 30px 60px -15px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
+        className={`${dimensions.width} ${dimensions.height} bg-gradient-to-b from-zinc-700 to-zinc-900 ${dimensions.radius} p-[10px] shadow-2xl`}
+        style={{
+          boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1) inset",
+        }}
       >
         {/* Side buttons */}
         <div className="absolute left-[-2px] top-[80px] w-[3px] h-[25px] bg-zinc-600 rounded-l-sm" />
@@ -58,10 +53,13 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
           <div className="w-[6px] h-[6px] bg-zinc-800 rounded-full mr-[25px]" />
         </div>
 
-        {/* Fundo dinâmico da tela */}
+        {/* Screen */}
         <div
           className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`}
-          style={{ backgroundColor: mockupBg }}
+          style={{
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.2) inset",
+            background: "transparent",
+          }}
         >
           {/* Status Bar */}
           <div
@@ -84,15 +82,34 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
             </div>
           </div>
 
-          {/* 🔥 CORREÇÃO: Retirei a palavra 'relative' daqui que tinha quebrado sua rolagem */}
+          {/* Content - Copiado EXATAMENTE do seu modelo funcional */}
           <div
-            className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden capture-iphone-scroll"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto iphone-scroll"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              overflowX: "hidden",
+              background: formData.colors.background || "#0f172a",
+            }}
           >
-            <style>{`.capture-iphone-scroll::-webkit-scrollbar { display: none; }`}</style>
+            <style>
+              {`
+                .iphone-scroll::-webkit-scrollbar {
+                  display: none;
+                }
+              `}
+            </style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              {/* O fullHeight=false mata o buraco gigante de uma vez por todas */}
-              <div style={{ minHeight: `${virtualHeight}px`, display: "flex", flexDirection: "column", width: "100%" }}>
+              <div
+                className="w-full relative flex flex-col"
+                style={{
+                  minHeight:
+                    isCaptureHero && formData.capture_layout_id !== "split-dark"
+                      ? `${Math.ceil(dimensions.contentHeight / scale)}px`
+                      : "auto",
+                  alignItems: "stretch",
+                }}
+              >
                 <CaptureRenderer data={formData} isMobile={true} fullHeight={false} />
               </div>
             </ScaledViewport>

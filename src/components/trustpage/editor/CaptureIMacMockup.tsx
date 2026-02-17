@@ -2,37 +2,37 @@ import { LandingPageFormData } from "@/types/landing-page";
 import CaptureRenderer from "../templates/capture/CaptureRenderer";
 import ScaledViewport from "./ScaledViewport";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
-import { extractCaptureData } from "../templates/capture/captureDataHelpers";
 
 interface CaptureIMacMockupProps {
   formData: LandingPageFormData;
 }
 
 const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
+  const isCaptureHero = true; // Sempre true neste componente
+
+  // Mockup screen dimensions
   const screenWidth = 512;
+  const screenHeight = 306; // Accounting for browser chrome (24px)
+
+  // Target viewport dimensions
   const viewportWidth = 1280;
+
+  // Calculate scale
   const scale = screenWidth / viewportWidth;
 
-  const d = extractCaptureData(formData);
-  // 🔥 MÁGICA DA COR: Pegamos a cor FINAL (de baixo) do tema.
-  // Assim, se a página acabar, o fundo se camufla perfeitamente sem criar linha/costura.
-  const mockupBg = d.isGradientBg ? d.bgEnd : d.bgStart;
-
-  // Altura Virtual para impedir o bug do 100vh
-  const virtualHeight = 312 / scale;
-
   return (
-    <div className="relative shrink-0">
+    <div className="relative">
       {/* iMac Frame */}
       <div
         className="w-[520px] h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
-        style={{ boxShadow: "0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)" }}
+        style={{
+          boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0,0,0,0.1)",
+        }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          {/* Fundo dinâmico aplicado na tela do iMac */}
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ backgroundColor: mockupBg }}>
+          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: "transparent" }}>
             {/* Browser chrome */}
-            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5 z-10 relative">
+            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
@@ -43,16 +43,31 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Scroll Area (Limpo e funcionando) */}
+            {/* Scroll Container (Copiado EXATAMENTE do seu modelo funcional) */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden imac-scroll"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                background: formData.colors.background || "#0f172a",
+              }}
             >
-              <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
+              <style>
+                {`
+                  .imac-scroll::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}
+              </style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                {/* Aqui está a correção final: fullHeight={false} mata o vácuo de uma vez por todas */}
                 <div
-                  style={{ minHeight: `${virtualHeight}px`, display: "flex", flexDirection: "column", width: "100%" }}
+                  className="w-full relative"
+                  style={{
+                    minHeight:
+                      isCaptureHero && formData.capture_layout_id !== "split-dark"
+                        ? `${Math.ceil(screenHeight / scale)}px`
+                        : "auto",
+                  }}
                 >
                   <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
                 </div>
