@@ -12,9 +12,9 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const viewportWidth = 1280;
   const scale = screenWidth / viewportWidth;
 
-  // 🔥 A MÁGICA: A tela do iMac tem exatos 304px de altura útil.
-  // Dividindo pela escala, sabemos o tamanho exato que a página precisa ter pra preencher sem sobrar.
-  const virtualHeight = 304 / scale;
+  // Resolve background: gradient string or solid color
+  const bg = formData.colors?.background || "#0f172a";
+  const isGradient = bg.includes("gradient");
 
   return (
     <div className="relative">
@@ -24,9 +24,9 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
         style={{ boxShadow: "0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)" }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: "#000" }}>
+          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: "transparent" }}>
             {/* Browser chrome */}
-            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5 z-10 relative">
+            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
@@ -37,19 +37,18 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Scroll Container (SEM FUNDO FALSO) */}
+            {/* Content area — background matches theme (AGORA COM ROLAGEM) */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll relative"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
+              style={{
+                background: isGradient ? bg : bg,
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                {/* Obrigamos a página a abraçar a tela inteira, assim o próprio tema desce até o fim! */}
-                <div
-                  style={{ minHeight: `${virtualHeight}px`, display: "flex", flexDirection: "column", width: "100%" }}
-                >
-                  <CaptureRenderer data={formData} isMobile={false} fullHeight={false} />
-                </div>
+                <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
               </ScaledViewport>
             </div>
           </div>
