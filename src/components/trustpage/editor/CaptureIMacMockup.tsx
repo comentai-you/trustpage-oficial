@@ -2,6 +2,7 @@ import { LandingPageFormData } from "@/types/landing-page";
 import CaptureRenderer from "../templates/capture/CaptureRenderer";
 import ScaledViewport from "./ScaledViewport";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
+import { extractCaptureData } from "../templates/capture/captureDataHelpers";
 
 interface CaptureIMacMockupProps {
   formData: LandingPageFormData;
@@ -12,21 +13,23 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const viewportWidth = 1280;
   const scale = screenWidth / viewportWidth;
 
-  // Resolve background: gradient string or solid color
-  const bg = formData.colors?.background || "#0f172a";
-  const isGradient = bg.includes("gradient");
+  // Extraímos a cor inicial do fundo (Apenas a cor base, não o gradiente inteiro)
+  // Isso resolve a "costura" do gradiente. A página em si cuida do degradê, a caixa vazia fica da cor de cima.
+  const d = extractCaptureData(formData);
+  const baseColor = d.bgStart.includes("linear") ? "#111827" : d.bgStart;
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       {/* iMac Frame */}
       <div
         className="w-[520px] h-[340px] bg-gradient-to-b from-zinc-200 to-zinc-300 rounded-xl p-1 shadow-2xl"
         style={{ boxShadow: "0 25px 60px -15px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.1)" }}
       >
         <div className="w-full h-full bg-black rounded-lg p-[2px]">
-          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ background: "transparent" }}>
+          {/* 🔥 A CORREÇÃO IGUAL AO ADVERTORIAL: O fundo é aplicado na raiz do iMac, não no scroll */}
+          <div className="w-full h-full rounded-md overflow-hidden relative" style={{ backgroundColor: baseColor }}>
             {/* Browser chrome */}
-            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5">
+            <div className="h-6 bg-zinc-800 flex items-center px-2 gap-1.5 z-10 relative">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
@@ -37,14 +40,10 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               </div>
             </div>
 
-            {/* Content area — background matches theme (AGORA COM ROLAGEM) */}
+            {/* Scroll Container (Igual ao Advertorial - Limpo e sem background forçado) */}
             <div
-              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll"
-              style={{
-                background: isGradient ? bg : bg,
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
+              className="h-[calc(100%-24px)] w-full overflow-y-auto overflow-x-hidden capture-imac-scroll relative"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
@@ -55,7 +54,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
         </div>
       </div>
 
-      {/* Stand */}
+      {/* Stand (Mantive o seu stand original que é mais bonito que o do Advertorial) */}
       <div className="flex flex-col items-center">
         <div className="w-[520px] h-5 bg-gradient-to-b from-zinc-300 to-zinc-400 rounded-b-xl flex items-center justify-center">
           <div className="w-10 h-1.5 bg-zinc-500/50 rounded-full" />
