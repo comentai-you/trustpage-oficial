@@ -59,6 +59,7 @@ const IMacMockup = ({ formData }: IMacMockupProps) => {
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                background: formData.colors.background || '#ffffff',
               }}
             >
               <style>
