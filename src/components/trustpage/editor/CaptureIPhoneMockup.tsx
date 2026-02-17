@@ -33,10 +33,11 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
   const scale = dimensions.contentWidth / dimensions.viewportWidth;
 
   const d = extractCaptureData(formData);
-  const fallbackBg = d.bgStart.includes("linear") ? "#111827" : d.bgStart;
+  // Fundo do mockup: cor FINAL do gradiente para mistura perfeita
+  const mockupBg = d.isGradientBg ? d.bgEnd : d.bgStart;
   const statusBarColor = formData.colors?.text || "#ffffff";
 
-  // Altura exata da tela útil do iPhone
+  // Altura da tela útil para matar o vácuo
   const virtualHeight = (dimensions.contentHeight - 32) / scale;
 
   return (
@@ -57,10 +58,10 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
           <div className="w-[6px] h-[6px] bg-zinc-800 rounded-full mr-[25px]" />
         </div>
 
-        {/* Screen */}
+        {/* Fundo dinâmico da tela */}
         <div
           className={`w-full h-full ${dimensions.innerRadius} overflow-hidden relative`}
-          style={{ backgroundColor: fallbackBg }}
+          style={{ backgroundColor: mockupBg }}
         >
           {/* Status Bar */}
           <div
@@ -83,23 +84,15 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
             </div>
           </div>
 
-          {/* Scroll Area */}
+          {/* 🔥 CORREÇÃO: Retirei a palavra 'relative' daqui que tinha quebrado sua rolagem */}
           <div
             className="absolute top-8 left-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden capture-iphone-scroll"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <style>{`.capture-iphone-scroll::-webkit-scrollbar { display: none; }`}</style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              {/* 🔥 O ESTICADOR MÁGICO */}
-              <div
-                className="mockup-stretcher"
-                style={{ display: "grid", minHeight: `${virtualHeight}px`, width: "100%" }}
-              >
-                <style>{`
-                  .mockup-stretcher > * { min-height: 100% !important; height: 100%; }
-                  .mockup-stretcher > * > * { min-height: 100% !important; }
-                `}</style>
-
+              {/* O fullHeight=false mata o buraco gigante de uma vez por todas */}
+              <div style={{ minHeight: `${virtualHeight}px`, display: "flex", flexDirection: "column", width: "100%" }}>
                 <CaptureRenderer data={formData} isMobile={true} fullHeight={false} />
               </div>
             </ScaledViewport>
