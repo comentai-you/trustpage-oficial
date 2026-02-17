@@ -12,7 +12,6 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const viewportWidth = 1280;
   const scale = screenWidth / viewportWidth;
 
-  // Removido o fallback default para que ele herde nativamente do tema se necessário
   const bg = formData.colors?.background || "#ffffff";
 
   return (
@@ -47,8 +46,8 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                {/* CORREÇÃO AQUI: Forçando a altura do viewport simulado */}
-                <div className="w-full" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+                {/* Aqui está a correção: removido o 100vh e trocado por classes Tailwind */}
+                <div className="w-full h-full min-h-full flex flex-col">
                   <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
                 </div>
               </ScaledViewport>

@@ -89,8 +89,8 @@ const CaptureIPhoneMockup = ({ formData, size = "normal" }: CaptureIPhoneMockupP
           >
             <style>{`.capture-iphone-scroll::-webkit-scrollbar { display: none; }`}</style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              {/* CORREÇÃO AQUI: Forçando a altura base e permitindo expansão segura */}
-              <div className="w-full" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+              {/* Aqui está a correção: removido o 100vh e trocado por classes Tailwind */}
+              <div className="w-full h-full min-h-full flex flex-col">
                 <CaptureRenderer data={formData} isMobile={true} fullHeight={true} />
               </div>
             </ScaledViewport>
