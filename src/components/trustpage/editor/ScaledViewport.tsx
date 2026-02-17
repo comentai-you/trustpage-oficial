@@ -42,7 +42,8 @@ const ScaledViewport = ({ viewportWidth, scale, children }: ScaledViewportProps)
         style={{
           width: `${viewportWidth}px`,
           zoom: scale,
-         overflow: 'hidden',
+          overflow: 'hidden',
+          minHeight: `${Math.ceil(1 / scale * 100)}%`,
         }}
       >
         {children}
