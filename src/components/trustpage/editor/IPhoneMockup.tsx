@@ -96,6 +96,7 @@ const IPhoneMockup = ({ formData, size = 'normal' }: IPhoneMockupProps) => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 overflowX: 'hidden',
+                background: formData.colors.background || '#ffffff',
               }}
             >
               <style>
