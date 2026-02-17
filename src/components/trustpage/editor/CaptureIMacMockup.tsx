@@ -12,7 +12,7 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
   const viewportWidth = 1280;
   const scale = screenWidth / viewportWidth;
 
-  const bg = formData.colors.background || '#0f172a';
+  const bg = formData.colors.background || '#ffffff';
 
   return (
     <div className="relative">
@@ -41,11 +41,16 @@ const CaptureIMacMockup = ({ formData }: CaptureIMacMockupProps) => {
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                background: bg,
               }}
             >
               <style>{`.capture-imac-scroll::-webkit-scrollbar { display: none; }`}</style>
               <ScaledViewport viewportWidth={viewportWidth} scale={scale}>
-                <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
+                <div className="min-h-full flex flex-col">
+                  <div className="flex-1">
+                    <CaptureRenderer data={formData} isMobile={false} fullHeight={true} />
+                  </div>
+                </div>
               </ScaledViewport>
             </div>
           </div>

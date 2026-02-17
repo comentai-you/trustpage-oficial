@@ -14,7 +14,7 @@ const CaptureIPhoneMockup = ({ formData, size = 'normal' }: CaptureIPhoneMockupP
 
   const scale = dimensions.contentWidth / dimensions.viewportWidth;
 
-  const bg = formData.colors.background || '#0f172a';
+  const bg = formData.colors.background || '#ffffff';
   const statusBarColor = formData.colors.text || '#ffffff';
 
   return (
@@ -61,11 +61,16 @@ const CaptureIPhoneMockup = ({ formData, size = 'normal' }: CaptureIPhoneMockupP
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
+              background: bg,
             }}
           >
             <style>{`.capture-iphone-scroll::-webkit-scrollbar { display: none; }`}</style>
             <ScaledViewport viewportWidth={dimensions.viewportWidth} scale={scale}>
-              <CaptureRenderer data={formData} isMobile={true} fullHeight={true} />
+              <div className="min-h-full flex flex-col">
+                <div className="flex-1">
+                  <CaptureRenderer data={formData} isMobile={true} fullHeight={true} />
+                </div>
+              </div>
             </ScaledViewport>
           </div>
         </div>
