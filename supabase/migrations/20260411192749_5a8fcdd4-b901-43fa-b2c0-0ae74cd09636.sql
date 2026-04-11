@@ -1,0 +1,1 @@
+SELECT public.update_user_plan('c148e4cb-4bfe-4b29-b77c-40df7faf2aeb'::uuid, 'pro', 'active');
