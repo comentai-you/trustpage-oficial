@@ -29,7 +29,7 @@ const HighConversionTemplate = ({
   const [showCta, setShowCta] = useState(!data.cta_delay_enabled);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const playerRef = useRef<any>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Get video ID and type with strict domain validation
