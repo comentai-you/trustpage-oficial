@@ -68,7 +68,7 @@ const TrustPageEditor = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const lastSavedSlugRef = useRef<string | null>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastFormDataRef = useRef<string>("");
 
   // Fetch user plan and existing page data

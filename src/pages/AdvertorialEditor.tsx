@@ -31,7 +31,7 @@ const AdvertorialEditor = () => {
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   const lastSavedSlugRef = useRef<string | null>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDataRef = useRef<string>("");
 
   useEffect(() => {
