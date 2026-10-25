@@ -3,6 +3,8 @@ import { useCtaTracking } from "@/contexts/CtaTrackingContext";
 import { LandingPageFormData } from "@/types/landing-page";
 import { Play, Maximize2 } from "lucide-react";
 import LegalFooter from "./LegalFooter";
+import { Button } from "@/components/ui/button";
+import { getVslVideoInfo, getVslEmbedUrl } from "@/lib/vsl-video";
 // Extend Window interface for YouTube API
 declare global {
   interface Window {
@@ -33,35 +35,7 @@ const HighConversionTemplate = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Get video ID and type with strict domain validation
-  const getVideoInfo = useCallback((url: string) => {
-    if (!url) return null;
-    
-    try {
-      const parsed = new URL(url);
-      
-      // Strict YouTube domain validation
-      const youtubeHosts = ['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com'];
-      if (youtubeHosts.includes(parsed.hostname)) {
-        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        if (!youtubeMatch) return null;
-        return { type: 'youtube', id: youtubeMatch[1] };
-      }
-      
-      // Strict Vimeo domain validation
-      const vimeoHosts = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
-      if (vimeoHosts.includes(parsed.hostname)) {
-        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-        if (!vimeoMatch) return null;
-        return { type: 'vimeo', id: vimeoMatch[1] };
-      }
-      
-      return null;
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const videoInfo = getVideoInfo(data.video_url);
+  const videoInfo = getVslVideoInfo(data.video_url);
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -207,45 +181,6 @@ const HighConversionTemplate = ({
     }
   }, [data.cta_delay_enabled]);
 
-  const getVideoEmbedUrl = (url: string, autoplay = false) => {
-    if (!url) return null;
-    
-    try {
-      const parsed = new URL(url);
-      
-      // YouTube - Strict domain validation + Chromeless mode
-      const youtubeHosts = ['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com'];
-      if (youtubeHosts.includes(parsed.hostname)) {
-        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        if (!youtubeMatch) return null;
-        const videoId = youtubeMatch[1];
-        const baseParams = `controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
-        const params = autoplay 
-          ? `?autoplay=1&playsinline=1&${baseParams}`
-          : `?${baseParams}`;
-        return `https://www.youtube.com/embed/${videoId}${params}`;
-      }
-      
-      // Vimeo - Strict domain validation + Chromeless mode
-      const vimeoHosts = ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'];
-      if (vimeoHosts.includes(parsed.hostname)) {
-        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-        if (!vimeoMatch) return null;
-        const videoId = vimeoMatch[1];
-        const baseParams = 'controls=0&title=0&byline=0&portrait=0&sidedock=0&api=1';
-        const params = autoplay
-          ? `?autoplay=1&${baseParams}`
-          : `?${baseParams}`;
-        return `https://player.vimeo.com/video/${videoId}${params}`;
-      }
-      
-      // Reject all other domains
-      return null;
-    } catch {
-      return null;
-    }
-  };
-
   // Handle fullscreen
   const handleFullscreen = () => {
     const videoContainer = document.getElementById('video-container');
@@ -258,7 +193,7 @@ const HighConversionTemplate = ({
     }
   };
 
-  const embedUrl = getVideoEmbedUrl(data.video_url, isVideoPlaying);
+  const embedUrl = getVslEmbedUrl(data.video_url, isVideoPlaying, window.location.origin);
 
   const handlePlayClick = () => {
     setIsVideoPlaying(true);
@@ -350,28 +285,25 @@ const HighConversionTemplate = ({
                 <iframe
                   ref={iframeRef}
                   id="video-player"
+                  title="Vídeo da página VSL"
                   src={embedUrl}
                   className="w-full h-full absolute inset-0"
                   allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                />
-                
-                {/* Click Shield - prevents pausing by clicking on video */}
-                <div 
-                  className="absolute inset-0 z-10"
-                  style={{ pointerEvents: 'auto' }}
-                  onClick={(e) => e.preventDefault()}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 />
                 
                 {/* Fullscreen button - positioned above the shield */}
-                <button
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
                   onClick={handleFullscreen}
-                  className="absolute bottom-3 right-3 z-20 p-2 rounded-lg bg-black/60 hover:bg-black/80 transition-opacity opacity-0 group-hover:opacity-100"
-                  style={{ pointerEvents: 'auto' }}
+                  className="absolute top-3 right-3 z-20"
+                  aria-label="Tela cheia"
                   title="Tela cheia"
                 >
-                  <Maximize2 className="w-5 h-5 text-white" />
-                </button>
+                  <Maximize2 className="w-5 h-5" />
+                </Button>
               </div>
             ) : (
               <div
@@ -380,6 +312,10 @@ const HighConversionTemplate = ({
                     ? 'aspect-[9/16] rounded-xl'
                     : 'w-full aspect-video rounded-lg shadow-lg'
                 }`}
+                role="button"
+                tabIndex={0}
+                aria-label="Reproduzir vídeo"
+                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handlePlayClick(); } }}
                 onClick={handlePlayClick}
                 style={{ 
                   backgroundColor: `${data.colors.text}10`,
