@@ -370,6 +370,7 @@ const LandingPageView = ({ slugOverride, ownerIdOverride }: LandingPageViewProps
           description: page.description || '',
           image_url: page.image_url || '',
           cover_image_url: page.cover_image_url || '',
+          share_image_url: content?.share_image_url || '',
           cta_text: page.cta_text || 'QUERO AGORA',
           cta_url: page.cta_url || '',
           cta_delay_enabled: page.cta_delay_enabled ?? false,
