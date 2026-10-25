@@ -16,6 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import CoverImageUpload from "./CoverImageUpload";
+import ShareImageUpload from "./ShareImageUpload";
 import { AIConfigDialog } from "@/components/ai/AIConfigDialog";
 
 interface EditorSidebarProps {
@@ -133,6 +134,7 @@ const EditorSidebar = ({ formData, onChange, userPlan = 'free' }: EditorSidebarP
                 coverImageUrl={formData.cover_image_url || ''} 
                 onChange={(url) => onChange({ cover_image_url: url })} 
               />
+              <ShareImageUpload value={formData.share_image_url} onChange={(url) => onChange({ share_image_url: url })} />
             </AccordionContent>
           </AccordionItem>
 

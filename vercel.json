@@ -8,6 +8,22 @@
   ],
   "rewrites": [
     {
+      "source": "/p/:slug",
+      "has": [
+        { "type": "header", "key": "user-agent", "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot).*" },
+        { "type": "host", "value": "(?<shareHost>[^:]+)" }
+      ],
+      "destination": "https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/share-page?hostname=:shareHost&path=/p/:slug"
+    },
+    {
+      "source": "/:sharePath*",
+      "has": [
+        { "type": "header", "key": "user-agent", "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot).*" },
+        { "type": "host", "value": "(?<shareHost>(?!(?:www\\.)?(?:trustpageapp\\.com|trustpage\\.app|tpage\\.com\\.br)$)(?!.*\\.(?:lovable\\.app|lovableproject\\.com|vercel\\.app)$)[^:]+)" }
+      ],
+      "destination": "https://myqrydgbrxhrjkrvkgqq.supabase.co/functions/v1/share-page?hostname=:shareHost&path=/:sharePath*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
