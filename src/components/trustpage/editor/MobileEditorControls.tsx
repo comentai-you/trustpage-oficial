@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Globe, FileText, Video, MousePointer, Palette, Lightbulb } from "lucide-react";
 import ImageUpload from "@/components/trustpage/ImageUpload";
+import ShareImageUpload from "./ShareImageUpload";
 import { PUBLIC_PAGES_DOMAIN } from "@/lib/constants";
 import {
   Sheet,
@@ -82,6 +83,7 @@ const MobileEditorControls = ({ formData, onChange, open, onOpenChange }: Mobile
                   onChange={(url) => onChange({ profile_image_url: url })}
                   label="Foto de Perfil"
                 />
+                <ShareImageUpload value={formData.share_image_url} onChange={(url) => onChange({ share_image_url: url })} />
               </AccordionContent>
             </AccordionItem>
 

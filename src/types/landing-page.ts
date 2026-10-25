@@ -280,6 +280,7 @@ export interface LandingPageFormData {
   description: string;
   image_url: string;
   cover_image_url: string;
+  share_image_url?: string;
   cta_text: string;
   cta_url: string;
   cta_delay_enabled: boolean;
